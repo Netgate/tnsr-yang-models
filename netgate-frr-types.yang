@@ -1,0 +1,456 @@
+module netgate-frr-types {
+
+    namespace "urn:netgate:xml:yang:netgate-frr-types";
+    prefix "frr";
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This module contains data typedefs needded by FRR.
+
+	 Copyright 2018-2019 Rubicon Communications, LLC.
+	 ";
+
+    revision 2019-02-15 {
+	description
+	    "TNSR Release 19.02.";
+    }
+
+    revision 2018-12-10 {
+	description
+	    "put FRR typedefs in one place.";
+    }
+
+    typedef access-list-action {
+	type enumeration {
+	    enum deny {
+		description
+		"Deny";
+	    }
+	    enum permit {
+		description
+		"Permit";
+	    }
+	}
+    }
+
+    typedef as-path-policy {
+	type enumeration {
+	    enum deny {
+		description
+		"Deny";
+	    }
+	    enum permit {
+		description
+		"permit";
+	    }
+	}
+    }
+
+    typedef bgp-database {
+	type enumeration {
+	    enum candidate {
+		description
+		"Candidate Database";
+	    }
+	    enum running {
+		description
+		"Running Database";
+	    }
+	    enum startup {
+		description
+		"Startup Database";
+	    }
+	}
+    }
+
+    typedef bgp-family {
+	type enumeration {
+	    enum ipv4 {
+		description
+		"IPv4";
+	    }
+	    enum ipv6 {
+		description
+		"IPv6";
+	    }
+	    enum vpnv4 {
+		description
+		"VPNv4";
+	    }
+	    enum vpnv6 {
+		description
+		"VPNv6";
+	    }
+	    enum l2vpn {
+		description
+		"l2VPN";
+	    }
+	}
+    }
+
+    typedef bgp-subfamily {
+	type enumeration {
+	    enum unicast {
+		description
+		"Unicast";
+	    }
+	    enum multicast {
+		description
+		"Multicast";
+	    }
+	    enum vpn {
+		description
+		"VPN";
+	    }
+	    enum labeled-unicast {
+		description
+		    "Labeled Unicast";
+	    }
+	    enum evpn {
+		description
+		"EVPN";
+	    }
+	}
+    }
+
+    typedef bgp-orf-prefix-list {
+	type enumeration {
+	    enum send {
+		description
+		"Send";
+	    }
+	    enum receive {
+		description
+		"Receive";
+	    }
+	    enum both {
+		description
+		"Both";
+	    }
+	}
+    }
+
+    typedef bgp-source {
+	type enumeration {
+	    enum kernel {
+		description
+		"Kernel";
+	    }
+	    enum connected {
+		description
+		"Connected";
+	    }
+	    enum rip {
+		description
+		"RIP";
+	    }
+	    enum ospf {
+		description
+		"OSPF";
+	    }
+	    enum isis {
+		description
+		"ISIS";
+	    }
+	    enum pim {
+		description
+		"PIM";
+	    }
+	    enum eigrp {
+		description
+		"EIGRP";
+	    }
+	    enum nhrp {
+		description
+		"NHRP";
+	    }
+	    enum table {
+		description
+		"Table";
+	    }
+	    enum vnc {
+		description
+		"VNC";
+	    }
+	    enum vnc-direct {
+		description
+		    "VNC Direct";
+	    }
+	    enum babel {
+		description
+		"Babel";
+	    }
+	}
+    }
+
+    typedef community-list-value-type {
+	type enumeration {
+	    enum standard {
+		description
+		"The rules are normal numbers.";
+	    }
+	    enum expanded {
+		description
+		"The rules are regular expressions.";
+	    }
+	}
+    }
+
+    typedef community-list-value-size {
+	type enumeration {
+	    enum normal {
+		description
+		"Rules allow the original, normal communities values.";
+	    }
+	    enum extended {
+		description
+		"Rules allow IPv4-based policies and matches 8 octets
+		     per community from RFC 5668.";
+	    }
+	    enum large {
+		description
+		"Rules allow 12-octet values from RFC 8092.";
+	    }
+	}
+    }
+
+    typedef community-list-action {
+	type enumeration {
+	    enum deny {
+		description
+		"Deny";
+	    }
+	    enum permit {
+		description
+		"Permit";
+	    }
+	}
+    }
+
+    typedef frr-database {
+	type enumeration {
+	    enum candidate {
+		description
+		"Candidate Database";
+	    }
+	    enum running {
+		description
+		"Running Database";
+	    }
+	    enum startup {
+		description
+		"Startup Database";
+	    }
+	}
+    }
+
+    typedef bgp-show-request {
+	type enumeration {
+	    enum config {
+		description
+		    "Configuration";
+	    }
+	    enum neighbors {
+		description
+		    "Neighbors";
+	    }
+	    enum network {
+		description
+		    "Network";
+	    }
+	    enum nexthop {
+		description
+		    "Nexthop";
+	    }
+	    enum peer-group {
+		description
+		    "Peer-group";
+	    }
+	    enum summary {
+		description
+		    "Summary";
+	    }
+	}
+    }
+
+    typedef bgp-show-parameter {
+	type enumeration {
+	    enum advertised-routes {
+		description
+		    "advertised-routes";
+	    }
+	    enum dampened-routes {
+		description
+		    "dampened-routes";
+	    }
+	    enum flap-statistics {
+		description
+		    "flap-statistics";
+	    }
+	    enum prefix-counts {
+		description
+		    "prefix-counts";
+	    }
+	    enum received {
+		description
+		    "received'";
+	    }
+	    enum received-routes {
+		description
+		    "received-routes";
+	    }
+	    enum routes {
+		description
+		    "routes";
+	    }
+	    enum detail {
+		description
+		    "detail";
+	    }
+	}
+    }
+
+    typedef prefix-list-action {
+	type enumeration {
+	    enum deny {
+		description
+		"Deny";
+	    }
+	    enum permit {
+		description
+		"Permit";
+	    }
+	}
+    }
+
+    typedef route-map-policy {
+	type enumeration {
+	    enum deny {
+		description
+		"Deny";
+	    }
+	    enum permit {
+		description
+		"Permit";
+	    }
+	}
+    }
+
+    typedef route-map-origin {
+	type enumeration {
+	    enum egp {
+		description
+		"EGP";
+	    }
+	    enum igp {
+		description
+		"IGP";
+	    }
+	    enum incomplete {
+		description
+		"Incomplete";
+	    }
+	}
+    }
+
+    typedef route-map-source-protocol {
+	type enumeration {
+	    enum babel {
+		description
+		"Babel";
+	    }
+	    enum bgp {
+		description
+		"BGP";
+	    }
+	    enum connected {
+		description
+		"Connected";
+	    }
+	    enum eigrp {
+		description
+		"EIGRP";
+	    }
+	    enum isis {
+		description
+		"ISIS";
+	    }
+	    enum kernel {
+		description
+		"Kernel";
+	    }
+	    enum nhrp {
+		description
+		"NHRP";
+	    }
+	    enum ospf {
+		description
+		"OSPF";
+	    }
+	    enum ospf6 {
+		description
+		"OSPF6";
+	    }
+	    enum pim {
+		description
+		"PIM";
+	    }
+	    enum rip {
+		description
+		"RIP";
+	    }
+	    enum ripng {
+		description
+		"RIPng";
+	    }
+	    enum static {
+		description
+		"Static";
+	    }
+	    enum system {
+		description
+		"System";
+	    }
+	}
+    }
+
+    typedef zebra-level {
+	type enumeration {
+	    enum alerts {
+		description
+		"Log Level Alert.";
+	    }
+	    enum critical {
+		description
+		"Log Level Critical.";
+	    }
+	    enum debugging {
+		description
+		"Log Level Debugging";
+	    }
+	    enum emergencies {
+		description
+		"Log Level Emergency";
+	    }
+	    enum errors {
+		description
+		"Log Level Error";
+	    }
+	    enum informational {
+		description
+		"Log Level Information";
+	    }
+	    enum notifications {
+		description
+		"Log Level Notification";
+	    }
+	    enum warnings {
+		description
+		"Log Level Warning";
+	    }
+	}
+    }
+}

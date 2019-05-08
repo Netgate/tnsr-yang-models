@@ -1,0 +1,476 @@
+module netgate-netfilter {
+
+    namespace "urn:netgate:xml:yang:netgate-nf";
+    prefix "nghnf";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import ietf-yang-types {
+	prefix "yang";
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a data model for Host Netfilter Tables.
+
+	 Copyright 2018 Rubicon Communications, LLC.";
+
+    revision 2018-09-20;
+
+    typedef nf-address-family {
+	type enumeration {
+	    enum ipv4 {
+		description
+		    "IPv4 family";
+	    }
+
+	    enum arp {
+		description
+		    "ARP family";
+	    }
+
+	    enum ipv6 {
+		description
+		    "IPv6 family";
+	    }
+
+	    enum bridge {
+		description
+		    "Bridge family";
+	    }
+
+	    enum inet {
+		description
+		    "Pseudo family combining IPv4 and IPv6";
+	    }
+
+	    enum netdev {
+		description
+		    "L2 family";
+	    }
+	}
+    }
+
+    typedef nf-default-policy {
+	type enumeration {
+	    enum drop {
+	        description
+		    "Default policy is drop.";
+	    }
+
+	    enum accept {
+	        description
+		    "Default policy is accept.";
+	    }
+	}
+    }
+
+    typedef nf-chain-type {
+	type enumeration {
+	    enum filter {
+		description
+		    "Chain is of type 'filter'.";
+	    }
+
+	    enum route {
+		description
+		    "Chain is of type 'route'.";
+	    }
+
+	    enum nat {
+		description
+		    "Chain is of type 'nat'.";
+	    }
+	}
+    }
+
+    typedef nf-hook {
+	type enumeration {
+	    enum prerouting {
+		description
+		    "prerouting";
+	    }
+
+	    enum input {
+		description
+		    "input";
+	    }
+
+	    enum forward {
+		description
+		    "forward";
+	    }
+
+	    enum output {
+		description
+		    "output";
+	    }
+
+	    enum postrouting {
+		description
+		    "postrouting";
+	    }
+
+	    enum bridge {
+		description
+		    "bridge";
+	    }
+
+	    enum ingress {
+		description
+		    "ingress";
+	    }
+	}
+    }
+
+    typedef nf-ipv4-protocol {
+	type enumeration {
+	    enum icmp {
+		description
+		    "ICMP";
+	    }
+	    enum udp {
+		description
+		    "UDP";
+	    }
+	    enum tcp {
+		description
+		    "TCP";
+	    }
+	}
+    }
+
+    container netfilter-config {
+
+	container tables {
+	    description
+		"Netfilter ACL and NAT tables for host interfaces.";
+
+	    list table {
+		key "family table-name";
+
+		description
+		    "The list of Netfilter tables.";
+
+		leaf table-name {
+		    type string;
+		    description
+			"User assigned name of a netfilter table.";
+		}
+
+		leaf family {
+		    type nf-address-family;
+		}
+
+		container chains {
+		    description
+			"Netfilter chains for one table.";
+
+		    list chain {
+			key "chain-name";
+
+			description
+			    "List of chains in one table, each assigned
+			     a unique name by the user.";
+
+			leaf chain-name {
+			    type string;
+			    description
+				"User assigned name of a chain withing
+				 a table.";
+			}
+
+			leaf chain-type {
+			    type nf-chain-type;
+			    description
+				"The chain type.  One of filter, nat
+				 or route.";
+			}
+
+			leaf chain-hook {
+			    type nf-hook;
+			    description
+				"One of the hooks prerouting, input, forward,
+				 output, postrouting, bridge, or ingress.";
+			}
+
+			leaf chain-priority {
+			    type int32;
+			    description
+				"A signed 32-bit priority dictating execution
+				 ordering within a hook.  Lower numbers are
+				 earlier.";
+			}
+
+			leaf if-name {
+			    type ngcom:if-identifier-63;
+			    description
+				"Interface name.  Necessary for
+				 ingress hooks.";
+			}
+
+			leaf default-policy {
+			    type nf-default-policy;
+			    description
+				"One of the default policies accept or drop;";
+			}
+
+			container rules {
+			    description
+				"An set of rules ordered by sequence number.";
+
+			    list rule {
+				key "rule-seq";
+
+				description
+				    "A rule is a set of statements specifying
+				     matching conditions, actions and
+				     a possible verdict for packets.";
+
+				leaf rule-seq {
+				    type uint32;
+				    description
+					"Rules are maintained in sequence.";
+				}
+
+				leaf rule-comment {
+				    type string;
+				    description
+					"Arbitrary user comment.";
+				}
+
+				container ordered-stmts {
+
+				    list ordered-stmt {
+					key "stmt-seq";
+
+					leaf stmt-seq {
+					    type uint32;
+					    description
+						"Statements within a
+						 rule are maintained
+						 in sequence order.";
+					}
+
+					container stmt {
+					    description
+						"One Netfilter
+						 statement.  Within a
+						 rule, statements form
+						 a sequence of matches,
+						 actions, and a verdict
+						 for packets.";
+
+					    container ether {
+						leaf destination {
+						    type yang:mac-address;
+						    description
+							"Destination MAC
+							 address";
+						}
+						leaf source {
+						    type yang:mac-address;
+						    description
+							"Source MAC address";
+						}
+					    }
+
+					    container ipv4 {
+						leaf protocol {
+						    type nf-ipv4-protocol;
+						    description
+							"An IPv4 protocol.
+							 One of icmp,
+							 udp, or tcp.";
+						}
+						leaf destination {
+						    type inet:ipv4-prefix;
+						    description
+							"Destination IPv4
+							 prefix";
+						}
+						leaf source {
+						    type inet:ipv4-prefix;
+						    description
+							"Source IPv4 prefix";
+						}
+					    }
+
+					    container ipv6 {
+						leaf destination {
+						    type inet:ipv6-prefix;
+						    description
+							"Destination IPv6
+							 prefix";
+						}
+						leaf source {
+						    type inet:ipv6-prefix;
+						    description
+							"Source IPv6 prefix";
+						}
+					    }
+
+					    container tcp {
+						container destination-port {
+						    leaf first {
+							type uint16;
+							description
+							    "TCP first
+							    destination
+							    port";
+						    }
+						    leaf last {
+							type uint16;
+							description
+							    "TCP last
+							    destination
+							    port";
+						    }
+						}
+						container source-port {
+						    leaf first {
+							type uint16;
+							description
+							    "TCP first
+							    source
+							    port";
+						    }
+						    leaf last {
+							type uint16;
+							description
+							    "TCP last
+							    source
+							    port";
+						    }
+						}
+						container flags {
+						    leaf mask {
+							type uint8;
+							description
+							    "TCP flags mask.";
+						    }
+						    leaf value {
+							type uint8;
+							description
+							    "TCP flags value.";
+						    }
+						}
+					    }
+
+					    container udp {
+						container destination-port {
+						    leaf first {
+							type uint16;
+							description
+							    "UDP first
+							    destination
+							    port";
+						    }
+						    leaf last {
+							type uint16;
+							description
+							    "UDP last
+							    destination
+							    port";
+						    }
+						}
+						container source-port {
+						    leaf first {
+							type uint16;
+							description
+							    "UDP first
+							    source
+							    port";
+						    }
+						    leaf last {
+							type uint16;
+							description
+							    "UDP last
+							    source
+							    port";
+						    }
+						}
+					    }
+
+					    container icmp {
+						container code {
+						    leaf first {
+							type uint16;
+							description
+							    "ICMP first code";
+						    }
+						    leaf last {
+							type uint16;
+							description
+							    "ICMP last code";
+						    }
+						}
+						container type {
+						    leaf first {
+							type uint16;
+							description
+							    "ICMP first type";
+						    }
+						    leaf last {
+							type uint16;
+							description
+							    "ICMP last type";
+						    }
+						}
+					    }
+
+					    container accept {
+						presence
+						    "Presence indicates an
+						     accept statement.";
+					    }
+
+					    container drop {
+						presence
+						    "Presence indicates an
+						     drop statement.";
+					    }
+
+					    container continue {
+						presence
+						    "Presence indicates an
+						     continue statement.";
+					    }
+
+					    container return {
+						presence
+						    "Presence indicates an
+						     return statement.";
+					    }
+
+					    container jump {
+						leaf name {
+						    type string;
+						}
+					    }
+
+					    container goto {
+						leaf name {
+						    type string;
+						}
+					    }
+					}
+				    }
+				}
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+}

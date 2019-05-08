@@ -1,0 +1,147 @@
+module netgate-package {
+
+    namespace "urn:netgate:xml:yang:netgate-package";
+    prefix "ngpkg";
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a data model for network interfaces.
+
+	 Copyright 2018-2019 Rubicon Communications, LLC.
+	";
+
+    revision 2019-02-15 {
+	description
+	    "TNSR Release 19.02.";
+    }
+
+    // get information about packages
+    rpc package-info {
+        input {
+	    leaf allow {
+	        type string;
+		description
+		    "optional limitation to packages
+		     [ available | installed | updates ]
+		     if not specified then all packages ";
+	    }
+	    leaf glob {
+	        type string;
+		description
+		    "a glob to specify which packages
+		     if not specified then default is '*' (all)";
+            }
+	}
+	output {
+	    leaf result {
+	        type string;
+		description
+		    "results of package info query";
+	    }
+        }
+    }
+
+    // install a package
+    rpc package-install {
+        input {
+	    leaf glob {
+	        type string;
+		mandatory true;
+		description
+		    "a glob to specify which packages
+		     if not specified then default is '*' (all)";
+            }
+	}
+	output {
+	    leaf result {
+	        type string;
+		description
+		    "results of package installation";
+	    }
+        }
+    }
+
+    // list packages
+    rpc package-list {
+        input {
+	    leaf allow {
+	        type string;
+		description
+		    "optional limitation to packages
+		     [ available | installed | updates ]
+		     if not specified then all packages ";
+	    }
+	    leaf glob {
+	        type string;
+		description
+		    "a glob to specify which packages, if
+		     not specified then default is '*' (all)";
+            }
+	}
+	output {
+	    leaf result {
+	        type string;
+		description
+		    "results of package info query";
+	    }
+        }
+    }
+
+    rpc package-remove {
+        input {
+	    leaf glob {
+	        type string;
+		mandatory true;
+		description
+		    "a glob to specify which packages, 
+		     for safety, there is no default.";
+            }
+	}
+	output {
+	    leaf result {
+	        type string;
+		description
+		    "results of package operation";
+	    }
+        }
+    }
+
+    rpc package-search {
+        input {
+	    leaf term {
+	        type string;
+		mandatory true;
+		description
+		    "search term for query";
+            }
+	}
+	output {
+	    leaf result {
+	        type string;
+		description
+		    "results of package operation";
+	    }
+        }
+    }
+
+    rpc package-upgrade {
+        input {
+	    leaf glob {
+	        type string;
+		description
+		    "a glob to specify which packages, if
+                     not specified then default is '*' (all)";
+            }
+	}
+	output {
+	    leaf result {
+	        type string;
+		description
+		    "results of package operation";
+	    }
+        }
+    }
+}

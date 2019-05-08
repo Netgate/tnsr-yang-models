@@ -1,0 +1,512 @@
+module netgate-acl {
+
+    namespace "urn:netgate:xml:yang:netgate-acl";
+    prefix "ngacl";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import ietf-yang-types {
+	prefix "yang";
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data-model
+	 for Access Control Lists.
+
+	 Copyright 2017-2019 Rubicon Communications, LLC.
+	 ";
+
+    revision 2019-02-15 {
+	description
+	    "TNSR Release 19.02.";
+    }
+
+    revision 2017-05-10 {
+	description
+	    "Initial revision.";
+    }
+
+    typedef acl-protocol {
+	type enumeration {
+	    enum tcp {
+		description
+		    "TCP";
+	    }
+	    enum udp {
+		description
+		    "UDP";
+	    }
+	    enum icmp {
+		description
+		    "ICMP";
+	    }
+	}
+    }
+
+    typedef acl-rule-action {
+	type enumeration {
+	    enum deny {
+		description
+		    "Deny";
+	    }
+	    enum permit {
+		description
+		    "Permit";
+	    }
+	    enum reflect {
+		description
+		    "Reflect";
+	    }
+	}
+    }
+
+    typedef macip-rule-action {
+	type enumeration {
+	    enum deny {
+		description
+		    "Deny";
+	    }
+	    enum permit {
+		description
+		    "Permit";
+	    }
+	}
+    }
+
+    container "acl-config" {
+	description
+	    "Access Control Lists (ACL) data needed to support VPP.";
+
+	container acl-table {
+	    description
+		"Table of ACL lists, indexed by name.  Each entry
+		 contains a set of ACL Rules ordered by sequence number.";
+
+	    list acl-list {
+		key "acl-name";
+		description
+		    "ACL list name.";
+
+		leaf acl-name {
+		    type string;
+		    mandatory true;
+		    description
+			"The ACL name as supplied by the developer.
+			 It is a unique name used to identify this
+			 set of ACL Rules.";
+		}
+
+		leaf acl-description {
+		    type ngcom:description-63;
+		    description
+		        "A text description for the ACL.";
+		}
+
+		container acl-rules {
+		    description
+			"ACL Rule Table ordered by sequence number.";
+
+		    list acl-rule {
+			key "sequence";
+			description
+			    "A List of ACL Rules.";
+
+			leaf sequence {
+			    type uint32;
+			    description
+				"Rules are executed in increasing sequence
+				 number.";
+			}
+
+			leaf acl-rule-description {
+			    type ngcom:description-63;
+			    description
+			        "A text description for the ACL rule.";
+			}
+
+			leaf action {
+			    type acl-rule-action;
+			    description
+				"One of the actions 'deny', 'permit', or
+				 'reflect'.";
+			}
+
+			leaf src-ip-prefix {
+			    type inet:ip-prefix;
+			    description
+				"The IPv4 or IPv6 source prefix.";
+			}
+
+			leaf src-first-port {
+			    type uint16;
+			    description
+				"The first source port in a range.";
+			}
+
+			leaf src-last-port {
+			    type uint16;
+			    description
+				"The last source port in a range.";
+			}
+
+			leaf dst-ip-prefix {
+			    type inet:ip-prefix;
+			    description
+				"The IPv4 or IPv6 destination prefix.";
+			}
+
+			leaf dst-first-port {
+			    type uint16;
+			    description
+				"The first destination port in a range.";
+			}
+
+			leaf dst-last-port {
+			    type uint16;
+			    description
+				"The last destination port in a range.";
+			}
+
+			leaf protocol {
+			    type acl-protocol;
+			    description
+				"One of the L4 protocol strings 'tcp', 'udp'
+				 or 'icmp'.";
+			}
+
+			leaf icmp-first-type {
+			    type uint16;
+			    description
+				"The first ICMP type in a range.";
+			}
+
+			leaf icmp-last-type {
+			    type uint16;
+			    description
+				"The last ICMP type in a range.";
+			}
+
+			leaf icmp-first-code {
+			    type uint16;
+			    description
+				"The first ICMP code in a range.";
+			}
+
+			leaf icmp-last-code {
+			    type uint16;
+			    description
+				"The last ICMP code in a range.";
+			}
+
+			leaf tcp-flags-mask {
+			    type uint8;
+			    description
+				"The TCP flags mask.";
+			}
+
+			leaf tcp-flags-value {
+			    type uint8;
+			    description
+				"The TCP flags value.";
+			}
+		    }
+		}
+	    }
+	}
+
+	container macip-table {
+	    description
+		"Table of MACIP lists, indexed by name.  Each entry
+		 contains a set of MACIP Rules ordered by sequence number.";
+
+	    list macip-list {
+		key "macip-name";
+		description
+		    "MACIP list name.";
+
+		leaf macip-name {
+		    type string;
+		    mandatory true;
+		    description
+			"The MACIP name as supplied by the developer.
+			 It is a unique name used to identify this
+			 set of MACIP Rules.";
+		}
+
+		container macip-rules {
+		    description
+			"MACIP Rule Table ordered by sequence number.";
+
+		    list macip-rule {
+			key "sequence";
+			description
+			    "A List of MACIP Rules.";
+
+			leaf sequence {
+			    type uint32;
+			    description
+				"Rules are executed in increasing sequence
+				 number.";
+			}
+
+			leaf action {
+			    type macip-rule-action;
+			    description
+				"One of the actions 'deny' or 'permit'.";
+			}
+
+			leaf mac-address {
+			    type yang:mac-address;
+			    description
+			        "The L2 MAC address to be matched.";
+			}
+
+			leaf mac-mask {
+			    type yang:mac-address;
+			    description
+			        "The L2 MAC mask ANDed with packet MAC
+				addresses.";
+			}
+
+			leaf ip-prefix {
+			    type inet:ip-prefix;
+			    description
+				"The IPv4 or IPv6 source prefix.";
+			}
+		    }
+		}
+	    }
+	}
+    }
+
+    container "acl-state" {
+	description
+	    "Access Control Lists (ACL) state data.";
+
+	config "false";
+
+	container acl-table {
+	    description
+		"Table of ACL lists, indexed by name.  Each entry
+		 contains a set of ACL Rules ordered by sequence number.";
+
+	    list acl-list {
+		key "acl-name";
+		description
+		    "ACL list name.";
+
+		leaf acl-name {
+		    type string;
+		    mandatory true;
+		    description
+			"The ACL name as supplied by the developer.
+			 It is a unique name used to identify this
+			 set of ACL Rules.";
+		}
+
+		leaf acl-description {
+		    type ngcom:description-63;
+		    description
+		        "A text description for the ACL.";
+		}
+
+		container acl-rules {
+		    description
+			"ACL Rule Table ordered by sequence number.";
+
+		    list acl-rule {
+			key "sequence";
+			description
+			    "A List of ACL Rules.";
+
+			leaf sequence {
+			    type uint32;
+			    description
+				"Rules are executed in increasing sequence
+				 number.";
+			}
+
+			leaf acl-rule-description {
+			    type ngcom:description-63;
+			    description
+			        "A text description for the ACL rule.";
+			}
+
+			leaf address-family {
+			    type ngcom:ip-address-family;
+			    description
+				"One of 'ipv4' or 'ipv6'.";
+			}
+
+			leaf action {
+			    type acl-rule-action;
+			    description
+				"One of the actions 'deny', 'permit', or
+				 'reflect'.";
+			}
+
+			leaf src-ip-prefix {
+			    type inet:ip-prefix;
+			    description
+				"The IPv4 or IPv6 source prefix.";
+			}
+
+			leaf src-first-port {
+			    type uint16;
+			    description
+				"The first source port in a range.";
+			}
+
+			leaf src-last-port {
+			    type uint16;
+			    description
+				"The last source port in a range.";
+			}
+
+			leaf dst-ip-prefix {
+			    type inet:ip-prefix;
+			    description
+				"The IPv4 or IPv6 destination prefix.";
+			}
+
+			leaf dst-first-port {
+			    type uint16;
+			    description
+				"The first destination port in a range.";
+			}
+
+			leaf dst-last-port {
+			    type uint16;
+			    description
+				"The last destination port in a range.";
+			}
+
+			leaf protocol {
+			    type acl-protocol;
+			    description
+				"One of the L4 protocol strings 'tcp', 'udp'
+				 or 'icmp'.";
+			}
+
+			leaf icmp-first-type {
+			    type uint16;
+			    description
+				"The first ICMP type in a range.";
+			}
+
+			leaf icmp-last-type {
+			    type uint16;
+			    description
+				"The last ICMP type in a range.";
+			}
+
+			leaf icmp-first-code {
+			    type uint16;
+			    description
+				"The first ICMP code in a range.";
+			}
+
+			leaf icmp-last-code {
+			    type uint16;
+			    description
+				"The last ICMP code in a range.";
+			}
+
+			leaf tcp-flags-mask {
+			    type uint8;
+			    description
+				"The TCP flags mask.";
+			}
+
+			leaf tcp-flags-value {
+			    type uint8;
+			    description
+				"The TCP flags value.";
+			}
+		    }
+		}
+	    }
+	}
+
+	container macip-table {
+	    description
+		"Table of MACIP lists, indexed by name.  Each entry
+		 contains a set of MACIP Rules ordered by sequence number.";
+
+	    list macip-list {
+		key "macip-name";
+		description
+		    "MACIP list name.";
+
+		leaf macip-name {
+		    type string;
+		    mandatory true;
+		    description
+			"The MACIP name as supplied by the developer.
+			 It is a unique name used to identify this
+			 set of MACIP Rules.";
+		}
+
+		container macip-rules {
+		    description
+			"MACIP Rule Table ordered by sequence number.";
+
+		    list macip-rule {
+			key "sequence";
+			description
+			    "A List of MACIP Rules.";
+
+			leaf sequence {
+			    type uint32;
+			    description
+				"Rules are executed in increasing sequence
+				 number.";
+			}
+
+			leaf address-family {
+			    type ngcom:ip-address-family;
+			    description
+				"One of 'ipv4' or 'ipv6'.";
+			}
+
+			leaf action {
+			    type macip-rule-action;
+			    description
+				"One of the actions 'deny' or 'permit'.";
+			}
+
+			leaf mac-address {
+			    type yang:mac-address;
+			    description
+			        "The L2 MAC address to be matched.";
+			}
+
+			leaf mac-mask {
+			    type yang:mac-address;
+			    description
+			        "The L2 MAC mask ANDed with packet MAC
+				addresses.";
+			}
+
+			leaf ip-prefix {
+			    type inet:ip-prefix;
+			    description
+				"The IPv4 or IPv6 source prefix.";
+			}
+		    }
+		}
+	    }
+	}
+    }
+
+}

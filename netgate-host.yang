@@ -1,0 +1,390 @@
+module netgate-host {
+
+    namespace "urn:netgate:xml:yang:netgate-host";
+    prefix "nghost";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import ietf-yang-types {
+	prefix "yang";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a data model for host data.
+
+	 Copyright 2019 Rubicon Communications, LLC.
+	";
+
+    revision 2019-02-15 {
+	description
+	    "TNSR Release 19.02.";
+    }
+
+    revision 2019-02-07 {
+	description
+	    "Initial revision.";
+    }
+
+    typedef host-acl-protocol {
+	type enumeration {
+	    enum icmp {
+		description
+		    "Internet Control Message Protocol (ICMP).";
+	    }
+
+	    enum tcp {
+		description
+		    "Transmission Control Protocol (TCP).";
+	    }
+
+	    enum udp {
+		description
+		    "User Datagram Protocol (UDP).";
+	    }
+	}
+    }
+
+    typedef host-acl-icmp-type {
+	type enumeration {
+	    enum echo-reply {
+		description
+		    "Echo reply.";
+	    }
+
+	    enum destination-unreachable {
+		description
+		    "Destination unreachable.";
+	    }
+
+	    enum source-quench {
+		description
+		    "Source quench.";
+	    }
+
+	    enum redirect {
+		description
+		    "Redirect.";
+	    }
+
+	    enum echo-request {
+		description
+		    "Echo request.";
+	    }
+
+	    enum time-exceeded {
+		description
+		    "Time exceeded.";
+	    }
+
+	    enum parameter-problem {
+		description
+		    "Parameter problem.";
+	    }
+
+	    enum timestamp-request {
+		description
+		    "Timestamp request.";
+	    }
+
+	    enum timestamp-reply {
+		description
+		    "Timestamp reply.";
+	    }
+
+	    enum info-request {
+		description
+		    "Info request.";
+	    }
+
+	    enum info-reply {
+		description
+		    "Info reply.";
+	    }
+
+	    enum address-mask-request {
+		description
+		    "Address mask request.";
+	    }
+
+	    enum address-mask-reply {
+		description
+		    "Address mask reply.";
+	    }
+
+	    enum router-advertisement {
+		description
+		    "Router advertisement.";
+	    }
+
+	    enum router-solicitation {
+		description
+		    "Router solicitation.";
+	    }
+	}
+    }
+
+    typedef host-acl-action {
+	type enumeration {
+	    enum permit {
+		description
+		    "Permit.";
+	    }
+
+	    enum deny {
+		description
+		    "Deny.";
+	    }
+	}
+    }
+
+    container host-config {
+	description
+	    "Host configuration parameters.";
+
+	container security {
+	    description
+		"Host security configuration parameters.";
+
+	    container host-acls {
+		description
+		    "Host access lists (ACLs).";
+
+		list host-acl {
+		    key "acl-name";
+
+		    description
+			"The list of configured host ACLs.";
+
+		    leaf acl-name {
+			    type string;
+			    description
+				"The name of the host ACL.";
+		    }
+
+		    leaf acl-seq {
+			    type uint32;
+			    description
+				"The sequence number of the host ACL.";
+		    }
+
+		    leaf description {
+			    type string;
+			    description
+				"The description of the host ACL.";
+		    }
+
+		    list acl-rule {
+			key "rule-seq";
+
+			description
+			    "The list of the host ACL rules.";
+
+			leaf rule-seq {
+			    type uint32;
+			    description
+				"The sequence number of the rule.";
+			}
+
+			leaf description {
+			    type string;
+			    description
+				"The description of the rule.";
+			}
+
+			container packet-match {
+			    description
+				"The matching packets of the rule.";
+
+			    leaf input-if {
+				type string;
+				description
+				    "The input interface name.";
+			    }
+
+			    container link {
+				description
+				    "Ethernet traffic match.";
+
+				leaf source {
+				    type yang:mac-address;
+				    description
+					"The source MAC address.";
+				}
+
+				leaf destination {
+				    type yang:mac-address;
+				    description
+					"The destination MAC address.";
+				}
+			    }
+
+			    container ip {
+				description
+				    "IP traffic match.";
+
+				leaf version {
+				    type uint8 {
+					range "4 | 6";
+				    }
+				    description
+					"IP version.";
+				}
+
+				leaf protocol {
+				    type host-acl-protocol;
+				    description
+					"The IP protocol.";
+				}
+
+				leaf source {
+				    type inet:ip-prefix;
+				    description
+					"The source IP prefix.";
+				}
+
+				leaf destination {
+				    type inet:ip-prefix;
+				    description
+					"The destination IP prefix.";
+				}
+
+				container transport {
+				    description
+					"Transport options.";
+
+				    container source-port {
+					description
+					    "The source port range.";
+
+					leaf first {
+					    type inet:port-number;
+					    description
+						"The first port number.";
+					}
+
+					leaf last {
+					    type inet:port-number;
+					    description
+						"The last port number.";
+					}
+				    }
+
+				    container destination-port {
+					description
+					    "The destination port range.";
+
+					leaf first {
+					    type inet:port-number;
+					    description
+						"The first port number.";
+					}
+
+					leaf last {
+					    type inet:port-number;
+					    description
+						"The last port number.";
+					}
+				    }
+
+				    container tcp {
+					description
+					    "TCP options.";
+
+					container flags {
+					    description
+						"TCP flags.";
+
+					    leaf ns {
+						type boolean;
+						description
+						    "Nonce Sum.";
+					    }
+
+					    leaf cwr {
+						type boolean;
+						description
+						    "Congestion
+						     Window Reduced.";
+					    }
+
+					    leaf ece {
+						type boolean;
+						description
+						    "ECN-Echo.";
+					    }
+
+					    leaf urg {
+						type boolean;
+						description
+						    "Urgent.";
+					    }
+
+					    leaf ack {
+						type boolean;
+						description
+						    "Acknowledgment.";
+					    }
+
+					    leaf psh {
+						type boolean;
+						description
+						    "Push.";
+					    }
+
+					    leaf rst {
+						type boolean;
+						description
+						    "Reset.";
+					    }
+
+					    leaf syn {
+						type boolean;
+						description
+						    "Synchronize.";
+					    }
+
+					    leaf fin {
+						type boolean;
+						description
+						    "Finished.";
+					    }
+					}
+				    }
+
+				    container icmp {
+					description
+					    "ICMP options.";
+
+					leaf type {
+					    type host-acl-icmp-type;
+					    description
+						"ICMP type.";
+					}
+
+					leaf code {
+					    type uint8;
+					    description
+						"ICMP code.";
+					}
+				    }
+				}
+			    }
+			}
+
+			leaf action {
+			    type host-acl-action;
+			    description
+				"The action of the rule.";
+			}
+		    }
+		}
+	    }
+	}
+    }
+}

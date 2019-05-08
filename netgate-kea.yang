@@ -1,0 +1,1653 @@
+module netgate-kea {
+
+    namespace "urn:netgate:xml:yang:netgate-kea";
+    prefix "ngkea";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import ietf-yang-types {
+	prefix "yang";
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a data model for the Kea DHCP server.
+
+	 Copyright 2019 Rubicon Communications, LLC.";
+
+    revision 2019-02-15 {
+	description
+	    "TNSR Release 19.02.";
+    }
+
+    typedef duid {
+	type string {
+	    pattern '(([0-9a-fA-F]{2}){2,128})';
+	}
+	description
+	    "DHCP Unique Identifier (RFC-3315).";
+    }
+
+    typedef kea-host-id-method {
+	type enumeration {
+	    enum hw-address {
+		description
+		    "The host's identifying MAC address.";
+	    }
+	    enum duid {
+		description
+		    "The host's identifying DUID.";
+	    }
+	    enum circuit-id {
+		description
+		    "The host's identifying circuit-id address.";
+	    }
+	    enum client-id {
+		description
+		    "The host's identifying client-id address.";
+	    }
+	}
+    }
+
+    typedef kea-dhcp4-option {
+	type enumeration {
+	    enum time-offset {
+		description
+		    "time-offset";
+	    }
+
+	    enum routers {
+		description
+		    "routers";
+	    }
+
+	    enum time-servers {
+		description
+		    "time-servers";
+	    }
+
+	    enum name-servers {
+		description
+		    "name-servers";
+	    }
+
+	    enum domain-name-servers {
+		description
+		    "domain-name-servers";
+	    }
+
+	    enum log-servers {
+		description
+		    "log-servers";
+	    }
+
+	    enum cookie-servers {
+		description
+		    "cookie-servers";
+	    }
+
+	    enum lpr-servers {
+		description
+		    "lpr-servers";
+	    }
+
+	    enum impress-servers {
+		description
+		    "impress-servers";
+	    }
+
+	    enum resource-location-servers {
+		description
+		    "resource-location-servers";
+	    }
+
+	    enum boot-size {
+		description
+		    "boot-size";
+	    }
+
+	    enum merit-dump {
+		description
+		    "merit-dump";
+	    }
+
+	    enum domain-name {
+		description
+		    "domain-name";
+	    }
+
+	    enum swap-server {
+		description
+		    "swap-server";
+	    }
+
+	    enum root-path {
+		description
+		    "root-path";
+	    }
+
+	    enum extensions-path {
+		description
+		    "extensions-path";
+	    }
+
+	    enum ip-forwarding {
+		description
+		    "ip-forwarding";
+	    }
+
+	    enum non-local-source-routing {
+		description
+		    "non-local-source-routing";
+	    }
+
+	    enum policy-filter {
+		description
+		    "pllicy-filter";
+	    }
+
+	    enum max-dgram-reassembly {
+		description
+		    "max-dgram-reassembly";
+	    }
+
+	    enum default-ip-ttl {
+		description
+		    "default-ip-ttl";
+	    }
+
+	    enum path-mtu-aging-timeout {
+		description
+		    "path-mtu-aging-timeout";
+	    }
+
+	    enum path-mtu-plateau-table {
+		description
+		    "path-mtu-plateau-table";
+	    }
+
+	    enum interface-mtu {
+		description
+		    "interface-mtu";
+	    }
+
+	    enum all-subnets-local {
+		description
+		    "all-subnets-local";
+	    }
+
+	    enum broadcast-address {
+		description
+		    "broadcast-address";
+	    }
+
+	    enum perform-mask-discovery {
+		description
+		    "perform-mask-discovery";
+	    }
+
+	    enum mask-supplier {
+		description
+		    "mask-supplier";
+	    }
+
+	    enum router-discovery {
+		description
+		    "router-discovery";
+	    }
+
+	    enum router-solicitation-address {
+		description
+		    "router-solicitation-address";
+	    }
+
+	    enum static-routes {
+		description
+		    "static-routes";
+	    }
+
+	    enum trailer-encapsulation {
+		description
+		    "trailer-encapsulation";
+	    }
+
+	    enum arp-cache-timeout {
+		description
+		    "arp-cache-timeout";
+	    }
+
+	    enum ieee802-3-encapsulation {
+		description
+		    "ieee802-3-encapsulation";
+	    }
+
+	    enum default-tcp-ttl {
+		description
+		    "default-tcp-ttl";
+	    }
+
+	    enum tcp-keepalive-interval {
+		description
+		    "tcp-keepalive-interval";
+	    }
+
+	    enum tcp-keepalive-garbage {
+		description
+		    "tcp-keepalive-garbage";
+	    }
+
+	    enum nis-domain {
+		description
+		    "nis-domain";
+	    }
+
+	    enum nis-servers {
+		description
+		    "nis-servers";
+	    }
+
+	    enum ntp-servers {
+		description
+		    "ntp-servers";
+	    }
+
+	    enum vendor-encapsulated-options {
+		description
+		    "vendor-encapsulated-options";
+	    }
+
+	    enum netbios-name-servers {
+		description
+		    "netbios-name-servers";
+	    }
+
+	    enum netbios-dd-server {
+		description
+		    "netbios-dd-server";
+	    }
+
+	    enum netbios-node-type {
+		description
+		    "netbios-node-type";
+	    }
+
+	    enum netbios-scope {
+	        description
+		    "netbios-scope";
+	    }
+
+	    enum font-servers {
+		description
+		    "font-servers";
+	    }
+
+	    enum x-display-manager {
+		description
+		    "x-display-manager";
+	    }
+
+	    enum dhcp-option-overload {
+		description
+		    "dhcp-option-overload";
+	    }
+
+	    enum dhcp-server-identifier {
+		description
+		    "dhcp-server-identifier";
+	    }
+
+	    enum dhcp-message {
+		description
+		    "dhcp-message";
+	    }
+
+	    enum dhcp-max-message-size {
+		description
+		    "dhcp-max-message-size";
+	    }
+
+	    enum vendor-class-identifier {
+		description
+		    "vendor-class-identifier";
+	    }
+
+	    enum nwip-domain-name {
+		description
+		    "nwip-domain-name";
+	    }
+
+	    enum nwip-suboptions {
+		description
+		    "nwip-suboptions";
+	    }
+
+	    enum nisplus-domain-name {
+		description
+		    "nisplus-domain-name";
+	    }
+
+	    enum nisplus-servers {
+		description
+		    "nisplus-servers";
+	    }
+
+	    enum tftp-server-name {
+		description
+		    "tftp-server-name";
+	    }
+
+	    enum boot-file-name {
+		description
+		    "boot-file-name";
+	    }
+
+	    enum mobile-ip-home-agent {
+		description
+		    "mobile-ip-home-agent";
+	    }
+
+	    enum smtp-server {
+		description
+		    "smtp-server";
+	    }
+
+	    enum pop-server {
+		description
+		    "pop-server";
+	    }
+
+	    enum nntp-server {
+		description
+		    "nntp-server";
+	    }
+
+	    enum www-server {
+		description
+		    "www-server";
+	    }
+
+	    enum finger-server {
+		description
+		    "finger-server";
+	    }
+
+	    enum irc-server {
+		description
+		    "irc-server";
+	    }
+
+	    enum streettalk-server {
+		description
+		    "streettalk-server";
+	    }
+
+	    enum streettalk-directory-assistance-server {
+		description
+		    "streettalk-directory-assistance-server";
+	    }
+
+	    enum user-class {
+		description
+		    "user-class";
+	    }
+
+	    enum slp-directory-agent {
+		description
+		    "slp-directory-agent";
+	    }
+
+	    enum slp-service-scope {
+		description
+		    "slp-service-scope";
+	    }
+
+	    enum nds-server {
+		description
+		    "nds-server";
+	    }
+
+	    enum nds-tree-name {
+		description
+		    "nds-tree-name";
+	    }
+
+	    enum nds-context {
+		description
+		    "nds-context";
+	    }
+
+	    enum bcms-controller-names {
+		description
+		    "bcms-controller-names";
+	    }
+
+	    enum bcms-controller-address {
+		description
+		    "bcms-controller-address";
+	    }
+
+	    enum client-system {
+		description
+		    "client-system";
+	    }
+
+	    enum client-ndi {
+		description
+		    "client-ndi";
+	    }
+
+	    enum uuid-guid {
+		description
+		    "uuid-guid";
+	    }
+
+	    enum uap-servers {
+		description
+		    "uap-servers";
+	    }
+
+	    enum geoconf-civic {
+		description
+		    "geoconf-civic";
+	    }
+
+	    enum pcode {
+		description
+		    "pcode";
+	    }
+
+	    enum tcode {
+		description
+		    "tcode";
+	    }
+
+	    enum netinfo-server-address {
+		description
+		    "netinfo-server-address";
+	    }
+
+	    enum netinfo-server-tag {
+		description
+		    "netinfo-server-tag";
+	    }
+
+	    enum default-url {
+		description
+		    "default-url";
+	    }
+
+	    enum auto-config {
+		description
+		    "auto-config";
+	    }
+
+	    enum name-service-search {
+		description
+		    "name-service-search";
+	    }
+
+	    enum subnet-selection {
+		description
+		    "subnet-selection";
+	    }
+
+	    enum domain-search {
+		description
+		    "domain-search";
+	    }
+
+	    enum vivco-suboptions {
+		description
+		    "vivco-suboptions";
+	    }
+
+	    enum vivso-suboptions {
+		description
+		    "vivso-suboptions";
+	    }
+
+	    enum pana-agent {
+		description
+		    "pana-agent";
+	    }
+
+	    enum v4-lost {
+		description
+		    "v4-lost";
+	    }
+
+	    enum capwap-ac-v4 {
+		description
+		    "capwap-ac-v4";
+	    }
+
+	    enum sip-ua-cs-domains {
+		description
+		    "sip-ua-cs-domains";
+	    }
+
+	    enum rdnss-selection {
+		description
+		    "rdnss-selection";
+	    }
+
+	    enum v4-portparams {
+		description
+		    "v4-portparams";
+	    }
+
+	    enum v4-captive-portal {
+		description
+		    "v4-captive-portal";
+	    }
+
+	    enum option-6rd {
+		description
+		    "option-6rd";
+	    }
+
+	    enum v4-access-domain {
+		description
+		    "v4-access-domain";
+	    }
+	}
+    }
+
+    typedef kea-logger-name {
+	type enumeration {
+	    enum * {
+		description
+		    "Wildcard all Kea logger names.";
+	    }
+
+	    enum kea-ctrl-agent {
+		description
+		    "The root logger for the Control Agent exposing
+		     RESTful control API. All components used by the
+		     Control Agent inherit the settings from this
+		     logger.";
+	     }
+
+	     enum kea-ctrl-agent.http {
+		 description
+		     "A logger which outputs log messages related to
+		      receiving, parsing and sending HTTP messages.";
+	     }
+
+	    enum kea-dhcp4 {
+		description
+		    "The root logger for the DHCPv4 server. All
+		     components used by the DHCPv4 server inherit the
+		     settings from this logger.";
+	    }
+
+	    enum kea-dhcp4.alloc-engine {
+		description
+		    "Used by the lease allocation engine, which is
+		     responsible for managing leases in the lease
+		     database, i.e. create, modify and remove DHCPv4
+		     leases as a result of processing messages from
+		     the clients.";
+	    }
+
+	    enum kea-dhcp4.bad-packets {
+		description
+		    "Used by the DHCPv4 server daemon for logging
+		     inbound client packets that were dropped or to
+		     which the server responded with a DHCPNAK. It
+		     allows administrators to configure a separate log
+		     output that contains only packet drop and reject
+		     entries.";
+	    }
+
+	    enum kea-dhcp4.callouts {
+		description
+		    "Used to log messages pertaining to the callouts
+		     registration and execution for the particular
+		     hook point.";
+	    }
+
+	    enum kea-dhcp4.commands {
+		description
+		    "Used to log messages relating to the handling of
+		     commands received by the the DHCPv4 server over
+		     the command channel.";
+	    }
+
+	    enum kea-dhcp4.ddns {
+		description
+		    "Used by the DHCPv4 server to log messages related
+		     to the Client FQDN and Hostname option
+		     processing. It also includes log messages related
+		     to the relevant DNS updates.";
+	    }
+
+	    enum kea-dhcp4.dhcp4 {
+		description
+		    "Used by the DHCPv4 server daemon to log basic
+		     operations.";
+	    }
+
+	    enum kea-dhcp4.dhcpsrv {
+		description
+		    "The base logger for the libdhcpsrv library.";
+	    }
+
+	    enum kea-dhcp4.eval {
+		description
+		    "Used to log messages relating to the client
+		     classification expression evaluation code.";
+	    }
+
+	    enum kea-dhcp4.hooks {
+		description
+		    "Used to log messages related to management of
+		     hooks libraries, e.g. registration and
+		     deregistration of the libraries, and to the
+		     initialization of the callouts execution for
+		     various hook points within the DHCPv4 server.";
+	    }
+
+	    enum kea-dhcp4.hosts {
+		description
+		    "Used within the libdhcpsrv and it logs messages
+		     related to the management of the DHCPv4 host
+		     reservations, i.e. retrieval of the reservations
+		     and adding new reservations.";
+	    }
+
+	    enum kea-dhcp4.leases {
+		description
+		    "Used by the DHCPv4 server to log messages related
+		     to the lease allocation. The messages include
+		     detailed information about the allocated or
+		     offered leases, errors during the lease
+		     allocation etc.";
+	    }
+
+	    enum kea-dhcp4.options {
+		description
+		    "Used by the DHCPv4 server to log messages related
+		     to processing of the options in the DHCPv4
+		     messages, i.e. parsing options, encoding options
+		     into on-wire format and packet classification
+		     using options contained in the received
+		     packets.";
+	    }
+
+	    enum kea-dhcp4.packets {
+		description
+		    "This logger is mostly used to log messages
+		     related to transmission of the DHCPv4 packets,
+		     i.e. packet reception and sending a
+		     response. Such messages include information about
+		     the source and destination IP addresses and
+		     interfaces used to transmit packets. The logger
+		     is also used to log messages related to subnet
+		     selection, as this selection is usually based on
+		     the IP addresses and/or interface names, which
+		     can be retrieved from the received packet, even
+		     before the DHCPv4 message carried in the packet
+		     is parsed.";
+	    }
+
+	    enum kea-dhcp4.stat-cmds-hooks {
+		description
+		    "This logger is used to log messages related to
+		     operation of the Stats Cmds hooks library. In
+		     general these will pertain to loading and
+		     unloading the library and the execution of
+		     commands by the library.";
+	    }
+
+	    enum kea-dhcp6 {
+		description
+		    "The root logger for the DHCPv6 server. All
+		     components used by the DHCPv6 server inherit the
+		     settings from this logger if there is no
+		     specialized logger provided.";
+	    }
+
+	    enum kea-dhcp6.alloc-engine {
+		description
+		    "Used by the lease allocation engine, which is
+		     responsible for managing leases in the lease
+		     database, i.e. create, modify and remove DHCPv6
+		     leases as a result of processing messages from
+		     the clients.";
+	    }
+
+	    enum kea-dhcp6.bad-packets {
+		description
+		    "Used by the DHCPv6 server daemon for logging
+		     inbound client packets that were dropped.";
+	    }
+
+	    enum kea-dhcp6.callouts {
+		description
+		    "Used to log messages pertaining to the callouts
+		     registration and execution for the particular
+		     hook point.";
+	    }
+
+	    enum kea-dhcp6.commands {
+		description
+		    "Used to log messages relating to the handling of
+		     commands received by the the DHCPv6 server over
+		     the command channel.";
+	    }
+
+	    enum kea-dhcp6.ddns {
+		description
+		    "This logger is used by the DHCPv6 server to log
+		     messages related to the Client FQDN option
+		     processing. It also includes log messages related
+		     to the relevant DNS updates.";
+	    }
+
+	    enum kea-dhcp6.dhcp6 {
+		description
+		    "Used DHCPv6 server daemon to log basic operations.";
+	    }
+
+	    enum kea-dhcp6.dhcpsrv {
+		description
+		    "The base logger for the libdhcpsrv library.";
+	    }
+
+	    enum kea-dhcp6.eval {
+		description
+		    "Used to log messages relating to the client
+		     classification expression evaluation code.";
+	    }
+
+	    enum kea-dhcp6.hooks {
+		description
+		    "This logger is used to log messages related to
+		     management of hooks libraries, e.g. registration
+		     and deregistration of the libraries, and to the
+		     initialization of the callouts execution for
+		     various hook points within the DHCPv6 server.";
+	    }
+
+	    enum kea-dhcp6.hosts {
+		description
+		    "Used within the libdhcpsrv and it logs messages
+		     related to the management of the DHCPv6 host
+		     reservations, i.e. retrieval of the reservations
+		     and adding new reservations.";
+	    }
+
+	    enum kea-dhcp6.leases {
+		description
+		    "Used by the DHCPv6 server to log messages related
+		     to the lease allocation. The messages include
+		     detailed information about the allocated or
+		     offered leases, errors during the lease
+		     allocation etc.";
+	    }
+
+	    enum kea-dhcp6.options {
+		description
+		    "Used by the DHCPv6 server to log messages related
+		     to processing of the options in the DHCPv6
+		     messages, i.e. parsing options, encoding options
+		     into on-wire format and packet classification
+		     using options contained in the received
+		     packets.";
+	    }
+
+	    enum kea-dhcp6.packets {
+		description
+		    "This logger is mostly used to log messages
+		    related to transmission of the DHCPv6 packets,
+		    i.e. packet reception and sending a response. Such
+		    messages include the information about the source
+		    and destination IP addresses and interfaces used
+		    to transmit packets. This logger is also used to
+		    log messages related to subnet selection, as this
+		    selection is usually based on the IP addresses
+		    and/or interface names, which can be retrieved
+		    from the received packet, even before the DHCPv6
+		    message carried in the packet is parsed.";
+	    }
+
+	    enum kea-dhcp6.stat-cmds-hooks {
+		description
+		    "This logger is used to log messages related to
+		     operation of the Stats Cmds hooks library. In
+		     general these will pertain to loading and
+		     unloading the library and the execution of
+		     commands by the library.";
+	    }
+
+	    enum kea-dhcp-ddns {
+		description
+		    "The root logger for the kea-dhcp-ddns daemon. All
+		     components used by this daemon inherit the
+		     settings from this logger if there is no
+		     specialized logger provided.";
+	    }
+
+	    enum kea-dhcp-ddns.dctl {
+		description
+		    "The logger used by the kea-dhcp-ddns daemon for
+		     logging basic information about the process,
+		     received signals and triggered
+		     reconfigurations.";
+	    }
+
+	    enum kea-dhcp-ddns.dhcpddns {
+		description
+		    "The logger used by the kea-dhcp-ddns daemon for
+		    logging events related to DDNS operations.";
+	    }
+
+	    enum kea-dhcp-ddns.dhcp-to-d2 {
+		description
+		    "Used by the kea-dhcp-ddns daemon for logging
+		     information about events dealing with receiving
+		     messages from the DHCP servers and adding them to
+		     the queue for processing.";
+	    }
+
+	    enum kea-dhcp-ddns.d2-to-dns {
+		description
+		    "Used by the kea-dhcp-ddns daemon for logging
+		     information about events dealing with sending and
+		     receiving messages with the DNS servers.";
+	    }
+	}
+    }
+
+    typedef kea-logger-severity {
+	type enumeration {
+	    enum fatal {
+		description
+		    "Associated with messages generated by a condition
+		     that is so serious that the server cannot
+		     continue executing.";
+	    }
+
+	    enum error {
+		description
+		    "Associated with messages generated by an error
+		     condition. The server will continue executing,
+		     but the results may not be as expected.";
+	    }
+
+	    enum warn {
+		description
+		    "Indicates an out of the ordinary condition.
+		     However, the server will continue executing
+		     normally.";
+	    }
+
+	    enum info {
+		description
+		    "An informational message marking some event.";
+	    }
+
+	    enum debug {
+		description
+		    "Messages produced for debugging purposes.";
+	    }
+	}
+    }
+
+    typedef kea-output-keyword {
+	type string {
+	    pattern "stdout|stderr|syslog(:[a-zA-Z0-9]+){0,1}";
+	}
+	description
+	    "The special output locations stdout, stderr, or syslog
+	     with an optional facility name.";
+    }
+
+    typedef kea-output-filename {
+	type string {
+	    length "1..max";
+	    pattern '[^\*].*';
+	}
+	description
+	    "A filename.";
+    }
+
+    typedef kea-output-location {
+	type union {
+	    type kea-output-keyword;
+	    type kea-output-filename;
+	}
+    }
+    
+    typedef ipv4-range {
+	type string {
+	    pattern
+		  '(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}'
+		+ '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])'
+		+ '(-'
+		+ '(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}'
+		+ '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])'
+		+ ')';
+	    }
+    }
+
+    typedef ipv4-prefix-or-range {
+	type union {
+	    type inet:ipv4-prefix;
+	    type ipv4-range;
+	}
+    }
+
+    rpc kea-control {
+	input {
+	    leaf operation {
+		mandatory true;
+		type ngcom:service-operation;
+		description
+		    "One of the strings 'start', 'stop', 'reload',
+		     or 'status'.";
+	    }
+	    leaf option {
+		type string;
+		description
+		    "Option on operation";
+	    }
+	    leaf kea-service {
+		type string;
+	    }
+	}
+	output {
+	    leaf stdout {
+		type string;
+	    }
+	}
+    }
+
+    typedef kea-show-request {
+	type enumeration {
+	    enum config {
+		description
+		    "Get on-disk configuration files.";
+	    }
+	}
+    }
+
+    typedef kea-show-parameter {
+	type enumeration {
+	    enum dhcp4 {
+		description
+		    "DHCP IPv4 configuration file.";
+	    }
+	    enum keactrl {
+		description
+		    "Kea control configuration file.";
+	    }
+	}
+    }
+
+    rpc kea-show {
+	input {
+	    leaf request {
+		type kea-show-request;
+		description
+		    "A Kea show request type.  The string 'config'
+		     along with parameter 'dhcp4' or 'keactrl'.
+		     This request will return the contents of the
+		     corresponding on-disk Kea configuration file.";
+	    }
+	    leaf param {
+		type kea-show-parameter;
+		description
+		    "One of the strings 'dhcp4', or 'keactrl'.";
+	    }
+	}
+	output {
+	    leaf stdout {
+		type string;
+	    }
+	}
+    }
+
+    grouping kea-dhcp4-option-group {
+	description
+	    "Kea DHCPv4 option information.";
+
+	list option-data {
+	    key name;
+	    description
+		"List of DHCPv4 options and values.";
+
+	    leaf name {
+		type string;
+		description
+		    "The server requires an option name to identify an
+		     option.";
+	    }
+
+	    leaf always-send {
+		type boolean;
+		description
+		    "To enforce the addition of a particular option
+		     set the always-send flag to true.";
+	    }
+
+	    leaf csv-format {
+		type boolean;
+		description
+		    "If this value is not specified the server will
+		     assume that the option data is specified as a
+		     list of comma separated values to be assigned to
+		     individual fields of the DHCP option.";
+	    }
+
+	    leaf data {
+		type string;
+		description
+		    "If the option data is unspecified it defaults to
+		     an empty value. The empty value is mostly used
+		     for the options which have no payload (boolean
+		     options), but it is legal to specify empty values
+		     for some options which carry variable length data
+		     and which the specification allows for the length
+		     of 0. For such options, the data parameter may be
+		     omitted in the configuration.";
+	    }
+
+	    leaf space {
+		type string;
+		description
+		    "If the option space is unspecified it will
+		     default to 'dhcp4' which is an option space
+		     holding DHCPv4 standard options";
+	    }
+	}
+    }
+
+    grouping kea-logging-group {
+	description
+	    "Kea logging information.";
+
+	list loggers {
+	    key name;
+	    description
+		"List of logging facilities and parameters.";
+
+	    leaf name {
+		type kea-logger-name;
+		description
+		    "The name of a Kea logger.";
+	    }
+
+	    list output_options {
+		key output;
+		description
+		    "List of output options for a logger.";
+
+		leaf output {
+		    type kea-output-location;
+		    description
+			"The logger's file or keyword output location.";
+		}
+
+		leaf maxver {
+		    type uint32 {
+			range "1..max";
+		    }
+		    description
+			"The maximum number of rotation log files
+			 to keep.";
+		}
+
+		leaf maxsize {
+		    type uint32 {
+			range "1000..max";
+		    }
+		    description
+			"The maximum size of a rotating log file.
+			 The default is 10MB.";
+		}
+
+		leaf flush {
+		    type boolean;
+		    description
+			"If true, each log message is flushed as it is
+			 logged at a slight performance penalty.";
+		}
+	    }
+
+	    leaf severity {
+		type kea-logger-severity;
+		description
+		    "A Kea logger severity level.";
+	    }
+
+	    leaf debuglevel {
+		type uint16 {
+		    range "0..99";
+		}
+		description
+		    "A Kea debug level.";
+	    }
+	}
+    }
+
+    container kea-config {
+
+	container keactrl {
+	    description
+		"This section contains parameters for the keactrl
+		 configuration file.";
+
+	    leaf verbose {
+		type boolean;
+		description
+		    "If true, the Kea Control daemon will be verbose.";
+	    }
+
+	    container dhcp4 {
+		description
+		    "Parameters for the DHCP IPv4 server.";
+
+		leaf enable {
+		    type boolean;
+		    description
+			"If true, the Kea dhcp4 server is enabled.";
+		}
+	    }
+	}
+
+	container dhcp4-server {
+	    description
+		"Gather all the parts that contribute to the DHCP4 server.";
+
+	    container Dhcp4 {
+		description
+		    "Configuration for the Kea DHCP IPv4 Server";
+
+		uses kea-dhcp4-option-group;
+
+		leaf decline-probation-period {
+		    type uint32;
+		    description
+			"The decline-probation-period specifies the period
+			 in seconds in which the server will recycle
+			 declined leases.  The default period is 86400
+			 seconds (24 hours).";
+		}
+
+		leaf description {
+		    type string;
+		    description
+			"A user-supplied description of the server.";
+		}
+
+		leaf echo-client-id {
+		    type boolean;
+		    description
+			"The echo-client-id boolean value specifies that
+			 the server should or should-not reply with the
+			 client-id if the client sent it.  Setting this to
+			 false enables RFC-2131 backward compatibitlity.";
+		}
+
+		leaf match-client-id {
+		    type boolean;
+		    description
+			"If match-client-id is false, the DHCP server will
+			 match clients using the 'chaddr' field.";
+		}
+
+		leaf next-server {
+		    type inet:ipv4-address;
+		    description
+			"This next-server IPv4 address is used as the
+			siaddr field.";
+		}
+
+		leaf rebind-timer {
+		    type uint32;
+		    description
+			"The RFC-2131 T2 rebind value in seconds.";
+		}
+
+		leaf renew-timer {
+		    type uint32;
+		    description
+			"The RFC-2131 T1 renewal value in seconds.";
+		}
+
+		leaf valid-lifetime {
+		    type uint32;
+		    description
+			"The valid duration for an assigned lease in
+			seconds.";
+		}
+
+		container lease-database {
+		    leaf type {
+			type string;
+			default "memfile";
+			description
+			    "The database type used to store the lease
+			     information.  Currently only the type
+			     'memfile' is supported.";
+		    }
+
+		    leaf name {
+			type string;
+			description
+			    "Name of the DHCPv4 leases file on disk.
+			     This should be a name ending in '.csv'.
+			     FIXME: We should probably make this file be
+			     permanently stored under /var/kea/leases/ or
+			     something.";
+		    }
+
+		    leaf persist {
+			type boolean;
+			default true;
+			description
+			    "If set to TRUE, new leases and updates to
+			     existing leases are written to the leases
+			     file on disk.  If leases aren't written to
+			     disk, no assurance can be made that leases
+			     will persist across a server restart.";
+		    }
+
+		    leaf lfc-interval {
+			type uint32;
+			default 0;
+			description
+			    "The lfc-interval specifies the interval in
+			     seconds at which the server will perform a
+			     lease file cleanup to remove the unused,
+			     historical information from the lease file.
+			     The default, 0, disables the LFC operation.";
+		    }
+		}
+
+		container interfaces-config {
+		    description
+			"The interfaces-config holds configuration
+			 information about each interface used by the
+			 DHCPv4 server.";
+
+		    list interfaces {
+			key interface;
+			description
+			    "The interfaces is a list of interface names
+			     or interface names with unicast addresses on
+			     them on which the server will listen for DHCP
+			     requests.";
+
+			leaf interface {
+			    type ngcom:if-identifier-63;
+			    description
+				"The name of an interface on which the
+				 server will listen for IPv4 DHCP
+				 requests.";
+			}
+		    }
+
+		    leaf dhcp-socket-type {
+			type string;
+			default "raw";
+			description
+			    "Sockets used for listening on the set of
+			     interfaces will be opened as either'raw' IP
+			     sockets, or 'udp' sockets.";
+		    }
+		}
+
+		list subnet4 {
+		    key subnet;
+		    description
+			"An IPv4 subnet configuration within the DHCPv4
+			server.";
+
+		    leaf subnet {
+			type inet:ipv4-prefix;
+			description
+			    "The IPv4 subnet prefix.";
+		    }
+
+		    leaf id {
+			type uint32;
+			description
+			    "Manually assigned subnet id.";
+		    }
+
+		    leaf interface {
+			type ngcom:if-identifier-63;
+			mandatory true;
+			description
+			    "Interface on which subnet is located.";
+		    }
+
+		    uses kea-dhcp4-option-group;
+
+		    list pools {
+			key pool;
+			description
+			    "A list of leased address pools.  Each pool
+			     is specfied as a start and optional end IPv4
+			     addresses, or as an IPv4 address and prefix.";
+
+			leaf pool {
+			    type ipv4-prefix-or-range;
+			    description
+				"A pool is specfied as a start and
+				 optional end IPv4 addresses, or as an
+				 IPv4 address and prefix.";
+			}
+
+			leaf pool-present {
+			    type boolean;
+			    /* CONSIDER DEPRECATION */
+			}
+
+			uses kea-dhcp4-option-group;
+		    }
+
+		    list reservations {
+			key ip-address;
+			description
+			    "List of host reservations.";
+
+			leaf ip-address {
+			    type inet:ipv4-address;
+			    description
+				"The IPv4 address for the host.";
+			}
+
+			leaf hw-address {
+			    type yang:mac-address;
+			    description
+				"The host's MAC address.";
+			}
+
+			leaf hostname {
+			    type inet:domain-name;
+			    description
+				"The host name of the identified host.";
+			}
+
+			uses kea-dhcp4-option-group;
+		    }
+		}
+	    }
+
+	    container Logging {
+		description
+		    "Configuration for the Kea Logging";
+
+		uses kea-logging-group;
+	    }
+	}
+    }
+
+    container kea-state {
+
+	config "false";
+
+	container keactrl {
+	    description
+		"This section contains parameters for the keactrl
+		 configuration file.";
+
+	    leaf verbose {
+		type boolean;
+		description
+		    "If true, the Kea Control daemon will be verbose.";
+	    }
+
+	    container dhcp4 {
+		description
+		    "Parameters for the DHCP IPv4 server.";
+
+		leaf enable {
+		    type boolean;
+		    description
+		    "If true, the Kea dhcp4 server is enabled.";
+		}
+	    }
+	}
+
+	container dhcp4-server {
+	    description
+		"Gather all the parts that contribute to the DHCP4 server.";
+
+	    container Dhcp4 {
+		description
+		    "Configuration for the Kea DHCP IPv4 Server";
+
+		uses kea-dhcp4-option-group;
+
+		leaf decline-probation-period {
+		    type uint32;
+		    description
+			"The decline-probation-period specifies the period
+			 in seconds in which the server will recycle
+			 declined leases.  The default period is 86400
+			 seconds (24 hours).";
+		}
+
+		leaf description {
+		    type string;
+		    description
+			"A user-supplied description of the server.";
+		}
+
+		leaf echo-client-id {
+		    type boolean;
+		    description
+			"The echo-client-id boolean value specifies that
+			 the server should or should-not reply with the
+			 client-id if the client sent it.  Setting this to
+			 false enables RFC-2131 backward compatibitlity.";
+		}
+
+		leaf match-client-id {
+		    type boolean;
+		    description
+			"If match-client-id is false, the DHCP server will
+			 match clients using the 'chaddr' field.";
+		}
+
+		leaf next-server {
+		    type inet:ipv4-address;
+		    description
+			"This next-server IPv4 address is used as the
+			siaddr field.";
+		}
+
+		leaf rebind-timer {
+		    type uint32;
+		    description
+			"The RFC-2131 T2 rebind value in seconds.";
+		}
+
+		leaf renew-timer {
+		    type uint32;
+		    description
+			"The RFC-2131 T1 renewal value in seconds.";
+		}
+
+		leaf valid-lifetime {
+		    type uint32;
+		    description
+			"The valid duration for an assigned lease in
+			seconds.";
+		}
+
+		container lease-database {
+		    leaf type {
+			type string;
+			default "memfile";
+			description
+			    "The database type used to store the lease
+			     information.  Currently only the type
+			     'memfile' is supported.";
+		    }
+
+		    leaf name {
+			type string;
+			description
+			    "Name of the DHCPv4 leases file on disk.
+			     This should be a name ending in '.csv'.
+			     FIXME: We should probably make this file be
+			     permanently stored under /var/kea/leases/ or
+			     something.";
+		    }
+
+		    leaf persist {
+			type boolean;
+			default true;
+			description
+			    "If set to TRUE, new leases and updates to
+			     existing leases are written to the leases
+			     file on disk.  If leases aren't written to
+			     disk, no assurance can be made that leases
+			     will persist across a server restart.";
+		    }
+
+		    leaf lfc-interval {
+			type uint32;
+			default 0;
+			description
+			    "The lfc-interval specifies the interval in
+			     seconds at which the server will perform a
+			     lease file cleanup to remove the unused,
+			     historical information from the lease file.
+			     The default, 0, disables the LFC operation.";
+		    }
+		}
+
+		container interfaces-config {
+		    description
+			"The interfaces-config holds configuration
+			 information about each interface used by the
+			 DHCPv4 server.";
+
+		    list interfaces {
+			key interface;
+			description
+			    "The interfaces is a list of interface names
+			     or interface names with unicast addresses on
+			     them on which the server will listen for DHCP
+			     requests.";
+
+			leaf interface {
+			    type ngcom:if-identifier-63;
+			    description
+				"The name of aninterface on which the
+				 server will listen for IPv4 DHCP
+				 requests.";
+			}
+		    }
+
+		    leaf dhcp-socket-type {
+			type string;
+			default "raw";
+			description
+			    "Sockets used for listening on the set of
+			     interfaces will be opened as either'raw' IP
+			     sockets, or 'udp' sockets.";
+		    }
+		}
+
+		list subnet4 {
+		    key subnet;
+		    description
+			"An IPv4 subnet configuration within the DHCPv4
+			server.";
+
+		    leaf subnet {
+			type inet:ipv4-prefix;
+			description
+			    "The IPv4 subnet prefix.";
+		    }
+
+		    leaf id {
+			type uint32;
+			description
+			    "Manually assigned subnet id.";
+		    }
+
+		    leaf interface {
+			type ngcom:if-identifier-63;
+			mandatory true;
+			description
+			    "Interface on which subnet is located.";
+		    }
+
+		    uses kea-dhcp4-option-group;
+
+		    list pools {
+			key pool;
+			description
+			    "A list of leased address pools.  Each pool
+			     is specfied as a start and optional end IPv4
+			     addresses, or as an IPv4 address and prefix.";
+
+			leaf pool {
+			    type ipv4-prefix-or-range;
+			    description
+				"A pool is specfied as a start and
+				 optional end IPv4 addresses, or as an
+				 IPv4 address and prefix.";
+			}
+
+			leaf pool-present {
+			    type boolean;
+			    /* CONSIDER DEPRECATION */
+			}
+
+			uses kea-dhcp4-option-group;
+		    }
+
+		    list reservations {
+			key ip-address;
+			description
+			    "List of host reservations.";
+
+			leaf ip-address {
+			    type inet:ipv4-address;
+			    description
+				"The IPv4 address for the host.";
+			}
+
+			leaf hw-address {
+			    type yang:mac-address;
+			    description
+				"The host's MAC address.";
+			}
+
+			leaf hostname {
+			    type inet:domain-name;
+			    description
+				"The host name of the identified host.";
+			}
+		    }
+		}
+	    }
+
+	    container Logging {
+		description
+		    "Configuration for the Kea Logging";
+
+		uses kea-logging-group;
+	    }
+	}
+    }
+}

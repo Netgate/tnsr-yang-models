@@ -1,0 +1,188 @@
+module netgate-vxlan {
+
+    namespace "urn:netgate:xml:yang:netgate-vxlan";
+    prefix "ngvxlan";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data-model
+	 for VXLAN data.
+
+	 Copyright 2018-2019 Rubicon Communications, LLC. ";
+
+    revision 2019-02-15 {
+	description
+	    "TNSR Release 19.02.";
+    }
+
+    revision 2018-01-31 {
+	description
+	    "Initial revision.";
+    }
+
+    container "vxlan-config" {
+	description
+	    "Configuration for VXLAN tunnels.";
+
+	container vxlan-table {
+	    description
+		"VXLAN table.";
+
+	    list tunnel {
+		key "name";
+		description
+		    "VXLAN tunnel name.";
+
+		leaf name {
+		    type ngcom:if-identifier-63;
+		    description
+			"The VXLAN tunnel identifier.  A unique name
+			 for this VXLAN tunnel.";
+		}
+
+		leaf encap-route-table {
+		    type ngcom:rt-identifier-63;
+		    description
+			"The name of an encapsulation route table.";
+		}
+
+		leaf decap-next-node {
+		    type string;
+		    description
+			"The name of the decapsulation next graph node.";
+		}
+
+		leaf instance {
+		    type uint32;
+		    description
+			"Each VXLAN creates an interface.  The created
+			 interface will be named 'vxlan_tunnel<X>',
+			 where the <X> is the instance number.  The
+			 instance number must be unique across all
+			 VXLAN entries.";
+		}
+
+		leaf mcast-if-name {
+		    type ngcom:if-identifier-63;
+		    description
+			"The interface to use, along with a multicast
+			 destination IP address, if a multicast
+			 destination is desired.";
+		}
+
+		leaf vni {
+		    type uint32 {
+			range "0..16777215";
+		    }
+		    description
+			"VNI value, u24.";
+		}
+
+		leaf src-ip-address {
+		     type inet:ip-address-no-zone;
+		     description
+			"The source IP address.";
+		}
+
+		leaf dst-ip-address {
+		     type inet:ip-address-no-zone;
+		     description
+			"The destination IP address.";
+		}
+	    }
+	}
+    }
+
+    container "vxlan-state" {
+	description
+	    "State of the VXLAN tunnels.";
+
+	config "false";
+
+	container vxlan-table {
+	    description
+		"VXLAN table.";
+
+	    list tunnel {
+		key "name";
+		description
+		    "VXLAN tunnel name.";
+
+		leaf name {
+		    type ngcom:if-identifier-63;
+		    description
+			"The VXLAN tunnel identifier.  A unique name
+			 for this VXLAN tunnel.";
+		}
+
+		leaf decap-next-node {
+		    type string;
+		    description
+			"The name of the decapsulation next graph node.";
+		}
+
+		leaf dst-ip-address {
+		     type inet:ip-address-no-zone;
+		     description
+			"The destination IP address.";
+		}
+
+		leaf encap-route-table {
+		    type ngcom:rt-identifier-63;
+		    description
+			"The name of an encapsulation route table.";
+		}
+
+		leaf if-name {
+		    type ngcom:if-identifier-63;
+		    description
+			"The VXLAN tunnel interface name.";
+		}
+
+		leaf instance {
+		    type uint32;
+		    description
+			"Each VXLAN creates an interface.  The created
+			 interface will be named 'vxlan_tunnel<X>',
+			 where the <X> is the instance number.  The
+			 instance number must be unique across all
+			 VXLAN entries.";
+		}
+
+		leaf mcast-if-name {
+		    type ngcom:if-identifier-63;
+		    description
+			"The interface to use, along with a multicast
+			 destination IP address, if a multicast
+			 destination is desired.";
+		}
+
+		leaf src-ip-address {
+		     type inet:ip-address-no-zone;
+		     description
+			"The source IP address.";
+		}
+
+		leaf vni {
+		    type uint32 {
+			range "0..16777215";
+		    }
+		    description
+			"VNI value, u24.";
+		}
+
+	    }
+	}
+    }
+}

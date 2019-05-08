@@ -1,0 +1,93 @@
+module netgate-sysctl {
+
+    namespace "urn:netgate:xml:yang:netgate-sysctl";
+    prefix "ngsysctl";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data-model
+	 for Linux Kernel sysctl parameters.
+
+	 Copyright 2018-2019 Rubicon Communications, LLC.
+	 ";
+
+    revision 2019-02-15 {
+	description
+	    "TNSR Release 19.02.";
+    }
+
+    revision 2018-01-08 {
+	description
+	    "Initial revision.";
+    }
+
+    container sysctl-config {
+	description
+	    "Linux kernel sysctl parameters.";
+
+	container vm {
+	    description
+		"VM sysctl parameters.";
+
+	    leaf nr_hugepages {
+		type uint64;
+		description
+		    "Number of hugepages.";
+	    }
+
+	    leaf max_map_count {
+		type uint64;
+		description
+		    "Maximum map count.";
+	    }
+	}
+
+	container kernel {
+	    description
+		"Kernel sysctl parameters.";
+
+	    leaf shmmax {
+	        type uint64;
+		description
+		    "Shared memory maximum.";
+	    }
+	}
+    }
+
+    container sysctl-state {
+	description
+	    "Linux kernel sysctl parameters.";
+
+	config "false";
+
+	container vm {
+	    description
+		"VM sysctl parameters.";
+
+	    leaf nr_hugepages {
+		type uint64;
+		description
+		    "Number of hugepages.";
+	    }
+
+	    leaf max_map_count {
+		type uint64;
+		description
+		    "Maximum map count.";
+	    }
+	}
+
+	container kernel {
+	    description
+		"Kernel sysctl parameters.";
+
+	    leaf shmmax {
+	        type uint64;
+		description
+		    "Shared memory maximum.";
+	    }
+	}
+    }
+
+}

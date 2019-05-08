@@ -1,0 +1,333 @@
+module netgate-bfd {
+
+    namespace "urn:netgate:xml:yang:netgate-bfd";
+    prefix "ngbfd";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data-model
+	 for Bidirectional Forwarding Detection (BFD) data.
+
+	 Copyright 2017-2019 Rubicon Communications, LLC.
+	 ";
+
+    revision 2019-02-15 {
+	description
+	    "TNSR Release 19.02.";
+    }
+
+    revision 2017-04-17 {
+	description
+	    "Initial revision.";
+    }
+
+    typedef bfd-auth-key-type {
+	type enumeration {
+	    enum keyed-sha1 {
+		description
+		    "keyed-sha1";
+	    }
+	    enum meticulous-keyed-sha1 {
+		description
+		    "meticulous-keyed-sha1";
+	    }
+	}
+    }
+
+    typedef bfd-session-state-type {
+	type enumeration {
+	    enum admin_down {
+		description
+		    "admin_down";
+	    }
+	    enum down {
+		description
+		    "down";
+	    }
+	    enum init {
+		description
+		    "init";
+	    }
+	    enum up {
+		description
+		    "up";
+	    }
+	}
+    }
+
+    container "bfd-config" {
+	description
+	    "The bfd-config node contains BFD keys and session.";
+
+	container key-table {
+	    description
+		"This table contains BFD Conf Keys.";
+
+	    list key-entry {
+		key "conf-key-id";
+		description
+		    "BFD Conf Key Entry.";
+
+		leaf conf-key-id {
+		    type uint32;
+		    description
+			"This is the unique integer Id of the BFD key.";
+		}
+
+		leaf type {
+		    type bfd-auth-key-type;
+		    description
+			"This is one of the supported key-types 'keyed-sha1',
+			 or 'meticulous-keyed-sha1'.  The other key types
+			 from RFC-5880 are not supported.";
+		}
+
+		leaf secret {
+		    type string {
+		        pattern '(([0-9a-fA-F]{2}){1,20})';
+		    }
+		    description
+			"This is the hex encoded secret with maximum
+			length 20 bytes.";
+		}
+	    }
+	}
+
+	container bfd-table {
+	    description
+		"Host BFD interface configuration table.";
+
+	    list bfd-session {
+		key "name";
+		description
+		    "Each session has its own unique name.";
+
+		leaf name {
+		    type string;
+		    mandatory true;
+		    description
+			"This is the name of the BFD session.";
+		}
+
+		leaf interface {
+		    type string;
+		    description
+		        "The session's interface name.";
+		}
+
+		leaf local-ip-address {
+		    type inet:ip-address-no-zone;
+		    description
+			"The session's local IPv4 or IPv6 address.";
+		}
+
+		leaf peer-ip-address {
+		    type inet:ip-address-no-zone;
+		    description
+			"The session's peer IPv4 or IPv6 address.";
+		}
+
+		leaf desired-min-tx {
+		    type uint32 {
+		        range "1..4294967295";
+		    }
+		    description
+			"This is the minimum interval, in
+                         microseconds, that the local system would
+                         like to use when transmitting BFD Control
+                         packets, less any jitter applied.  The value
+                         zero is reserved.";
+		}
+
+		leaf required-min-rx {
+		    type uint32;
+		    description
+		        "This is the minimum interval, in
+                         microseconds, between received BFD Control
+                         packets that this system is capable of
+                         supporting, less any jitter applied by
+                         the sender.  If this value is zero, the
+                         transmitting system does not want the remote
+                         system to send any periodic BFD Control
+                         packets.";
+                }
+
+		leaf detect-multiplier {
+		    type uint8 {
+		        range "1..255";
+		    }
+		    description
+		        "The desired Detection Time multiplier for BFD
+                         Control packets on the local system.  This
+                         variable MUST be a nonzero integer.  This
+                         value is (roughly speaking, due to jitter)
+                         the number of packets that have to be missed
+                         in a row to declare the session to be down.";
+		}
+
+		leaf bfd-key-id {
+		    type uint32;
+		    description
+		        "The BFD key.";
+		}
+
+		leaf conf-key-id {
+		    type uint32;
+		    description
+		        "The conf authentication key id.";
+		}
+
+		leaf enable {
+		    type boolean;
+		    description
+		        "If true, BFD is enabled on this interface. ";
+		}
+
+		leaf delayed {
+		    type boolean;
+		    description
+		        "If true, authentication begins when a packet
+			 is received from the peer.";
+		}
+	    }
+	}
+    }
+
+    container "bfd-state" {
+	description
+	    "The bfd-config node contains BFD keys and session.";
+
+	config "false";
+
+	container key-table {
+	    description
+		"This table contains BFD Conf Keys.";
+
+	    list key-entry {
+		key "conf-key-id";
+		description
+		    "BFD Conf Key Entry.";
+
+		leaf conf-key-id {
+		    type uint32;
+		    description
+			"This is the unique integer Id of the BFD
+			 configuration key.";
+		}
+
+		leaf type {
+		    type bfd-auth-key-type;
+		    description
+			"This is one of the supported key-types 'keyed-sha1',
+			 or 'meticulous-keyed-sha1'.  The other key types
+			 from RFC-5880 are not supported.";
+		}
+
+		leaf use-count {
+		    type uint8;
+		    description
+			"The number of times this key is used.";
+		}
+	    }
+	}
+
+	container bfd-table {
+	    description
+		"Host BFD interface configuration table.";
+
+	    list bfd-session {
+		key "session-number";
+		description
+		    "Each session has its own unique name.";
+
+		leaf session-number {
+		    type uint32;
+		    description
+			"The session number.";
+		}
+
+		leaf local-ip-address {
+		    type inet:ip-address-no-zone;
+		    description
+			"The session's local IPv4 or IPv6 address.";
+		}
+
+		leaf peer-ip-address {
+		    type inet:ip-address-no-zone;
+		    description
+			"The session's peer IPv4 or IPv6 address.";
+		}
+
+		leaf state {
+		    type bfd-session-state-type;
+		    description
+			"The state of the session, 'admin_down', 'down',
+			 'init', or 'up'";
+		}
+
+		leaf authenticated {
+		    type boolean;
+		    description
+			"If true, authentication is in use.";
+		}
+
+		leaf desired-min-tx {
+		    type uint32 {
+		        range "1..4294967295";
+		    }
+		    description
+			"This is the minimum interval, in
+                         microseconds, that the local system would
+                         like to use when transmitting BFD Control
+                         packets, less any jitter applied.  The value
+                         zero is reserved.";
+		}
+
+		leaf required-min-rx {
+		    type uint32;
+		    description
+		        "This is the minimum interval, in
+                         microseconds, between received BFD Control
+                         packets that this system is capable of
+                         supporting, less any jitter applied by
+                         the sender.  If this value is zero, the
+                         transmitting system does not want the remote
+                         system to send any periodic BFD Control
+                         packets.";
+                }
+
+		leaf detect-multiplier {
+		    type uint8 {
+		        range "1..255";
+		    }
+		    description
+		        "The desired Detection Time multiplier for BFD
+                         Control packets on the local system.  This
+                         variable MUST be a nonzero integer.  This
+                         value is (roughly speaking, due to jitter)
+                         the number of packets that have to be missed
+                         in a row to declare the session to be down.";
+		}
+
+		leaf bfd-key-id {
+		    type uint32;
+		    description
+		        "The BFD key.";
+		}
+
+		leaf conf-key-id {
+		    type uint32;
+		    description
+		        "The conf authentication key id.";
+		}
+	    }
+	}
+    }
+}

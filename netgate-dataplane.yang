@@ -1,0 +1,282 @@
+module netgate-dataplane {
+
+    namespace "urn:netgate:xml:yang:netgate-dataplane";
+    prefix "ngdataplane";
+
+    import netgate-common {
+        prefix "ngcom";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+        "This module defines startup configuration settings for VPP.
+
+         This includes items related to how VPP itself is run, such
+	 as memory allocations, which devices to manage, which drivers
+	 to use.
+
+         This does not include dataplane configurations such as the IP
+         address assigned to an interface or IP routes. 
+         to the underlying data-model elements for the Netgate router.
+
+         Copyright 2018-2019 Rubicon Communications, LLC.
+        ";
+
+    revision 2019-02-15 {
+	description
+	    "TNSR Release 19.02.";
+    }
+
+    revision 2018-01-03 {
+        description
+            "Initial revision.";
+    }
+
+    rpc dataplane-control {
+        input {
+            leaf operation {
+                mandatory true;
+                type ngcom:service-operation;
+                description
+                    "The operation to perform";
+            }
+            leaf option {
+                type string;
+                description
+                    "Option on operation";
+            }
+        }
+        output {
+            leaf stdout {
+                type string;
+            }
+        }
+    }
+
+    typedef uio-driver-t {
+        type enumeration {
+            enum igb_uio {
+                description
+                    "UIO igb driver";
+            }
+            enum uio_pci_generic {
+                description
+                    "Generic UIO driver";
+            }
+            enum vfio-pci {
+                description
+                    "VFIO driver";
+            }
+        }
+    }
+
+    typedef vdev-type-t {
+        type enumeration {
+            enum aesni_mb {
+                description
+                    "AESNI multibuffer cryptodev";
+            }
+            enum aesni_gcm {
+                description
+                    "AESNI GCM cryptodev";
+            }
+        }
+    }
+
+    typedef device-type-t {
+        type enumeration {
+            enum network {
+                description
+                    "Network interface";
+            }
+            enum crypto {
+                description
+                    "Cryptographic accelerator";
+            }
+        }
+    }
+
+    typedef nat-mode-t {
+	type enumeration {
+	    enum simple {
+		description
+		    "simple nat";
+	    }
+	    enum deterministic {
+		description
+		    "deterministic";
+	    }
+	    enum endpoint-dependent {
+		description
+		    "endpoint dependent mode";
+	    }
+	}
+    }
+
+    container dataplane-config {
+        description
+            "dataplane startup configurations";
+
+        container cpu {
+            description
+                "cpu stanza";
+
+            leaf workers {
+                type uint16;
+                description
+                    "Number of worker threads";
+            }
+        }
+
+        container dpdk {
+            description
+                "dpdk stanza";
+
+            list dev {
+                key "id";
+                description
+                    "Configs for a NIC or crypto device";
+
+                leaf id {
+                    type string;
+                    description
+                        "The PCI ID for a device or 'default'.";
+                }
+
+                leaf device-type {
+                    type device-type-t;
+                    description
+                        "The type of the device.";
+                }
+
+                leaf present {
+                    type boolean;
+                    description
+                        "Device enabled, no attributes necessarily set";
+                }
+
+                leaf num-rx-queues {
+                    type uint16;
+                    description
+                        "Number of receive queues.";
+                }
+
+                leaf num-tx-queues {
+                    type uint16;
+                    description
+                        "Number of transmit queues.";
+                }
+
+                leaf vlan-strip-offload {
+                    type string;
+                    description
+                        "VLAN strip offload on/off";
+                }
+            }
+
+	    leaf no-tx-checksum-offload {
+		type boolean;
+		description
+		    "Disable transmit checksum offload.";
+	    }
+
+            leaf uio-driver {
+                type uio-driver-t;
+                description
+                    "Name of the uio driver";
+            }
+
+            list vdev {
+                key "vdev-type";
+                description
+                    "Configs for a software cryptodev";
+
+                leaf vdev-type {
+                    type vdev-type-t;
+                    description
+                        "The name of the vdev type.";
+                }
+            }
+        }
+
+        container ip {
+
+            description
+                "IPv4 settings";
+
+            leaf heap-size {
+                type string;
+                description
+                    "Size of heap for IPv4 FIB. Should be a number. "+
+                    "Optionally followed by a specified of k, m, or g, "+
+                    "to indicate kilo, mega, or giga bytes. ";
+            }
+        }
+
+        container ip6 {
+            description
+                "IPv6 settings";
+
+            leaf hash-buckets {
+                type uint32;
+                description
+                    "Number of hash buckets for IPv6 lookup table.";
+            }
+
+            leaf heap-size {
+                type string;
+                description
+                    "Size of heap for IPv6 FIB. Should be a number. "+
+                    "Optionally followed by a specified of k, m, or g, "+
+                    "to indicate kilo, mega, or giga bytes. ";
+            }
+        }
+
+	container nat {
+	    description
+	        "global NAT settings";
+
+	    leaf nat-mode {
+		type nat-mode-t;
+		description
+		    "One of 'simple', 'deterministic' or
+		    'endpoint-dependent'";
+	    }
+
+	    leaf dslite-ce {
+		type boolean;
+		description
+		    "dslite ce";
+	    }
+
+	    leaf max-translations-per-user {
+		type uint16 {
+		    range "1..16384";
+		}
+		description
+		    "max translations per user";
+	    }
+
+	    container mode-options {
+
+		container simple {
+
+		    leaf static-mapping-only {
+			type boolean;
+			description
+			    "static mapping only";
+		    }
+
+		    leaf out2in-dpo {
+			type boolean;
+			description
+			    "out2in dpo";
+		    }
+		}
+	    }
+	}
+    }
+}

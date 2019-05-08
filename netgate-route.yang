@@ -1,0 +1,53 @@
+module netgate-route {
+
+    namespace "urn:netgate:xml:yang:netgate-route";
+    prefix "ngrt";
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+        "Container for routing related YANG models.
+
+         Consider carefully when modifying this file. It serves primarily
+         as a point for the actual models for the routing to attach to
+         via an augment statement.
+
+         Copyright 2017-2019 Rubicon Communications, LLC. All rights reserved.";
+
+    revision 2019-02-15 {
+	description
+	    "TNSR Release 19.02.";
+    }
+
+    revision 2018-12-10 {
+        description
+            "Initial revision.";
+    }
+
+    container route-config {
+	description
+	    "Root container for routing models";
+
+	container dynamic {
+	}
+
+	container static {
+	}
+    }
+
+    container route-state {
+	description
+	    "Root container for routing models";
+
+	config "false";
+
+	container dynamic {
+	}
+
+	container static {
+	}
+    }
+}
+

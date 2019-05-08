@@ -1,0 +1,1215 @@
+module netgate-ipsec {
+
+    namespace "urn:netgate:xml:yang:netgate-ipsec";
+    prefix "ngipsec";
+
+    import ietf-inet-types {
+        prefix "inet";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+        "This YANG module provides mappings of the CLI command structure
+         to the underlying data-model elements for the Netgate router.
+
+         Copyright 2016-2019 Rubicon Communications, LLC.
+        ";
+
+    revision 2019-02-15 {
+	description
+	    "TNSR Release 19.02.";
+    }
+
+    revision 2016-12-19 {
+        description
+            "Initial revision.";
+    }
+
+    
+    typedef ng-ike-encryption-algorithm-t {
+        type enumeration {
+            enum aes128 {
+                description
+                    "128 bit AES-CBC";
+            }
+            enum aes192 {
+                description
+                    "192 bit AES-CBC";
+            }
+            enum aes256 {
+                description
+                    "256 bit AES-CBC";
+            }
+            enum aes128ctr {
+                description
+                    "128 bit AES-Counter";
+            }
+            enum aes192ctr {
+                description
+                    "192 bit AES-Counter";
+            }
+            enum aes256ctr {
+                description
+                    "256 bit AES-Counter";
+            }
+            enum aes128ccm8 {
+                description
+                    "128 bit AES-CCM with 8 byte ICV";
+            }
+            enum aes192ccm8 {
+                description
+                    "192 bit AES-CCM with 8 byte ICV";
+            }
+            enum aes256ccm8 {
+                description
+                    "256 bit AES-CCM with 8 byte ICV";
+            }
+            enum aes128ccm12 {
+                description
+                    "128 bit AES-CCM with 12 byte ICV";
+            }
+            enum aes192ccm12 {
+                description
+                    "192 bit AES-CCM with 12 byte ICV";
+            }
+            enum aes256ccm12 {
+                description
+                    "256 bit AES-CCM with 12 byte ICV";
+            }
+            enum aes128ccm16 {
+                description
+                    "128 bit AES-CCM with 16 byte ICV";
+            }
+            enum aes192ccm16 {
+                description
+                    "192 bit AES-CCM with 16 byte ICV";
+            }
+            enum aes256ccm16 {
+                description
+                    "256 bit AES-CCM with 16 byte ICV";
+            }
+            enum aes128gcm8 {
+                description
+                    "128 bit AES-GCM with 8 byte ICV";
+            }
+            enum aes192gcm8 {
+                description
+                    "192 bit AES-GCM with 8 byte ICV";
+            }
+            enum aes256gcm8 {
+                description
+                    "256 bit AES-GCM with 8 byte ICV";
+            }
+            enum aes128gcm12 {
+                description
+                    "128 bit AES-GCM with 12 byte ICV";
+            }
+            enum aes192gcm12 {
+                description
+                    "192 bit AES-GCM with 12 byte ICV";
+            }
+            enum aes256gcm12 {
+                description
+                    "256 bit AES-GCM with 12 byte ICV";
+            }
+            enum aes128gcm16 {
+                description
+                    "128 bit AES-GCM with 16 byte ICV";
+            }
+            enum aes192gcm16 {
+                description
+                    "192 bit AES-GCM with 16 byte ICV";
+            }
+            enum aes256gcm16 {
+                description
+                    "256 bit AES-GCM with 16 byte ICV";
+            }
+            enum camellia128 {
+                description
+                    "128 bit Camellia";
+            }
+            enum camellia192 {
+                description
+                    "192 bit Camellia";
+            }
+            enum camellia256 {
+                description
+                    "256 bit Camellia";
+            }
+            enum camellia128ctr {
+                description
+                    "128 bit Camellia-Counter";
+            }
+            enum camellia192ctr {
+                description
+                    "192 bit Camellia-Counter";
+            }
+            enum camellia256ctr {
+                description
+                    "256 bit Camellia-Counter";
+            }
+            enum camellia128ccm8 {
+                description
+                    "128 bit Camellia-CCM with 8 byte ICV";
+            }
+            enum camellia192ccm8 {
+                description
+                    "192 bit Camellia-CCM with 8 byte ICV";
+            }
+            enum camellia256ccm8 {
+                description
+                    "256 bit Camellia-CCM with 8 byte ICV";
+            }
+            enum camellia128ccm12 {
+                description
+                    "128 bit Camellia-CCM with 12 byte ICV";
+            }
+            enum camellia192ccm12 {
+                description
+                    "192 bit Camellia-CCM with 12 byte ICV";
+            }
+            enum camellia256ccm12 {
+                description
+                    "256 bit Camellia-CCM with 12 byte ICV";
+            }
+            enum camellia128ccm16 {
+                description
+                    "128 bit Camellia-CCM with 16 byte ICV";
+            }
+            enum camellia192ccm16 {
+                description
+                    "192 bit Camellia-CCM with 16 byte ICV";
+            }
+            enum camellia256ccm16 {
+                description
+                    "256 bit Camellia-CCM with 16 byte ICV";
+            }
+            enum chacha20poly1305 {
+                description
+                    "256 bit ChaCha20/Poly1305 with 16 byte ICV";
+            }
+        }
+        description
+            "Transform Type 1 - Internet Key Exchange (IKE) "+
+            "encryption algorithms.";
+    }
+
+    typedef dataplane-esp-encryption-algorithm-t {
+        type enumeration {
+            enum aes128gcm16 {
+                description
+                    "128 bit AES-GCM with 16 byte ICV";
+            }
+            enum aes192gcm16 {
+                description
+                    "192 bit AES-GCM with 16 byte ICV";
+            }
+            enum aes256gcm16 {
+                description
+                    "256 bit AES-GCM with 16 byte ICV";
+            }
+            enum aes128 {
+                description
+                    "128 bit AES-CBC";
+            }
+            enum aes192 {
+                description
+                    "192 bit AES-CBC";
+            }
+            enum aes256 {
+                description
+                    "256 bit AES-CBC";
+            }
+       }
+       description
+         "Subset of encryption algorithms supported for IPsec in dataplane.";
+    }
+
+    typedef ng-ike-integrity-algorithm-t {
+        type enumeration {
+            enum md5 {
+                description
+                    "MD5 96";
+            }
+            enum sha1 {
+                description
+                    "SHA1 96";
+            }
+            enum aesxcbc {
+                value 5;
+                description
+                    "AES-XCBC 96";
+            }
+            enum aescmac {
+                description
+                    "AES-CMAC 96";
+            }
+            enum sha256 {
+                description
+                    "SHA2 256 bit blocks, 128 bits output";
+            }
+            enum sha384 {
+                description
+                    "SHA2 384 bit blocks, 192 bits output";
+            }
+            enum sha512 {
+                description
+                    "SHA2 512 bit blocks, 256 bits output";
+            }
+        }
+        description
+            "Transform Type 3 - Internet Key Exchange (IKE) "+
+            "Integrity Algorithms.";
+    }
+
+    typedef dataplane-esp-integrity-algorithm-t {
+        type enumeration {
+            enum md5 {
+                description
+                    "MD5 96";
+            }
+            enum sha1 {
+                description
+                    "SHA1 96";
+            }
+            enum sha256 {
+                description
+                    "SHA2 256 bit blocks, 128 bits output";
+            }
+            enum sha384 {
+                description
+                    "SHA2 384 bit blocks, 192 bits output";
+            }
+            enum sha512 {
+                description
+                    "SHA2 512 bit blocks, 256 bits output";
+            }
+        }
+        description
+            "Subset of integrity algorithms supported for ESP in dataplane.";
+    }
+
+    typedef ng-diffie-hellman-group-t {
+        type enumeration {
+            enum modp768 {
+                description
+                     "Group 1 (768 bit modulus)";
+            }
+            enum modp1024 {
+                description
+                     "Group 2 (1024 bit modulus)";
+            }
+            enum modp1536 {
+                description
+                     "Group 5 (1536 bit modulus)";
+            }
+            enum modp2048 {
+                description
+                     "Group 14 (2048 bit modulus)";
+            }
+            enum modp3072 {
+                description
+                     "Group 15 (3072 bit modulus)";
+            }
+            enum modp4096 {
+                description
+                     "Group 16 (4096 bit modulus)";
+            }
+            enum modp6144 {
+                description
+                     "Group 17 (6144 bit modulus)";
+            }
+            enum modp8192 {
+                description
+                     "Group 18 (8192 bit modulus)";
+            }
+            enum ecp256 {
+                description
+                     "Group 19 (256 bit ECP)";
+            }
+            enum ecp384 {
+                description
+                     "Group 20 (384 bit ECP)";
+            }
+            enum ecp521 {
+                description
+                     "Group 21 (521 bit ECP)";
+            }
+            enum modp1024s160 {
+                description
+                    "Group 22 (1024 bit modulus, 160 bit POS)";
+            }
+            enum modp2048s224 {
+                description
+                    "Group 23 (2048 bit modulus, 224 bit POS)";
+            }
+            enum modp2048s256 {
+                description
+                    "Group 24 (2048 bit modulus, 256 bit POS)";
+            }
+       }
+        description
+         "Diffie-Hellman Groups (RFC 5996).";
+    }
+
+    typedef ng-pseudo-random-function-t {
+        type enumeration {
+            enum prfmd5 {
+                value 1;
+                    description
+                        "MD5 PRF";
+            }
+            enum prfsha1 {
+                value 2;
+                    description
+                        "SHA1 PRF";
+            }
+            enum prfaesxcbc {
+                value 4;
+                    description
+                        "AES128-XCBC PRF";
+            }
+            enum prfsha256 {
+                value 5;
+                    description
+                        "SHA2-256 PRF";
+            }
+            enum prfsha384 {
+                value 6;
+                    description
+                        "SHA2-384 PRF";
+            }
+            enum prfsha512 {
+                value 7;
+                    description
+                        "SHA2-512 PRF";
+            }
+            enum prfaescmac {
+                value 8;
+                    description
+                        "AES128-CMAC PRF";
+            }
+       }
+                description
+                    "Available Pseudo-Random Functions (PRF).";
+    }
+
+    typedef ike-identity-type-t {
+        type enumeration {
+            enum none {
+                description
+                    "No particular value.";
+            }
+            enum email {
+                description
+                    "Email address.";
+            }
+            enum fqdn {
+                description
+                    "Fully qualified domain name.";
+            }
+            enum dn {
+                description
+                    "X509 distinguished name.";
+            }
+            enum key-id {
+                description
+                    "Opaque key-id string.";
+            }
+            enum address {
+                description
+                    "IP address.";
+            }
+        }
+    }
+
+    typedef authentication-method-t {
+        type enumeration {
+            enum psk {
+                value 0;
+                description
+                    "Pre-Shared Key";
+            }
+            /* future support
+            enum pubkey {
+                value 1;
+                description
+                    "Certificate";
+            }
+            enum xauth {
+                value 2;
+                description
+                    "IKEv1 extended auth";
+            }
+            enum eap {
+                value 3;
+                description
+                    "IKEv2 EAP auth";
+            }
+            */
+        }
+        description
+            "Available authentication methods.";
+    }
+
+    typedef connection-type-t {
+        type enumeration {
+            enum initiator-only {
+                value 0;
+                description
+                    "Managed device will always initiate IKE SA."+
+                    " Will not respond to incoming requests from peer.";
+            }
+            enum responder-only {
+                value 1;
+                description
+                    "Managed device will never initiate IKE SA." +
+                    " Will only respond to incoming requests from peer.";
+            }
+            enum both {
+                value 2;
+                description
+                    "both: Managed device can act as initiator or responder.";
+            }
+        }
+        description
+            "Connection type for IKE session.";
+    }
+
+    typedef ike-phase1-mode-t {
+        type enumeration {
+            enum main {
+                value 0;
+                description
+                    "IKEv1 phase 1 main mode exchange.";
+            }
+            enum aggressive {
+                value 1;
+                description
+                    "IKEv1 phase 1 aggressive mode exchange.";
+            }
+        }
+    }
+
+    typedef ipsec-protocol-t {
+        type enumeration {
+            enum "esp" {
+                value 0;
+                description
+                    "ESP Encryption";
+            }
+        }
+        description
+            "IPsec security protocols.";
+    }
+
+    typedef ipsec-mode-t {
+        type enumeration {
+            enum "tunnel" {
+                description
+                    "Tunnel mode";
+            }
+            /* future support
+            enum "transport" {
+                description
+                    "Transport mode";
+            }
+            */
+        }
+        description
+            "IPsec modes";
+    }
+
+    typedef peer-position-t {
+        type enumeration {
+            enum "remote" {
+                description
+                    "The remote endpoint of an SA.";
+            }
+            enum "local" {
+                description
+                    "The local device.";
+            }
+        }
+        description
+            "Location of the peer relative to the device being configured.";
+    }
+
+    typedef ipsec-tunnel-type-t {
+        type enumeration {
+            enum "interface" {
+                description
+                    "An IPsec tunnel associated with a tunnel interface.";
+            }
+            /* policy-based added in the future
+            enum "policy" {
+                description
+                    "An IPsec tunnel associated with IPsec policies.";
+            }
+            */
+        }
+        description
+            "Whether a tunnel is interface/route-based or policy-based.";
+    }
+
+    typedef ipsec-crypto-config-type-t {
+        type enumeration {
+            enum "ike" {
+                value 0;
+                description
+                    "Tunnel crypto parameters determined dynamically with IKE";
+            }
+            enum "manual" {
+                value 1;
+                description
+                    "Tunnel crypto parameters manually set (static keys)";
+            }
+        }
+        description
+            "Tunnel crypto/keying method";
+    }
+
+    typedef ipsec-seq-number-type-t {
+        type enumeration {
+            enum "esn" {
+                value 0;
+                description
+                    "Use extended sequence numbers";
+            }
+            enum "noesn" {
+                value 1;
+                description
+                    "Use standard sequence numbers";
+            }
+        }
+        description
+            "IPsec sequence number type";
+    }
+
+    typedef key-renewal-t {
+        type enumeration {
+            enum "reauth" {
+                description
+                    "Full teardown/re-establishment of IKE/child SAs";
+            }
+            enum "rekey" {
+                description
+                    "Inline rekeying while SA stays active. Only in IKEv2";
+            }
+        }
+        description
+            "Methods for updating keys on an established IKE SA.";
+    }
+
+    typedef ipsec-peer-type-t {
+        type enumeration {
+            enum "gateway" {
+                value 0;
+                description
+                    "The peer is a gateway (site-to-site)";
+            }
+            enum "endpoint" {
+                value 1;
+                description
+                    "The peer is an endpoint (remote access)";
+            }
+        }
+        description
+            "Type of IKE/IPsec peer";
+    } 
+
+    /*
+     * END TYPES
+     */
+
+    /*
+     * BEGIN CONFIGURATION DATA
+     */
+    container ipsec-config {
+        list tunnel {
+            description
+                "IPsec tunnel configurations";
+
+            key "instance";
+            leaf instance {
+                type uint32;
+                description
+                    "Numeric identifier of tunnel";
+            }
+
+            leaf local-addr {
+                type inet:ip-address;
+                mandatory true;
+                description
+                    "IP address used locally to terminate tunnel.";
+            }
+
+            leaf remote-addr {
+                type inet:host;
+                mandatory true;
+                description
+                    "IP address or hostname of remote tunnel peer.";
+            }
+
+            leaf remote-type {
+                type ipsec-peer-type-t;
+                default "gateway";
+                description
+                    "Remote tunnel peer is a gateway or a user/device";
+            }
+
+            leaf tunnel-type {
+                type ipsec-tunnel-type-t;
+                default "interface";
+            }
+
+            container crypto {
+
+                description
+                    "Tunnel cryptographic settings";
+
+                leaf config-type {
+                    description
+                        "Crypto config/keying method";
+                         type ipsec-crypto-config-type-t;
+                         default "ike";
+                }
+
+                container ike {
+
+                    leaf version {
+                        type uint8 {
+                            range "1..2";
+                        }
+                        default 2;
+                    }
+
+                    leaf role {
+                        type connection-type-t;
+                        default both;
+                    }
+
+                    leaf lifetime {
+                        type uint32 {
+                            range "120..214783647";
+                        }
+                        default 14400;
+                        description
+                            "Lifetime of IKE SA in seconds.";
+                    }
+
+                    leaf dpd-poll-interval {
+                        type uint16;
+                        description
+                            "Seconds between DPD peer status checks.";
+                    }
+
+                    leaf key-renewal {
+                        type key-renewal-t;
+                        description
+                            "IKE SA key renewal method - rekey or reauth";
+                    }
+
+                    list proposals {
+
+                        description
+                            "Proposed parameters for IKE SA";
+
+                        key "name";
+                        leaf "name" {
+                            type string;
+                            description
+                                "IKE proposal name.";
+                        }
+
+                        leaf encryption-algorithm {
+                            type ng-ike-encryption-algorithm-t;
+                            mandatory true;
+                            description
+                                "IKE encryption algorithm.";
+                        }
+
+                        leaf integrity-algorithm {
+                            type ng-ike-integrity-algorithm-t;
+                            mandatory true;
+                            description
+                                "IKE integrity algorithm.";
+                        }
+
+                        leaf dh-group {
+                            type ng-diffie-hellman-group-t;
+                            mandatory true;
+                            description
+                                "IKE Diffie-Hellman group.";
+                        }
+
+                        leaf prf {
+                            type ng-pseudo-random-function-t;
+                            description
+                                "IKE pseudo-random function.";
+                        }
+                    }
+            
+                    list identity {
+                        description
+                            "The ID data for one peer in the SA";
+
+                        key "peer";
+                        leaf peer {
+                            type peer-position-t;
+                            description
+                                "Whether ID is for for the local or
+                                 remote peer.";
+                        }
+
+                        leaf type {
+                            type ike-identity-type-t;
+                            mandatory true;
+                            description
+                                "Type of ID used by the peer.";
+                        }
+
+                        leaf value {
+                            type string;
+                            description
+                                "The ID of the peer.";
+                        }
+                    }
+            
+                    list authentication {
+                        description
+                            "The auth data for an IKE peer";
+
+                        key "peer";
+                        leaf peer {
+                            type peer-position-t;
+                            description
+                                "Which peer this data is for.";
+                        }
+
+                        list round {
+                            description
+                                "An authentication round for one peer.";
+
+                            key "number";
+                            leaf number {
+                                type uint8 {
+                                    range "1..2";
+                                }
+                                description
+                                    "Numeric field to order multiple
+                                     authentications";
+                            }
+
+                            leaf type {
+                                type authentication-method-t;
+                                mandatory true;
+                                description
+                                    "The type of authentication used.";
+                            }
+
+                            leaf psk {
+                                    type string;
+                                    description
+                                        "Pre Shared Key";
+                            }
+                        }
+                    }
+
+                    list child-sa {
+                        description
+                            "Child (phase 2) SA.";
+                        key "name";
+                        leaf name {
+                            type string;
+                            description
+                                "Name of the child SA";
+                        }
+                        leaf lifetime {
+                            type uint32 {
+                                range "60..214783647";
+                            }
+                            default 3600;
+                            description
+                                "The length of time in seconds until "+
+                                "the child SA is no longer valid.";
+                        }
+                        leaf mode {
+                            type ipsec-mode-t;
+                            default tunnel;
+                            description
+                                "The ESP mode: tunnel or transport. The "+
+                                "only supported value currently is tunnel.";
+                        }
+                        list proposal {
+                            key "name";
+                            leaf name {
+                                type string;
+                            }
+
+                            leaf encryption-algorithm {
+                                type dataplane-esp-encryption-algorithm-t;
+                                description
+                                    "Child SA encryption algorithm";
+                            }
+
+                            leaf integrity-algorithm {
+                                type dataplane-esp-integrity-algorithm-t;
+                                description
+                                    "Child SA integrity algorithm";
+                            }
+                            leaf dh-group {
+                                type ng-diffie-hellman-group-t;
+                                description
+                                    "DH group for PFS";
+                            }
+                            leaf sequence-number {
+                                type ipsec-seq-number-type-t;
+                                description
+                                    "Extended or regular sequence numbers";
+                            }
+                        }
+                        leaf protocol {
+                            type ipsec-protocol-t;
+                            default esp;
+                            description
+                                "The IPsec protocol: ESP or AH. Currently "+
+                                "only ESP is supported.";
+                        }
+                        leaf replay-window {
+                            type uint32;
+                            description
+                                "Number of packets in replay window. "+
+                                "Currently, 64 packets is the only "+
+                                "supported value. Setting anything here "+
+                                "will enable a 64 packet replay window.";
+                        }
+                        /* traffic selectors not used for interface-based */
+                        list traffic-selector {
+                            description
+                                "Local and remote address ranges that match "+
+                                "packets that should go over a policy-based "+
+                                "IPsec tunnel.";
+                            key "number";
+                            leaf number {
+                                type uint8;
+                                description
+                                    "Numeric identifier for traffic selector.";
+                            }
+
+                            leaf local-net {
+                                type string;
+                                description
+                                    "Local network prefix.";
+                            }
+                            leaf remote-net {
+                                type string;
+                                description
+                                    "Remote network prefix.";
+                            }
+                        }
+                    }
+                }
+
+                container manual {
+                    container encryption {
+                        leaf algorithm {
+                            type dataplane-esp-encryption-algorithm-t;
+                        }
+                        leaf key {
+                            type string;
+                        }
+                    }
+                    container integrity {
+                        leaf algorithm {
+                            type dataplane-esp-integrity-algorithm-t;
+                        }
+                        leaf key {
+                            type string;
+                        }
+                    }
+                    leaf protocol {
+                        type ipsec-protocol-t;
+                        default esp;
+                    }
+
+                }
+            }
+        }
+    }
+
+    container ipsec-state {
+        config false;
+        description
+            "Operational state data for IPsec.";
+
+        list tunnel {
+            description
+                "IPsec tunnel";
+
+            key "instance";
+            leaf instance {
+                type uint32;
+                description
+                    "Tunnel number";
+            }
+
+            list "ike-sa" {
+                description
+                    "IKE SA";
+
+                key "ike-unique-id";
+                leaf ike-unique-id {
+                    type uint32;
+                    description
+                        "Unique IKE SA ID";
+                }
+
+                leaf name {
+                    type string;
+                    description
+                        "IKE SA name";
+                }
+
+                leaf local-addr {
+                    type inet:ip-address;
+                    description
+                        "Local address";
+                }
+
+                leaf remote-addr {
+                    type inet:ip-address;
+                    description
+                        "Remote address";
+                }
+
+                leaf version {
+                    type uint8 {
+                        range "1..2";
+                    }
+                    description
+                        "IKE version";
+                }
+
+                container status {
+
+                    description
+                        "SA status";
+
+                    leaf state {
+                        type string;
+                        description
+                            "Current state";
+                    }
+    
+                    leaf age {
+                        type uint32;
+                        description
+                            "Seconds up";
+                    }
+    
+                    leaf rekey-time {
+                        type uint32;
+                        description
+                            "Seconds until rekey";
+                    }
+    
+                    leaf reauth-time {
+                        type uint32;
+                        description
+                            "Seconds until reauth";
+                    }
+                }
+
+                container crypto {
+
+                    description
+                        "Cryptographic Parameters";
+
+                    leaf local-id {
+                        type string;
+                        description
+                            "Local ID";
+                    }
+
+                    leaf remote-id {
+                        type string;
+                        description
+                            "Remote ID";
+                    }
+
+                    leaf initiator {
+                        type boolean;
+                        description
+                            "Initiator";
+                    }
+
+                    leaf initiator-spi {
+                        type uint64;
+                        description
+                            "Initiator SPI";
+                    }
+
+                    leaf responder-spi {
+                        type uint64;
+                        description
+                            "Responder SPI";
+                    }
+
+                    leaf encryption-algorithm {
+                        type string;
+                        description
+                            "Crypto algorithm";
+                    }
+
+                    leaf encryption-keylen {
+                        type uint16;
+                        description
+                            "Crypto key size";
+                    }
+
+                    leaf integrity-algorithm {
+                        type string;
+                        description
+                            "Integrity algorithm";
+                    }
+
+                    leaf prf-algorithm {
+                        type string;
+                        description
+                            "PRF algorithm";
+                    }
+
+                    leaf dh-group {
+                        type string;
+                        description
+                            "Diffie-Hellman group";
+                    }
+
+                }
+
+                list child-sa {
+                    description
+                        "Child SA";
+
+                    key "name";
+
+                    leaf name {
+                        type string;
+                        description
+                            "Child SA name";
+                    }
+
+                    list sa {
+                        description
+                            "Child SA instance";
+
+                        key "unique-id";
+                        leaf unique-id {
+                            type uint32;
+                            description
+                                "Child SA ID";
+                        }
+
+                        container crypto {
+                            description
+                                "Cryptographic Parameters";
+
+                            leaf inbound-spi {
+                                type string;
+                                description
+                                    "Inbound SPI";
+                            }
+    
+                            leaf outbound-spi {
+                                type string;
+                                description
+                                    "Outbound SPI";
+                            }
+    
+                            leaf encryption-algorithm {
+                                type string;
+                                description
+                                    "Crypto algorithm";
+                            }
+    
+                            leaf encryption-keylen {
+                                type uint16;
+                                description
+                                    "Crypto key size";
+                            }
+    
+                            leaf integrity-algorithm {
+                                type string;
+                                description
+                                    "Integrity algorithm";
+                            }
+    
+                            leaf dh-group {
+                                type string;
+                                description
+                                    "PFS Diffie-Hellman group";
+                            }
+                        }
+    
+                        container status {
+                            description
+                                "SA status";
+
+                            leaf state {
+                                type string;
+                                description
+                                    "Current state";
+                            }
+    
+                            leaf bytes-received {
+                                type uint64;
+                                description
+                                    "Bytes received";
+                            }
+    
+                            leaf packets-received {
+                                type uint64;
+                                description
+                                    "Packets received";
+                            }
+    
+                            leaf bytes-sent {
+                                type uint64;
+                                description
+                                    "Bytes sent";
+                            }
+                            
+                            leaf packets-sent {
+                                type uint64;
+                                description
+                                    "Packets sent";
+                            }
+                            
+                            leaf age {
+                                type uint32;
+                                description
+                                    "Seconds up";
+                            }
+    
+                            leaf rekey-time {
+                                type uint32;
+                                description
+                                    "Seconds until rekey";
+                            }
+    
+                            leaf expire-time {
+                                type uint32;
+                                description
+                                    "Seconds until expiration";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

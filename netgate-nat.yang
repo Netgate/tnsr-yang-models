@@ -1,0 +1,793 @@
+module netgate-nat {
+
+    namespace "urn:netgate:xml:yang:netgate-nat";
+    prefix "ngnat";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data-model
+	 for Network Address Translation data.
+
+	 Copyright 2017-2019 Rubicon Communications, LLC.";
+
+    revision 2019-02-15 {
+	description
+	    "TNSR Release 19.02.";
+    }
+
+    revision 2017-01-20 {
+	description
+	    "Initial revision.";
+    }
+
+    typedef nat-side {
+	type enumeration {
+	    enum inside {
+		description
+		    "Inside";
+	    }
+	    enum outside {
+		description
+		    "Outside";
+	    }
+	    enum both {
+		description
+		    "Both";
+	    }
+	}
+    }
+
+    container "nat-config" {
+	description
+	    "Network Address Translation (NAT) data needed to support VPP.";
+
+	container global-options {
+	    description
+		"NAT global options";
+
+	    container nat44 {
+		description
+		    "NAT44 options";
+
+		leaf forwarding-enabled {
+		    description
+			"NAT44 forwarding option. Used 'true' or 'false'.";
+
+		    type boolean;
+		}
+	    }
+	}
+
+	container reassembly {
+	    description
+		"Attributes that control NAT fragmentation reassembly.";
+
+	    list address-family {
+		key "family";
+		description
+		    "Select either 'ipv4' or 'ipv6'.";
+
+		leaf family {
+		    type ngcom:ip-address-family;
+		    description
+			"One of 'ipv4' or 'ipv6'.";
+		}
+
+		leaf enable {
+		    type boolean;
+		    description
+			"If true, NAT reassembly is enabled for this
+			 address family.";
+		}
+
+		leaf timeout {
+		    type uint32;
+		    description
+			"The period of time in seconds between fragments
+			 in a NAT reassembly before the reassmbly expires.";
+		}
+
+		leaf max-concurrent-reassemblies {
+		    type uint16;
+		    description
+			"The maximum number of concurrent reassemblies.";
+		}
+
+		leaf max-fragments {
+		    type uint8;
+		    description
+			"The max number of fragments that can be reassembled.";
+		}
+	    }
+	}
+	
+	container deterministic {
+	    description
+		"Deterministic NAT information.";
+
+	    container det-mapping-table {
+		description
+		    "Deterministic NAT mapping table.";
+
+		list det-mapping-entry {
+		    key "inside-prefix outside-prefix";
+		    description
+			"Deterministic NAT Mapping Entry.";
+
+		    leaf inside-prefix {
+			type inet:ipv4-prefix;
+			mandatory true;
+			description
+			    "The inside network.";
+		    }
+
+		    leaf outside-prefix {
+			type inet:ipv4-prefix;
+			mandatory true;
+			description
+			    "The outside address range.";
+		    }
+		}
+	    }
+	}
+
+	container static {
+	    description
+		"Static mapping information.";
+
+	    container mapping-table {
+		description
+		    "NAT mapping table.";
+
+		list mapping-entry {
+		    key "transport-protocol local-address local-port"
+			+ " external-address external-port"
+			+ " route-table-name";
+		    description
+			"NAT Mapping Entry.";
+
+		    leaf present {
+			type boolean;
+		    }
+
+		    leaf transport-protocol {
+			type string;
+			mandatory true;
+			description
+			    "Upper-layer protocol associated with this mapping.
+			     Should be 'udp', 'tcp', or 'icmp'.";
+		    }
+
+		    leaf local-address {
+			type inet:ipv4-address;
+			mandatory true;
+			description
+			    "The local IPv4 address of the IPv4 packet.";
+		    }
+
+		    leaf local-port {
+			type uint16;
+			description
+			    "The local port mapped.";
+		    }
+
+		    leaf external-address {
+			type inet:ipv4-address;
+			description
+			    "The external IPv4 address of the IPv4 packet.";
+		    }
+
+		    leaf external-if-name {
+			type ngcom:if-identifier-63;
+			description
+			    "The external interface of the IPv4 packet.";
+		    }
+
+		    leaf external-port {
+			type uint16;
+			description
+			    "The external port mapped.";
+		    }
+
+		    leaf twice-nat {
+			type boolean;
+			description
+			    "NAT translate external address and port
+			     for 1:1 NAPT.";
+		    }
+
+		    leaf out-to-in-only {
+			type boolean;
+			description
+			    "Match only out-to-in direction.";
+		    }
+
+		    leaf route-table-name {
+			type ngcom:rt-identifier-63;
+			description
+			    "The name of a Route Table.";
+		    }
+		}
+	    }
+	}
+
+	container dynamic {
+	    description
+		"Dynamic mapping information.";
+
+	    container pool-table {
+		description
+		    "NAT address pool table.";
+
+		list pool-entry {
+		    key "first-address";
+		    description
+			"NAT address range entry.";
+
+		    leaf first-address {
+			type inet:ipv4-address;
+			mandatory true;
+			description
+			    "The first IPv4 address in the range.";
+		    }
+		    leaf last-address {
+			type inet:ipv4-address;
+			mandatory true;
+			description
+			    "The last IPv4 address in the range.";
+		    }
+		    leaf route-table-name {
+			type ngcom:rt-identifier-63;
+			description
+			    "The route table name.";
+		    }
+		    leaf twice-nat {
+			type boolean;
+			description
+			    "Twice-nat address range for external hosts.";
+		    }
+		}
+	    }
+
+	    container pool-if-table {
+		description
+		    "NAT interface pool table.";
+
+		list if-entry {
+		    key "if-name";
+		    description
+			"Dynamic pool interface entries.";
+
+		    leaf if-name {
+			type ngcom:if-identifier-63;
+			description
+			    "The name of an interface whose IPv4 addresses
+			     are added to the pool of addresses used in
+			     NAT mappings.";
+		    }
+		    leaf twice-nat {
+			type boolean;
+			description
+			    "Twice-nat address range for external hosts.";
+		    }
+		}
+	    }
+	}
+
+	container ipfix {
+	    description
+		"IPFIX information.";
+
+	    container logging {
+		description
+		    "IPFIX logging information.";
+
+		list logging-entry {
+		    key "domain src-port";
+		    description
+			"IPFIX logging entry.";
+
+		    leaf domain {
+			type uint32;
+			description
+			    "The logging domain id.";
+		    }
+
+		    leaf src-port {
+			type uint16;
+			description
+			    "The logging source port id.";
+		    }
+
+		    leaf enable {
+			type boolean;
+			description
+			    "If logging is enabled for this domain and port,
+			     this value will be true.";
+		    }
+		}
+	    }
+	}
+
+	container nat64 {
+	    description
+		"NAT for IPv6/IPv4.";
+	}
+
+    }
+
+    container "nat-state" {
+	description
+	    "Network Address Translation (NAT) state data.";
+
+	config "false";
+
+	container parameters {
+	    description
+		"NAT configuration parameters.";
+
+	    leaf translation-buckets {
+		type uint32;
+		description
+		    "Translation hash buckets";
+	    }
+
+	    leaf translation-memory-size {
+		type uint32;
+		description
+		    "Translation memory size.";
+	    }
+
+	    leaf deterministic {
+		type boolean;
+		description
+		    "If true, a deterministic translation is used.";
+	    }
+
+	    leaf user-buckets {
+		type uint32;
+		description
+		    "User hashs buckets.";
+	    }
+
+	    leaf user-memory-size {
+		type uint32;
+		description
+		    "User memory size.";
+	    }
+
+	    leaf max-translations-per-user {
+		type uint32;
+		description
+		    "Macimum translations per user";
+	    }
+
+	    leaf outside-route-table-name {
+		type ngcom:rt-identifier-63;
+		description
+		    "Outside route table name";
+	    }
+
+	    leaf inside-route-table-name {
+		type ngcom:rt-identifier-63;
+		description
+		    "Inside route table name";
+	    }
+
+	    leaf static-mapping-only {
+		type boolean;
+		description
+		    "Static mapping only";
+	    }
+
+	    leaf static-mapping-connection-tracking {
+		type boolean;
+		description
+		    "Static mapping connection tracking";
+	    }
+
+	    leaf forwarding-enabled {
+		type boolean;
+		description
+		    "NAT44 Forwarding enabled";
+	    }
+	}
+
+	container reassembly {
+	    description
+		"Attributes that control NAT fragmentation reassembly.";
+
+	    list address-family {
+		key "family";
+		description
+		    "Select either 'ipv4' or 'ipv6'.";
+
+		leaf family {
+		    type ngcom:ip-address-family;
+		    description
+			"One of 'ipv4' or 'ipv6'.";
+		}
+
+		leaf enable {
+		    type boolean;
+		    description
+			"If true, NAT reassembly is enabled for this
+			 address family.";
+		}
+
+		leaf timeout {
+		    type uint32;
+		    description
+			"The period of time in seconds between fragments
+			 in a NAT reassembly before the reassmbly expires.";
+		}
+
+		leaf max-concurrent-reassemblies {
+		    type uint16;
+		    description
+			"The maximum number of concurrent reassemblies.";
+		}
+
+		leaf max-fragments {
+		    type uint8;
+		    description
+			"The max number of fragments that can be reassembled.";
+		}
+	    }
+	}
+
+	container deterministic {
+	    description
+		"Deterministic NAT information.";
+
+	    container det-mapping-table {
+		description
+		    "Deterministic NAT mapping table.";
+
+		list det-mapping-entry {
+		    key "inside-prefix outside-prefix";
+		    description
+			"Deterministic NAT Mapping Entry.";
+
+		    leaf inside-prefix {
+			type inet:ipv4-prefix;
+			mandatory true;
+			description
+			    "The inside network.";
+		    }
+
+		    leaf outside-prefix {
+			type inet:ipv4-prefix;
+			mandatory true;
+			description
+			    "The outside address range.";
+		    }
+
+		    leaf sharing-ratio {
+			type uint32;
+			mandatory true;
+			description
+			    "The outside to inside address sharing ratio.";
+		    }
+
+		    leaf ports-per-host {
+			type uint16;
+			mandatory true;
+			description
+			    "The number of ports available to a host.";
+		    }
+
+		    leaf ses-num {
+			type uint32;
+			mandatory true;
+			description
+			    "The number of sessions belonging to this
+			     mapping.";
+		    }
+		}
+	    }
+	}
+
+	container static {
+	    description
+		"Static mapping information.";
+
+	    container mapping-table {
+		description
+		    "NAT mapping table.";
+
+		list mapping-entry {
+		    key "transport-protocol local-address local-port"
+			+ " external-address external-port"
+			+ " route-table-name";
+		    description
+			"NAT Mapping Entry.";
+
+		    leaf transport-protocol {
+			type string;
+			mandatory true;
+			description
+			    "Upper-layer protocol associated with this mapping.
+			     Should be 'udp', 'tcp', or 'icmp'.";
+		    }
+
+		    leaf local-address {
+			type inet:ipv4-address;
+			mandatory true;
+			description
+			    "The local IPv4 address of the IPv4 packet.";
+		    }
+
+		    leaf local-port {
+			type uint16;
+			description
+			    "The local port mapped.";
+		    }
+
+		    leaf external-address {
+			type inet:ipv4-address;
+			description
+			    "The external IPv4 address of the IPv4 packet.";
+		    }
+
+		    leaf external-if-name {
+			type ngcom:if-identifier-63;
+			description
+			    "The external interface of the IPv4 packet.";
+		    }
+
+		    leaf external-port {
+			type uint16;
+			description
+			    "The external port mapped.";
+		    }
+
+		    leaf twice-nat {
+			type boolean;
+			description
+			    "NAT translate external address and port
+			     for 1:1 NAPT.";
+		    }
+
+		    leaf out-to-in-only {
+			type boolean;
+			description
+			    "Match only out-to-in direction.";
+		    }
+
+		    leaf route-table-name {
+			type ngcom:rt-identifier-63;
+			description
+			    "The name of a Route Table.";
+		    }
+		}
+	    }
+	}
+
+	container dynamic {
+	    description
+		"Dynamic mapping information.";
+
+	    container pool-table {
+		description
+		    "NAT address pool table.";
+
+		list pool-entry {
+		    key "address";
+		    description
+			"NAT pool address.";
+
+		    leaf address {
+			type inet:ipv4-address;
+			mandatory true;
+			description
+			    "An IPv4 address in the address pool.";
+		    }
+
+		    leaf route-table-name {
+			type ngcom:rt-identifier-63;
+			description
+			    "The route table name.";
+		    }
+		    leaf twice-nat {
+			type boolean;
+			description
+			    "Twice-nat address range for external hosts.";
+		    }
+		}
+	    }
+
+	    container pool-if-table {
+		description
+		    "NAT interface pool table.";
+
+		list if-entry {
+		    key "if-name";
+		    description
+			"Dynamic pool interface entries.";
+
+		    leaf if-name {
+			type ngcom:if-identifier-63;
+			description
+			    "The name of an interface whose IPv4 addresses
+			     are added to the pool of addresses used in
+			     NAT mappings.";
+		    }
+		    leaf twice-nat {
+			type boolean;
+			description
+			    "Twice-nat address range for external hosts.";
+		    }
+		}
+	    }
+	}
+
+	container interface-sides {
+	    description
+		"Side information for each interface.";
+
+	    list interface-side {
+		key "if-name";
+		description
+		    "Side information about interfaces.";
+
+		leaf if-name {
+		    type ngcom:if-identifier-63;
+		    description
+			"The interface whose side information is given.";
+		}
+
+		leaf side {
+		    type nat-side;
+		    description
+			"One of the strings 'inside', 'outside', or 'both'.";
+		}
+	    }
+	}
+
+	container nat64 {
+	    description
+		"NAT for IPv6/IPv4.";
+	}
+    }
+
+
+    container "dslite-config" {
+	description
+	    "Dual-Stack Lite (DS-Lite) configuration.";
+
+	container dynamic {
+	    description
+		"Dynamic mapping information.";
+
+	    container pool-table {
+		description
+		    "DS-Lite address pool table.";
+
+		list pool-entry {
+		    key "first-address";
+		    description
+			"DS-Lite address range entry.";
+
+		    leaf first-address {
+			type inet:ipv4-address;
+			mandatory true;
+			description
+			    "The first IPv4 address in the range.";
+		    }
+		    leaf last-address {
+			type inet:ipv4-address;
+			mandatory true;
+			description
+			    "The last IPv4 address in the range.";
+		    }
+		}
+	    }
+	}
+
+	container aftr {
+	    description
+		"Address Family Transition Router (AFTR) configuration.";
+
+	    container endpoint {
+		description
+		    "An IPv6 tunnel endpoint.";
+
+		leaf ipv6-address {
+		    type inet:ipv6-address;
+		    description
+			"The IPv6 address of the tunnel endpoint.";
+		}
+	    }
+	}
+
+	container b4 {
+	    description
+		"Basic Bridging BroadBand (B4) configuration.";
+
+	    container endpoint {
+		description
+		    "An IPv6 tunnel endpoint.";
+
+		leaf ipv6-address {
+		    type inet:ipv6-address;
+		    description
+			"The IPv6 address of the tunnel endpoint.";
+		}
+	    }
+	}
+    }
+
+    container "dslite-state" {
+	description
+	    "Dual-Stack Lite (DS-Lite) state.";
+
+	config "false";
+
+	container dynamic {
+	    description
+		"Dynamic mapping information.";
+
+	    container pool-table {
+		description
+		    "DS-Lite address pool table.";
+
+		list pool-entry {
+		    key "address";
+		    description
+			"DS-Lite address range entry.";
+
+		    leaf address {
+			type inet:ipv4-address;
+			mandatory true;
+			description
+			    "An IPv4 address in the address pool.";
+		    }
+		}
+	    }
+	}
+
+	container aftr {
+	    description
+		"Address Family Transition Router (AFTR) configuration.";
+
+	    container endpoint {
+		description
+		    "An IPv6 tunnel endpoint.";
+
+		leaf ipv6-address {
+		    type inet:ipv6-address;
+		    description
+			"The IPv6 address of the tunnel endpoint.";
+		}
+	    }
+	}
+
+	container b4 {
+	    description
+		"Basic Bridging BroadBand (B4) configuration.";
+
+	    container endpoint {
+		description
+		    "An IPv6 tunnel endpoint.";
+
+		leaf ipv6-address {
+		    type inet:ipv6-address;
+		    description
+			"The IPv6 address of the tunnel endpoint.";
+		}
+	    }
+	}
+    }
+}

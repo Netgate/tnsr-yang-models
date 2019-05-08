@@ -1,0 +1,172 @@
+module netgate-span {
+
+    namespace "urn:netgate:xml:yang:netgate-span";
+    prefix "ngspan";
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data-model
+	 for SPAN data.
+
+	 Copyright 2018-2019 Rubicon Communications, LLC.
+	 ";
+
+    revision 2019-02-15 {
+	description
+	    "TNSR Release 19.02.";
+    }
+
+    revision 2018-03-01 {
+	description
+	    "Initial Revision";
+    }
+
+    typedef span-layer {
+	type enumeration {
+	    enum hw {
+		description
+		    "Mirror HW layer packets.";
+	    }
+	    enum l2 {
+		description
+		    "Mirror L2 layer packets.";
+	    }
+	}
+    }
+
+    typedef span-state {
+	type enumeration {
+	    enum disabled {
+		description
+		    "Disabled.";
+	    }
+	    enum rx {
+		description
+		    "Rx enabled.";
+	    }
+	    enum tx {
+		description
+		    "Tx enabled.";
+	    }
+	    enum both {
+		description
+		    "Both Rx and Tx enabled.";
+	    }
+	}
+    }
+
+    container span-config {
+	description
+	    "Switched Port Analyzer (SPAN) configuration.";
+
+	container span-table {
+	    description
+		"SPAN table.";
+
+	    list source {
+		key "if-name-src";
+		description
+		    "Mirrored source interface.";
+
+		leaf if-name-src {
+		    type ngcom:if-identifier-63;
+		    description
+			"The source interface that will be mirrored.";
+		}
+
+		container destination-table {
+		    description
+			"The set of destinations for one source.";
+
+		    list destination {
+			key "if-name-dst";
+			description
+			    "The destination interface.";
+
+			leaf if-name-dst {
+			    type ngcom:if-identifier-63;
+			    description
+				"The destination interface receiving mirrored
+				 packets.";
+			}
+
+			leaf layer {
+			    type span-layer;
+			    description
+				"One of 'hw' or 'l2' indicating at which
+				 layer packets are to be mirrored.";
+			}
+
+			leaf state {
+			    type span-state;
+			    description
+				"One of 'rx', 'tx', or 'both'.";
+			}
+		    }
+		}
+	    }
+	}
+    }
+
+    container span-state {
+	description
+	    "Switched Port Analyzer (SPAN) state.";
+
+	config "false";
+
+	container span-table {
+	    description
+		"SPAN table.";
+
+	    list source {
+		key "if-name-src";
+		description
+		    "Mirrored source interface.";
+
+		leaf if-name-src {
+		    type ngcom:if-identifier-63;
+		    description
+			"The source interface that will be mirrored.";
+		}
+
+		container destination-table {
+		    description
+			"The set of destinations for one source.";
+
+		    list destination {
+			key "if-name-dst";
+			description
+			    "The destination interface.";
+
+			leaf if-name-dst {
+			    type ngcom:if-identifier-63;
+			    description
+				"The destination interface receiving mirrored
+				 packets.";
+			}
+
+			leaf layer {
+			    type span-layer;
+			    description
+				"One of 'hw' or 'l2' indicating at which
+				 layer packets are to be mirrored.";
+			}
+
+			leaf state {
+			    type span-state;
+			    description
+				"One of 'rx', 'tx', or 'both'.";
+			}
+		    }
+		}
+	    }
+	}
+    }
+}

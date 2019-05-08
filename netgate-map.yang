@@ -1,0 +1,645 @@
+module netgate-map {
+
+    namespace "urn:netgate:xml:yang:netgate-map";
+    prefix "ngmap";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    import netgate-nat {
+	prefix "ngnat";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data-model
+	 for Mapping Address and Port (MAP) data.
+
+	 Copyright 2018-2019 Rubicon Communications, LLC.
+	 ";
+
+    revision 2019-02-15 {
+	description
+	    "TNSR Release 19.02.";
+    }
+
+    revision 2018-11-13;
+
+
+    augment "/ngnat:nat-config/ngnat:nat64" {
+
+	container map {
+	    description
+		"Configuration for MAP-E and MAP-t translations.";
+
+	    container parameters {
+		description
+		    "Global MAP parameters.";
+
+		container fragment {
+		    description
+			"Parameters that indicate how MAP framentation
+			 should happen.";
+
+		    leaf inner {
+			type boolean;
+			description
+			    "If needed, inner packets should be fragmented.";
+		    }
+
+		    leaf ignore-df {
+			type boolean;
+			description
+			    "If true, perform IPv4 fragmentation despite the
+			     value of the DF bit.";
+		    }
+		}
+
+		container icmp {
+		    description
+			"MAP ICMP parameters.";
+
+		    leaf source-address {
+			type inet:ipv4-address-no-zone;
+			description
+			    "This parameter specifies the ICMP error relay
+			     source address.";
+		    }
+		}
+
+		container icmp6 {
+		    description
+			"MAP ICMP6 parameters.";
+
+		    leaf unreachables {
+			type boolean;
+			description
+			    "If true, generate ICMP6 unreachable messages.";
+		    }
+		}
+
+		container tcp {
+		    description
+			"MAP TCP parameters.";
+
+		    leaf mss {
+			type uint16;
+			description
+			    "The Maximum Segment Size is the largest
+			     amount of data, specified in bytes, that TCP
+			     is willing to receive in a single segment.";
+		    }
+		}
+
+		container pre-resolve {
+		    description
+			"MAP pre-resolved routing parameters.";
+
+		    container ipv4 {
+			description
+			    "IPv4 pre-resolved parameters.";
+
+			leaf next-hop {
+			    type inet:ipv4-address-no-zone;
+			    description
+				"Use this IPv4 as the re-resolved next-hop.";
+			}
+		    }
+
+		    container ipv6 {
+			description
+			    "IPv6 pre-resolved parameters.";
+
+			leaf next-hop {
+			    type inet:ipv6-address-no-zone;
+			    description
+				"Use this IPv6 as the re-resolved next-hop.";
+			}
+		    }
+		}
+
+		container reassembly {
+		    description
+			"Fragmentation reassembly parameters.";
+
+		    container ipv4 {
+			description
+			    "IPv4 fragmentation reassembly parameters.";
+
+			leaf lifetime {
+			    type uint16;
+			    description
+				"This parameters specifies the valid lifetime
+				 of a reassembly in ms.";
+			}
+			leaf pool-size {
+			    type uint16;
+			    description
+				"This parameters specifies the reassembly
+				 pool size in bytes.";
+			}
+			leaf buffers {
+			    type uint32;
+			    description
+				"This parameters specifies the number of
+				 buffers in the reassembly pool.";
+			}
+			leaf ht-ratio {
+			    type decimal64 {
+				fraction-digits 2;
+			    }
+			    description
+				"This parameters specifies a multiplier ratio
+				 for the reassembly pool hash table.  It is a
+				 small-ish (< 100.00) 2-decimal fraction.";
+			}
+		    }
+
+		    container ipv6 {
+			description
+			    "IPv6 fragmentation reassembly parameters.";
+
+			leaf lifetime {
+			    type uint16;
+			    description
+				"This parameters specifies the valid lifetime
+				 of a reassembly in ms.";
+			}
+			leaf pool-size {
+			    type uint16;
+			    description
+				"This parameters specifies the reassembly
+				 pool size in bytes.";
+			}
+			leaf buffers {
+			    type uint32;
+			    description
+				"This parameters specifies the number of
+				 buffers in the reassembly pool.";
+			}
+			leaf ht-ratio {
+			    type decimal64 {
+				fraction-digits 2;
+			    }
+			    description
+				"This parameters specifies a multiplier ratio
+				 for the reassembly pool hash table.  It is a
+				 small-ish (< 100.00) 2-decimal fraction.";
+			}
+		    }
+		}
+
+		container security-check {
+		    description
+			"MAP security-check parameters.";
+
+		    leaf enable {
+			type boolean;
+			default true;
+			description
+			    "If true, perform security checks on the first
+			     inbound packet.";
+		    }
+		    leaf fragments {
+			type boolean;
+			description
+			    "If true, also perform security checks on the
+			     subsequent inbound fragments too.";
+		    }
+		}
+
+		container traffic-class {
+		    description
+			"MAP traffic-class parameters.";
+
+		    leaf copy {
+			type boolean;
+			description
+			    "If true, the traffic class/TOS field is
+			     copied from the original packet to the
+			     encapsulating header.  If false, the 'tc'
+			     value is encoded instead.";
+		    }
+		    leaf tc {
+			type uint8;
+			description
+			    "If the 'copy' field is false, encode this value
+			     as the traffic-class/TOS field in encapsulated
+			     headers.";
+		    }
+		}
+	    }
+
+	    container map-domains {
+		description
+		    "MAP table.";
+
+		list domain {
+		    key "name";
+		    description
+			"MAP domain name.";
+
+		    leaf name {
+			type ngcom:identifier-63;
+			description
+			    "The unique MAP domain name identifier.";
+		    }
+
+		    leaf description {
+			type string;
+			description
+			    "An arbitrary description of the MAP domain.";
+		    }
+
+		    leaf ip4-prefix {
+			 type inet:ipv4-prefix;
+			 description
+			    "The Rule IPv4 prefix.";
+		    }
+
+		    leaf ip6-prefix {
+			 type inet:ipv6-prefix;
+			 description
+			    "The Rule IPv6 prefix.";
+		    }
+
+		    leaf ip6-src-prefix {
+			 type inet:ipv6-prefix;
+			 description
+			    "The IPv6 Border Relay (BR) address or
+			     tunnel source.  For MAP-E, this prefix
+			     must be a full /128 address.  For MAP-T,
+			     this prefix must be /96 or /64.";
+		    }
+
+		    leaf ea-bits-length {
+			type uint8 {
+			    range "0..128";
+			}
+			description
+			    "The width of the embedded address field in bits.";
+		    }
+
+		    leaf psid-offset {
+			type uint8 {
+			    range "0..64";		/* FIXME: 16? */
+			}
+			description
+			    "The offset of the Port Set Identifier (PSID).";
+		    }
+
+		    leaf psid-length {
+			type uint8 {
+			    range "0..64";		/* FIXME: 16? */
+			}
+			description
+			    "The length of the Port Set Identifier (PSID).";
+		    }
+
+		    leaf mtu {
+			type uint16;
+			description
+			    "MTU";
+		    }
+
+		    container rules {
+			description
+			    "The set of MAP Rules.";
+
+			list rule {
+			    key "psid";
+			    description
+				"Port Set Identifier";
+
+			    leaf psid {
+				type uint32;
+				description
+				    "The PSID in the range
+				     [0 .. (1 << psid-length)).";
+			    }
+
+			    leaf ip6-destination {
+				 type inet:ipv6-address;
+				 description
+				    "The destination IPv6 address.";
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+
+    augment "/ngnat:nat-state/ngnat:nat64" {
+
+	container map {
+	    description
+		"State for MAP-E and MAP-t translations.";
+
+	    config "false";
+
+	    container parameters {
+		description
+		    "Global MAP parameters.";
+
+		container fragment {
+		    description
+			"Parameters that indicate how MAP framentation
+			 should happen.";
+
+		    leaf inner {
+			type boolean;
+			description
+			    "If needed, inner packets should be fragmented.";
+		    }
+
+		    leaf ignore-df {
+			type boolean;
+			description
+			    "If true, perform IPv4 fragmentation despite the
+			     value of the DF bit.";
+		    }
+		}
+
+		container icmp {
+		    description
+			"MAP ICMP parameters.";
+
+		    leaf source-address {
+			type inet:ipv4-address-no-zone;
+			description
+			    "This parameter specifies the ICMP error relay
+			     source address.";
+		    }
+		}
+
+		container icmp6 {
+		    description
+			"MAP ICMP6 parameters.";
+
+		    leaf unreachables {
+			type boolean;
+			description
+			    "If true, generate ICMP6 unreachable messages.";
+		    }
+		}
+
+		container tcp {
+		    description
+			"MAP TCP parameters.";
+
+		    leaf mss {
+			type uint16;
+			description
+			    "The Maximum Segment Size is the largest
+			     amount of data, specified in bytes, that TCP
+			     is willing to receive in a single segment.";
+		    }
+		}
+
+		container pre-resolve {
+		    description
+			"MAP pre-resolved routing parameters.";
+
+		    container ipv4 {
+			description
+			    "IPv4 pre-resolved parameters.";
+
+			leaf next-hop {
+			    type inet:ipv4-address-no-zone;
+			    description
+				"Use this IPv4 as the re-resolved next-hop.";
+			}
+		    }
+
+		    container ipv6 {
+			description
+			    "IPv6 pre-resolved parameters.";
+
+			leaf next-hop {
+			    type inet:ipv6-address-no-zone;
+			    description
+				"Use this IPv6 as the re-resolved next-hop.";
+			}
+		    }
+		}
+
+		container reassembly {
+		    description
+			"Fragmentation reassembly parameters.";
+
+		    container ipv4 {
+			description
+			    "IPv4 fragmentation reassembly parameters.";
+
+			leaf lifetime {
+			    type uint16;
+			    description
+				"This parameters specifies the valid lifetime
+				 of a reassembly in ms.";
+			}
+			leaf pool-size {
+			    type uint16;
+			    description
+				"This parameters specifies the reassembly
+				 pool size in bytes.";
+			}
+			leaf buffers {
+			    type uint32;
+			    description
+				"This parameters specifies the number of
+				 buffers in the reassembly pool.";
+			}
+			leaf ht-ratio {
+			    type decimal64 {
+				fraction-digits 2;
+			    }
+			    description
+				"This parameters specifies a multiplier ratio
+				 for the reassembly pool hash table.  It is a
+				 small-ish (< 100.00) 2-decimal fraction.";
+			}
+		    }
+
+		    container ipv6 {
+			description
+			    "IPv6 fragmentation reassembly parameters.";
+
+			leaf lifetime {
+			    type uint16;
+			    description
+				"This parameters specifies the valid lifetime
+				 of a reassembly in ms.";
+			}
+			leaf pool-size {
+			    type uint16;
+			    description
+				"This parameters specifies the reassembly
+				 pool size in bytes.";
+			}
+			leaf buffers {
+			    type uint32;
+			    description
+				"This parameters specifies the number of
+				 buffers in the reassembly pool.";
+			}
+			leaf ht-ratio {
+			    type decimal64 {
+				fraction-digits 2;
+			    }
+			    description
+				"This parameters specifies a multiplier ratio
+				 for the reassembly pool hash table.  It is a
+				 small-ish (< 100.00) 2-decimal fraction.";
+			}
+		    }
+		}
+
+		container security-check {
+		    description
+			"MAP security-check parameters.";
+
+		    leaf enable {
+			type boolean;
+			description
+			    "If true, perform security checks on the first
+			     inbound packet.";
+		    }
+		    leaf fragments {
+			type boolean;
+			description
+			    "If true, also perform security checks on the
+			     subsequent inbound fragments too.";
+		    }
+		}
+
+		container traffic-class {
+		    description
+			"MAP traffic-class parameters.";
+
+		    leaf copy {
+			type boolean;
+			description
+			    "If true, the traffic class/TOS field is
+			     copied from the original packet to the
+			     encapsulating header.  If false, the 'tc'
+			     value is encoded instead.";
+		    }
+		    leaf tc {
+			type uint8;
+			description
+			    "If the 'copy' field is false, encode this value
+			     as the traffic-class/TOS field in encapsulated
+			     headers.";
+		    }
+		}
+	    }
+
+	    container map-domains {
+		description
+		    "MAP table.";
+
+		list domain {
+		    key "name";
+		    description
+			"MAP domain name.";
+
+		    leaf name {
+			type ngcom:identifier-63;
+			description
+			    "The unique MAP domain name identifier.";
+		    }
+
+		    leaf description {
+			type string;
+			description
+			    "An arbitrary description of the MAP domain.";
+		    }
+
+		    leaf ip4-prefix {
+			 type inet:ipv4-prefix;
+			 description
+			    "The Rule IPv4 prefix.";
+		    }
+
+		    leaf ip6-prefix {
+			 type inet:ipv6-prefix;
+			 description
+			    "The Rule IPv6 prefix.";
+		    }
+
+		    leaf ip6-src-prefix {
+			 type inet:ipv6-prefix;
+			 description
+			    "The IPv6 Border Relay (BR) address or
+			     tunnel source.  For MAP-E, this prefix
+			     must be a full /128 address.  For MAP-T,
+			     this prefix must be /96 or /64.";
+		    }
+
+		    leaf ea-bits-length {
+			type uint8 {
+			    range "0..128";
+			}
+			description
+			    "The width of the embedded address field in bits.";
+		    }
+
+		    leaf psid-offset {
+			type uint8 {
+			    range "0..64";		/* FIXME: 16? */
+			}
+			description
+			    "The offset of the Port Set Identifier (PSID).";
+		    }
+
+		    leaf psid-length {
+			type uint8 {
+			    range "0..64";		/* FIXME: 16? */
+			}
+			description
+			    "The length of the Port Set Identifier (PSID).";
+		    }
+
+		    leaf mtu {
+			type uint16;
+			description
+			    "MTU";
+		    }
+
+		    container rules {
+			description
+			    "The set of MAP Rules.";
+
+			list rule {
+			    key "psid";
+			    description
+				"Port Set Identifier";
+
+			    leaf psid {
+				type uint32;
+				description
+				    "The PSID in the range
+				     [0 .. (1 << psid-length)).";
+			    }
+
+			    leaf ip6-destination {
+				 type inet:ipv6-address;
+				 description
+				    "The destination IPv6 address.";
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+}

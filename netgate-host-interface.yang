@@ -1,0 +1,189 @@
+module netgate-host-interface {
+
+    namespace "urn:netgate:xml:yang:netgate-hostif";
+    prefix "nghif";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import ietf-yang-types {
+	prefix "yang";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a data model for host interfaces.
+
+	 Copyright 2018-2019 Rubicon Communications, LLC.
+	";
+
+    revision 2019-02-15 {
+	description
+	    "TNSR Release 19.02.";
+    }
+
+    revision 2018-08-23 {
+	description
+	    "A day that will live in Dental Infamy.";
+    }
+
+    container host-if-config {
+	description
+	    "Interface configuration parameters.";
+
+	list interface {
+	    key "name";
+
+	    description
+		"The list of configured host interfaces on the device.";
+
+	    leaf name {
+		type string;
+		description
+		    "The name of the host interface.";
+	    }
+
+	    leaf description {
+		type string;
+		description
+		    "A textual description of the host interface.";
+	    }
+
+	    leaf enabled {
+		type boolean;
+		description
+		    "This leaf contains the configured, desired state of
+		     the interface.";
+	    }
+
+	    leaf mtu {
+		type uint16 {
+		    range "68..max";
+		}
+		units octets;
+		description
+		    "The size, in octets, of the largest packet that the
+		     interface will send and receive.";
+	    }
+
+	    container ipv4 {
+		presence
+		    "Enables IPv4'";
+		description
+		    "Parameters for the IPv4 address family.";
+
+		container address {
+		    leaf-list ip {
+			type inet:ipv4-prefix;
+			description
+			    "An IPv4 prefix on the host interface.";
+		    }
+		}
+	    }
+
+	    container ipv6 {
+		presence
+		    "Enables IPv6";
+		description
+		    "Parameters for the IPv6 address family.";
+
+		container address {
+		    leaf-list ip {
+			type inet:ipv6-prefix;
+			description
+			    "An IPv6 prefix on the host interface.";
+		    }
+		}
+	    }
+	}
+    }
+
+    container host-if-state {
+	description
+	    "Interface configuration parameters.";
+
+	config "false";
+
+	list interface {
+	    key "name";
+
+	    description
+		"The list of configured host interfaces on the device.";
+
+	    leaf name {
+		type string;
+		description
+		    "The name of the host interface.";
+	    }
+
+	    leaf description {
+		type string;
+		description
+		    "A textual description of the host interface.";
+	    }
+
+	    leaf admin-status {
+		type string;
+		description
+		    "The admin 'up' or 'down' status of the link.";
+	    }
+
+	    leaf link-status {
+		type string;
+		description
+		    "The 'up' or 'down' status of the link.";
+	    }
+
+	    leaf link-mtu {
+		type uint16 {
+		    range "68..max";
+		}
+		units octets;
+		description
+		    "The size, in octets, of the largest packet that the
+		     interface will send and receive.";
+	    }
+
+	    leaf mac-address {
+		type yang:mac-address;
+		description
+		    "The Media Access Control (MAC) address of the
+		    interface.";
+	    }
+
+	    container ipv4 {
+		presence
+		    "Enables IPv4'";
+		description
+		    "Parameters for the IPv4 address family.";
+
+		container address {
+		    leaf-list ip {
+			type inet:ipv4-prefix;
+			description
+			    "An IPv4 prefix on the host interface.";
+		    }
+		}
+	    }
+
+	    container ipv6 {
+		presence
+		    "Enables IPv6";
+		description
+		    "Parameters for the IPv6 address family.";
+
+		container address {
+		    leaf-list ip {
+			type inet:ipv6-prefix;
+			description
+			    "An IPv6 prefix on the host interface.";
+		    }
+		}
+	    }
+	}
+    }
+}

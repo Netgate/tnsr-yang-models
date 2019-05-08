@@ -1,0 +1,1016 @@
+module netgate-ntp {
+
+    namespace "urn:netgate:xml:yang:netgate-ntp";
+    prefix "ngntp";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a data-model for the NTP service.
+
+	 Copyright 2018-2019 Rubicon Communications, LLC.
+	";
+
+    revision 2019-02-15 {
+	description
+	    "TNSR Release 19.02.";
+    }
+
+    revision 2018-05-17 {
+	description
+	    "Initial Revision.";
+    }
+
+    typedef ntp-restriction-special {
+	description
+	    "Enumeration of special NTP restriction values other than
+	     network specifications.";
+
+	type enumeration {
+	    enum default {
+		description
+		    "Default restrictions";
+	    }
+	    enum source {
+		description
+		    "Source restrictions";
+	    }
+	}
+    }
+
+    typedef ntp-restriction-address {
+	description
+	    "NTP restriction address type which can be a special name
+	     or an IP prefix.";
+
+	type union {
+	    type inet:ip-prefix;
+	    type inet:domain-name;
+	    type ntp-restriction-special;
+	}
+    }
+
+    typedef ntp-interface-action {
+	description
+	    "List of special interface address class names.";
+
+	type enumeration {
+	    enum listen {
+		description
+		    "Listen for matching packets.";
+	    }
+	    enum ignore {
+		description
+		    "Prevent opening matching packets.";
+	    }
+	    enum drop {
+		description
+		    "Drop causes ntpd to open the address and drop all
+		     the received packets without examination.";
+	    }
+	}
+    }
+
+    typedef ntp-server-mode {
+	description
+	    "Enumeration of server types.";
+
+	type enumeration {
+	    enum server {
+		description
+		    "Server";
+	    }
+	    enum pool {
+		description
+		    "Pool";
+	    }
+	}
+    }
+
+    typedef ntp-log-action {
+	type enumeration {
+	    enum set {
+		description
+		    "Set";
+	    }
+	    enum add {
+		description
+		    "Add";
+	    }
+	    enum delete {
+		description
+		    "Delete";
+	    }
+	}
+    }
+
+    typedef ntp-log-class {
+	type enumeration {
+	    enum all {
+		description
+		    "All";
+	    }
+	    enum clock {
+		description
+		    "Clock";
+	    }
+	    enum peer {
+		description
+		    "Peer";
+	    }
+	    enum sys {
+		description
+		    "Sys";
+	    }
+	    enum sync {
+		description
+		    "Sync";
+	    }
+	}
+    }
+
+    typedef ntp-log-type {
+	type enumeration {
+	    enum all {
+		description
+		    "All";
+	    }
+	    enum info {
+		description
+		    "Info";
+	    }
+	    enum events {
+		description
+		    "events";
+	    }
+	    enum statistics {
+		description
+		    "Statistics";
+	    }
+	    enum status {
+		description
+		    "Status";
+	    }
+	}
+    }
+
+    typedef ntp-operation {
+	type enumeration {
+	    enum start {
+		description
+		    "Start daemon";
+	    }
+	    enum stop {
+		description
+		    "Stop daemon";
+	    }
+	    enum restart {
+		description
+		    "Restart daemon";
+	    }
+	    enum status {
+		description
+		    "Daemon status";
+	    }
+	}
+    }
+
+    typedef ntp-selection {
+	type enumeration {
+	    enum "rejected" {
+		description
+		    "rejected";
+	    }
+
+	    enum "falsetick" {
+		description
+		    "discarded by intersection algorithm";
+	    }
+
+	    enum "excess" {
+		description
+		    "discarded by table overflow";
+	    }
+
+	    enum "outlier" {
+		description
+		    "discarded by cluster algorithm";
+	    }
+
+	    enum "candidate" {
+		description
+		    "included by the combine algorithm";
+	    }
+
+	    enum "backup" {
+		description
+		    "backup source";
+	    }
+
+	    enum "sys.peer" {
+		description
+		    "synchronization source";
+	    }
+
+	    enum "pps.peer" {
+		description
+		    "Pulse per second peer";
+	    }
+	}
+    }
+
+
+    typedef ntp-event {
+	type enumeration {
+	    enum "unspecified" {
+		description
+		    "unspecified";
+	    }
+
+	    enum "mobilize" {
+		description
+		    "association mobilized";
+	    }
+
+	    enum "demobilized" {
+		description
+		    "association demobilized";
+	    }
+
+	    enum "unreachable" {
+		description
+		    "peer unreachable (peer.reach was nonzero now zero)";
+	    }
+
+	    enum "rechable" {
+		description
+		    "peer reachable (peer.reach was zero now nonzero)";
+	    }
+
+	    enum "restart" {
+		description
+		    "association restarted or timed out";
+	    }
+
+	    enum "no_reply" {
+		description
+		    "no reply (only used with one-shot ntpd -q)";
+	    }
+
+	    enum "rate_exceeded" {
+		description
+		    "peer rate limit exceeded (kiss code RATE received)";
+	    }
+
+	    enum "access_denied" {
+		description
+		    "access denied (kiss code DENY received)";
+	    }
+
+	    enum "leap_armed" {
+		description
+		    "leap second insertion/deletion at month's end
+		     armed by peer vote";
+	    }
+
+	    enum "sys_peer" {
+		description
+		    "became system peer (sys.peer)";
+	    }
+
+	    enum "clock_event" {
+		description
+		    "reference clock event (see clock status word)";
+	    }
+
+	    enum "bad_auth" {
+		description
+		    "authentication failed";
+	    }
+
+	    enum "popcorn" {
+		description
+		    "popcorn spike suppressed by peer clock filter register";
+	    }
+
+	    enum "interleave_mode" {
+		description
+		    "entering interleaved mode";
+	    }
+
+	    enum "interleave_error" {
+		description
+		    "recovered from interleave error";
+	    }
+	}
+    }
+
+
+    container ntp-config {
+	description
+	    "Network Time Protocol daemon configuration for time
+	     keeping and services.";
+
+	container parameters {
+	    description
+		"A collection of various NTP daemon parameters.";
+
+	    leaf enable {
+		type boolean;
+		description
+		    "If true, the NTP daemon is enabled.";
+	    }
+
+	    leaf driftfile {
+		type string;
+		description
+		    "Full path name of the drift file.  If not specified,
+		     /var/lib/ntp/drift.";
+	    }
+
+	    leaf statsdir {
+		type string;
+		description
+		    "Full path name of the statistics directory.  If not
+		     specified, /var/log/ntpstats";
+	    }
+
+	    container disabled-flags {
+		description
+		    "A set of flags explicitly disabled.";
+
+		leaf monitor {
+		    type boolean;
+		    description
+			"If true, disable monitor.";
+		}
+	    }
+
+	    container enabled-flags {
+		description
+		    "A set of flags explicitly enabled.";
+
+		leaf monitor {
+		    type boolean;
+		    description
+			"If true, enable monitor.";
+		}
+	    }
+	}
+
+	container interfaces {
+	    description
+		"Interface binding specifications.";
+
+	    list interface {
+		key "sequence";
+
+		leaf sequence {
+		    type uint32;
+		    description
+			"The sequence numbers provide an ordering for the
+			 list of interface commands.";
+		}
+
+		leaf action {
+		    type ntp-interface-action;
+		    description
+			"One of the action keywords listen, ignore
+			 or drop to perform on a single matching
+			 keyword, interface, or IP prefix.";
+		}
+
+		leaf match-all {
+		    type boolean;
+		    description
+			"Match all interfaces.";
+		}
+
+		leaf match-interface {
+		    type string;
+		    description
+			"Match an interface name.";
+		}
+
+		leaf match-ip-prefix {
+		    type inet:ip-prefix;
+		    description
+			"Match an IP prefix.";
+		}
+	    }
+	}
+
+	container logconfigs {
+	    description
+		"An ordered sequence of NTPD logconfig settings.";
+
+	    list logconfig {
+		key "sequence";
+
+		leaf sequence {
+		    type uint32;
+		    description
+			"Logconfig options must be ordered.";
+		}
+
+		leaf action {
+		    type ntp-log-action;
+		    description
+			"One of the actions 'set', 'add', or 'delete'.";
+		}
+
+		leaf class {
+		    type ntp-log-class;
+		    description
+			"One of the logging classes 'clock', 'peer',
+			 'sys', 'sync', or 'all'.";
+		}
+
+		leaf type {
+		    type ntp-log-type;
+		    description
+			"One of the logging types 'info', 'events',
+			 'statistics', 'status', or 'all'.";
+		}
+	    }
+	}
+
+	container restrictions {
+	    list restriction {
+		key "address";
+
+		leaf address {
+		    type ntp-restriction-address;
+		    mandatory true;
+		    description
+			"Network to restrict.";
+		}
+
+		leaf present {
+		    type boolean;
+		    /* CONSIDER DEPRECATION */
+		}
+
+		leaf address-family {
+		    type ngcom:ip-address-family;
+		    description
+			"IP address family of this restriction.";
+		}
+
+		leaf kod {
+		    type boolean;
+		    description
+			"If true, enable Kiss o' Death packets.";
+		}
+
+		leaf limited {
+		    type boolean;
+		    description
+			"If true, enable Kiss o' Death packets.";
+		}
+
+		leaf nomodify {
+		    type boolean;
+		    description
+			"If true, deny run-time config by ntpq and ntpdc.";
+		}
+
+		leaf noquery {
+		    type boolean;
+		    description
+			"If true, disable ntpq/ntpdc queries.";
+		}
+
+		leaf noserve {
+		    type boolean;
+		    description
+			"If true, disable service/everything except
+			 ntpq and ntpdc queries.";
+		}
+
+		leaf nopeer {
+		    type boolean;
+		    description
+			"If true, deny peer association packets.";
+		}
+
+		leaf notrap {
+		    type boolean;
+		    description
+			"If true, deny mode 6 control message trap
+			 service.";
+		}
+	    }
+	}
+
+	container servers {
+	    list server {
+		key "host";
+
+		leaf host {
+		    type inet:host;
+		    mandatory true;
+		    description
+			"NTP server IP address or FQDN.";
+		}
+
+		leaf iburst {
+		    type boolean;
+		    description
+			"If true, send a burst of attempts to an
+			 unreachable server to speed up acquisition of
+			 time synchronization.";
+		}
+
+		leaf maxpoll {
+		    type uint8 {
+			range "7..17";
+		    }
+		    description    
+			"Maximum poll interval expressed as a power of
+			 2 in seconds.";
+		}
+
+		leaf noselect {
+		    type boolean;
+		    description
+			"If true, disable time sync for this server,
+			 track stats only.";
+		}
+
+		leaf operational-mode {
+		    type ntp-server-mode;
+		    mandatory true;
+		    description
+			"One of 'server', or 'pool'.";
+		}
+
+		leaf prefer {
+		    type boolean;
+		    description
+			"If true, favor this server more than others.";
+		}
+	    }
+	}
+
+	container tinker {
+	    description
+		"Tinker options.";
+
+	    leaf panic {
+		type uint32;
+		description
+		    "Panic threshold in seconds.  0 disables.  Default 1000.";
+	    }
+	}
+
+	container tos {
+	    description
+		"TOS options.";
+
+	    leaf orphan {
+		type uint8 {
+		    range "1..16";
+		}
+		description
+		    "Orphan stratum in the range 1 through 16.";
+	    }
+	}
+    }
+
+    container ntp-state {
+	description
+	    "Network Time Protocol daemon configuration for time
+	     keeping and services.";
+
+	config false;
+
+	container parameters {
+	    description
+		"A collection of various NTP daemon parameters.";
+
+	    leaf enable {
+		type boolean;
+		description
+		    "If true, the NTP daemon is enabled.";
+	    }
+
+	    leaf driftfile {
+		type string;
+		description
+		    "Full path name of the drift file.  If not specified,
+		     /var/lib/ntp/drift.";
+	    }
+
+	    leaf statsdir {
+		type string;
+		description
+		    "Full path name of the statistics directory.  If not
+		     specified, /var/log/ntpstats";
+	    }
+
+	    container disabled-flags {
+		description
+		    "A set of flags explicitly disabled.";
+
+		leaf monitor {
+		    type boolean;
+		    description
+			"If true, disable monitor.";
+		}
+	    }
+
+	    container enabled-flags {
+		description
+		    "A set of flags explicitly enabled.";
+
+		leaf monitor {
+		    type boolean;
+		    description
+			"If true, enable monitor.";
+		}
+	    }
+	}
+
+	container interfaces {
+	    description
+		"Interface binding specifications.";
+
+	    list interface {
+		key "sequence";
+
+		leaf sequence {
+		    type uint32;
+		    description
+			"The sequence numbers provide an ordering for the
+			 list of interface commands.";
+		}
+
+		leaf action {
+		    type ntp-interface-action;
+		    description
+			"Action to perform on a single matching
+			 keyword, interface, or IP prefix.";
+		}
+
+		leaf match-all {
+		    type boolean;
+		    description
+			"Match all interfaces.";
+		}
+
+		leaf match-interface {
+		    type string;
+		    description
+			"Match an interface name.";
+		}
+
+		leaf match-ip-prefix {
+		    type inet:ip-prefix;
+		    description
+			"Match an IP prefix.";
+		}
+	    }
+	}
+
+	container logconfigs {
+	    description
+		"An ordered sequence of NTPD logconfig settings.";
+
+	    list logconfig {
+		key "sequence";
+
+		leaf sequence {
+		    type uint32;
+		    description
+			"Logconfig options must be ordered.";
+		}
+
+		leaf action {
+		    type ntp-log-action;
+		    description
+			"One of the actions 'set', 'add', or 'delete'.";
+		}
+
+		leaf class {
+		    type ntp-log-class;
+		    description
+			"One of the logging classes 'clock', 'peer',
+			 'sys', 'sync', or 'all'.";
+		}
+
+		leaf type {
+		    type ntp-log-type;
+		    description
+			"One of the logging types 'info', 'events',
+			 'statistics', 'status', or 'all'.";
+		}
+	    }
+	}
+
+	container restrictions {
+	    list restriction {
+		key "address";
+
+		leaf address {
+		    type ntp-restriction-address;
+		    mandatory true;
+		    description
+			"Network to restrict.";
+		}
+
+		leaf present {
+		    type boolean;
+		    /* CONSIDER DEPRECATION */
+		}
+
+		leaf address-family {
+		    type ngcom:ip-address-family;
+		    description
+			"IP address family of this restriction.";
+		}
+
+		leaf kod {
+		    type boolean;
+		    description
+			"If true, enable Kiss o' Death packets.";
+		}
+
+		leaf limited {
+		    type boolean;
+		    description
+			"If true, enable Kiss o' Death packets.";
+		}
+
+		leaf nomodify {
+		    type boolean;
+		    description
+			"If true, deny run-time config by ntpq and ntpdc.";
+		}
+
+		leaf noquery {
+		    type boolean;
+		    description
+			"If true, disable ntpq/ntpdc queries.";
+		}
+
+		leaf noserve {
+		    type boolean;
+		    description
+			"If true, disable service/everything except
+			 ntpq and ntpdc queries.";
+		}
+
+		leaf nopeer {
+		    type boolean;
+		    description
+			"If true, deny peer association packets.";
+		}
+
+		leaf notrap {
+		    type boolean;
+		    description
+			"If true, deny mode 6 control message trap
+			 service.";
+		}
+	    }
+	}
+
+	container servers {
+	    list server {
+		key "host";
+
+		leaf host {
+		    type inet:host;
+		    mandatory true;
+		    description
+			"NTP server IP address or FQDN.";
+		}
+
+		leaf iburst {
+		    type boolean;
+		    description
+			"If true, send a burst of attempts to an
+			 unreachable server to speed up acquisition of
+			 time synchronization.";
+		}
+
+		leaf maxpoll {
+		    type uint8 {
+			range "7 .. 17";
+		    }
+		    description    
+			"Maximum poll interval expressed as a power of
+			 2 in seconds.";
+		}
+
+		leaf noselect {
+		    type boolean;
+		    description
+			"If true, disable time sync for this server,
+			 track stats only.";
+		}
+
+		leaf operational-mode {
+		    type ntp-server-mode;
+		    mandatory true;
+		    description
+			"One of 'server', or 'pool'.";
+		}
+
+		leaf prefer {
+		    type boolean;
+		    description
+			"If true, favor this server more than others.";
+		}
+	    }
+	}
+
+	container tinker {
+	    description
+		"Tinker options.";
+
+	    leaf panic {
+		type uint32;
+		description
+		    "Panic threshold in seconds.  0 disables.  Default 1000.";
+	    }
+	}
+
+	container tos {
+	    description
+		"TOS options.";
+
+	    leaf orphan {
+		type uint8 {
+		    range "1..16";
+		}
+		description
+		    "Orphan stratum in the range 1 through 16.";
+	    }
+	}
+
+	container peers {
+	    description
+		"Information about the server's peer associations.";
+
+	    list peer {
+		key "id";
+
+		leaf id {
+		    type uint16;
+		    description
+			"The peer's association ID.";
+		}
+
+		container status {
+		    description
+			"The decoded peer status.";
+
+		    leaf raw {
+			type uint16;
+			description
+			    "The association's rw hex status value.";
+		    }
+
+		    leaf persistent {
+			type boolean;
+			description
+			    "If true, the association condition is
+			     persistent.";
+		    }
+
+		    leaf auth-enable {
+			type boolean;
+			description
+			    "If true, authentication is enabled for
+			     this association.";
+		    }
+
+		    leaf authentic {
+			type boolean;
+			description
+			    "If true, the authetication is considered
+			     okay for this association.";
+		    }
+
+		    leaf reachable {
+			type boolean;
+			description
+			    "If true, the association is reachable.";
+		    }
+
+		    leaf broadcast {
+			type boolean;
+			description
+			    "If true, this is a broadcast association.";
+		    }
+
+		    leaf selection {
+			type ntp-selection;
+			description
+			    "One of the NTP peer selections rejected,
+			     falsetick, excess, outlier, candidate,
+			     backup, sys.peer, or pps.peer.";
+		    }
+
+		    leaf last-event {
+			type ntp-event;
+			description
+			    "The most recent event received from this
+			     peer.";
+		    }
+
+		    leaf event-count {
+			type uint8 {
+			    range "0..15";
+			}
+			description
+			    "This is the number of peer exception
+			     events that occurred since the last time
+			     the peer event code changed.  Upon
+			     reaching 15, subsequent events with the
+			     same code are not counted.";
+		    }
+		}
+
+		container variables {
+		    description
+			"The peer variables of an association.";
+
+		    list variable {
+			key "name";
+
+			leaf name {
+			    type string;
+			    description
+				"The name of the variable.  These are
+				 named and described in the NTP RFCs.";
+			}
+
+			leaf raw {
+			    type string;
+			    description
+				"The raw value returned from the peer.";
+			}
+
+			leaf decoded {
+			    type string;
+			    description
+				"If needed, the raw value might be decoded
+				 into something more legible.";
+			}
+		    }	
+		}
+	    }
+	}
+
+    }
+
+
+    rpc ntp-control {
+	input {
+	    leaf operation {
+		type ntp-operation;
+		description
+		    "One of the strings 'start', 'stop', 'restart',
+		     or 'status'.";
+	    }
+	}
+	output {
+	    leaf stdout {
+		type string;
+	    }
+	}
+    }
+
+    rpc ntp-config-operation {
+	input {
+	    leaf request {
+		type string;
+		description
+		    "The operation, 'get-config-file'.";
+	    }
+	    leaf param {
+		type string;
+		description
+		    "An optional parameter.";
+	    }
+	}
+	output {
+	    leaf stdout {
+		type string;
+	    }
+	}
+    }
+}

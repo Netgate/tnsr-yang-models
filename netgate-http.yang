@@ -1,0 +1,175 @@
+module netgate-http {
+
+    namespace "urn:ietf:params:xml:ns:yang:netgate-http";
+    prefix "nghttp";
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a data-model for the HTTP daemon.
+
+	 Copyright 2018-2019 Rubicon Communications, LLC.
+	";
+
+    revision 2019-02-15 {
+	description
+	    "TNSR Release 19.02.";
+    }
+
+    revision 2018-07-04 {
+	description
+	    "Initial revision.";
+    }
+
+    typedef http-auth-type {
+	description
+	    "Enumeration of HTTP authorization types.";
+
+	type enumeration {
+	    enum client-certificate {
+		description
+		    "TLS client certificate";
+	    }
+	    enum password {
+		description
+		    "PAM password auth";
+	    }
+	    enum none {
+		description
+		    "No authentication, no security.";
+	    }
+	}
+    }
+
+    container http-config {
+	description
+	    "HTTP daemon configuration.";
+
+	container restconf {
+	    description
+		"RESTconf configuration values.";
+
+	    leaf enable {
+		type boolean;
+		description
+		    "If true, RESTconf is enabled.";
+	    }
+	}
+
+	container authentication {
+	    description
+		"Authentication configuration.";
+
+	    leaf auth-type {
+		type http-auth-type;
+		description
+		    "The authentication type.";
+	    }
+
+	    leaf client-cert-ca {
+		type string;
+		description
+		    "Client certificate.";
+	    }
+	}
+
+	container encryption {
+	    description
+		"Encryption.";
+
+	    leaf server-certificate {
+		type string;
+		description
+		    "Server certificate.";
+	    }
+	}
+    }
+
+	container http-state {
+	description
+	    "HTTP daemon configuration.";
+
+	config "false";
+
+	container restconf {
+	    description
+		"RESTconf configuration values.";
+
+	    leaf enable {
+		type boolean;
+		description
+		    "If true, RESTconf is enabled.";
+	    }
+	}
+
+	container authentication {
+	    description
+		"Authentication configuration.";
+
+	    leaf auth-type {
+		type http-auth-type;
+		description
+		    "The authentication type.";
+	    }
+
+	    leaf client-cert-ca {
+		type string;
+		description
+		    "Client certificate.";
+	    }
+	}
+
+	container encryption {
+	    description
+		"Encryption.";
+
+	    leaf server-certificate {
+		type string;
+		description
+		    "Server certificate.";
+	    }
+	}
+    }
+
+    rpc http-control {
+	input {
+	    leaf operation {
+		type ngcom:service-operation;
+		description
+		    "One of the strings 'start', 'stop', 'restart',
+		     or 'status'.";
+	    }
+	}
+	output {
+	    leaf stdout {
+		type string;
+	    }
+	}
+    }
+
+    rpc http-config-operation {
+	input {
+	    leaf request {
+		type string;
+		description
+		    "The operation, 'get-config-file'.";
+	    }
+	    leaf param {
+		type string;
+		description
+		    "An optional parameter.";
+	    }
+	}
+	output {
+	    leaf stdout {
+		type string;
+	    }
+	}
+    }
+}

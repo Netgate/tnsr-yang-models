@@ -1,0 +1,186 @@
+module netgate-gre {
+
+    namespace "urn:netgate:xml:yang:netgate-gre";
+    prefix "nggre";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data-model
+	 for GRE data.
+
+	 Copyright 2018-2019 Rubicon Communications, LLC.
+	 ";
+
+    revision 2019-02-15 {
+	description
+	    "TNSR Release 19.02.";
+    }
+
+    revision 2018-02-14 {
+	description
+	    "Initial revision.";
+    }
+
+    typedef gre-tunnel-type{
+	type enumeration {
+	    enum l3 {
+		description
+		    "L3";
+	    }
+	    enum teb {
+		description
+		    "TEB";
+	    }
+	    enum erspan {
+		description
+		    "ERSPN";
+	    }
+	}
+    }
+
+    container "gre-config" {
+	description
+	    "Configuration for GRE tunnels.";
+
+	container gre-table {
+	    description
+		"GRE table.";
+
+	    list tunnel {
+		key "name";
+		description
+		    "GRE tunnel name.";
+
+		leaf name {
+		    type string;
+		    description
+			"The GRE tunnel identifier.  A unique name
+			 for this GRE tunnel.";
+		}
+
+		leaf dst-ip-address {
+		     type inet:ip-address-no-zone;
+		     description
+			"The destination IP address.";
+		}
+
+		leaf erspan-session-id {
+		    type uint32 {
+			range "0..1023";
+		    }
+		    description
+			"VNI value, u24.";
+		}
+
+		leaf instance {
+		    type uint32;
+		    description
+			"Each GRE tunnel creates an interface.  The
+			 created interface will be named 'gre<X>',
+			 where the <X> is the instance number.
+			 The instance number must be unique across
+			 all GRE entries.";
+
+		}
+
+		leaf encap-route-table {
+		    type ngcom:rt-identifier-63;
+		    description
+			"Encapsulation route table name.";
+		}
+
+		leaf src-ip-address {
+		     type inet:ip-address-no-zone;
+		     description
+			"The source IP address.";
+		}
+
+		leaf tunnel-type {
+		    type gre-tunnel-type;
+		    description
+			"One of the strings 'l3', 'teb', or 'erspan'.";
+		}
+	    }
+	}
+    }
+
+    container "gre-state" {
+	description
+	    "State of the GRE tunnels.";
+
+	config "false";
+
+	container gre-table {
+	    description
+		"GRE table.";
+
+	    list tunnel {
+		key "name";
+		description
+		    "GRE tunnel name.";
+
+		leaf name {
+		    type string;
+		    description
+			"The GRE tunnel identifier.  A unique name
+			 for this GRE tunnel.";
+		}
+
+		leaf dst-ip-address {
+		     type inet:ip-address-no-zone;
+		     description
+			"The destination IP address.";
+		}
+
+		leaf erspan-session-id {
+		    type uint32 {
+			range "0..1023";
+		    }
+		    description
+			"VNI value, u24.";
+		}
+
+		leaf instance {
+		    type uint32;
+		    description
+			"Each GRE tunnel creates an interface.  The
+			 created interface will be named 'gre<X>',
+			 where the <X> is the instance number.
+			 The instance number must be unique across
+			 all GRE entries.";
+
+		}
+
+		leaf encap-route-table {
+		    type ngcom:rt-identifier-63;
+		    description
+			"Encapsulation route table name.";
+		}
+
+		leaf src-ip-address {
+		     type inet:ip-address-no-zone;
+		     description
+			"The source IP address.";
+		}
+
+		leaf tunnel-type {
+		    type gre-tunnel-type;
+		    description
+			"One of the strings 'l3', 'teb', or 'erspan'.";
+		}
+	    }
+	}
+    }
+
+}

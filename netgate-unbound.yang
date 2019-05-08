@@ -1,0 +1,1077 @@
+module netgate-unbound {
+
+    namespace "urn:netgate:xml:yang:netgate-unbound";
+    prefix "ngunb";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a data-model for the Unbound service.
+
+	 Copyright 2018-2019 Rubicon Communications, LLC.
+	";
+
+    revision 2019-02-15 {
+	description
+	    "TNSR Release 19.02.";
+    }
+
+    revision 2018-06-26 {
+	description
+	    "Initial Revision.";
+    }
+
+    typedef unbound-operation {
+	type enumeration {
+	    enum start {
+		description
+		    "Start daemon";
+	    }
+	    enum stop {
+		description
+		    "Stop daemon";
+	    }
+	    enum restart {
+		description
+		    "Restart daemon";
+	    }
+	    enum reload {
+		description
+		    "Reload config file";
+	    }
+	    enum status {
+		description
+		    "Daemon status";
+	    }
+	}
+    }
+
+    typedef unbound-access-control {
+	type enumeration {
+	    enum allow {
+		description
+		    "Allow access for a client.";
+	    }
+	    enum allow_setrd {
+		description
+		    "Allow access for a client and ignore the RD bit.";
+	    }
+	    enum allow_snoop {
+		description
+		    "Allow both recursive and non recursive access.";
+	    }
+	    enum deny {
+		description
+		    "Stop queries.";
+	    }
+	    enum deny_non_local {
+		description
+		    "Allow queries for the authoritative local-data only.
+		     Disallowed queries are dropped.";
+	    }
+	    enum refuse {
+		description
+		    "Stop queries, sends a DNS rcode REFUSED error.";
+	    }
+	    enum refuse_non_local {
+		description
+		    "Allow queries for the authoritative local-data only.
+		     Disallowed queries garner the REFUSED error code.";
+	    }
+	}
+    }
+
+    typedef unbound-zone-type {
+	type enumeration {
+	    enum deny {
+		description
+		    "Serve local data, else drop queries.";
+	    }
+
+	    enum refuse {
+		description
+		    "Serve local data, else reply with error.";
+	    }
+
+	    enum static {
+		description
+		    "Serve local data, else nxdomain or nodata answer.";
+	    }
+
+	    enum transparent {
+		description
+		    "Gives local data, and resolves normally for other names.";
+	    }
+
+	    enum typetransparent {
+		description
+		    "Resolves normally for other types and other names.";
+	    }
+
+	    enum redirect {
+		description
+		    "Serves zone data for any subdomain in the zone.";
+	    }
+
+	    enum inform {
+		description
+		    "Like transparent, but logs client IP address.";
+	    }
+
+	    enum inform_deny {
+		description
+		    "Drops queries and logs client IP address.";
+	    }
+
+	    enum no_default {
+		description
+		    "Normally resolve AS112 zones.";
+	    }
+	}
+    }
+
+    container unbound-config {
+	description
+	    "Configuration for the Unbound DNS name resolver daemon.";
+
+	container parameters {
+	    description
+		"A collection of various Unbound parameters.";
+
+	    leaf enable {
+		type boolean;
+		description
+		    "If true, the Unbound daemon is enabled.";
+	    }
+	}
+
+	container server {
+	    description
+		"The server attributes.";
+
+	    container interfaces {
+		description
+		    "Interface binding specifications.";
+
+		list interface {
+		    key "ip-address";
+
+		    leaf ip-address {
+			type inet:ip-address-no-zone;
+			description
+			    "IP address of an interface on which
+			     queries should be answered.";
+		    }
+
+		    leaf port {
+			type uint16;
+			description
+			    "An optional port number.";
+		    }
+		}
+	    }
+
+	    container access-control {
+		description
+		    "Access control specifications.";
+
+		list access {
+		    key "ip-prefix";
+
+		    leaf ip-prefix {
+			type inet:ip-prefix;
+			description
+			    "An IP prefix being granted some access.";
+		    }
+		    leaf action {
+			type unbound-access-control;
+			description
+			    "The access-control action allow to the
+			     given IP prefix.";
+		    }
+		}
+	    }
+
+	    container local-zones {
+		description
+		    "The local-zone attributes.";
+
+		list zone {
+		    key "zone-name";
+		    description
+			"Each local-zone is identified by a domain name.";
+
+		    leaf zone-name {
+			type inet:domain-name;
+			description
+			    "The local-zone domain name.";
+		    }
+
+		    leaf type {
+			type unbound-zone-type;
+			default "transparent";
+			description
+			    "The zone type.  One of 'deny', 'refuse',
+			     'static', 'transparent', 'type_transparent',
+			     'redirect', 'inform', 'inform_deny', or
+			     'no_default'.";
+		    }
+
+		    leaf description {
+			type string;
+			description
+			    "Arbitrary description for zone.";
+		    }
+
+		    container hosts {
+			description
+			    "Local host names within the zone.";
+
+			list host {
+			    key "host-name";
+
+			    leaf host-name {
+				type inet:domain-name;
+				description
+				    "The host name within the simple zone.";
+			    }
+
+			    leaf ip-address {
+				type inet:ip-address-no-zone;
+				mandatory true;
+				description
+				    "The IP address of host.";
+			    }
+
+			    leaf description {
+				type string;
+				description
+				    "Arbitrary description for host.";
+			    }
+			}
+		    }
+		}
+	    }
+
+	    leaf cache-max-ttl {
+		type uint32;
+		description
+		    "Maximum time to live for RRsets and messages
+		     in the cache.  Default is 86400 seconds.";
+	    }
+
+	    leaf cache-min-ttl {
+		type uint32;
+		description
+		    "Maximum time to live for RRsets and messages
+		     in the cache.  Default is 0 seconds.";
+	    }
+
+	    leaf do-ip4 {
+		type boolean;
+		default true;
+		description
+		    "If true, IPv4 queries are answered.";
+	    }
+
+	    leaf do-ip6 {
+		type boolean;
+		description
+		    "If true, IPv6 queries are answered.";
+	    }
+
+	    leaf do-tcp {
+		type boolean;
+		default true;
+		description
+		    "If true, TCP queries are answered.";
+	    }
+
+	    leaf do-udp {
+		type boolean;
+		default true;
+		description
+		    "If true, UDP queries are answered.";
+	    }
+
+	    leaf edns-buffer-size {
+		type uint16;
+		description
+		    "The EDNS reassembly buffer size in bytes
+		     advertised to peers.  Default is 4096 by
+		     RFC recommendation.";
+	    }
+
+	    leaf harden-dnssec-stripped {
+		type boolean;
+		description
+		    "If true, require DNSSEC data for trust-anchored
+		     zones.";
+	    }
+
+	    leaf harden-glue {
+		type boolean;
+		default true;
+		description
+		    "If true, and it is within the server's authority,
+		     glue will be trusted.";
+	    }
+
+	    leaf hide-identity {
+		type boolean;
+		default true;
+		description
+		    "If true, id.server and hostname.bind queries are
+		     refused.";
+	    }
+
+	    leaf hide-version {
+		type boolean;
+		description
+		    "If true, version.server and version.bind queries
+		     are refused.";
+	    }
+
+	    leaf incoming-num-tcp {
+		type uint16;
+		description
+		    "The number of incoming TCP buffers to allocate
+		     per thread.  Default is 10.";
+	    }
+
+	    leaf infra-cache-numhosts {
+		type uint32;
+		description
+		    "The number of hosts for which information is
+		     cached.  Default is 10000.";
+	    }
+
+	    leaf infra-cache-slabs {
+		type uint8;
+		description
+		    "The power of 2 number of slabs in the
+		     infrastructure cache.";
+	    }
+
+	    leaf infra-host-ttl {
+		type uint32;
+		description
+		    "Time to live, in seconds, for entries in the host
+		     cache.  The host cache contains roundtrip timing,
+		     lameness, and EDNS support information.  Default
+		     is 900.";
+	    }
+
+	    leaf jostle-timeout {
+		type uint32;
+		description
+		    "Timeout, in msec, used when the server is very
+		     busy.  Set to a value that usually results in one
+		     roundtrip to the authority servers.  This value
+		     helps mitigate denial of service and slow queries.
+		     Default is 200 milliseconds.";
+	    }
+
+	    leaf key-cache-slabs {
+		type uint8;
+		description
+		    "The power of 2 number of slabs in the key cache.
+		     A value (close) to the number of cpus is a
+		     reasonable guess.";
+	    }
+
+	    leaf msg-cache-size {
+		type uint32;
+		description
+		    "The number of bytes in the message cache.  The
+		     default is 4 megabytes.";
+	    }
+
+	    leaf msg-cache-slabs {
+		type uint8;
+		description
+		    "The power of 2 number of slabs in the message
+		     cache.  A value (close) to the number of cpus is
+		     a reasonable guess.";
+	    }
+
+	    leaf num-queries-per-thread {
+		type uint16;
+		description
+		    "The number of queries that every thread will
+		     service simultaneously.";
+	    }
+
+	    leaf num-threads {
+		type uint8;
+		description
+		    "The number of threads used to serve clients.  Use
+		     1 for no threading.";
+	    }
+
+	    leaf outgoing-num-tcp {
+		type uint16;
+		description
+		    "The number of outgoing TCP buffers to allocate
+		     per thread.  Default is 10.";
+	    }
+
+	    leaf outgoing-range {
+		type uint16 {
+		    range "1..max";
+		}
+		default 4096;
+		description
+		    "The number of ports, and file descriptors, to
+		     open per thread. Must be at least 1.";
+	    }
+
+	    leaf port {
+		type uint16;
+		description
+		    "The port on which the server responds to queries.
+		     Default is 53.";
+	    }
+
+	    leaf prefetch-key {
+		type boolean;
+		description
+		    "If true, DNSKEYs are fetched earlier in the
+		     validation process when a DS record is
+		     encountered.";
+	    }
+
+	    leaf prefetch {
+		type boolean;
+		description
+		    "If true, message cache elements are prefetched
+		     before they expire to keep the cache up to date.";
+	    }
+
+	    leaf rrset-cache-size {
+		type uint32;
+		description
+		    "The number of bytes in the RRset cache.  The
+		     default is 4 MB.";
+	    }
+
+	    leaf rrset-cache-slabs {
+		type uint8;
+		description
+		    "The power of 2 number of slabs in the RRset
+		     cache.";
+	    }
+
+	    leaf serve-expired {
+		type boolean;
+		description
+		    "If true, the server attempts to serve old
+		     responses from cache with a TTL of 0 in the
+		     response without waiting for the actual
+		     resolution to finish.";
+	    }
+
+	    leaf so-rcvbuf {
+		type uint32;
+		description
+		    "If not 0, then set the SO_RCVBUF socket option to
+		     get more buffer space on the UDP port's incoming
+		     queries so that short spikes on busy servers do
+		     not drop packets";
+	    }
+
+	    leaf unwanted-reply-threshold {
+		type uint32;
+		description
+		    "If not 0, when a total number of unwanted replies
+		     per thread reaches this threshold, warnings are
+		     issued and defensive actions is taken.  The RRset
+		     and message caches are cleared. ";
+	    }
+
+	    leaf use-caps-for-id {
+		type boolean;
+		description
+		    "If true, use 0x20-encoded random bits in the
+		     query to foil spoof attempts.";
+	    }
+
+	    leaf verbosity {
+		type uint8 {
+		    range "0..5";
+		}
+		description
+		    "The verbosity level, 0-5.";
+	    }
+	}
+
+	container forward-zones {
+	    description
+		"The forward-zone attributes.";
+
+	    list zone {
+		key "zone-name";
+		description
+		    "Each forward-zone is identified by a domain name.
+		     Use '.' as the wildcard domain name.  Each zone
+		     has a list of nameservers specified as hostnames
+		     or host addresses.";
+
+		leaf zone-name {
+		    type inet:domain-name;
+		    description
+			"The forward-zone domain name.  Use '.' as
+			 a wildcard to forward all queries.";
+		}
+
+		container forward-hosts {
+		    leaf-list host {
+			type inet:domain-name;
+			description
+			    "Hostname of a nameserver to which queries
+			     are forwarded.";
+		    }
+		}
+
+		container forward-addresses {
+		    description
+			"A collection of nameserver IPv4 or IPv6
+			 addresses of nameservers to which queries are
+			 forwarded.";
+
+		    list address {
+			key "ip-address";
+
+			leaf ip-address {
+			    type inet:ip-address-no-zone;
+			    description
+				"IP address of a nameserver to which
+				 queries are forwarded.";
+			}
+
+			leaf port {
+			    type uint16;
+			    description
+				"An optional port number.";
+			}
+
+			leaf auth-name {
+			    type string;
+			    description
+				"An optional TLS auth name.";
+			}
+		    }
+		}
+
+		leaf forward-first {
+		    type boolean;
+		    description
+			"If true and the query fails using this
+			 forwarder first, lookups are then sent to
+			 authoritative, root nameservers.";
+		}
+
+		leaf forward-tls-upstream {
+		    type boolean;
+		    description
+			"If true, queries to this forwarder use TLS
+			 for transport.";
+		}
+	    }
+	}
+    }
+
+    container unbound-state {
+	description
+	    "Configuration for the Unbound DNS name resolver daemon.";
+
+	config "false";
+
+	container parameters {
+	    description
+		"A collection of various Unbound parameters.";
+
+	    leaf enable {
+		type boolean;
+		description
+		    "If true, the Unbound daemon is enabled.";
+	    }
+	}
+
+	container server {
+	    description
+		"The server attributes.";
+
+	    container interfaces {
+		description
+		    "Interface binding specifications.";
+
+		list interface {
+		    key "ip-address";
+
+		    leaf ip-address {
+			type inet:ip-address-no-zone;
+			description
+			    "IP address of an interface on which
+			     queries should be answered.";
+		    }
+
+		    leaf port {
+			type uint16;
+			description
+			    "An optional port number.";
+		    }
+		}
+	    }
+
+	    container access-control {
+		description
+		    "Access control specifications.";
+
+		list access {
+		    key "ip-prefix";
+
+		    leaf ip-prefix {
+			type inet:ip-prefix;
+			description
+			    "An IP prefix being granted some access.";
+		    }
+		    leaf action {
+			type unbound-access-control;
+			description
+			    "The access-control action allow to the
+			     given IP prefix.";
+		    }
+		}
+	    }
+
+	    container local-zones {
+		description
+		    "The local-zone attributes.";
+
+		list zone {
+		    key "zone-name";
+		    description
+			"Each local-zone is identified by a domain name.";
+
+		    leaf zone-name {
+			type inet:domain-name;
+			description
+			    "The local-zone domain name.";
+		    }
+
+		    leaf type {
+			type unbound-zone-type;
+			default "transparent";
+			description
+			    "The zone type.  One of 'deny', 'refuse',
+			     'static', 'transparent', 'type_transparent',
+			     'redirect', 'inform', 'inform_deny', or
+			     'no_default'.";
+		    }
+
+		    leaf description {
+			type string;
+			description
+			    "Arbitrary description for zone.";
+		    }
+
+		    container hosts {
+			description
+			    "Local host names within the zone.";
+
+			list host {
+			    key "host-name";
+
+			    leaf host-name {
+				type inet:domain-name;
+				description
+				    "The host name within the simple zone.";
+			    }
+
+			    leaf ip-address {
+				type inet:ip-address-no-zone;
+				description
+				    "The IP address of host.";
+			    }
+
+			    leaf description {
+				type string;
+				description
+				    "Arbitrary description for host.";
+			    }
+			}
+		    }
+		}
+	    }
+
+	    leaf cache-max-ttl {
+		type uint32;
+		description
+		    "Maximum time to live for RRsets and messages
+		     in the cache.  Default is 86400 seconds.";
+	    }
+
+	    leaf cache-min-ttl {
+		type uint32;
+		description
+		    "Maximum time to live for RRsets and messages
+		     in the cache.  Default is 0 seconds.";
+	    }
+
+	    leaf do-ip4 {
+		type boolean;
+		default true;
+		description
+		    "If true, IPv4 queries are answered.";
+	    }
+
+	    leaf do-ip6 {
+		type boolean;
+		description
+		    "If true, IPv6 queries are answered.";
+	    }
+
+	    leaf do-tcp {
+		type boolean;
+		default true;
+		description
+		    "If true, TCP queries are answered.";
+	    }
+
+	    leaf do-udp {
+		type boolean;
+		default true;
+		description
+		    "If true, UDP queries are answered.";
+	    }
+
+	    leaf edns-buffer-size {
+		type uint16;
+		description
+		    "The EDNS reassembly buffer size in bytes
+		     advertised to peers.  Default is 4096 by
+		     RFC recommendation.";
+	    }
+
+	    leaf harden-dnssec-stripped {
+		type boolean;
+		description
+		    "If true, require DNSSEC data for trust-anchored
+		     zones.";
+	    }
+
+	    leaf harden-glue {
+		type boolean;
+		default true;
+		description
+		    "If true, and it is within the server's authority,
+		     glue will be trusted.";
+	    }
+
+	    leaf hide-identity {
+		type boolean;
+		default true;
+		description
+		    "If true, id.server and hostname.bind queries are
+		     refused.";
+	    }
+
+	    leaf hide-version {
+		type boolean;
+		description
+		    "If true, version.server and version.bind queries
+		     are refused.";
+	    }
+
+	    leaf incoming-num-tcp {
+		type uint16;
+		description
+		    "The number of incoming TCP buffers to allocate
+		     per thread.  Default is 10.";
+	    }
+
+	    leaf infra-cache-numhosts {
+		type uint32;
+		description
+		    "The number of hosts for which information is
+		     cached.  Default is 10000.";
+	    }
+
+	    leaf infra-cache-slabs {
+		type uint8;
+		description
+		    "The power of 2 number of slabs in the
+		     infrastructure cache.";
+	    }
+
+	    leaf infra-host-ttl {
+		type uint32;
+		description
+		    "Time to live, in seconds, for entries in the host
+		     cache.  The host cache contains roundtrip timing,
+		     lameness, and EDNS support information.  Default
+		     is 900.";
+	    }
+
+	    leaf jostle-timeout {
+		type uint32;
+		description
+		    "Timeout, in msec, used when the server is very
+		     busy.  Set to a value that usually results in one
+		     roundtrip to the authority servers.  This value
+		     helps mitigate denial of service and slow queries.
+		     Default is 200 milliseconds.";
+	    }
+
+	    leaf key-cache-slabs {
+		type uint8;
+		description
+		    "The power of 2 number of slabs in the key cache.
+		     A value (close) to the number of cpus is a
+		     reasonable guess.";
+	    }
+
+	    leaf msg-cache-size {
+		type uint32;
+		description
+		    "The number of bytes in the message cache.  The
+		     default is 4 megabytes.";
+	    }
+
+	    leaf msg-cache-slabs {
+		type uint8;
+		description
+		    "The power of 2 number of slabs in the message
+		     cache.  A value (close) to the number of cpus is
+		     a reasonable guess.";
+	    }
+
+	    leaf num-queries-per-thread {
+		type uint16;
+		description
+		    "The number of queries that every thread will
+		     service simultaneously.";
+	    }
+
+	    leaf num-threads {
+		type uint8;
+		description
+		    "The number of threads used to serve clients.  Use
+		     1 for no threading.";
+	    }
+
+	    leaf outgoing-num-tcp {
+		type uint16;
+		description
+		    "The number of outgoing TCP buffers to allocate
+		     per thread.  Default is 10.";
+	    }
+
+	    leaf outgoing-range {
+		type uint16 {
+		    range "1..max";
+		}
+		default 4096;
+		description
+		    "The number of ports, and file descriptors, to
+		     open per thread. Must be at least 1.";
+	    }
+
+	    leaf port {
+		type uint16;
+		description
+		    "The port on which the server responds to queries.
+		     Default is 53.";
+	    }
+
+	    leaf prefetch-key {
+		type boolean;
+		description
+		    "If true, DNSKEYs are fetched earlier in the
+		     validation process when a DS record is
+		     encountered.";
+	    }
+
+	    leaf prefetch {
+		type boolean;
+		description
+		    "If true, message cache elements are prefetched
+		     before they expire to keep the cache up to date.";
+	    }
+
+	    leaf rrset-cache-size {
+		type uint32;
+		description
+		    "The number of bytes in the RRset cache.  The
+		     default is 4 MB.";
+	    }
+
+	    leaf rrset-cache-slabs {
+		type uint8;
+		description
+		    "The power of 2 number of slabs in the RRset
+		     cache.";
+	    }
+
+	    leaf serve-expired {
+		type boolean;
+		description
+		    "If true, the server attempts to serve old
+		     responses from cache with a TTL of 0 in the
+		     response without waiting for the actual
+		     resolution to finish.";
+	    }
+
+	    leaf so-rcvbuf {
+		type uint32;
+		description
+		    "If not 0, then set the SO_RCVBUF socket option to
+		     get more buffer space on the UDP port's incoming
+		     queries so that short spikes on busy servers do
+		     not drop packets";
+	    }
+
+	    leaf unwanted-reply-threshold {
+		type uint32;
+		description
+		    "If not 0, when a total number of unwanted replies
+		     per thread reaches this threshold, warnings are
+		     issued and defensive actions is taken.  The RRset
+		     and message caches are cleared. ";
+	    }
+
+	    leaf use-caps-for-id {
+		type boolean;
+		description
+		    "If true, use 0x20-encoded random bits in the
+		     query to foil spoof attempts.";
+	    }
+
+	    leaf verbosity {
+		type uint8 {
+		    range "0..5";
+		}
+		description
+		    "The verbosity level, 0-5.";
+	    }
+	}
+
+	container forward-zones {
+	    description
+		"The forward-zone attributes.";
+
+	    list zone {
+		key "zone-name";
+		description
+		    "Each forward-zone is identified by a domain name.
+		     Use '.' as the wildcard domain name.  Each zone
+		     has a list of nameservers specified as hostnames
+		     or host addresses.";
+
+		leaf zone-name {
+		    type inet:domain-name;
+		    description
+			"The forward-zone domain name.  Use '.' as
+			 a wildcard to forward all queries.";
+		}
+
+		container forward-hosts {
+		    leaf-list host {
+			type inet:domain-name;
+			description
+			    "Hostname of a nameserver to which queries
+			     are forwarded.";
+		    }
+		}
+
+		container forward-addresses {
+		    description
+			"A collection of nameserver IPv4 or IPv6
+			 addresses of nameservers to which queries are
+			 forwarded.";
+
+		    list address {
+			key "ip-address";
+
+			leaf ip-address {
+			    type inet:ip-address-no-zone;
+			    description
+				"IP address of a nameserver to which
+				 queries are forwarded.";
+			}
+
+			leaf port {
+			    type uint16;
+			    description
+				"An optional port number.";
+			}
+
+			leaf auth-name {
+			    type string;
+			    description
+				"An optional TLS auth name.";
+			}
+		    }
+		}
+
+		leaf forward-first {
+		    type boolean;
+		    description
+			"If true and the query fails using this
+			 forwarder first, lookups are then sent to
+			 authoritative, root nameservers.";
+		}
+
+		leaf forward-tls-upstream {
+		    type boolean;
+		    description
+			"If true, queries to this forwarder use TLS
+			 for transport.";
+		}
+	    }
+	}
+    }
+
+    rpc unbound-control {
+	input {
+	    leaf operation {
+		type unbound-operation;
+		description
+		    "One of the strings 'start', 'stop', 'restart',
+		     'reload', or 'status'.";
+	    }
+	}
+	output {
+	    leaf stdout {
+		type string;
+	    }
+	}
+    }
+
+    rpc unbound-config-operation {
+	input {
+	    leaf request {
+		type string;
+		description
+		    "The operation, 'get-config-file'.";
+	    }
+	    leaf param {
+		type string;
+		description
+		    "An optional parameter.";
+	    }
+	}
+	output {
+	    leaf stdout {
+		type string;
+	    }
+	}
+    }
+}

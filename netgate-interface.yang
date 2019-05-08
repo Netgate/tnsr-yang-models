@@ -1,0 +1,1989 @@
+module netgate-interface {
+
+    namespace "urn:netgate:xml:yang:netgate-interface";
+    prefix "ngif";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import ietf-yang-types {
+	prefix "yang";
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a data model for network interfaces.
+
+	 Copyright 2017-2019 Rubicon Communications, LLC.
+	";
+
+    revision 2019-02-15 {
+	description
+	    "TNSR Release 19.02.";
+    }
+
+    revision 2017-01-06 {
+	description
+	    "Initial revision.";
+    }
+
+    typedef intf-vlan-id {
+	type union {
+	    type uint16 {
+		range "1..4095";
+	    }
+	    type string {
+		pattern "any";
+	    }
+	}
+    }
+
+    typedef intf-tag-rewrite-op {
+	type enumeration {
+	    enum disable {
+		description
+		    "IPv4";
+	    }
+	    enum pop-1 {
+		description
+		    "Pop 1";
+	    }
+	    enum pop-2 {
+		description
+		    "Pop 2";
+	    }
+	    enum push-1 {
+		description
+		    "Push 1";
+	    }
+	    enum push-2 {
+		description
+		    "Push 2";
+	    }
+	    enum translate-1-1 {
+		description
+		    "Translate 1 1";
+	    }
+	    enum translate-1-2 {
+		description
+		    "Translate 1 2";
+	    }
+	    enum translate-2-1 {
+		description
+		    "Translate 2 1";
+	    }
+	    enum translate-2-2 {
+		description
+		    "Translate 2 2";
+	    }
+	}
+    }
+
+    typedef bond-mode {
+	type enumeration {
+	    enum round-robin {
+		value 1;
+		description
+		    "Round robin";
+	    }
+	    enum active-backup {
+		value 2;
+		description
+		    "Active backup";
+	    }
+	    enum xor {
+		value 3;
+		description
+		    "XOR";
+	    }
+	    enum broadcast {
+		value 4;
+		description
+		    "Broadcast";
+	    }
+	    enum lacp {
+		value 5;
+		description
+		    "LACP";
+	    }
+	}
+    }
+
+    typedef bond-load-balance {
+	type enumeration {
+	    enum l2 {
+		value 0;
+		description
+		    "L2";
+	    }
+	    enum l23 {
+		value 2;
+		description
+		    "L23";
+	    }
+	    enum l34 {
+		value 1;
+		description
+		    "L34";
+	    }
+	}
+    }
+
+    typedef lacp-rx-state {
+	type enumeration {
+	    enum INITIALIZE {
+		value 0;
+		description
+		    "Initialize";
+	    }
+	    enum PORT_DISABLED {
+		value 1;
+		description
+		    "Port disabled";
+	    }
+	    enum EXPIRED {
+		value 2;
+		description
+		    "Expired";
+	    }
+	    enum LACP_DISABLED {
+		value 3;
+		description
+		    "LACP disabled";
+	    }
+	    enum DEFAULTED {
+		value 4;
+		description
+		    "Defaulted";
+	    }
+	    enum CURRENT {
+		value 5;
+		description
+		    "Current";
+	    }
+	}
+    }
+
+    typedef lacp-tx-state {
+	type enumeration {
+	    enum TRANSMIT {
+		value 0;
+		description
+		    "Transmit PDU";
+	    }
+	}
+    }
+
+    typedef lacp-mux-state {
+	type enumeration {
+	    enum DETACHED {
+		value 0;
+		description
+		    "Detached";
+	    }
+	    enum WAITING {
+		value 1;
+		description
+		    "Waiting";
+	    }
+	    enum ATTACHED {
+		value 2;
+		description
+		    "Attached";
+	    }
+	    enum COLLECTING_DISTRIBUTING {
+		value 3;
+		description
+		    "Collecting distributing";
+	    }
+	}
+    }
+
+    typedef lacp-ptx-state {
+	type enumeration {
+	    enum NO_PERIODIC {
+		value 0;
+		description
+		    "No periodic";
+	    }
+	    enum FAST_PERIODIC {
+		value 1;
+		description
+		    "Fast periodic";
+	    }
+	    enum SLOW_PERIODIC {
+		value 2;
+		description
+		    "Slow periodic";
+	    }
+	    enum PERIODIC_TX {
+		value 3;
+		description
+		    "Periodic transmission";
+	    }
+	}
+    }
+
+    rpc clear-interface-counters {
+        input {
+	    leaf interface {
+	        type string;
+		description
+		    "Should be a valid interface name.  No name implies
+		     clear all interfaces.";
+	    }
+	}
+    }
+    
+    rpc packet-counters {
+        output {
+            leaf stdout {
+                type string;
+            }
+        }
+    }
+
+    container interfaces-config {
+	description
+	    "Interface configuration parameters.";
+
+	list interface {
+	    key "name";
+
+	    description
+		"The list of configured interfaces on the device.";
+
+	    leaf name {
+		type string;
+		description
+		    "The name of the interface.";
+	    }
+
+	    leaf description {
+		type string;
+		description
+		    "A textual description of the interface.";
+	    }
+
+	    leaf enabled {
+		type boolean;
+		description
+		    "This leaf contains the configured, desired state of
+		     the interface.";
+	    }
+
+	    leaf mtu {
+		type uint16 {
+		    range "68..max";
+		}
+		units octets;
+		description
+		    "The size, in octets, of the largest packet that the
+		     interface will send and receive.";
+	    }
+
+	    leaf inside {
+		type boolean;
+		description
+		    "If set true, this interface is used as a NAT
+		     inside interface.";
+	    }
+
+	    leaf outside {
+		type boolean;
+		description
+		    "If set true, this interface is used as a NAT
+		    outside interface.";
+	    }
+
+	    leaf mac-address {
+		type yang:mac-address;
+		description
+		    "The Media Access Control (MAC) address of the
+		    interface.";
+	    }
+
+	    leaf host-tap-name {
+		type string;
+		description
+		    "If this interface is associated with a host tap,
+		     this field names that host tap interface.";
+	    }
+
+	    container ipv4 {
+		presence
+		    "Enables IPv4'";
+		description
+		    "Parameters for the IPv4 address family.";
+
+		leaf route-table-name {
+		    type ngcom:rt-identifier-63;
+		    description
+			"If present, this is the name of the IPv4 Route Table
+			 to which this interface is bound.  If not present,
+			 the IF uses the Default Route Table.";
+		}
+
+		container address {
+		    leaf-list ip {
+			type inet:ipv4-prefix;
+			description
+			    "An IPv4 address on the interface.";
+		    }
+		}
+	    }
+
+	    container ipv6 {
+		presence
+		    "Enables IPv6";
+		description
+		    "Parameters for the IPv6 address family.";
+
+		leaf route-table-name {
+		    type ngcom:rt-identifier-63;
+		    description
+			"If present, this is the name of the IPv6 Route Table
+			 to which this interface is bound.  If not present,
+			 the IF uses the Default Route Table.";
+		}
+
+		container address {
+		    leaf-list ip {
+			type inet:ipv6-prefix;
+			description
+			    "An IPv6 address on the interface.";
+		    }
+		}
+	    }
+
+	    container bridge {
+		description
+		    "If the interface is being used as a bridge, this
+		     node contains the corresponding Bridge Domain Id,
+		     Split Horizon, and/or Bridge Virtual Id information.";
+
+		leaf bdi {
+		    type uint32;
+		    description
+			"Bridge Domain Id.";
+		}
+
+		leaf bvi {
+		    type boolean;
+		    description
+			"Set up the interface as a BVI.";
+		}
+
+		leaf shg {
+		    type uint8;
+		    description
+			"Split Horizon Group.";
+		}
+	    }
+
+	    container dhcp-client {
+		description
+		    "If the interface is configured using a DHCP client,
+		     that configuration is contained here.";
+
+		leaf enable {
+		    type boolean;
+		    default false;
+		}
+
+		leaf hostname {
+		    type string {
+			/*
+			 * RFC-1123, RFC-2181.
+			 */
+			 pattern '[a-zA-Z0-9]([-a-zA-Z0-9]){0,62}';
+		    }
+		    description
+			"An optional hostname to use.";
+		}
+	    }
+
+	    container access-list {
+		description
+		    "If the interface has any Access Control Lists,
+		     they are listed here in two groups: those that apply
+		     to packet ingress and those that apply to egresss.
+		     The two sets of ACLs are sorted independenty and
+		     applied in ascending sequence-number order.";
+
+		container input {
+		    description
+			"These are the ACL rule-sets that apply to ingress
+			packets.";
+
+		    list acl-list {
+			key "acl-name";
+			description
+			    "Each ACL rule-set can appear at most once within
+			     the input list.";
+
+			leaf acl-name {
+			    type string;
+			    description
+				"This is the name of an ACL rule-set
+				 that will be be applied to packets on
+				 this interface.";
+			}
+
+			leaf sequence {
+			    type uint32;
+			    description
+				"Rules are applied in ascending
+				sequence number.";
+			}
+		    }
+		}
+
+		container output {
+		    description
+			"These are the ACL rule-sets that apply to egress
+			 packets.";
+
+		    list acl-list {
+			key "acl-name";
+			description
+			    "Each ACL rule-set can appear at most once within
+			     the output list.";
+
+			leaf acl-name {
+			    type string;
+			    description
+				"This is the name of an ACL rule-set
+				 that will be be applied to packets on
+				 this interface.";
+			}
+
+			leaf sequence {
+			    type uint32;
+			    description
+				"Rules are applied in ascending
+				sequence number.";
+			}
+		    }
+		}
+
+		container macip {
+		    description
+			"An interface may also have at most one ACL
+			 based upon a combination of MAC address and
+			 IP.  If that ACL is present, it is always on
+			 the ingress packets.";
+
+		    leaf macip-name {
+			type string;
+			description
+			    "This name references at most one MACIP ingress
+			     rule-set from the ACL MACIP tables.";
+		    }
+		}
+	    }
+
+	    container lldp {
+		 leaf port-name {
+		     type string;
+		     description
+			 "Port name used in LLDP packet.";
+		 }
+
+		 container management {
+		     leaf ipv4-address {
+			 type inet:ipv4-address-no-zone;
+			 description
+			     "IPv4 management address.";
+		     }
+		     leaf ipv6-address {
+			 type inet:ipv6-address-no-zone;
+			 description
+			     "IPv6 management address.";
+		     }
+		     leaf oid {
+			 type string;
+			 description
+			     "Management object ID.";
+		     }
+		 }
+	    }
+
+	    container bond {
+		description
+		    "If the interface is being used as a slave, this node
+		     contains the corresponding bond ID and slave options.";
+
+		leaf instance {
+		    type uint32;
+		    description
+			"Bond unique identifier.";
+		}
+
+		leaf passive {
+		    type boolean;
+		    default false;
+		    description
+			"The slave interface does not
+			 initiate the LACP protocol,
+			 remote must be active speaker.";
+		}
+
+		leaf long-timeout {
+		    type boolean;
+		    default false;
+		    description
+			"90 seconds VS default 3 seconds
+			 neighbor timeout.";
+		}
+	    }
+
+	    container map {
+		description
+		    "Per-interface parameters for MAP-E and MAP-T.";
+
+		leaf enabled {
+		    type boolean;
+		    description
+			"If true, MAP-E encapsulation or MAP-T
+			 translations are enabled on this interface.";
+		}
+
+		leaf is-translation {
+		    type boolean;
+		    description
+			"If true, this interface is performing MAP-T
+			 translations.  If false, this interface is
+			 performing encapsuations.  Valid only when
+			 also enabled.";
+		}
+	    }
+	}
+
+	container bridge-table {
+	    description
+		"Bridge mapping table.";
+
+	    list bridge-entry {
+		key "bdi";
+		description
+		    "Bridge Domain Id.";
+
+		leaf bdi {
+		    type uint32 {
+			range "1..16777215";
+		    }
+		    mandatory true;
+		    description
+			"The Bridge Domain Identifier.  A unique number
+			 for this entry.";
+		}
+
+		leaf flood {
+		    type boolean;
+		    description
+			"Broadcast/multicast flooding in the bd";
+		}
+
+		leaf uu-flood {
+		    type boolean;
+		    description
+			"Unknown unicast flood in the bd";
+		}
+
+		leaf forward {
+		    type boolean;
+		    description
+			"Forwarding on all interfaces in the bd";
+		}
+
+		leaf learn {
+		    type boolean;
+		    description
+			"Learning on all interfaces in the bd";
+		}
+
+		leaf arp-term {
+		    type boolean;
+		    description
+			"ARP termination in the bd";
+		}
+
+		leaf mac-age {
+		    type uint8;
+		    description
+			"MAC aging time in min, 0 for disabled.";
+		}
+
+		container bridge-arp-table {
+		    description
+			"Bridge ARP Entry Table.";
+
+		    list bridge-arp-entry {
+			key "ip-address";
+			description
+			    "Bridge ARP entry table.";
+
+			leaf ip-address {
+			    type inet:ip-address-no-zone;
+			    description
+				"The IPv4 or IPv6 address of an ARP entry.";
+			}
+
+			leaf mac-address {
+			    type yang:mac-address;
+			    description
+				"The MAC address of an ARP entry.";
+			}
+		    }
+		}
+	    }
+	}
+
+	container loopback-table {
+	    description
+		"Loopback name table.";
+
+	    list loopback {
+		key "name";
+		description
+		    "Loopback name.";
+
+		leaf name {
+		    type string;
+		    description
+			"The identifier.  A unique name
+			 for this Loopback entry.";
+		}
+
+		leaf instance {
+		    type uint16;
+		    description
+			"Each Loopback creates an interface.  The
+			 interface will be named 'loopback<X>',
+			 where the <X> is the instance number.
+			 The instance number must be unique
+			 across all Loopback interfaces.";
+		}
+
+		leaf mac-address {
+		    type yang:mac-address;
+		    description
+			"The MAC address for the interface.";
+		}
+
+		leaf description {
+		    type string;
+		    description
+			"A user description of the Loopback.";
+		}
+	    }
+	}
+
+	container socket-table {
+	    description
+		"Host memif socket table.";
+
+	    list socket {
+		key "id";
+		description
+		    "A unique 32-bit integer identifying this socket
+		     filename.";
+
+		leaf id {
+		    type uint32 {
+			range "1..4294967294";
+		    }
+		    mandatory true;
+		    description
+			"This is the user assigned id of the socket
+			 filename.";
+		}
+		leaf filename {
+		    type string;
+		    description
+			"The path to a socket file used for establishing
+			 memif connections.  A socket can be used for
+			 either master or slave interfaces, but not both.
+			 A socket can have more than one master using it,
+			 or it can have more than one slave using it.";
+		}
+	    }
+	}
+
+	container memif-table {
+	    description
+		"Host memif interface configuration table.";
+
+	    list memif-entry {
+		key "memif-id";
+		description
+		    "A unique 32-bit integer identifying this interface.";
+
+		leaf memif-id {
+		    type uint32;
+		    mandatory true;
+		    description
+			"This is the user assigned id of the memif interface.";
+		}
+
+		leaf buffer-size {
+		    type uint32;
+		    description
+			"The size of the buffer allocated for each
+			 ring entry.  Default 2048.";
+		}
+
+		leaf mac-address {
+		    type yang:mac-address;
+		    description
+			"The MAC address for the interface.";
+		}
+
+		leaf mode {
+		    type string;
+		    description
+			"Should be 'ethernet', 'IP' or 'punt/inject'.";
+		}
+
+		leaf ring-size {
+		    type uint8 {
+			range "8..32";
+		    }
+		    description
+			"The number of entries in the rx/tx rings.
+			 The number of entries must be a power of 2
+			 This number is that power of 2, between 8 and 32.
+			 The default is 10, for 1024 entries.";
+		}
+
+		leaf secret {
+		    type string {
+			length "1..24";
+		    }
+		    description
+			"The secret is used to match and authenticate
+			 the other end of the connection.";
+		}
+
+		container slave {
+		    presence
+			"If present, the role of this memif is 'slave'.
+			 If not present, the role is 'master'.";
+
+		    leaf rx-queues {
+			type uint8;
+			description
+			    "The number of slave rx queues.";
+		    }
+
+		    leaf tx-queues {
+			type uint8;
+			description
+			    "The number of slave tx queues.";
+		    }
+		}
+
+		leaf socket-id {
+		    type uint32;
+		    description
+			"The socket-id of the socket filename to use
+			 in establishing a connection.";
+		}
+	    }
+	}
+
+	container subinterfaces {
+	    description
+		"An interface may have subinterfaces.";
+
+	    list subif-entry {
+		key "if-name subid";
+		description
+		    "Each subinterface entry represents a VLAN.";
+
+		leaf if-name {
+		    type string;
+		    description
+			"The interface on which this subinterface exists.";
+		}
+
+		leaf subid {
+		    type uint32;
+		    description
+			"The subinterface id.  It is often also the (outer)
+			 VLAN tag value, though they can be different.";
+		}
+
+		container vlan {
+		    description
+			"These fields all contribute to the subinterface
+			 definition for VLAN handling.";
+
+		    leaf dot1ad {
+			type boolean;
+			description
+			    "By default the outer tag is dot1q.  If this
+			     value is true, it is instead dot1ad.";
+		    }
+
+		    leaf exact-match {
+			type boolean;
+			description
+			    "By default matching is non-exact.  If this
+			     value is true, matching is exact.";
+		    }
+
+		    leaf default-subif {
+			type boolean;
+			description
+			    "The default subinterface is associated with a
+			     packet that did not match any other configured
+			     subinterface on this interface.";
+		    }
+
+		    leaf outer-vlan-id {
+			type intf-vlan-id;
+			description
+			    "The outer vlan tag id.  It can be an integer
+			     between 1 and 4095 inclusive, or the word 'any'.";
+		    }
+
+		    leaf inner-vlan-id {
+			type intf-vlan-id;
+			description
+			    "The inner vlan tag id.  It can be an integer
+			     between 1 and 4095 inclusive, or the word 'any'.";
+		    }
+		}
+
+		container vlan-tag-rewrite {
+		    leaf operation {
+			type intf-tag-rewrite-op;
+			description
+			    "A tag rewrite operation is one of the strings:
+			     'disable', 'pop-1', 'pop-2', 'push-1', 'push-2',
+			     'translate-1-1', 'translate-1-2',
+			     'translate-2-1', 'translate-2-2'.";
+		    }
+
+		    leaf push-dot1q {
+			type boolean;
+			description
+			    "If true the first pushed tag is of type dot1q,
+			     otherwise it will be of type dot1ad.";
+		    }
+
+		    leaf tag1 {
+			type uint32;
+			description
+			    "The first pushed tag value.";
+		    }
+
+		    leaf tag2 {
+			type uint32;
+			description
+			    "The second pushed tag value.";
+		    }
+		}
+	    }
+	}
+
+	container tap-table {
+	    description
+		"Host Tap interface configuration table.";
+
+	    list tap {
+		key "host-name";
+		description
+		    "Unique identifing host tap name.";
+
+		leaf host-name {
+		    type string;
+		    description
+			"The name of the tap on the host system.";
+		}
+
+		leaf host-bridge {
+		    type string;
+		    description
+			"The host bridge to which the tap will be attached.";
+		}
+
+		leaf host-ipv4-gateway {
+		    type inet:ipv4-address-no-zone;
+		    description
+			"The IPv4 gateway address on the interface.";
+		}
+
+		leaf host-ipv4-prefix {
+		    type inet:ipv4-prefix;
+		    description
+			"The IPv4 prefix on the interface.";
+		}
+
+		leaf host-ipv6-gateway {
+		    type inet:ipv6-address-no-zone;
+		    description
+			"The IPv6 gateway address on the interface.";
+		}
+
+		leaf host-ipv6-prefix {
+		    type inet:ipv6-prefix;
+		    description
+			"The IPv6 prefix on the interface.";
+		}
+
+		leaf host-mac-address {
+		    type yang:mac-address;
+		    description
+			"The MAC address of the host tap interface.";
+		}
+
+		leaf host-namespace {
+		    type string;
+		    description
+			"The host namespace in which the tap will be made.";
+		}
+
+		leaf instance {
+		    type uint32;
+		    description
+			"The tap instance number.";
+		}
+
+		leaf mac-address {
+		    type yang:mac-address;
+		    description
+			"The MAC address of the interface.";
+		}
+
+		leaf rx-ring-size {
+		    type uint8 {
+			range "0..15";
+		    }
+		    description
+			"A power of 2 between 0 and 15 inclusive yielding
+			 a receive ring size 32 to 32768 entries.  The
+			 default is 8 (256 entries).";
+		}
+
+		leaf tx-ring-size {
+		    type uint8 {
+			range "0..15";
+		    }
+		    description
+			"A power of 2 between 0 and 15 inclusive yielding
+			 a transmit ring size 32 to 32768 entries.  The
+			 default is 8 (256 entries).";
+		}
+	    }
+	}
+
+	container bond-table {
+	    description
+		"Bond interface configuration table.";
+
+	    list bond {
+		key "instance";
+		description
+		    "Bond interface.";
+
+		leaf instance {
+		    type uint32;
+		    description
+			"The identifier. A unique number
+			 for this bond interface.";
+		}
+
+		leaf mode {
+		    type bond-mode;
+		    mandatory true;
+		    description
+			"The mode for the interface.";
+		}
+
+		leaf mac-address {
+		    type yang:mac-address;
+		    description
+			"The MAC address for the interface.";
+		}
+
+		leaf load-balance {
+		    type bond-load-balance;
+		    default l2;
+		    description
+			"The load balance for the interface
+			 (valid for XOR and LACP modes).";
+		}
+	    }
+	}
+    }
+
+    container interfaces-state {
+	description
+	    "Interface state information.";
+
+	config "false";
+
+	list interface {
+	    key "name";
+
+	    description
+		"The list of interfaces on the device.";
+
+	    leaf name {
+		type string;
+		description
+		    "The name of the interface.";
+	    }
+
+	    leaf description {
+		type string;
+		description
+		    "A textual description of the interface.";
+	    }
+
+	    leaf admin-status {
+		type string;
+		description
+		    "The admin 'up' or 'down' status of the link.";
+	    }
+
+	    leaf link-status {
+		type string;
+		description
+		    "The 'up' or 'down' status of the link.";
+	    }
+
+	    leaf link-speed {
+		type string;
+		description
+		    "The link speed.";
+	    }
+
+	    leaf link-duplex {
+		type string;
+		description
+		    "The link duplex, either 'half' or 'full'.";
+	    }
+
+	    leaf link-mtu {
+		type uint16 {
+		    range "68..max";
+		}
+		units octets;
+		description
+		    "The size, in octets, of the largest packet that the
+		     interface will send and receive.";
+	    }
+
+	    leaf mac-address {
+		type yang:mac-address;
+		description
+		    "The Media Access Control (MAC) address of the
+		    interface.";
+	    }
+
+	    leaf nat-side {
+		type string;
+		description
+		    "If used as a NAT interface, either 'inside'
+		     'outside', or 'both'.";
+	    }
+
+	    container ipv4 {
+		presence
+		    "Enables IPv4'";
+		description
+		    "IPv4 address family state information.";
+
+		leaf route-table-name {
+		    type ngcom:rt-identifier-63;
+		    description
+			"If present, this is the name of the IPv4 Route Table
+			 to which this interface is bound.  If not present,
+			 the IF uses the Default Route Table.";
+		}
+
+		container address {
+		    leaf-list ip {
+			type inet:ipv4-prefix;
+			description
+			    "An IPv4 address on the interface.";
+		    }
+		}
+	    }
+
+	    container ipv6 {
+		presence
+		    "Enables IPv6";
+		description
+		    "IPv6 address family state information.";
+
+		leaf route-table-name {
+		    type ngcom:rt-identifier-63;
+		    description
+			"If present, this is the name of the IPv6 Route Table
+			 to which this interface is bound.  If not present,
+			 the IF uses the Default Route Table.";
+		}
+
+		container address {
+		    leaf-list ip {
+			type inet:ipv6-prefix;
+			description
+			    "An IPv6 address on the interface.";
+		    }
+		}
+	    }
+
+	    container counters {
+	        description
+		    "Per-interface counters from VPP.";
+
+		leaf collect-time {
+		    type uint64;
+		    description
+		        "time counters cleared in seconds since
+			 midnight 1/1/1970 UTC";
+		}
+
+		leaf reset-time {
+		    type uint64;
+		    description
+		        "time counters reset in seconds since
+			 midnight 1/1/1970 UTC";
+		}
+
+		leaf rx-bytes {
+		    type uint64;
+		    description
+		        "The number of octets received on this interface.";
+		}
+
+		leaf rx-packets {
+		    type uint64;
+		    description
+		        "The number of packets received on this interface.";
+		}
+
+		leaf rx-unicast-bytes {
+		    type uint64;
+		    description
+		        "The number of unicast octets received on this
+		         interface.";
+		}
+
+		leaf rx-unicast-packets {
+		    type uint64;
+		    description
+		        "The number of unicast packets received on
+		         this interface.";
+		}
+
+		leaf rx-multicast-bytes {
+		    type uint64;
+		    description
+		        "The number of multicast octets received on
+		         this interface.";
+		}
+
+		leaf rx-multicast-packets {
+		    type uint64;
+		    description
+		        "The number of multicast packets received on
+		         this interface.";
+		}
+
+		leaf rx-broadcast-bytes {
+		    type uint64;
+		    description
+		        "The number of broadcast octets received on
+		         this interface.";
+		}
+
+	        leaf rx-broadcast-packets {
+		    type uint64;
+		    description
+		        "The number of unicast packets received on
+		         this interface.";
+		}
+
+		leaf rx-ip4 {
+		    type uint64;
+		    description
+		        "The number of IPv4 packets received on this
+		         interface.";
+		}
+
+		leaf rx-ip6 {
+		    type uint64;
+		    description
+		        "The number of IPv6 packets received on this
+		         interface.";
+		}
+
+		leaf rx-mpls {
+		    type uint64;
+		    description
+		        "The number of MPLS packets received on this
+		         interface.";
+		}
+
+		leaf tx-bytes {
+		    type uint64;
+		    description
+		        "The number of octets transmitted on this interface.";
+		}
+
+		leaf tx-packets {
+		    type uint64;
+		    description
+		        "The number of packets transmitted on this interface.";
+		}
+
+		leaf tx-unicast-bytes {
+		    type uint64;
+		    description
+		        "The number of unicast octets transmitted on
+		         this interface.";
+		}
+
+		leaf tx-unicast-packets {
+		    type uint64;
+		    description
+		        "The number of unicast packets transmitted on
+		         this interface.";
+		}
+
+		leaf tx-multicast-bytes {
+		    type uint64;
+		    description
+		        "The number of multicast octets transmitted on
+		         this interface.";
+		}
+
+		leaf tx-multicast-packets {
+		    type uint64;
+		    description
+		        "The number of multicast packets transmitted
+		         on this interface.";
+		}
+
+		leaf tx-broadcast-bytes {
+		    type uint64;
+		    description
+		        "The number of broadcast octets transmitted on
+		         this interface.";
+		}
+
+		leaf tx-broadcast-packets {
+		    type uint64;
+		    description
+		        "The number of broadcast packets transmitted
+		         on this interface.";
+		}
+
+		leaf rx-error {
+		    type uint64;
+		    description
+		        "The number of receive errors on this interface.";
+		}
+
+		leaf tx-error {
+		    type uint64;
+		    description
+		        "The number of transmit errors on this interface.";
+		}
+
+		leaf drop {
+		    type uint64;
+		    description
+		        "The number of packet drops on this interface.";
+		}
+
+		leaf punt {
+		    type uint64;
+		    description
+		        "The number of punts on this interface.";
+		}
+
+		leaf rx-miss {
+		    type uint64;
+		    description
+		        "The number of receiver misses on this interface.";
+		}
+
+		leaf rx-no-buffer {
+		    type uint64;
+		    description
+		        "The number of packets dropped due to no receive
+			 buffers on this interface.";
+		}
+	    }
+
+	    container access-list {
+		description
+		    "If the interface has any Access Control Lists,
+		     they are listed here in two groups: those that apply
+		     to packet ingress and those that apply to egresss.
+		     The two sets of ACLs are sorted independenty and
+		     applied in ascending sequence-number order.";
+
+		container input {
+		    description
+			"These are the ACL rule-sets that apply to ingress
+			packets.";
+
+		    list acl-list {
+			key "acl-name";
+			description
+			    "Each ACL rule-set can appear at most once within
+			     the input list.";
+
+			leaf acl-name {
+			    type string;
+			    description
+				"This is the name of an ACL rule-set
+				 that will be be applied to packets on
+				 this interface.";
+			}
+		    }
+		}
+
+		container output {
+		    description
+			"These are the ACL rule-sets that apply to egress
+			 packets.";
+
+		    list acl-list {
+			key "acl-name";
+			description
+			    "Each ACL rule-set can appear at most once within
+			     the output list.";
+
+			leaf acl-name {
+			    type string;
+			    description
+				"This is the name of an ACL rule-set
+				 that will be be applied to packets on
+				 this interface.";
+			}
+		    }
+		}
+
+		container macip {
+		    description
+			"An interface may also have at most one ACL
+			 based upon a combination of MAC address and
+			 IP.  If that ACL is present, it is always on
+			 the ingress packets.";
+
+		    leaf macip-name {
+			type string;
+			description
+			    "This name references at most one MACIP ingress
+			     rule-set from the ACL MACIP tables.";
+		    }
+		}
+	    }
+
+	    container bond {
+		description
+		    "If the interface is being used as a slave, this node
+		     contains the corresponding bond interface.";
+
+		leaf if-name {
+		    type ngcom:if-identifier-63;
+		    description
+			"The name of the bond interface.";
+		}
+	    }
+
+	    container slave-if-table {
+		description
+		    "If the interface is a bond interface, this node
+		     contains the list of its slave interfaces.";
+
+		list slave-if {
+		    key "if-name";
+		    description
+			"Slave interface.";
+
+		    leaf if-name {
+			type ngcom:if-identifier-63;
+			description
+			    "The name of the slave interface.";
+		    }
+		}
+	    }
+	}
+
+	container bridge-table {
+	    description
+		"Bridge mapping table.";
+
+	    list bridge-entry {
+		key "bdi";
+		description
+		    "Bridge Domain Id.";
+
+		leaf bdi {
+		    type uint32 {
+			range "1..16777215";
+		    }
+		    mandatory true;
+		    description
+			"The Bridge Domain Identifier.  A unique number
+			 for this entry.";
+		}
+
+		leaf flood {
+		    type boolean;
+		    description
+			"Broadcast/multicast flooding in the bd";
+		}
+
+		leaf uu-flood {
+		    type boolean;
+		    description
+			"Unknown unicast flood in the bd";
+		}
+
+		leaf forward {
+		    type boolean;
+		    description
+			"Forwarding on all interfaces in the bd";
+		}
+
+		leaf learn {
+		    type boolean;
+		    description
+			"Learning on all interfaces in the bd";
+		}
+
+		leaf arp-term {
+		    type boolean;
+		    description
+			"ARP termination in the bd";
+		}
+
+		leaf mac-age {
+		    type uint8;
+		    description
+			"MAC aging time in min, 0 for disabled.";
+		}
+
+		leaf bvi-if-name {
+		    type ngcom:if-identifier-63;
+		    description
+			"Bridge virtual interface name.";
+		}
+
+		container domain-if-members {
+		    description
+			"Bridge Domain Interface Members.";
+
+		    list domain-if {
+			key "if-name";
+			description
+			    "Bridge domain interface members.";
+
+			leaf if-name {
+			    type ngcom:if-identifier-63;
+			    description
+				"The name of an interface that is a
+				 member of this bridge domain.";
+			}
+
+			leaf shg {
+			    type string;
+			    description
+				"The split horizon group ID to which
+				 this interface belongs.";
+			}
+		    }
+		}
+
+		container bridge-arp-table {
+		    description
+			"Bridge ARP Entry Table.";
+
+		    list bridge-arp-entry {
+			key "ip-address";
+			description
+			    "Bridge ARP entry table.";
+
+			leaf ip-address {
+			    type inet:ip-address-no-zone;
+			    description
+				"The IPv4 or IPv6 address of an ARP entry.";
+			}
+
+			leaf mac-address {
+			    type yang:mac-address;
+			    description
+				"The MAC address of an ARP entry.";
+			}
+		    }
+		}
+	    }
+	}
+
+	container loopback-table {
+	    description
+		"Loopback name table.";
+
+	    list loopback {
+		key "name";
+		description
+		    "Loopback name.";
+
+		leaf name {
+		    type string;
+		    description
+			"The identifier.  A unique name
+			 for this Loopback entry.";
+		}
+
+		leaf instance {
+		    type uint16;
+		    description
+			"Each Loopback creates an interface.
+			 The interface will be named 'loopback<X>',
+			 where the <X> is the instance number.
+			 The instance number must be unique
+			 across all Loopback interfaces.";
+		}
+
+		leaf mac-address {
+		    type yang:mac-address;
+		    description
+			"The MAC address for the interface.";
+		}
+
+		leaf description {
+		    type string;
+		    description
+			"A user description of the Loopback.";
+		}
+	    }
+	}
+
+	container socket-table {
+	    description
+		"Host memif socket table.";
+
+	    list socket {
+		key "id";
+		description
+		    "A unique 32-bit integer identifying this socket
+		     filename.";
+
+		leaf id {
+		    type uint32 {
+			range "1..4294967294";
+		    }
+		    mandatory true;
+		    description
+			"This is the user assigned id of the socket
+			 filename.";
+		}
+		leaf filename {
+		    type string;
+		    description
+			"The path to a socket file used for establishing
+			 memif connections.  A socket can be used for
+			 either master or slave interfaces, but not both.
+			 A socket can have more than one master using it,
+			 or it can have more than one slave using it.";
+		}
+	    }
+	}
+
+	container memif-table {
+	    description
+		"Host memif interface state table.";
+
+	    list memif-entry {
+		key "memif-id";
+		description
+		    "A unique 32-bit integer identifying this interface.";
+
+		leaf memif-id {
+		    type uint32;
+		    mandatory true;
+		    description
+			"This is the user assigned id of the memif
+			 interface.";
+		}
+
+		leaf admin-up {
+		    type boolean;
+		    description
+			"If true the interface is administratively 'up'.";
+		}
+
+		leaf buffer-size {
+		    type uint32;
+		    description
+			"The size of the buffer allocated for each
+			 ring entry.  Default 2048.";
+		}
+
+		leaf if-name {
+		    type ngcom:if-identifier-63;
+		    description
+			"The name of the corresponding interface.";
+		}
+
+		leaf link-up {
+		    type boolean;
+		    description
+			"If true the interface is link is 'up'.";
+		}
+
+		leaf mac-address {
+		    type yang:mac-address;
+		    description
+			"The MAC address of the interface.";
+		}
+
+		leaf memif-name {
+		    type ngcom:if-identifier-63;
+		    description
+			"The name of memif interface.";
+		}
+
+		leaf mode {
+		    type string;
+		    description
+			"Should be 'ethernet', 'IP' or 'punt/inject'.";
+		}
+
+		leaf ring-size {
+		    type uint32;
+		    description
+			"The number of entries in the rx/tx rings.
+			 The number of entries must be a power of 2
+			 This number is that power of 2, between 8 and 32.
+			 The default is 10, for 1024 entries.";
+		}
+
+		leaf role {
+		    type string;
+		    description
+			"Should be 'master', or 'slave'.";
+		}
+
+		leaf socket-id {
+		    type uint32;
+		    description
+			"The id of a memif socket filename.";
+		}
+	    }
+	}
+
+	container tap-table {
+	    description
+		"Host Tap table.";
+
+	    list tap {
+		key "host-name";
+		description
+		    "Unique identifing host tap name.";
+
+		leaf host-name {
+		    type string;
+		    description
+			"The name of the tap on the host system.";
+		}
+
+		leaf host-bridge {
+		    type string;
+		    description
+			"The host bridge to which the tap will be attached.";
+		}
+
+		leaf host-ipv4-prefix {
+		    type inet:ipv4-prefix;
+		    description
+			"The IPv4 prefix on the interface.";
+		}
+
+		leaf host-ipv6-prefix {
+		    type inet:ipv6-prefix;
+		    description
+			"The IPv6 prefix on the interface.";
+		}
+
+		leaf host-mac-address {
+		    type yang:mac-address;
+		    description
+			"The MAC address of the host tap interface.";
+		}
+
+		leaf host-namespace {
+		    type string;
+		    description
+			"The host namespace in which the tap will be made.";
+		}
+
+		leaf instance {
+		    type uint32;
+		    description
+			"The tap instance number.";
+		}
+
+		leaf rx-ring-size {
+		    type uint8 {
+			range "0..15";
+		    }
+		    description
+			"A power of 2 between 0 and 15 inclusive yielding
+			 a receive ring size 32 to 32768 entries.  The
+			 default is 8 (256 entries).";
+		}
+
+		leaf tx-ring-size {
+		    type uint8 {
+			range "0..15";
+		    }
+		    description
+			"A power of 2 between 0 and 15 inclusive yielding
+			 a transmit ring size 32 to 32768 entries.  The
+			 default is 8 (256 entries).";
+		}
+	    }
+	}
+
+	container bond-table {
+	    description
+		"Bond interface state table.";
+
+	    list bond {
+		key "instance";
+		description
+		    "Bond interface.";
+
+		leaf instance {
+		    type uint32;
+		    description
+			"The identifier. A unique number
+			 for this bond interface.";
+		}
+
+		leaf if-name {
+		    type ngcom:if-identifier-63;
+		    description
+			"The name of the bond interface.";
+		}
+
+		leaf mode {
+		    type bond-mode;
+		    mandatory true;
+		    description
+			"The mode for the interface.";
+		}
+
+		leaf mac-address {
+		    type yang:mac-address;
+		    description
+			"The MAC address for the interface.";
+		}
+
+		leaf load-balance {
+		    type bond-load-balance;
+		    default l2;
+		    description
+			"The load balance for the interface.";
+		}
+
+		leaf active-slaves {
+		    type uint32;
+		    description
+			"The number of active slaves.";
+		}
+
+		leaf slaves {
+		    type uint32;
+		    description
+			"The total number of slaves.";
+		}
+
+		container slave-if-table {
+		    description
+			"The list of slave interfaces.";
+
+		    list slave-if {
+			key "if-name";
+			description
+			    "Slave interface.";
+
+			leaf if-name {
+			    type ngcom:if-identifier-63;
+			    description
+				"The name of a slave interface.";
+			}
+
+			leaf passive {
+			    type boolean;
+			    default false;
+			    description
+				"The slave interface does not
+				 initiate the LACP protocol,
+				 remote must be active speaker.";
+			}
+
+			leaf long-timeout {
+			    type boolean;
+			    default false;
+			    description
+				"90 seconds VS default 3 seconds
+				 neighbor timeout.";
+			}
+		    }
+		}
+	    }
+	}
+
+	container lacp-table {
+	    description
+		"Link Aggregation Control Protocol (LACP)
+		 state table.";
+
+	    list lacp-entry {
+		key "slave-if-name";
+		description
+		    "LACP entry.";
+
+		leaf slave-if-name {
+		    type ngcom:if-identifier-63;
+		    description
+			"The name of the slave interface.";
+		}
+
+		leaf rx-state {
+		    type lacp-rx-state;
+		    description
+			"The RX machine state for the interface.";
+		}
+
+		leaf tx-state {
+		    type lacp-tx-state;
+		    description
+			"The TX machine state for the interface.";
+		}
+
+		leaf mux-state {
+		    type lacp-mux-state;
+		    description
+			"The MUX machine state for the interface.";
+		}
+
+		leaf ptx-state {
+		    type lacp-ptx-state;
+		    description
+			"The PTX machine state for the interface.";
+		}
+
+		leaf bond-if-name {
+		    type ngcom:if-identifier-63;
+		    description
+			"The name of the bond interface.";
+		}
+		
+		container actor {
+		    description
+			"The actor parameters.";
+
+		    leaf system-priority {
+			type uint16;
+			description
+			    "The actor system priority.";
+		    }
+
+		    leaf system {
+			type yang:mac-address;
+			description
+			    "The actor system.";
+		    }
+
+		    leaf key {
+			type uint16;
+			description
+			    "The actor key.";
+		    }
+
+		    leaf port-priority {
+			type uint16;
+			description
+			    "The actor port priority.";
+		    }
+
+		    leaf port-number {
+			type uint16;
+			description
+			    "The actor port number.";
+		    }
+
+		    leaf state {
+			type uint8;
+			description
+			    "The actor state.";
+		    }
+		}
+
+		container partner {
+		    description
+			"The partner parameters.";
+
+		    leaf system-priority {
+			type uint16;
+			description
+			    "The partner system priority.";
+		    }
+
+		    leaf system {
+			type yang:mac-address;
+			description
+			    "The partner system.";
+		    }
+
+		    leaf key {
+			type uint16;
+			description
+			    "The partner key.";
+		    }
+
+		    leaf port-priority {
+			type uint16;
+			description
+			    "The partner port priority.";
+		    }
+
+		    leaf port-number {
+			type uint16;
+			description
+			    "The partner port number.";
+		    }
+
+		    leaf state {
+			type uint8;
+			description
+			    "The partner state.";
+		    }
+		}
+	    }
+	}
+    }
+}

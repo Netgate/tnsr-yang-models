@@ -1,0 +1,142 @@
+module netgate-neighbor {
+
+    namespace "urn:netgate:xml:yang:netgate-neighbor";
+    prefix "ngneigh";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import ietf-yang-types {
+	prefix "yang";
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data-model
+	 for neighbor data.
+
+	 Copyright 2017-2019 Rubicon Communications, LLC.";
+
+    revision 2019-02-15 {
+	description
+	    "TNSR Release 19.02.";
+    }
+
+    revision 2017-11-06 {
+	description
+	    "Initial revision.";
+    }
+
+    container "neighbor-config" {
+	description
+	    "Neighbor configuration data.";
+
+	container neighbor-table {
+	    description
+		"Neighbor mapping table.";
+
+	    list interface {
+		key "if-name";
+		description
+		    "Neighbor table entry.";
+
+		leaf if-name {
+		    type ngcom:if-identifier-63;
+		    description
+			"The interface on which the neighbor entry is found.";
+		}
+
+		container neighbors {
+		    description
+			"Addresses for which there is a neighbor Entry.";
+
+		    list neighbor-entry {
+			key "ip-address";
+			description
+			    "Neighbor entry table.";
+
+			leaf ip-address {
+			    type inet:ip-address-no-zone;
+			    description
+				"The IP address whose MAC address is stated.";
+			}
+
+			leaf mac-address {
+			    type yang:mac-address;
+			    description
+				"The MAC address of an neighbor entry.";
+			}
+
+			leaf is-no-route-table-entry {
+			     type boolean;
+			     description
+				"True if this neighbor entry is shoud have no
+				 entry made in the adjacency route table.";
+			}
+		    }
+		}
+	    }
+	}
+    }
+
+    container "neighbor-state" {
+	description
+	    "Neighbor table state.";
+
+	config "false";
+
+	container neighbor-table {
+	    description
+		"Neighbor mapping table.";
+
+	    list interface {
+		key "if-name";
+		description
+		    "Neighbor table entry.";
+
+		leaf if-name {
+		    type ngcom:if-identifier-63;
+		    description
+			"The interface on which the neighbor entry is found.";
+		}
+
+		container neighbors {
+		    description
+			"Addresses for which there is a neighbor Entry.";
+
+		    list neighbor-entry {
+			key "ip-address";
+			description
+			    "Neighbor entry table.";
+
+			leaf ip-address {
+			    type inet:ip-address-no-zone;
+			    description
+				"The IP address whose MAC address is stated.";
+			}
+
+			leaf mac-address {
+			    type yang:mac-address;
+			    description
+				"The MAC address of an neighbor entry.";
+			}
+
+			leaf is-static {
+			     type boolean;
+			     description
+				"True if this neighbor entry is static.";
+			}
+		    }
+		}
+	    }
+	}
+    }
+}

@@ -1,0 +1,579 @@
+module netgate-route-table {
+
+    namespace "urn:netgate:xml:yang:netgate-route-table";
+    prefix "ngrttab";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data-model
+	 for Route Tables.
+
+	 Copyright 2017-2019 Rubicon Communications, LLC.";
+
+    revision 2019-02-15 {
+	description
+	    "TNSR Release 19.02.";
+    }
+
+    revision 2017-08-26 {
+	description
+	    "Initial Revision.";
+    }
+
+    container route-table-config {
+	description
+	    "Route Table define a set of static IPv4 and IPv6 routes.";
+
+	container static-routes {
+	    description
+		"Static routes.";
+
+	    list route-table {
+		key "name";
+		description
+		    "Route table entries are indexed by their name.
+		     Table names are unique across all address families.";
+
+		leaf name {
+		    type ngcom:rt-identifier-63;
+		    description
+			"The name of a Route Table.";
+		}
+
+		leaf address-family {
+		    type ngcom:ip-address-family;
+		    description
+			"The address family in this route table.
+			 One of 'ipv4' or 'ipv6'.";
+		}
+
+		leaf description {
+		    type string;
+		    description
+			"A description of the route table.";
+		}
+
+		container ipv4-routes {
+		    description
+			"List of IPv4 routes by destination prefix.";
+
+		    list route {
+			key "destination-prefix";
+			description
+			    "Routes are index by their destination.";
+
+			leaf destination-prefix {
+			    type inet:ipv4-prefix;
+			    description
+				"IPv4 destination prefix";
+			}
+
+			leaf description {
+			    type string;
+			    description
+				"A description of the route.";
+			}
+
+			container next-hop {
+			    description
+				"Next-hop configuration.";
+
+			    list hop {
+				key "hop-id";
+				description
+				    "A list of next-hops.";
+
+				leaf hop-id {
+				    type uint32;
+				    description
+					"A unique identifier for
+					 each next-hop.";
+				}
+
+				leaf ipv4-address {
+				    type inet:ipv4-address;
+				    description
+					"The next hop IPv4 address.";
+				}
+
+				leaf if-name {
+				    type ngcom:if-identifier-63;
+				    description
+					"The next hop interface name.";
+				}
+
+				leaf next-hop-table-name {
+				    type ngcom:rt-identifier-63;
+				    description
+					"The next hop route table name.";
+				}
+
+				leaf classify-table-name {
+				    type string;
+				    description
+					"Use the given Classify Table
+					 name as the next hop.";
+				}
+
+				leaf weight {
+				    type uint8;
+				    description
+					"Multipath route weight.";
+				}
+
+				leaf preference {
+				    type uint8;
+				    description
+					"Administrative distance
+					preference.";
+				}
+
+				leaf drop {
+				    type boolean;
+				    description
+					"Drop the packet.";
+				}
+
+				leaf local {
+				    type boolean;
+				    description
+					"Receive the packet locally.";
+				}
+
+				leaf null-send-unreach {
+				    type boolean;
+				    description
+					"Drop packet with an
+					 'unreachable' reply.";
+				}
+
+				leaf null-send-prohibit {
+				    type boolean;
+				    description
+					"Drop packet with n
+					 'prohibited' reply.";
+				}
+
+				leaf resolve-host {
+				    type boolean;
+				    description
+					"Resolve host";
+				}
+
+				leaf resolve-attached {
+				    type boolean;
+				    description
+					"Resolve attached";
+				}
+
+			    }
+			}
+
+		    }
+		}
+
+		container ipv6-routes {
+		    description
+			"List of IPv6 routes by destination prefix.";
+
+		    list route {
+			key "destination-prefix";
+			description
+			    "Routes are index by their destination.";
+
+			leaf destination-prefix {
+			    type inet:ipv6-prefix;
+			    description
+				"IPv6 destination prefix";
+			}
+
+			leaf description {
+			    type string;
+			    description
+				"A description of the route.";
+			}
+
+			container next-hop {
+			    description
+				"Next-hop configuration.";
+
+			    list hop {
+				key "hop-id";
+				description
+				    "A list of next-hops.";
+
+				leaf hop-id {
+				    type uint32;
+				    description
+					"A unique identifier for
+					 each next-hop.";
+				}
+
+				leaf ipv6-address {
+				    type inet:ipv6-address;
+				    description
+					"The next hop IPv6 address.";
+				}
+
+				leaf if-name {
+				    type ngcom:if-identifier-63;
+				    description
+					"The next hop interface name.";
+				}
+
+				leaf next-hop-table-name {
+				    type string;
+				    description
+					"The next hop route table name.";
+				}
+
+				leaf classify-table-name {
+				    type string;
+				    description
+					"Use the given Classify Table
+					 name as the next hop.";
+				}
+
+				leaf weight {
+				    type uint8;
+				    description
+					"Multipath route weight.";
+				}
+
+				leaf preference {
+				    type uint8;
+				    description
+					"Administrative distance
+					preference.";
+				}
+
+				leaf drop {
+				    type boolean;
+				    description
+					"Drop the packet.";
+				}
+
+				leaf local {
+				    type boolean;
+				    description
+					"Receive the packet locally.";
+				}
+
+				leaf null-send-unreach {
+				    type boolean;
+				    description
+					"Drop packet with an
+					 'unreachable' reply.";
+				}
+
+				leaf null-send-prohibit {
+				    type boolean;
+				    description
+					"Drop packet with a
+					 'prohibited' reply.";
+				}
+
+				leaf resolve-host {
+				    type boolean;
+				    description
+					"Resolve host";
+				}
+
+				leaf resolve-attached {
+				    type boolean;
+				    description
+					"Resolve attached";
+				}
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+
+    container route-table-state {
+	description
+	    "Route Table define a set of static IPv4 and IPv6 routes.";
+
+	config "false";
+
+	container static-routes {
+	    description
+		"Static routes.";
+
+	    list route-table {
+		key "name";
+		description
+		    "Route table entries are indexed by their name.
+		     Table names are unique across all address families.";
+
+		leaf name {
+		    type ngcom:rt-identifier-63;
+		    description
+			"The name of a Route Table.";
+		}
+
+		leaf address-family {
+		    type ngcom:ip-address-family;
+		    description
+			"The address family in this route table.
+			 One of 'ipv4' or 'ipv6'.";
+		}
+
+		leaf description {
+		    type string;
+		    description
+			"A description of the route table.";
+		}
+
+		container ipv4-routes {
+		    description
+			"List of IPv4 routes by destination prefix.";
+
+		    list route {
+			key "destination-prefix";
+			description
+			    "Routes are index by their destination.";
+
+			leaf destination-prefix {
+			    type inet:ipv4-prefix;
+			    description
+				"IPv4 destination prefix";
+			}
+
+			leaf description {
+			    type string;
+			    description
+				"A description of the route.";
+			}
+
+			container next-hop {
+			    description
+				"Next-hop configuration.";
+
+			    list hop {
+				key "hop-id";
+				description
+				    "A list of next-hops.";
+
+				leaf hop-id {
+				    type uint32;
+				    description
+					"A unique identifier for
+					 each next-hop.";
+				}
+
+				leaf ipv4-address {
+				    type inet:ipv4-address;
+				    description
+					"The next hop IPv4 address.";
+				}
+
+				leaf if-name {
+				    type ngcom:if-identifier-63;
+				    description
+					"The next hop interface name.";
+				}
+
+				leaf next-hop-table-name {
+				    type ngcom:rt-identifier-63;
+				    description
+					"The next hop route table name.";
+				}
+
+				leaf classify-table-name {
+				    type string;
+				    description
+					"Use the given Classify Table
+					 name as the next hop.";
+				}
+
+				leaf weight {
+				    type uint8;
+				    description
+					"Multipath route weight.";
+				}
+
+				leaf preference {
+				    type uint8;
+				    description
+					"Administrative distance
+					preference.";
+				}
+
+				leaf drop {
+				    type boolean;
+				    description
+					"Drop the packet.";
+				}
+
+				leaf local {
+				    type boolean;
+				    description
+					"Receive the packet locally.";
+				}
+
+				leaf null-send-unreach {
+				    type boolean;
+				    description
+					"Drop packet with an
+					 'unreachable' reply.";
+				}
+
+				leaf null-send-prohibit {
+				    type boolean;
+				    description
+					"Drop packet with n
+					 'prohibited' reply.";
+				}
+
+				leaf resolve-host {
+				    type boolean;
+				    description
+					"Resolve host";
+				}
+
+				leaf resolve-attached {
+				    type boolean;
+				    description
+					"Resolve attached";
+				}
+
+			    }
+			}
+
+		    }
+		}
+
+		container ipv6-routes {
+		    description
+			"List of IPv6 routes by destination prefix.";
+
+		    list route {
+			key "destination-prefix";
+			description
+			    "Routes are index by their destination.";
+
+			leaf destination-prefix {
+			    type inet:ipv6-prefix;
+			    description
+				"IPv6 destination prefix";
+			}
+
+			leaf description {
+			    type string;
+			    description
+				"A description of the route.";
+			}
+
+			container next-hop {
+			    description
+				"Next-hop configuration.";
+
+			    list hop {
+				key "hop-id";
+				description
+				    "A list of next-hops.";
+
+				leaf hop-id {
+				    type uint32;
+				    description
+					"A unique identifier for
+					 each next-hop.";
+				}
+
+				leaf ipv6-address {
+				    type inet:ipv6-address;
+				    description
+					"The next hop IPv6 address.";
+				}
+
+				leaf if-name {
+				    type ngcom:if-identifier-63;
+				    description
+					"The next hop interface name.";
+				}
+
+				leaf next-hop-table-name {
+				    type string;
+				    description
+					"The next hop route table name.";
+				}
+
+				leaf classify-table-name {
+				    type string;
+				    description
+					"Use the given Classify Table
+					 name as the next hop.";
+				}
+
+				leaf weight {
+				    type uint8;
+				    description
+					"Multipath route weight.";
+				}
+
+				leaf preference {
+				    type uint8;
+				    description
+					"Administrative distance
+					preference.";
+				}
+
+				leaf drop {
+				    type boolean;
+				    description
+					"Drop the packet.";
+				}
+
+				leaf local {
+				    type boolean;
+				    description
+					"Receive the packet locally.";
+				}
+
+				leaf null-send-unreach {
+				    type boolean;
+				    description
+					"Drop packet with an
+					 'unreachable' reply.";
+				}
+
+				leaf null-send-prohibit {
+				    type boolean;
+				    description
+					"Drop packet with a
+					 'prohibited' reply.";
+				}
+
+				leaf resolve-host {
+				    type boolean;
+				    description
+					"Resolve host";
+				}
+
+				leaf resolve-attached {
+				    type boolean;
+				    description
+					"Resolve attached";
+				}
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+}

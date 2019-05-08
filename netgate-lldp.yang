@@ -1,0 +1,39 @@
+module netgate-lldp {
+
+    namespace "urn:netgate:xml:yang:netgate-lldp";
+    prefix "nglldp";
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+        "This YANG module provides a data model for the VPP LLDP Service.
+
+	 Copyright 2019 Rubicon Communications, LLC.";
+
+    revision 2019-02-15 {
+	description
+	    "TNSR Release 19.02.";
+    }
+
+    container lldp-config {
+	leaf system-name {
+	    type string;
+            description
+	        "LLDP system name";
+        }
+
+	leaf tx-hold {
+	    type uint16;
+	    description
+	        "transmit hold time";
+	}
+
+	leaf tx-interval {
+	    type uint16;
+	    description
+	        "transmit interval";
+        }
+    }
+}
