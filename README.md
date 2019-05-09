@@ -1,7 +1,7 @@
 # TNSR YANG Models
 
-These files are provided for users of TNSR by Netgate LLC and are prefixed
-ith "netgate-".
+These files are provided by Rubicon Communications, LLC (Netgate) for users of
+TNSR (tnsr.com). Files prefixed with "netgate-" are specific to TNSR.
 
 Files prefixed "ietf-" are published by the [IETF](https://www.ietf.org/).
 
