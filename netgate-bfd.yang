@@ -18,6 +18,11 @@ module netgate-bfd {
 	 Copyright 2017-2019 Rubicon Communications, LLC.
 	 ";
 
+    revision 2019-12-15 {
+	description
+	    "TNSR Release 19.12.";
+    }
+
     revision 2019-08-30 {
 	description
 	    "TNSR Release 19.08.";
@@ -267,6 +272,18 @@ module netgate-bfd {
 		    type uint32;
 		    description
 			"The session number.";
+		}
+
+		leaf session-name {
+		    type string;
+		    description
+			"session name";
+		}
+
+		leaf interface {
+		    type string;
+		    description
+			"interface name";
 		}
 
 		leaf local-ip-address {

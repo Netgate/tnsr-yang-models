@@ -1,0 +1,1594 @@
+module netgate-ospf6 {
+
+    namespace "urn:netgate:xml:yang:netgate-ospf6";
+    prefix "ngospf6";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import ietf-yang-types {
+	prefix "yang";
+    }
+
+    import netgate-route {
+	prefix "ngrt";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data-model
+	 for OSPFv3 data.
+
+	 Copyright 2019 Rubicon Communications, LLC.
+	 ";
+
+    revision 2019-12-15 {
+	description
+	    "TNSR Release 19.12.";
+    }
+
+    typedef ospf6-area-id {
+	type union {
+	    type uint32;
+	    type yang:dotted-quad;
+	}
+    }
+
+    typedef ospf6-redistribution {
+	type enumeration {
+	    enum bgp {
+		description
+		    "BGP";
+	    }
+	    enum connected {
+		description
+		    "Connected";
+	    }
+	    enum kernel {
+		description
+		    "Kernel";
+	    }
+	    enum table {
+		description
+		    "Table";
+	    }
+	}
+    }
+
+    typedef ospf6-network-type {
+	type enumeration {
+	    enum broadcast {
+		description
+		    "Broadcast multi-access network.";
+	    }
+
+	    enum point-to-point {
+		description
+		    "Point-to-point network.";
+	    }
+	}
+    }
+
+    typedef ospf6-dead-interval {
+	type uint16 {
+	    range "1..65535";
+	}
+    }
+
+    typedef ospf6-message-send-recv {
+	type enumeration {
+	    enum send {
+		description
+		    "If specified, only sent packets are requested.";
+	    }
+
+	    enum recv {
+		description
+		    "If specified, only received  packets are requested.";
+	    }
+	}
+    }
+
+    typedef ospf6-debug-neighbor-option {
+	type enumeration {
+	    enum event {
+		description
+		    "Debug OSPF6 neighbor events.";
+	    }
+
+	    enum state {
+		description
+		    "Debug OSPF6 neighbor state changes.";
+	    }
+	}
+    }
+
+    typedef ospf6-show-request {
+	type enumeration {
+	    enum area {
+		description
+		    "Show area information.";
+	    }
+
+	    enum border-routers {
+		description
+		    "Show all the ABR's and ASBR's.";
+	    }
+
+	    enum database {
+		description
+		    "Database summary.";
+	    }
+
+	    enum default {
+		description
+		    "Show default information.";
+	    }
+
+	    enum interface {
+		description
+		    "Interface information.";
+	    }
+
+	    enum linkstate {
+		description
+		    "Linkstate information.";
+	    }
+
+	    enum neighbor {
+		description
+		    "Neighbor list.";
+	    }
+
+	    enum neighbor-detail {
+		description
+		    "Neighbor detailed list.";
+	    }
+
+	    enum route-table {
+		description
+		    "OSPF routing table.";
+	    }
+
+	    enum spf {
+		description
+		    "SPF Information.";
+	    }
+	}
+    }
+
+    typedef ospf6-show-parameter {
+	type inet:ipv4-address-no-zone;
+    }
+
+    grouping ospf6-message-send-recv {
+	description
+	    "Packet debug flags can specify a either a 'send' or
+	     a 'recv' direction limiter, or if absent, both.";
+
+	leaf direction {
+	    type ospf6-message-send-recv;
+	    description
+		"Debug packets sent or received.
+		 Missing is both.";
+	}
+    }
+
+    grouping ospf6-debug-lsa-options {
+	description
+	    "LSA debug detail options.";
+
+	leaf no-options {
+	    type boolean;
+	    description
+		"If true, debug the LSA without options.";
+	}
+
+	leaf examine {
+	    type boolean;
+	    description
+		"Print LSAs.";
+	}
+
+	leaf flooding {
+	    type boolean;
+	    description
+		"Print LSA's internal information.";
+	}
+
+	leaf originate {
+	    type boolean;
+	    description
+		"Print LSA details.";
+	}
+    }
+
+    rpc ospf6-show {
+	input {
+	    leaf request {
+		type ospf6-show-request;
+		description
+		    "An OSPF show request type.";
+
+	    }
+	    leaf param {
+		type ospf6-show-parameter;
+		description
+		    "An additional parameter string.";
+	    }
+	}
+	output {
+	    leaf stdout {
+		type string;
+	    }
+	}
+    }
+
+    augment "/ngrt:route-config/ngrt:dynamic" {
+
+	container ospf6 {
+
+	    container global-options {
+		description
+		    "These are options that apply to the OSPF6 Server or
+		     to all OSPF6 Router configurations.";
+
+		container debug {
+		    description
+			"OSPF6 debug configurations.";
+
+		    leaf abr {
+			type boolean;
+			description
+			    "Debug ABR.";
+		    }
+
+		    leaf asbr {
+			type boolean;
+			description
+			    "Debug ASBR.";
+		    }
+
+		    container border-routers {
+			description
+			    "Debug border routers by area or router id.";
+
+			leaf area-id {
+			    type yang:dotted-quad;
+			    description
+				"Debug the border-routers with the
+				 given area-id.";
+			}
+
+			leaf router-id {
+			    type yang:dotted-quad;
+			    description
+				"Debug the border-routers with the
+				 given router-id.";
+			}
+		    }
+
+		    leaf flooding {
+			type boolean;
+			description
+			    "Debug flooding.";
+		    }
+
+		    leaf interface {
+			type boolean;
+			description
+			    "Debug interfaces.";
+		    }
+
+		    container lsa {
+			description
+			    "Debug OSPF link state advertisement";
+
+			container as-external {
+			    description
+				"Debug AS-external LSAs.";
+
+			    uses ospf6-debug-lsa-options;
+			}
+
+			container inter-prefix {
+			    description
+				"Debug inter-area-prefix LSAs.";
+
+			    uses ospf6-debug-lsa-options;
+			}
+
+			container inter-router {
+			    description
+				"Debug inter-router LSAs.";
+
+			    uses ospf6-debug-lsa-options;
+			}
+
+			container intra-prefix {
+			    description
+				"Debug intra-area-prefix LSAs.";
+
+			    uses ospf6-debug-lsa-options;
+			}
+
+			container link {
+			    description
+				"Debug link LSAs.";
+
+			    uses ospf6-debug-lsa-options;
+			}
+
+			container network {
+			    description
+				"Debug network LSAs.";
+
+			    uses ospf6-debug-lsa-options;
+			}
+
+			container router {
+			    description
+				"Debug router LSAs.";
+
+			    uses ospf6-debug-lsa-options;
+			}
+
+			container unknown {
+			    presence
+				"If present, debug unknown LSAs.";
+
+			    uses ospf6-debug-lsa-options;
+			}
+		    }
+
+		    container message {
+			description
+			    "Debug OSPF6 messages.";
+
+			container dbdesc {
+			    presence
+				"If present, debug database
+				 description packets.";
+
+			    uses ospf6-message-send-recv;
+			}
+
+			container hello {
+			    presence
+				"If present, debug hello packets.";
+
+			    uses ospf6-message-send-recv;
+			}
+
+			container ls-ack {
+			    presence
+				"If present, debug link state ACK packets.";
+
+			    uses ospf6-message-send-recv;
+			}
+
+			container ls-request {
+			    presence
+				"If present, debug link state request
+				 packets.";
+
+			    uses ospf6-message-send-recv;
+			}
+
+			container ls-update {
+			    presence
+				"If present, debug ls-update packets.";
+
+			    uses ospf6-message-send-recv;
+			}
+
+			container unknown {
+			    presence
+				"If present, debug unknown packets.";
+
+			    uses ospf6-message-send-recv;
+			}
+		    }
+
+		    container neighbor {
+			presence
+			    "If present, debug neighbors.";
+
+			leaf option {
+			    type ospf6-debug-neighbor-option;
+			    description
+				"Debug only 'event' or 'state' changes.";
+			}
+		    }
+
+		    container route {
+			description
+			    "Debug OSPF6 routes.";
+
+			leaf inter-area {
+			    type boolean;
+			    description
+				"Debug inter-area route calculation.";
+			}
+
+			leaf intra-area {
+			    type boolean;
+			    description
+				"Debug intra-area route calculation.";
+			}
+
+			leaf memory {
+			    type boolean;
+			    description
+				"Debug route memory use.";
+			}
+
+			leaf table {
+			    type boolean;
+			    description
+				"Debug route table calculation.";
+			}
+		    }
+
+		    container spf {
+			description
+			    "Debug OSPF6 SPF calculation.";
+
+			leaf database {
+			    type boolean;
+			    description
+				"Log number of LSAs at SPF calculation time.";
+			}
+
+			leaf process {
+			    type boolean;
+			    description
+				"Debug SPF process in detail.";
+			}
+
+			leaf time {
+			    type boolean;
+			    description
+				"Measure time take by SPF calculations.";
+			}
+		    }
+
+		    container zebra {
+			description
+			    "Debug OSPF6 Zebra messages.";
+
+			container messages {
+			    presence
+				"If present, debug Zebra messages.";
+
+			    uses ospf6-message-send-recv;
+			}
+		    }
+		}
+
+		leaf enable {
+		    type boolean;
+		    default false;
+		    description
+			"If true, the OSPF6 Daemon is enabled.";
+		}
+	    }
+
+	    container interfaces {
+		description
+		    "OSPF6 configuration informataion for interfaces
+		     includes enablement, cost, and timing data.";
+
+		list if {
+		    key if-name;
+
+		    leaf if-name {
+			type string;
+			description
+			    "The interface with OSPF6 enabled on it.";
+		    }
+
+		    container advertise {
+			description
+			    "Advertising options.";
+
+			leaf prefix-list-name {
+			    type string;
+			    description
+				"Use prefix-list as a filter.";
+			}
+		    }
+
+		    container cost {
+			description
+			    "Interface costs.";
+
+			leaf outgoing {
+			    type uint16 {
+				range "1..65535";
+			    }
+			    description
+				"The outgoing metric for this interface.";
+			}
+		    }
+
+		    container dead-interval {
+			description
+			    "Interval time after which a neighbor is
+			     declared dead.  The interval is a number of
+			     seconds in the range [1..65535].";
+
+			leaf interval {
+			    type uint16 {
+				range "1..65535";
+			    }
+			    description
+				"Interval time after which a neighbor
+				 is declared dead.";
+			}
+		    }
+
+		    container hello-interval {
+			description
+			    "The interval between hello packets.";
+
+			leaf interval {
+			    type uint16 {
+				range "1..65535";
+			    }
+			    description
+				"The interval between hello packets,
+				 in seconds, 1..65535.";
+			}
+		    }
+
+		    leaf ifmtu {
+			type uint16 {
+			    range "1..65535";
+			}
+			description
+			    "MTU parameter for an interface.";
+		    }
+
+		    leaf instance-id {
+			type uint16 {
+			    range "0..255";
+			}
+			description
+			    "Instance ID of the interface.";
+		    }
+
+		    leaf mtu-ignore {
+			type boolean;
+			description
+			    "Disable MTU mismatch detection on this
+			     interface";
+		    }
+
+		    container network {
+			description
+			    "Network parameters";
+
+			leaf type {
+			    type ospf6-network-type;
+			    description
+				"OSPF6 Network type is one of 'broadcast',
+				 or 'point-to-point'.";
+			}
+		    }
+
+		    leaf passive {
+			type boolean;
+			description
+			    "If true, the interface will be passive and
+			     no adjacency will be formed.";
+		    }
+
+		    leaf priority {
+			type uint8;
+			description
+			    "Router priority, 0..255.";
+		    }
+
+		    container retransmit {
+			description
+			    "Time in seconds between retransmitting lost
+			     link state advertisements.";
+
+			leaf interval {
+			    type uint16 {
+				range "1..65535";
+			    }
+			    description
+				"Interval between retransmitting lost
+				 LSAs, in seconds.";
+			}
+		    }
+
+		    container transmit-delay {
+			description
+			    "Link state transmit delay information.";
+
+			leaf delay {
+			    type uint16 {
+				range "1..3600";
+			    }
+			    description
+				"The LSA transmit delay, 1..3600
+				 in seconds.";
+			}
+		    }
+
+		    leaf bfd {
+			type boolean;
+			description
+			    "Bidirectional Forwarding Detection (BFD)
+			     is enabled for this interface.";
+		    }
+		}
+	    }
+
+	    container routers {
+		description
+		    "Table of OSPF6 Router instances .";
+
+		container router {
+		    description
+			"The router contains all information for one instance
+			 of the OSPF6 protocol as supported by FRR.";
+
+		    container areas {
+			description
+			    "The OSPF6 protocol operates on independent
+			     link state regions called 'areas'.";
+
+			list area {
+			    key area-id;
+
+			    leaf area-id {
+				type ospf6-area-id;
+				description
+				    "Each area must have a unique ID
+				     that takes the form of either a
+				     dotted-quad or an unsigned 32-bit
+				     number, interchangeably.  That
+				     is, dotted-quad 0.0.0.1 is the
+				     same as the unsigned number 1.";
+			    }
+
+			    container ranges {
+				description
+				    "Summarize intra-area paths from
+				     speified area into one Type-3
+				     Summary LSA announced to other areas.";
+
+				list range {
+				    key "prefix";
+
+				    leaf prefix {
+					type inet:ipv6-prefix;
+					description
+					    "Area range IPv6 prefix.";
+				    }
+
+				    container range-data {
+					presence
+					    "If present, hold range
+					     data for the prefix.";
+
+					leaf not-advertise {
+					    type boolean;
+					    description
+						"If true, do not advertise
+						 this prefix.";
+					}
+
+					leaf cost {
+					    type uint32 {
+						range "0..16777215";
+					    }
+					    description
+						"Cost metric for this range.";
+					}
+				    }
+				}
+			    }
+
+			    container stub {
+				presence
+				    "If present, configure area as a stub.";
+
+				leaf no-summary {
+				    type boolean;
+				    description
+					"Do not inject inter-area routes
+					 into stub.";
+				}
+			    }
+			}
+		    }
+
+		    container auto-cost {
+			leaf reference-bandwidth {
+			    type uint32 {
+				range "1..4294967";
+			    }
+			    description
+				"The reference bandwidth, 1..4294967,
+				 in MBits/sec.";
+			}
+		    }
+
+		    container distance {
+			description
+			    "OSPF6 administrative distances for routes.";
+
+			leaf administrative {
+			    type uint8 {
+				range "1..255";
+			    }
+			    description
+				"OSPF6 administrative distance.";
+			}
+
+			leaf external {
+			    type uint8 {
+				range "1..255";
+			    }
+			    description
+				"OSPF6 administrative distance for external
+				 routes.";
+			}
+
+			leaf inter-area {
+			    type uint8 {
+				range "1..255";
+			    }
+			    description
+				"OSPF6 administrative distance for inter-area
+				 routes.";
+			}
+
+			leaf intra-area {
+			    type uint8 {
+				range "1..255";
+			    }
+			    description
+				"OSPF6 administrative distance for intra-area
+				 routes.";
+			}
+		    }
+
+		    container interfaces {
+			description
+			    "OSPF6 configuration informataion for
+			     interfaces includes enablement,
+			     cost and timing data.";
+
+			list if {
+			    key if-name;
+
+			    leaf if-name {
+				type string;
+				description
+				    "The interface with OSPF6 enabled
+				    on it.";
+			    }
+
+			    leaf area-id {
+				type inet:ipv4-address-no-zone;
+				description
+				    "The dotted-quad area identifier.";
+			    }
+			}
+		    }
+
+		    container log-adjacency-changes {
+			presence
+			    "If present, changes in adjacency state
+			     will be logged.";
+
+			leaf detail {
+			    type boolean;
+			    description
+				"If true, all state changes will be logged.";
+			}
+		    }
+
+		    container ospf6 {
+			description
+			    "OSPF6 attributes.";
+
+			leaf router-id {
+			    type yang:dotted-quad;
+			    description
+				"The unique ID of this OSPF6 router as a
+				 dotted-quad.";
+			}
+		    }
+
+		    container redistributions {
+			description
+			    "Configure which route types from other protocols
+			     should be distributed into OSPF6.";
+
+			list redistribution {
+			    key source;
+
+			    leaf source {
+				type ospf6-redistribution;
+				description
+				    "The source of routes that will be
+				     distributed into OSPF6.";
+			    }
+
+			    container redistribution-data {
+				presence
+				    "If present, routes from this source will
+				     be distributed into OSPF6.";
+
+				leaf route-map {
+				    type string;
+				    description
+					"Route-map used to filter routes into
+					 OSPF6.";
+				}
+
+			    }
+			}
+		    }
+
+		    container stub-router {
+			leaf administrative {
+			    type boolean;
+			    description
+				"If true, this router will be a stub.";
+			}
+		    }
+
+		    container timers {
+			description
+			    "OSPF6 timer configurations.";
+
+			container lsa {
+			    description
+				"OSPF6 LSA timer configurations.";
+
+			    leaf min-arrival {
+				type uint32 {
+				    range "0..600000";
+				}
+				description
+				    "Mimimum delay in receiving new
+				     versions of an LSA, in ms.";
+			    }
+			}
+
+			container throttle {
+			    description
+				"Throttle adaptive timer configurations.";
+
+			    container spf {
+				description
+				    "SPF timers.";
+
+				leaf delay {
+				    type uint32 {
+					range "0..600000";
+				    }
+				    description
+					"Delay from first received change until
+					 SPF calculation, in ms.";
+				}
+
+				leaf initial-hold {
+				    type uint32 {
+					range "0..600000";
+				    }
+				    description
+					"Initial hold time between consecutive
+					 SPF calculation, in ms.";
+				}
+
+				leaf maximum-hold {
+				    type uint32 {
+					range "0..600000";
+				    }
+				    description
+					"Maximum hold time, in ms.";
+				}
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+
+    augment "/ngrt:route-state/ngrt:dynamic" {
+
+	container ospf6 {
+
+	    config "false";
+
+	    container global-options {
+		description
+		    "These are options that apply to the OSPF6 Server or
+		     to all OSPF6 Router configurations.";
+
+		container debug {
+		    description
+			"OSPF6 debug configurations.";
+
+		    leaf abr {
+			type boolean;
+			description
+			    "Debug ABR.";
+		    }
+
+		    leaf asbr {
+			type boolean;
+			description
+			    "Debug ASBR.";
+		    }
+
+		    container border-routers {
+			description
+			    "Debug border routers by area or router id.";
+
+			leaf area-id {
+			    type yang:dotted-quad;
+			    description
+				"Debug the border-routers with the
+				 given area-id.";
+			}
+
+			leaf router-id {
+			    type yang:dotted-quad;
+			    description
+				"Debug the border-routers with the
+				 given router-id.";
+			}
+		    }
+
+		    leaf flooding {
+			type boolean;
+			description
+			    "Debug flooding.";
+		    }
+
+		    leaf interface {
+			type boolean;
+			description
+			    "Debug interfaces.";
+		    }
+
+		    container lsa {
+			description
+			    "Debug OSPF link state advertisement";
+
+			container as-external {
+			    description
+				"Debug AS-external LSAs.";
+
+			    uses ospf6-debug-lsa-options;
+			}
+
+			container inter-prefix {
+			    description
+				"Debug inter-area-prefix LSAs.";
+
+			    uses ospf6-debug-lsa-options;
+			}
+
+			container inter-router {
+			    description
+				"Debug inter-router LSAs.";
+
+			    uses ospf6-debug-lsa-options;
+			}
+
+			container intra-prefix {
+			    description
+				"Debug intra-area-prefix LSAs.";
+
+			    uses ospf6-debug-lsa-options;
+			}
+
+			container link {
+			    description
+				"Debug link LSAs.";
+
+			    uses ospf6-debug-lsa-options;
+			}
+
+			container network {
+			    description
+				"Debug network LSAs.";
+
+			    uses ospf6-debug-lsa-options;
+			}
+
+			container router {
+			    description
+				"Debug router LSAs.";
+
+			    uses ospf6-debug-lsa-options;
+			}
+
+			container unknown {
+			    presence
+				"If present, debug unknown LSAs.";
+
+			    uses ospf6-debug-lsa-options;
+			}
+		    }
+
+		    container message {
+			description
+			    "Debug OSPF6 messages.";
+
+			container dbdesc {
+			    presence
+				"If present, debug database
+				 description packets.";
+
+			    uses ospf6-message-send-recv;
+			}
+
+			container hello {
+			    presence
+				"If present, debug hello packets.";
+
+			    uses ospf6-message-send-recv;
+			}
+
+			container ls-ack {
+			    presence
+				"If present, debug link state ACK packets.";
+
+			    uses ospf6-message-send-recv;
+			}
+
+			container ls-request {
+			    presence
+				"If present, debug link state request
+				 packets.";
+
+			    uses ospf6-message-send-recv;
+			}
+
+			container ls-update {
+			    presence
+				"If present, debug ls-update packets.";
+
+			    uses ospf6-message-send-recv;
+			}
+
+			container unknown {
+			    presence
+				"If present, debug unknown packets.";
+
+			    uses ospf6-message-send-recv;
+			}
+		    }
+
+		    container neighbor {
+			presence
+			    "If present, debug neighbors.";
+
+			leaf option {
+			    type ospf6-debug-neighbor-option;
+			    description
+				"Debug only 'event' or 'state' changes.";
+			}
+		    }
+
+		    container route {
+			description
+			    "Debug OSPF6 routes.";
+
+			leaf inter-area {
+			    type boolean;
+			    description
+				"Debug inter-area route calculation.";
+			}
+
+			leaf intra-area {
+			    type boolean;
+			    description
+				"Debug intra-area route calculation.";
+			}
+
+			leaf memory {
+			    type boolean;
+			    description
+				"Debug route memory use.";
+			}
+
+			leaf table {
+			    type boolean;
+			    description
+				"Debug route table calculation.";
+			}
+		    }
+
+		    container spf {
+			description
+			    "Debug OSPF6 SPF calculation.";
+
+			leaf database {
+			    type boolean;
+			    description
+				"Log number of LSAs at SPF calculation time.";
+			}
+
+			leaf process {
+			    type boolean;
+			    description
+				"Debug SPF process in detail.";
+			}
+
+			leaf time {
+			    type boolean;
+			    description
+				"Measure time take by SPF calculations.";
+			}
+		    }
+
+		    container zebra {
+			description
+			    "Debug OSPF6 Zebra messages.";
+
+			container messages {
+			    presence
+				"If present, debug Zebra messages.";
+
+			    uses ospf6-message-send-recv;
+			}
+		    }
+		}
+
+		leaf enable {
+		    type boolean;
+		    default false;
+		    description
+			"If true, the OSPF6 Daemon is enabled.";
+		}
+	    }
+
+	    container interfaces {
+		description
+		    "OSPF6 configuration informataion for interfaces
+		     includes enablement, cost, and timing data.";
+
+		list if {
+		    key if-name;
+
+		    leaf if-name {
+			type string;
+			description
+			    "The interface with OSPF6 enabled on it.";
+		    }
+
+		    container advertise {
+			description
+			    "Advertising options.";
+
+			leaf prefix-list-name {
+			    type string;
+			    description
+				"Use prefix-list as a filter.";
+			}
+		    }
+
+		    container cost {
+			description
+			    "Interface costs.";
+
+			leaf outgoing {
+			    type uint16 {
+				range "1..65535";
+			    }
+			    description
+				"The outgoing metric for this interface.";
+			}
+		    }
+
+		    container dead-interval {
+			description
+			    "Interval time after which a neighbor is
+			     declared dead.  The interval is a number of
+			     seconds in the range [1..65535].";
+
+			leaf interval {
+			    type uint16 {
+				range "1..65535";
+			    }
+			    description
+				"Interval time after which a neighbor
+				 is declared dead.";
+			}
+		    }
+
+		    container hello-interval {
+			description
+			    "The interval between hello packets.";
+
+			leaf interval {
+			    type uint16 {
+				range "1..65535";
+			    }
+			    description
+				"The interval between hello packets,
+				 in seconds, 1..65535.";
+			}
+		    }
+
+		    leaf ifmtu {
+			type uint16 {
+			    range "1..65535";
+			}
+			description
+			    "MTU parameter for an interface.";
+		    }
+
+		    leaf instance-id {
+			type uint16 {
+			    range "0..255";
+			}
+			description
+			    "Instance ID of the interface.";
+		    }
+
+		    leaf mtu-ignore {
+			type boolean;
+			description
+			    "Disable MTU mismatch detection on this
+			     interface";
+		    }
+
+		    container network {
+			description
+			    "Network parameters";
+
+			leaf type {
+			    type ospf6-network-type;
+			    description
+				"OSPF6 Network type is one of 'broadcast',
+				 or 'point-to-point'.";
+			}
+		    }
+
+		    leaf passive {
+			type boolean;
+			description
+			    "If true, the interface will be passive and
+			     no adjacency will be formed.";
+		    }
+
+		    leaf priority {
+			type uint8;
+			description
+			    "Router priority, 0..255.";
+		    }
+
+		    container retransmit {
+			description
+			    "Time in seconds between retransmitting lost
+			     link state advertisements.";
+
+			leaf interval {
+			    type uint16 {
+				range "1..65535";
+			    }
+			    description
+				"Interval between retransmitting lost
+				 LSAs, in seconds.";
+			}
+		    }
+
+		    container transmit-delay {
+			description
+			    "Link state transmit delay information.";
+
+			leaf delay {
+			    type uint16 {
+				range "1..3600";
+			    }
+			    description
+				"The LSA transmit delay, 1..3600
+				 in seconds.";
+			}
+		    }
+
+		    leaf bfd {
+			type boolean;
+			description
+			    "Bidirectional Forwarding Detection (BFD)
+			     is enabled for this interface.";
+		    }
+		}
+	    }
+
+	    container routers {
+		description
+		    "Table of OSPF6 Router instances .";
+
+		container router {
+		    description
+			"The router contains all information for one instance
+			 of the OSPF6 protocol as supported by FRR.";
+
+		    container areas {
+			description
+			    "The OSPF6 protocol operates on independent
+			     link state regions called 'areas'.";
+
+			list area {
+			    key area-id;
+
+			    leaf area-id {
+				type ospf6-area-id;
+				description
+				    "Each area must have a unique ID
+				     that takes the form of either a
+				     dotted-quad or an unsigned 32-bit
+				     number, interchangeably.  That
+				     is, dotted-quad 0.0.0.1 is the
+				     same as the unsigned number 1.";
+			    }
+
+			    container ranges {
+				description
+				    "Summarize intra-area paths from
+				     speified area into one Type-3
+				     Summary LSA announced to other areas.";
+
+				list range {
+				    key "prefix";
+
+				    leaf prefix {
+					type inet:ipv6-prefix;
+					description
+					    "Area range IPv6 prefix.";
+				    }
+
+				    container range-data {
+					presence
+					    "If present, hold range
+					     data for the prefix.";
+
+					leaf not-advertise {
+					    type boolean;
+					    description
+						"If true, do not advertise
+						 this prefix.";
+					}
+
+					leaf cost {
+					    type uint32 {
+						range "0..16777215";
+					    }
+					    description
+						"Cost metric for this range.";
+					}
+				    }
+				}
+			    }
+
+			    container stub {
+				presence
+				    "If present, configure area as a stub.";
+
+				leaf no-summary {
+				    type boolean;
+				    description
+					"Do not inject inter-area routes
+					 into stub.";
+				}
+			    }
+			}
+		    }
+
+		    container auto-cost {
+			leaf reference-bandwidth {
+			    type uint32 {
+				range "1..4294967";
+			    }
+			    description
+				"The reference bandwidth, 1..4294967,
+				 in MBits/sec.";
+			}
+		    }
+
+		    container distance {
+			description
+			    "OSPF6 administrative distances for routes.";
+
+			leaf administrative {
+			    type uint8 {
+				range "1..255";
+			    }
+			    description
+				"OSPF6 administrative distance.";
+			}
+
+			leaf external {
+			    type uint8 {
+				range "1..255";
+			    }
+			    description
+				"OSPF6 administrative distance for external
+				 routes.";
+			}
+
+			leaf inter-area {
+			    type uint8 {
+				range "1..255";
+			    }
+			    description
+				"OSPF6 administrative distance for inter-area
+				 routes.";
+			}
+
+			leaf intra-area {
+			    type uint8 {
+				range "1..255";
+			    }
+			    description
+				"OSPF6 administrative distance for intra-area
+				 routes.";
+			}
+		    }
+
+		    container interfaces {
+			description
+			    "OSPF6 configuration informataion for
+			     interfaces includes enablement,
+			     cost and timing data.";
+
+			list if {
+			    key if-name;
+
+			    leaf if-name {
+				type string;
+				description
+				    "The interface with OSPF6 enabled
+				    on it.";
+			    }
+
+			    leaf area-id {
+				type inet:ipv4-address-no-zone;
+				description
+				    "The dotted-quad area identifier.";
+			    }
+			}
+		    }
+
+		    container log-adjacency-changes {
+			presence
+			    "If present, changes in adjacency state
+			     will be logged.";
+
+			leaf detail {
+			    type boolean;
+			    description
+				"If true, all state changes will be logged.";
+			}
+		    }
+
+		    container ospf6 {
+			description
+			    "OSPF6 attributes.";
+
+			leaf router-id {
+			    type yang:dotted-quad;
+			    description
+				"The unique ID of this OSPF6 router as a
+				 dotted-quad.";
+			}
+		    }
+
+		    container redistributions {
+			description
+			    "Configure which route types from other protocols
+			     should be distributed into OSPF6.";
+
+			list redistribution {
+			    key source;
+
+			    leaf source {
+				type ospf6-redistribution;
+				description
+				    "The source of routes that will be
+				     distributed into OSPF6.";
+			    }
+
+			    container redistribution-data {
+				presence
+				    "If present, routes from this source will
+				     be distributed into OSPF6.";
+
+				leaf route-map {
+				    type string;
+				    description
+					"Route-map used to filter routes into
+					 OSPF6.";
+				}
+
+			    }
+			}
+		    }
+
+		    container stub-router {
+			leaf administrative {
+			    type boolean;
+			    description
+				"If true, this router will be a stub.";
+			}
+		    }
+
+		    container timers {
+			description
+			    "OSPF6 timer configurations.";
+
+			container lsa {
+			    description
+				"OSPF6 LSA timer configurations.";
+
+			    leaf min-arrival {
+				type uint32 {
+				    range "0..600000";
+				}
+				description
+				    "Mimimum delay in receiving new
+				     versions of an LSA, in ms.";
+			    }
+			}
+
+			container throttle {
+			    description
+				"Throttle adaptive timer configurations.";
+
+			    container spf {
+				description
+				    "SPF timers.";
+
+				leaf delay {
+				    type uint32 {
+					range "0..600000";
+				    }
+				    description
+					"Delay from first received change until
+					 SPF calculation, in ms.";
+				}
+
+				leaf initial-hold {
+				    type uint32 {
+					range "0..600000";
+				    }
+				    description
+					"Initial hold time between consecutive
+					 SPF calculation, in ms.";
+				}
+
+				leaf maximum-hold {
+				    type uint32 {
+					range "0..600000";
+				    }
+				    description
+					"Maximum hold time, in ms.";
+				}
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+}

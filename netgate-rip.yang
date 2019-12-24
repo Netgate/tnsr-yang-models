@@ -1,0 +1,1273 @@
+module netgate-rip {
+
+    namespace "urn:netgate:xml:yang:netgate-rip";
+    prefix "ngrip";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import ietf-yang-types {
+	prefix "yang";
+    }
+
+    import netgate-route {
+	prefix "ngrt";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data-model
+	 for RIP data.
+
+	 Copyright 2019 Rubicon Communications, LLC.
+	 ";
+
+    revision 2019-12-15 {
+	description
+	    "TNSR Release 19.12.";
+    }
+
+    typedef rip-passive-if-name {
+	type union {
+	    type string {
+		pattern 'default';
+	    }
+	    type string;	/* FIXME: limit to IF names */
+	}
+    }
+
+    typedef rip-if-or-none {
+	type union {
+	    type string;	/* FIXME: limit to IF names */
+	    type string {
+		pattern '\*';
+	    }
+	}
+    }
+
+    typedef rip-if-or-default {
+	type union {
+	    type string;	/* FIXME: limit to IF names */
+	    type string {
+		pattern 'default';
+	    }
+	}
+    }
+
+    typedef rip-network {
+	type union {
+	    type inet:ipv4-prefix;
+	    type string;	/* FIXME: limit to IF names */
+	}
+    }
+
+    typedef rip-auth-mode {
+	type enumeration {
+	    enum md5 {
+		description
+		    "MD5";
+	    }
+	    enum text {
+		description
+		    "Plaintext";
+	    }
+	}
+    }
+
+    typedef rip-auth-length {
+	type enumeration {
+	    enum old-ripd {
+		description
+		    "old-ripd";
+	    }
+	    enum rfc {
+		description
+		    "rfc";
+	    }
+	}
+    }
+
+    typedef rip-redistribution {
+	type enumeration {
+	    enum bgp {
+		description
+		    "BGP";
+	    }
+	    enum connected {
+		description
+		    "Connected";
+	    }
+	    enum kernel {
+		description
+		    "Kernel";
+	    }
+	    enum ospf {
+		description
+		    "OSPF";
+	    }
+	    enum table {
+		description
+		    "Table";
+	    }
+	}
+    }
+
+    typedef rip-packet-send-recv {
+	type enumeration {
+	    enum send {
+		description
+		    "If specified, only sent packets are requested.";
+	    }
+
+	    enum recv {
+		description
+		    "If specified, only received  packets are requested.";
+	    }
+	}
+    }
+
+    typedef rip-show-request {
+	type enumeration {
+	    enum default {
+		description
+		    "Show default RIP information.";
+	    }
+	    enum status {
+		description
+		    "Show RIP status information.";
+	    }
+	}
+    }
+
+    typedef rip-version-12b {
+	type enumeration {
+	    enum 1 {
+		description
+		    "RIP version 1";
+	    }
+	    enum 2 {
+		description
+		    "RIP version 2";
+	    }
+	    enum both {
+		description
+		    "RIP versions 1 and 2";
+	    }
+	}
+    }
+
+    typedef rip-version-12 {
+	type enumeration {
+	    enum 1 {
+		description
+		    "RIP version 1";
+	    }
+	    enum 2 {
+		description
+		    "RIP version 2";
+	    }
+	}
+    }
+
+    grouping rip-packet-send-recv {
+	description
+	    "Packet debug flags can specify a either a 'send' or
+	     a 'recv' direction limiter, or if absent, both.
+	     In addition a 'detail' flag may be requested.";
+
+	leaf direction {
+	    type rip-packet-send-recv;
+	    description
+		"Debug packets sent or received.  Missing is both.";
+	}
+    }
+
+    rpc rip-show {
+	input {
+	    leaf request {
+		type rip-show-request;
+		description
+		    "A RIP show request type.";
+	    }
+	}
+	output {
+	    leaf stdout {
+		type string;
+	    }
+	}
+    }
+
+    augment "/ngrt:route-config/ngrt:dynamic" {
+
+	container rip {
+
+	    container global-options {
+		description
+		    "These are options that apply to the RIP Server or
+		     to all RIP Router configurations.";
+
+		container debug {
+		    description
+			"RIP debug configurations.";
+
+		    leaf events {
+			type boolean;
+			description
+			    "If true, debug RIP events..";
+		    }
+
+		    container packet {
+			presence
+			    "If present, debug RIP packets.";
+
+			uses rip-packet-send-recv;
+		    }
+
+		    leaf zebra {
+			type boolean;
+			description
+			    "If true, debug RIP Zebra messages.";
+		    }
+		}
+
+		leaf enable {
+		    type boolean;
+		    default false;
+		    description
+			"If true, the RIP Daemon is enabled.";
+		}
+	    }
+
+	    container interfaces {
+		description
+		    "Interface configuration for RIP.";
+
+		list interface {
+		    key if-name;
+
+		    leaf if-name {
+			type string;
+			description
+			    "The name of an interface.";
+		    }
+
+		    container authentication {
+			description
+			    "RIP authentication configuration.";
+
+			leaf key-chain {
+			    type string;
+			    description
+				"The name of a key chain.";
+			}
+
+			container mode {
+			    description
+				"Authentication mode.";
+
+			    leaf auth-mode {
+				type rip-auth-mode;
+				description
+				    "One of the strings 'md5' or 'text'.";
+			    }
+
+			    leaf auth-length {
+				type rip-auth-length;
+				description
+				    "If present, one of the strings
+				     'old-ripd' or 'rfc'.";
+			    }
+			}
+
+			leaf auth-string {
+			    type string {
+				length "1..16";
+			    }
+			    description
+				"An authentication string, 1..16 chars.";
+			}
+		    }
+
+		    container receive {
+			description
+			    "RIP recieve configuration.";
+
+			leaf version {
+			    type rip-version-12b;
+			    description
+				"One of the versions 1, 2, or both.";
+			}
+		    }
+
+		    container send {
+			description
+			    "RIP send configuration.";
+
+			leaf version {
+			    type rip-version-12b;
+			    description
+				"One of the versions 1, 2, or both.";
+			}
+		    }
+
+		    container split-horizon {
+			presence
+			    "If present, perform split-horizon.";
+
+			leaf poisoned-reverse {
+			    type boolean;
+			    description
+				"If true, use poisoned-reverse.";
+			}
+		    }
+
+		    leaf v2-broadcast {
+			type boolean;
+			description
+			    "Send IP v2 broadcast update.";
+		    }
+		}
+	    }
+
+	    container key-chains {
+		description
+		    "Key chains.";
+
+		list chain {
+		    key name;
+
+		    leaf name {
+			type string;
+			description
+			    "Key chain name.";
+		    }
+
+		    container keys {
+			description
+			    "";
+
+			list key {
+			    key key-id;
+
+			    leaf key-id {
+				type uint32 {
+				    range "0..2147483647";
+				}
+				description
+				    "The ID for this key.";
+			    }
+
+			    leaf key-string {
+				type string;
+				description
+				    "The key string.";
+			    }
+			}
+		    }
+		}
+	    }
+
+	    container routers {
+		description
+		    "Table of RIP router instances.";
+
+		container router {
+		    description
+			"The router contains all information for one
+			 instance of the RIP protocol as supported by
+			 FRR.  Only one instance is supported.";
+
+		    leaf allow-ecmp {
+			type boolean;
+			description
+			    "Allow equal cost multi-path.";
+		    }
+
+		    container default-information {
+			description
+			    "Control distribution of default route.";
+
+			leaf originate {
+			    type boolean;
+			    description
+				"A default route will be distributed.";
+			}
+		    }
+
+		    container distances {
+			description
+			    "RIP administrative distances for routes.";
+
+			leaf default {
+			    type uint8 {
+				range "1..255";
+			    }
+			    description
+				"Default administrative distance.";
+			}
+
+			container source-prefixes {
+			    description
+				"Use specific distances for the given
+				 source prefixes";
+
+			    list prefix {
+				key ip4-prefix;
+
+				leaf ip4-prefix {
+				    type inet:ipv4-prefix;
+				    description
+					"The IPv4 source prefix.";
+				}
+
+				leaf administrative {
+				    type uint8 {
+					range "1..255";
+				    }
+				    mandatory true;
+				    description
+					"RIP administrative distance.";
+				}
+
+				leaf filter {
+				    type string;
+				    description
+					"Use access-list as matching filter.";
+				}
+			    }
+			}
+		    }
+
+		    container distributions {
+			description
+			    "Filter incoming or outgoing routing updates.";
+
+			list interface {
+			    key if-name;
+
+			    leaf if-name {
+				type rip-if-or-none;
+				description
+				    "An interface name or the symbol '*'
+				     representing no specified IF.";
+			    }
+
+			    container access-list-filter {
+				description
+				    "Use the given access-list to
+				     filter routes.";
+
+				leaf in {
+				    type string;
+				    description
+					"Filter incoming routes.";
+				}
+
+				leaf out {
+				    type string;
+				    description
+					"Filter outgoing routes.";
+				}
+			    }
+
+			    container prefix-list-filter {
+				description
+				    "Use the fiven prefix-list to
+				     filter routes.";
+
+				leaf in {
+				    type string;
+				    description
+					"Filter incoming routes.";
+				}
+
+				leaf out {
+				    type string;
+				    description
+					"Filter outgoing routes.";
+				}
+			    }
+			}
+		    }
+
+		    container neighbors {
+			description
+			    "RIP neighbors.";
+
+			leaf-list ip4-address {
+			    type inet:ipv4-address-no-zone;
+			    description
+				"The IPv4 address of a neighbor.";
+			}
+		    }
+
+		    container networks {
+			description
+			    "The list of interfaces and addresses on which
+			     RIP is enabled.";
+
+			container interfaces {
+			    description
+				"Interfaces on which RIP is enabled.";
+
+			    leaf-list if-name {
+				type string;
+				description
+				    "An interface on which RIP is enabled.";
+			    }
+			}
+
+			container prefixes {
+			    description
+				"Prefixes on which RIP is enabled.";
+
+			    leaf-list ip4-prefix {
+				type inet:ipv4-prefix;
+				description
+				    "An IPv4 prefix on which RIP is enabled.";
+			    }
+			}
+		    }
+
+		    container offset-list {
+			description
+			    "Modify RIP metric via access-list filtering.";
+
+			list interface {
+			    key if-name;
+
+			    leaf if-name {
+				type rip-if-or-none;
+				description
+				    "An interface name or the symbol '*'
+				     representing no specified IF.";
+			    }
+
+			    container in {
+				description
+				    "Match and adjust incoming routes.";
+
+				leaf access-list-name {
+				    type string;
+				    description
+					"Filter incoming routes.";
+				}
+
+				leaf metric {
+				    type uint8 {
+					range "1..16";
+				    }
+				    description
+					"Metric value, 1..16.";
+				}
+			    }
+
+			    container out {
+				description
+				    "Match and adjust outgoing routes.";
+
+				leaf access-list-name {
+				    type string;
+				    description
+					"Filter incoming routes.";
+				}
+
+				leaf metric {
+				    type uint8 {
+					range "1..16";
+				    }
+				    description
+					"Metric value, 1..16.";
+				}
+			    }
+			}
+		    }
+
+		    container passive-interfaces {
+			description
+			    "Interfaces on which to suppress routing updates.";
+
+			leaf-list if-name {
+			    type rip-if-or-default;
+			    description
+				"An interface on which routing updates are
+				 suppressed.";
+			}
+		    }
+
+		    container redistributions {
+			description
+			    "Configure which route types from other protocols
+			     should be distributed into RIP.";
+
+			list redistribution {
+			    key source;
+
+			    leaf source {
+				type rip-redistribution;
+				description
+				    "The source of routes that will be
+				     distributed into RIP.";
+			    }
+
+			    container redistribution-data {
+				presence
+				    "If present, routes from this source will
+				     be distributed into RIP.";
+
+				leaf metric {
+				    type uint8 {
+					range "0..16";
+				    }
+				    description
+					"The metric for redistributed routes.";
+				}
+
+				leaf route-map {
+				    type string;
+				    description
+					"Route-map used to filter routes into
+					 RIP.";
+				}
+			    }
+			}
+		    }
+
+		    container routes {
+			description
+			    "Static routes.";
+
+			leaf-list prefix {
+			    type inet:ipv4-prefix;
+			    description
+				"A static route IPv4 prefix.";
+			}
+		    }
+
+		    container router-map-filters {
+
+			list interface {
+			    key if-name; 
+
+			    leaf if-name {
+				type string;
+				description
+				    "The name of an interface.";
+			    }
+
+			    container in {
+				description
+				    "Filter information for incoming routes.";
+
+				leaf route-map-name {
+				    type string;
+				    description
+					"The name of a route-map filter.";
+				}
+			    }
+
+			    container out {
+				description
+				    "Filter information for outgoing routes.";
+
+				leaf route-map-name {
+				    type string;
+				    description
+					"The name of a route-map filter.";
+				}
+			    }
+			}
+		    }
+
+		    container timers {
+			description
+			    "Routing timers.";
+
+			container basic {
+			    description
+				"Basic routing protocol timers.";
+
+			    leaf table-update {
+				type uint32 {
+				    range "5..2147483647";
+				}
+				default 30;
+				description
+				    "Routing table update timer, in seconds,
+				     default 30";
+			    }
+
+			    leaf timeout {
+				type uint32 {
+				    range "5..2147483647";
+				}
+				default 180;
+				description
+				    "Routing information timeout timer,
+				    in seconds, default 180";
+			    }
+
+			    leaf garbage-collection {
+				type uint32 {
+				    range "5..2147483647";
+				}
+				default 120;
+				description
+				    "Garbage collecting timer, in seconds,
+				    default 120";
+			    }
+			}
+		    }
+
+		    leaf version {
+			type rip-version-12;
+			description
+			    "The RIP version for both transmit and receive.
+			     May be overridden per-interface.  Valid values
+			     are 1 or 2, with 2 strongly recommended.";
+		    }
+		}
+	    }
+	}
+    }
+
+    augment "/ngrt:route-state/ngrt:dynamic" {
+
+	container rip {
+
+	    config "false";
+
+	    container global-options {
+		description
+		    "These are options that apply to the RIP Server or
+		     to all RIP Router configurations.";
+
+		container debug {
+		    description
+			"RIP debug configurations.";
+
+		    leaf events {
+			type boolean;
+			description
+			    "If true, debug RIP events..";
+		    }
+
+		    container packet {
+			presence
+			    "If present, debug RIP packets.";
+
+			uses rip-packet-send-recv;
+		    }
+
+		    leaf zebra {
+			type boolean;
+			description
+			    "If true, debug RIP Zebra messages.";
+		    }
+		}
+
+		leaf enable {
+		    type boolean;
+		    default false;
+		    description
+			"If true, the RIP Daemon is enabled.";
+		}
+	    }
+
+	    container interfaces {
+		description
+		    "Interface configuration for RIP.";
+
+		list interface {
+		    key if-name;
+
+		    leaf if-name {
+			type string;
+			description
+			    "The name of an interface.";
+		    }
+
+		    container authentication {
+			description
+			    "RIP authentication configuration.";
+
+			leaf key-chain {
+			    type string;
+			    description
+				"The name of a key chain.";
+			}
+
+			container mode {
+			    description
+				"Authentication mode.";
+
+			    leaf auth-mode {
+				type rip-auth-mode;
+				description
+				    "One of the strings 'md5' or 'text'.";
+			    }
+
+			    leaf auth-length {
+				type rip-auth-length;
+				description
+				    "If present, one of the strings
+				     'old-ripd' or 'rfc'.";
+			    }
+			}
+
+			leaf auth-string {
+			    type string {
+				length "1..16";
+			    }
+			    description
+				"An authentication string, 1..16 chars.";
+			}
+		    }
+
+		    container receive {
+			description
+			    "RIP recieve configuration.";
+
+			leaf version {
+			    type rip-version-12b;
+			    description
+				"One of the versions 1, 2, or both.";
+			}
+		    }
+
+		    container send {
+			description
+			    "RIP send configuration.";
+
+			leaf version {
+			    type rip-version-12b;
+			    description
+				"One of the versions 1, 2, or both.";
+			}
+		    }
+
+		    container split-horizon {
+			presence
+			    "If present, perform split-horizon.";
+
+			leaf poisoned-reverse {
+			    type boolean;
+			    description
+				"If true, use poisoned-reverse.";
+			}
+		    }
+
+		    leaf v2-broadcast {
+			type boolean;
+			description
+			    "Send IP v2 broadcast update.";
+		    }
+		}
+	    }
+
+	    container key-chains {
+		description
+		    "Key chains.";
+
+		list chain {
+		    key name;
+
+		    leaf name {
+			type string;
+			description
+			    "Key chain name.";
+		    }
+
+		    container keys {
+			description
+			    "";
+
+			list key {
+			    key key-id;
+
+			    leaf key-id {
+				type uint32 {
+				    range "0..2147483647";
+				}
+				description
+				    "The ID for this key.";
+			    }
+
+			    leaf key-string {
+				type string;
+				description
+				    "The key string.";
+			    }
+			}
+		    }
+		}
+	    }
+
+	    container routers {
+		description
+		    "Table of RIP router instances.";
+
+		container router {
+		    description
+			"The router contains all information for one
+			 instance of the RIP protocol as supported by
+			 FRR.  Only one instance is supported.";
+
+		    leaf allow-ecmp {
+			type boolean;
+			description
+			    "Allow equal cost multi-path.";
+		    }
+
+		    container default-information {
+			description
+			    "Control distribution of default route.";
+
+			leaf originate {
+			    type boolean;
+			    description
+				"A default route will be distributed.";
+			}
+		    }
+
+		    container distances {
+			description
+			    "RIP administrative distances for routes.";
+
+			leaf default {
+			    type uint8 {
+				range "1..255";
+			    }
+			    description
+				"Default administrative distance.";
+			}
+
+			container source-prefixes {
+			    description
+				"Use specific distances for the given
+				 source prefixes";
+
+			    list prefix {
+				key ip4-prefix;
+
+				leaf ip4-prefix {
+				    type inet:ipv4-prefix;
+				    description
+					"The IPv4 source prefix.";
+				}
+
+				leaf administrative {
+				    type uint8 {
+					range "1..255";
+				    }
+				    mandatory true;
+				    description
+					"RIP administrative distance.";
+				}
+
+				leaf filter {
+				    type string;
+				    description
+					"Use access-list as matching filter.";
+				}
+			    }
+			}
+		    }
+
+		    container distributions {
+			description
+			    "Filter incoming or outgoing routing updates.";
+
+			list interface {
+			    key if-name;
+
+			    leaf if-name {
+				type rip-if-or-none;
+				description
+				    "An interface name or the symbol '*'
+				     representing no specified IF.";
+			    }
+
+			    container access-list-filter {
+				description
+				    "Use the given access-list to
+				     filter routes.";
+
+				leaf in {
+				    type string;
+				    description
+					"Filter incoming routes.";
+				}
+
+				leaf out {
+				    type string;
+				    description
+					"Filter outgoing routes.";
+				}
+			    }
+
+			    container prefix-list-filter {
+				description
+				    "Use the fiven prefix-list to
+				     filter routes.";
+
+				leaf in {
+				    type string;
+				    description
+					"Filter incoming routes.";
+				}
+
+				leaf out {
+				    type string;
+				    description
+					"Filter outgoing routes.";
+				}
+			    }
+			}
+		    }
+
+		    container neighbors {
+			description
+			    "RIP neighbors.";
+
+			leaf-list ip4-address {
+			    type inet:ipv4-address-no-zone;
+			    description
+				"The IPv4 address of a neighbor.";
+			}
+		    }
+
+		    container networks {
+			description
+			    "The list of interfaces and addresses on which
+			     RIP is enabled.";
+
+			container interfaces {
+			    description
+				"Interfaces on which RIP is enabled.";
+
+			    leaf-list if-name {
+				type string;
+				description
+				    "An interface on which RIP is enabled.";
+			    }
+			}
+
+			container prefixes {
+			    description
+				"Prefixes on which RIP is enabled.";
+
+			    leaf-list ip4-prefix {
+				type inet:ipv4-prefix;
+				description
+				    "An IPv4 prefix on which RIP is enabled.";
+			    }
+			}
+		    }
+
+		    container offset-list {
+			description
+			    "Modify RIP metric via access-list filtering.";
+
+			list interface {
+			    key if-name;
+
+			    leaf if-name {
+				type rip-if-or-none;
+				description
+				    "An interface name or the symbol '*'
+				     representing no specified IF.";
+			    }
+
+			    container in {
+				description
+				    "Match and adjust incoming routes.";
+
+				leaf access-list-name {
+				    type string;
+				    description
+					"Filter incoming routes.";
+				}
+
+				leaf metric {
+				    type uint8 {
+					range "1..16";
+				    }
+				    description
+					"Metric value, 1..16.";
+				}
+			    }
+
+			    container out {
+				description
+				    "Match and adjust outgoing routes.";
+
+				leaf access-list-name {
+				    type string;
+				    description
+					"Filter incoming routes.";
+				}
+
+				leaf metric {
+				    type uint8 {
+					range "1..16";
+				    }
+				    description
+					"Metric value, 1..16.";
+				}
+			    }
+			}
+		    }
+
+		    container passive-interfaces {
+			description
+			    "Interfaces on which to suppress routing updates.";
+
+			leaf-list if-name {
+			    type rip-if-or-default;
+			    description
+				"An interface on which routing updates are
+				 suppressed.";
+			}
+		    }
+
+		    container redistributions {
+			description
+			    "Configure which route types from other protocols
+			     should be distributed into RIP.";
+
+			list redistribution {
+			    key source;
+
+			    leaf source {
+				type rip-redistribution;
+				description
+				    "The source of routes that will be
+				     distributed into RIP.";
+			    }
+
+			    container redistribution-data {
+				presence
+				    "If present, routes from this source will
+				     be distributed into RIP.";
+
+				leaf metric {
+				    type uint8 {
+					range "0..16";
+				    }
+				    description
+					"The metric for redistributed routes.";
+				}
+
+				leaf route-map {
+				    type string;
+				    description
+					"Route-map used to filter routes into
+					 RIP.";
+				}
+			    }
+			}
+		    }
+
+		    container routes {
+			description
+			    "Static routes.";
+
+			leaf-list prefix {
+			    type inet:ipv4-prefix;
+			    description
+				"A static route IPv4 prefix.";
+			}
+		    }
+
+		    container router-map-filters {
+
+			list interface {
+			    key if-name; 
+
+			    leaf if-name {
+				type string;
+				description
+				    "The name of an interface.";
+			    }
+
+			    container in {
+				description
+				    "Filter information for incoming routes.";
+
+				leaf route-map-name {
+				    type string;
+				    description
+					"The name of a route-map filter.";
+				}
+			    }
+
+			    container out {
+				description
+				    "Filter information for outgoing routes.";
+
+				leaf route-map-name {
+				    type string;
+				    description
+					"The name of a route-map filter.";
+				}
+			    }
+			}
+		    }
+
+		    container timers {
+			description
+			    "Routing timers.";
+
+			container basic {
+			    description
+				"Basic routing protocol timers.";
+
+			    leaf table-update {
+				type uint32 {
+				    range "5..2147483647";
+				}
+				default 30;
+				description
+				    "Routing table update timer, in seconds,
+				     default 30";
+			    }
+
+			    leaf timeout {
+				type uint32 {
+				    range "5..2147483647";
+				}
+				default 180;
+				description
+				    "Routing information timeout timer,
+				    in seconds, default 180";
+			    }
+
+			    leaf garbage-collection {
+				type uint32 {
+				    range "5..2147483647";
+				}
+				default 120;
+				description
+				    "Garbage collecting timer, in seconds,
+				    default 120";
+			    }
+			}
+		    }
+
+		    leaf version {
+			type rip-version-12;
+			description
+			    "The RIP version for both transmit and receive.
+			     May be overridden per-interface.  Valid values
+			     are 1 or 2, with 2 strongly recommended.";
+		    }
+		}
+	    }
+	}
+    }
+}

@@ -24,6 +24,11 @@ module netgate-kea {
 
 	 Copyright 2019 Rubicon Communications, LLC.";
 
+    revision 2019-12-15 {
+	description
+	    "TNSR Release 19.12.";
+    }
+
     revision 2019-08-30 {
 	description
 	    "TNSR Release 19.08.";
@@ -64,6 +69,118 @@ module netgate-kea {
 	    enum client-id {
 		description
 		    "The host's identifying client-id address.";
+	    }
+	}
+    }
+
+    typedef kea-dhcp4-option-def-id {
+	type string {
+	    length "1..63";
+	    pattern '[a-zA-Z][a-zA-Z0-9_-]*';
+	}
+    }
+
+    typedef kea-dhcp4-option-def-type {
+	type enumeration {
+	    enum binary {
+		description
+		    "An arbitrary string of bytes, specified
+		     as a set of hexadecimal digits.";
+	    }
+
+	    enum boolean {
+		description
+		    "A boolean value.";
+	    }
+
+	    enum empty {
+		description
+		    "No value; data is caried in sub-options.";
+	    }
+
+	    enum fqdn {
+		description
+		    "Fully qualified domain name.";
+	    }
+
+	    enum ipv4-address {
+		description
+		    "Dotted quad IP address.";
+	    }
+
+	    enum ipv6-address {
+		description
+		    "An IPv6 address in colon notation.";
+	    }
+
+	    enum ipv6-prefix {
+		description
+		    "An IPv6 address and prefix length.";
+	    }
+
+	    enum psid {
+		description
+			"PSID and PSID length separated by a slash,
+			 e.g. 3/4 specifies PSID=3 and PSID length=4.
+			 In the wire format it is represented by an
+			 8-bit field carrying PSID length (in this
+			 case equal to 4) and the 16-bits-long PSID
+			 value field (in this case equal to
+			 “0011000000000000b” using binary notation).
+			 Allowed values for a PSID length are 0 to
+			 16. See RFC 7597 for details about the PSID
+			 wire representation.";
+	    }
+
+	    enum record {
+		description
+		    "Structured data that may be comprised of any
+		     types (except “record” and “empty”). The array
+		     flag applies to the last field only.";
+	    }
+
+	    enum string {
+		description
+		    "Any text.";
+	    }
+
+	    enum tuple {
+		description
+		    "A length encoded as an 8-bit unsigned integer
+		     followed by a string of this length.";
+	    }
+
+	    enum uint8 {
+		description
+		    "8-bit unsigned integer with allowed values 0 to 255.";
+	    }
+
+	    enum uint16 {
+		description
+		    "16-bit unsigned integer with allowed values 0 to 65535.";
+	    }
+
+	    enum uint32 {
+		description
+		    "32-bit unsigned integer with allowed values 0
+		     to 4294967295.";
+	    }
+
+	    enum int8 {
+		description
+		    "8-bit signed integer with allowed values -128 to 127.";
+	    }
+
+	    enum int16 {
+		description
+		    "16-bit signed integer with allowed values -32768
+		     to 32767.";
+	    }
+
+	    enum int32 {
+		description
+		    "32-bit signed integer with allowed values -2147483648
+		     to 2147483647.";
 	    }
 	}
     }
@@ -730,11 +847,32 @@ module netgate-kea {
 	}
     }
 
+    typedef kea-operation {
+	type enumeration {
+	    enum start {
+		description
+		    "Start daemon";
+	    }
+	    enum stop {
+		description
+		    "Stop daemon";
+	    }
+	    enum reload {
+		description
+		    "Reload config file";
+	    }
+	    enum status {
+		description
+		    "Daemon status";
+	    }
+	}
+    }
+
     rpc kea-control {
 	input {
 	    leaf operation {
 		mandatory true;
-		type ngcom:service-operation;
+		type kea-operation;
 		description
 		    "One of the strings 'start', 'stop', 'reload',
 		     or 'status'.";
@@ -807,6 +945,64 @@ module netgate-kea {
 	output {
 	    leaf stdout {
 		type string;
+	    }
+	}
+    }
+
+    grouping kea-dhcp4-option-def-group {
+	description
+	    "Kea DHCPv4 custom option definition information.";
+
+	list option-def-data {
+	    key name;
+	    description
+		"List of DHCPv4 custom option definition.";
+
+	    leaf name {
+		type kea-dhcp4-option-def-id;
+		description
+		    "The server requires an option name to identify an
+		     option definition.";
+	    }
+
+	    leaf array {
+		type boolean;
+		description
+		    "If true, specifies an array of values.  If false,
+		     specifies a singular datum or record.";
+	    }
+
+	    leaf code {
+		type uint32;
+		mandatory true;
+		description
+		    "The numeric uint32 option code.";
+	    }
+
+	    leaf encapsulate {
+		type string;
+		description
+		    "The name of the option space being encapsulated
+		     by the particular option.";
+	    }
+
+	    leaf record-types {
+		type string;
+		description
+		    "A comma separated list of record field types.";
+	    }
+
+	    leaf space {
+		type string;
+		description
+		    "The namespace for the option definition.";
+	    }
+
+	    leaf type {
+		type kea-dhcp4-option-def-type;
+		mandatory true;
+		description
+		    "The data-type of the option's value.";
 	    }
 	}
     }
@@ -966,6 +1162,8 @@ module netgate-kea {
 	    container Dhcp4 {
 		description
 		    "Configuration for the Kea DHCP IPv4 Server";
+
+		uses kea-dhcp4-option-def-group;
 
 		uses kea-dhcp4-option-group;
 
@@ -1212,7 +1410,7 @@ module netgate-kea {
 		leaf enable {
 		    type boolean;
 		    description
-		    "If true, the Kea dhcp4 server is enabled.";
+			"If true, the Kea dhcp4 server is enabled.";
 		}
 	    }
 	}
@@ -1224,6 +1422,8 @@ module netgate-kea {
 	    container Dhcp4 {
 		description
 		    "Configuration for the Kea DHCP IPv4 Server";
+
+		uses kea-dhcp4-option-def-group;
 
 		uses kea-dhcp4-option-group;
 

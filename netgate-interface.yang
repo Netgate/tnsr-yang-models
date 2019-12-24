@@ -30,6 +30,11 @@ module netgate-interface {
 	";
 
 
+    revision 2019-12-15 {
+	description
+	    "TNSR Release 19.12.";
+    }
+
     revision 2019-08-30 {
 	description
 	    "TNSR Release 19.08.";
@@ -43,6 +48,19 @@ module netgate-interface {
     revision 2017-01-06 {
 	description
 	    "Initial revision.";
+    }
+
+    /*
+     * Typedefs
+     */
+
+    typedef interface-ref {
+	type leafref {
+	    path "/ngif:interfaces-config/ngif:interface/ngif:name";
+	}
+	description
+	    "This type is used by data models that need to reference
+	     interfaces.";
     }
 
     typedef intf-vlan-id {

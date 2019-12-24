@@ -25,6 +25,11 @@ module netgate-dataplane {
          Copyright 2018-2019 Rubicon Communications, LLC.
         ";
 
+    revision 2019-12-15 {
+	description
+	    "TNSR Release 19.12.";
+    }
+
     revision 2019-08-30 {
 	description
 	    "TNSR Release 19.08.";
@@ -268,6 +273,18 @@ module netgate-dataplane {
                         "Given name for a dpdk device.";
                 }
 
+                leaf num-rx-desc {
+                    type uint16;
+                    description
+                        "Number of receive descriptors.";
+                }
+
+                leaf num-tx-desc {
+                    type uint16;
+                    description
+                        "Number of transmit descriptors.";
+                }
+
                 leaf num-rx-queues {
                     type uint16;
                     description
@@ -398,8 +415,8 @@ module netgate-dataplane {
 	    }
 
 	    leaf max-translations-per-user {
-		type uint16 {
-		    range "1..16384";
+		type uint32 {
+		    range "1..262144";
 		}
 		description
 		    "max translations per user";
@@ -422,6 +439,39 @@ module netgate-dataplane {
 		    }
 		}
 	    }
+
+	    leaf translation-hash-buckets {
+		type uint16 {
+		    range "1..65535";
+		    }
+		    description
+			"number of buckets in session lookup hash tables";
+	    }
+
+	    leaf translation-hash-memory {
+		type uint32 {
+		    range "1..4294967295";
+		}
+		    description
+			"memory size of session lookup hash tables";
+	    }
+
+	    leaf user-hash-buckets {
+		type uint16 {
+		    range "1..65535";
+		    }
+		    description
+			"number of buckets in NAT user lookup hash table";
+	    }
+
+	    leaf user-hash-memory {
+		type uint32 {
+		    range "1..4294967295";
+		}
+		    description
+			"memory size of NAT user lookup hash tabl";
+	    }
+
 	}
 
 	container statseg {

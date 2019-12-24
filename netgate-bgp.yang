@@ -34,6 +34,11 @@ module netgate-bgp {
 	 Copyright 2019 Rubicon Communications, LLC.
 	 ";
 
+    revision 2019-12-15 {
+	description
+	    "TNSR Release 19.12.";
+    }
+
     revision 2019-08-30 {
 	description
 	    "TNSR Release 19.08.";
@@ -1331,8 +1336,17 @@ module netgate-bgp {
 			type uint16 {
 			    range "1..3600";
 			}
+			must "current() <= ../update-delay-updates" {
+			    description
+				"The peer-wait delay must not be more
+				 than the maximum update-delay.";
+			    error-message
+			        "The peer-wait delay must not be more "
+				+ "than the maximum update-delay.";
+			}
 			description
 			    "Time to wait for a peer to establish connection.
+			     Must not be greater than initial, maximum delay.
 			     Default 120 seconds.";
 		    }
 
@@ -1437,7 +1451,7 @@ module netgate-bgp {
 				    uses bgp-distance-bgp;
 				}
 
-				container mutliple-path-maximums {
+				container multiple-path-maximums {
 				    description
 					"Multi-path maximums.";
 
@@ -1556,7 +1570,7 @@ module netgate-bgp {
 				    uses bgp-distance-bgp;
 				}
 
-				container mutliple-path-maximums {
+				container multiple-path-maximums {
 				    description
 					"Multi-path maximums.";
 
@@ -1626,32 +1640,11 @@ module netgate-bgp {
 				     updates to this peer.";
 			    }
 
-			    container bidirectional-forwarding-detection {
-				presence
-				    "Present if BFD is enabled.";
+			    leaf bfd {
+				type boolean;
 				description
-				    "Attributes describing Bidirectional
-				     Forwarding Detection (BFD).";
-
-				leaf detect-multiplier {
-				    type uint16;
-				    description
-					"BFD Multiplier, range [2-255].";
-				}
-
-				leaf minimum-receive-interval {
-				    type uint16;
-				    description
-					"Required minimum receive
-					 interval, range [50-60000].";
-				}
-
-				leaf minimum-transmit-interval {
-				    type uint16;
-				    description
-					"Desired minimum transmit
-					 interval, range [50-60000].";
-				}
+				    "Bidirectional Forwarding Detection (BFD)
+				     is enabled for this peer.";
 			    }
 
 			    container capability-advertise {
@@ -2547,7 +2540,7 @@ module netgate-bgp {
 				    uses bgp-distance-bgp;
 				}
 
-				container mutliple-path-maximums {
+				container multiple-path-maximums {
 				    description
 					"Multi-path maximums.";
 
@@ -2666,7 +2659,7 @@ module netgate-bgp {
 				    uses bgp-distance-bgp;
 				}
 
-				container mutliple-path-maximums {
+				container multiple-path-maximums {
 				    description
 					"Multi-path maximums.";
 
@@ -2736,32 +2729,11 @@ module netgate-bgp {
 				     updates to this peer.";
 			    }
 
-			    container bidirectional-forwarding-detection {
-				presence
-				    "Present if BFD is enabled.";
+			    leaf bfd {
+				type boolean;
 				description
-				    "Attributes describing Bidirectional
-				     Forwarding Detection (BFD).";
-
-				leaf detect-multiplier {
-				    type uint16;
-				    description
-					"BFD Multiplier, range [2-255].";
-				}
-
-				leaf minimum-receive-interval {
-				    type uint16;
-				    description
-					"Required minimum receive
-					 interval, range [50-60000].";
-				}
-
-				leaf minimum-transmit-interval {
-				    type uint16;
-				    description
-					"Desired minimum transmit
-					 interval, range [50-60000].";
-				}
+				    "Bidirectional Forwarding Detection (BFD)
+				     is enabled for this peer.";
 			    }
 
 			    container capability-advertise {

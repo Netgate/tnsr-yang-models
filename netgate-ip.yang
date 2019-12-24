@@ -18,12 +18,17 @@ module netgate-ip {
 	 Copyright 2019 Rubicon Communications, LLC.
 	 ";
 
+    revision 2019-12-15 {
+	description
+	    "TNSR Release 19.12.";
+    }
+
     revision 2019-08-30 {
 	description
 	    "TNSR Release 19.08.";
     }
 
-    container ip {
+    container ip-config {
 	container reassembly {
 
 	    container ipv4 {
@@ -34,15 +39,15 @@ module netgate-ip {
 		    description
 			"Reassembly timeout in milliseconds.";
 		}
-		leaf max-reassemblies {
-		    type uint32;
-		    description
-			"Maximum reassemblies count.";
-		}
 		leaf expire-walk-interval-ms {
 		    type uint32;
 		    description
 			"Timeout trying to keep fragments.";
+		}
+		leaf max-reassemblies {
+		    type uint32;
+		    description
+			"Maximum reassemblies count.";
 		}
 	    }
 
@@ -54,15 +59,15 @@ module netgate-ip {
 		    description
 			"Reassembly timeout in milliseconds.";
 		}
-		leaf max-reassemblies {
-		    type uint32;
-		    description
-			"Maximum reassemblies count.";
-		}
 		leaf expire-walk-interval-ms {
 		    type uint32;
 		    description
 			"Timeout trying to keep fragments.";
+		}
+		leaf max-reassemblies {
+		    type uint32;
+		    description
+			"Maximum reassemblies count.";
 		}
 	    }
 	}

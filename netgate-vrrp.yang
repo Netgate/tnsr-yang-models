@@ -31,6 +31,11 @@ module netgate-vrrp {
 	 Copyright 2019 Rubicon Communications, LLC.
 	";
 
+    revision 2019-12-15 {
+	description
+	    "TNSR Release 19.12.";
+    }
+
     revision 2019-08-30 {
 	description
 	    "TNSR Release 19.08.";
@@ -166,6 +171,58 @@ module netgate-vrrp {
 		 are sent from the specified interface.";
 	}
 
+	container track {
+	    description
+		"Enables the specified VRRP instance to track interfaces.";
+	    container interfaces {
+		description
+		    "Enables the specified VRRPv2 or VRRPv3 instance to track
+		     interfaces.  Interface tracking prevents traffic loss by
+		     detecting the availability of interfaces.  The operational
+		     states of other interfaces are associated with the
+		     priority of a VRRP router.  When a tracked interface
+		     becomes unavailable (or 'operational down'), the priority
+		     of the VRRP router decrements.  When an unavailable
+		     interface becomes available again, the priority of the
+		     VRRP router is incremented by the same amount.";
+
+		list interface {
+		    key "interface";
+		    description
+			"Interface to track.";
+		    leaf interface {
+			type ngif:interface-ref;
+			must "/ngif:interfaces-config/"
+			     + "ngif:interface[ngif:name=current()]/"
+			     + "ngif:ipv4" {
+			    description
+				"Interface is IPv4.";
+			    error-message
+				"IPv4 VR can only track interfaces with "
+				+ "IPv4 configured.";
+			}
+			must "current() != ../../../../../../../name" {
+			    description
+				"VR cannot track its own interface.";
+			    error-message
+				"VR cannot track its own interface.";
+			}
+			description
+			    "Interface to track.";
+		    }
+		    leaf priority-decrement {
+			type uint8 {
+			    range "1..254";
+			}
+			default 10;
+			description
+			    "Specifies how much to decrement the priority of the
+			     VRRP instance if the interface goes down.";
+		    }
+		} // interface
+	    } // interfaces
+	} //track
+
 	container virtual-ipv4-addresses {
 	    description
 		"Configures the virtual IPv4 address for the
@@ -208,6 +265,60 @@ module netgate-vrrp {
 		"Configures the interval that VRRPv3 advertisements
 		 are sent from the specified interface.";
 	}
+
+	container track {
+	    description
+		"Enables the specified VRRP instance to track interfaces
+		 or networks.";
+	    container interfaces {
+		description
+		    "Enables the specified VRRPv2 or VRRPv3 instance to track
+		     interfaces.  Interface tracking prevents traffic loss by
+		     detecting the availability of interfaces.  The operational
+		     states of other interfaces are associated with the
+		     priority of a VRRP router.  When a tracked interface
+		     becomes unavailable (or 'operational down'), the priority
+		     of the VRRP router decrements.  When an unavailable
+		     interface becomes available again, the priority of the
+		     VRRP router is incremented by the same amount.";
+		list interface {
+		    key "interface";
+		    description
+			"Interface to track.";
+
+		    leaf interface {
+			type ngif:interface-ref;
+			must "/ngif:interfaces-config/"
+			     + "ngif:interface[ngif:name=current()]/"
+			     + "ngif:ipv6" {
+			    description
+				"Interface is IPv6.";
+			    error-message
+				"IPv6 VR can only track interfaces with "
+				+ "IPv6 configured.";
+			}
+			must "current() != ../../../../../../../name" {
+			    description
+				"VR cannot track its own interface.";
+			    error-message
+				"VR cannot track its own interface.";
+			}
+			description
+			    "Interface to track.";
+		    }
+
+		    leaf priority-decrement {
+			type uint8 {
+			    range "1..254";
+			}
+			default 10;
+			description
+			    "Specifies how much to decrement the priority of the
+			     VRRP instance if the interface goes down.";
+		    }
+		} // interface
+	    } // interfaces
+	} // track
 
 	container virtual-ipv6-addresses {
 	    description

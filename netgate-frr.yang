@@ -1383,10 +1383,8 @@ module netgate-frr {
 				type frr:route-map-source-protocol;
 				description
 				    "Match the route source protocol.
-				     One of 'babel', 'bgp', 'connected',
-				     'eigrp', 'isis', 'kernel', 'nhrp',
-				     'ospf', 'ospf6', 'pim', 'rip',
-				     'ripng', 'static', 'system'.";
+				     One of 'bgp', 'connected', 'kernel',
+				     'ospf', 'ospf6', 'rip'.";
 			    }
 
 			    leaf tag {

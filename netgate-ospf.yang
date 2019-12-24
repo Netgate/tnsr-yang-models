@@ -26,6 +26,11 @@ module netgate-ospf {
 	 Copyright 2019 Rubicon Communications, LLC.
 	 ";
 
+    revision 2019-12-15 {
+	description
+	    "TNSR Release 19.12.";
+    }
+
     revision 2019-08-30 {
 	description
 	    "TNSR Release 19.08.";
@@ -152,10 +157,6 @@ module netgate-ospf {
 
     typedef ospf-route-out {
 	type enumeration {
-	    enum babel {
-		description
-		    "Babel";
-	    }
 	    enum bgp {
 		description
 		    "BGP";
@@ -164,41 +165,17 @@ module netgate-ospf {
 		description
 		    "Connected";
 	    }
-	    enum eigrp {
-		description
-		    "EIGRP";
-	    }
-	    enum isis {
-		description
-		    "ISIS";
-	    }
 	    enum kernel {
 		description
 		    "Kernel";
-	    }
-	    enum nhrp {
-		description
-		    "NHRP";
 	    }
 	    enum rip {
 		description
 		    "RIP";
 	    }
-	    enum sharp {
-		description
-		    "SHARP";
-	    }
-	    enum static {
-		description
-		    "Static";
-	    }
 	    enum table {
 		description
 		    "Table";
-	    }
-	    enum vnc {
-		description
-		    "VNC";
 	    }
 	}
     }
@@ -306,6 +283,11 @@ module netgate-ospf {
 	    enum neighbor {
 		description
 		    "Neighbor list.";
+	    }
+
+	    enum neighbor-detail {
+		description
+		    "Neighbor detailed list.";
 	    }
 
 	    enum route {
@@ -921,6 +903,13 @@ module netgate-ospf {
 					 in seconds.";
 				}
 			    }
+			}
+
+			leaf bfd {
+			    type boolean;
+			    description
+				"Bidirectional Forwarding Detection (BFD)
+				 is enabled for this interface.";
 			}
 		    }
 		}
@@ -2241,6 +2230,13 @@ module netgate-ospf {
 					 in seconds.";
 				}
 			    }
+			}
+
+			leaf bfd {
+			    type boolean;
+			    description
+				"Bidirectional Forwarding Detection (BFD)
+				 is enabled for this interface.";
 			}
 		    }
 		}

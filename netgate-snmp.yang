@@ -20,6 +20,11 @@ module netgate-snmp {
 
 	 Copyright 2019 Rubicon Communications, LLC.";
 
+    revision 2019-12-15 {
+	description
+	    "TNSR Release 19.12.";
+    }
+
     revision 2019-08-30 {
 	description
 	    "TNSR Release 19.08.";
@@ -40,8 +45,8 @@ module netgate-snmp {
     typedef snmp-security-level {
 	type enumeration {
 	    enum noauth;
-	    enum auth;
-	    enum priv;
+	    /* enum auth; */
+	    /* enum priv; */
 	}
     }
 
@@ -50,15 +55,16 @@ module netgate-snmp {
 	    enum any;
 	    enum v1;
 	    enum v2c;
-	    enum usm;
-	    enum tsmlksm;
+	    /* enum usm; */
+	    /* enum tsm; */
+	    /* enum ksm; */
 	}
     }
 
     typedef snmp-context-match {
 	type enumeration {
 	    enum exact;
-	    enum prefix;
+	    /* enum prefix; */
 	}
     }
 
