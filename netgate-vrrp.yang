@@ -1,0 +1,354 @@
+module netgate-vrrp {
+
+    namespace "urn:netgate:xml:yang:netgate-vrrp";
+    prefix "ngvrrp";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import ietf-yang-types {
+	prefix "yang";
+    }
+
+    import netgate-interface {
+	prefix "ngif";
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a data model for VRRP. The model is
+	 duplicated directly, to the extent possible, from the IETF VRRP
+	 data model introduced by RFC 8347.
+
+	 Copyright 2019 Rubicon Communications, LLC.
+	";
+
+    revision 2019-08-30 {
+	description
+	    "TNSR Release 19.08.";
+    }
+  
+    /*
+     * Identities
+     */
+
+    /* vrrp-state-type identity and its derivatives. */
+    identity vrrp-state-type {
+	description
+	    "Indicates the state of a virtual router.";
+    }
+    identity initialize {
+	base vrrp-state-type;
+	    description
+		"Indicates that the virtual router is waiting
+		 for a startup event.";
+    }
+    identity backup {
+	base vrrp-state-type;
+	    description
+		"Indicates that the virtual router is monitoring the
+		 availability of the master router.";
+    }
+    identity master {
+	base vrrp-state-type;
+	    description
+		"Indicates that the virtual router is forwarding
+		 packets for IP addresses that are associated with
+		 this virtual router.";
+    }
+    identity interface-down {
+	base vrrp-state-type;
+	    description
+		"Indicates that the virtual router has been started
+		 but is not currently monitoring the availability of
+		 the master or forwarding packets for the virtual
+		 router because the interface is down.";
+    }
+
+
+    /* vrrp-version identity and its derivatives. */
+    identity vrrp-version {
+	description
+	    "The version of VRRP.";
+    }
+    identity vrrp-v3 {
+	base vrrp-version;
+	description
+	    "Indicates version 3 of VRRP.";
+    }
+
+    /*
+     * Groupings
+     */
+
+    grouping vrrp-common-attributes {
+	description
+	    "Group of VRRP attributes common to versions 2 and 3.";
+
+	leaf vrid {
+	    type uint8 {
+		range "1..255";
+	    }
+	    description
+		"Virtual Router ID (i.e., VRID).";
+	}
+
+	leaf version {
+	    type identityref {
+		base ngvrrp:vrrp-version;
+	    }
+	    default vrrp-v3;
+	    description
+		"Version 2 or 3 of VRRP.";
+	}
+
+	container preempt {
+	    description
+		"Enables a higher-priority VRRP backup router to preempt a
+		 lower-priority VRRP master.";
+	    leaf enabled {
+		type boolean;
+		default "true";
+		description
+		    "'true' if preemption is enabled.";
+	    }
+	}
+
+	leaf priority {
+	    type uint8 {
+		range "1..255";
+	    }
+	    default 100;
+	    description
+		"Configures the VRRP election priority for the backup
+		 virtual router.";
+	}
+
+	leaf accept-mode {
+	    type boolean;
+	    default "false";
+	    description
+		"Controls whether a virtual router in master state will
+		 accept packets addressed to the address owner's IPvX address
+		 as its own if it is not the IPvX address owner.  The default
+		 is 'false'.  Deployments that rely on, for example, pinging
+		 the address owner's IPvX address may wish to configure
+		 accept-mode to 'true'.
+
+		 Note: IPv6 Neighbor Solicitations and Neighbor
+		 Advertisements MUST NOT be dropped when accept-mode
+		 is 'false'.";
+	}
+    } // vrrp-common-attributes
+
+    grouping vrrp-ipv4-attributes {
+	description
+	    "Group of VRRP attributes for IPv4.";
+
+	uses vrrp-common-attributes;
+
+	leaf advertise-interval-centi-sec {
+	    type uint16 {
+		range "1..4095";
+	    }
+	    units centiseconds;
+	    default 100;
+	    description
+		"Configures the interval that VRRPv3 advertisements
+		 are sent from the specified interface.";
+	}
+
+	container virtual-ipv4-addresses {
+	    description
+		"Configures the virtual IPv4 address for the
+		 VRRP interface.";
+
+	    list virtual-ipv4-address {
+		key "ipv4-address";
+		max-elements 16;
+		description
+		    "Virtual IPv4 addresses for a single VRRP instance.  For a
+		     VRRP owner router, the virtual address must match one
+		     of the IPv4 addresses configured on the interface
+		     corresponding to the virtual router.";
+
+		    leaf ipv4-address {
+			type inet:ipv4-address;
+			description
+			    "An IPv4 address associated with a virtual router.";
+			reference
+			    "RFC 5798: Virtual Router Redundancy Protocol (VRRP)
+			     Version 3 for IPv4 and IPv6.  Section 1.2";
+		    }
+	    } // virtual-ipv4-address
+	} // virtual-ipv4-addresses
+    } // vrrp-ipv4-attributes
+
+    grouping vrrp-ipv6-attributes {
+	description
+	    "Group of VRRP attributes for IPv6.";
+
+	uses vrrp-common-attributes;
+
+	leaf advertise-interval-centi-sec {
+	    type uint16 {
+		range "1..4095";
+	    }
+	    units centiseconds;
+	    default 100;
+	    description
+		"Configures the interval that VRRPv3 advertisements
+		 are sent from the specified interface.";
+	}
+
+	container virtual-ipv6-addresses {
+	    description
+		"Configures the virtual IPv6 address for the
+		 VRRP interface.";
+	    list virtual-ipv6-address {
+		key "ipv6-address";
+		max-elements 2;
+		description
+		    "Two IPv6 addresses are allowed.  The first address must
+		     be a link-local address.  The second address can be a
+		     link-local or global address.";
+
+		leaf ipv6-address {
+		    type inet:ipv6-address;
+		    description
+			"An IPv6 address associated with a virtual router.";
+		    reference
+			"RFC 5798: Virtual Router Redundancy Protocol (VRRP)
+			 Version 3 for IPv4 and IPv6.  Section 1.3";
+		}
+	    } // virtual-ipv6-address
+	} // virtual-ipv6-addresses
+    } // vrrp-ipv6-attributes
+
+    grouping vrrp-state-attributes {
+	description
+	    "Group of VRRP state attributes.";
+
+	leaf state {
+	    type identityref {
+		base ngvrrp:vrrp-state-type;
+	    }
+	    config false;
+	    description
+		"Operational state.";
+	}
+
+	leaf is-owner {
+	    type boolean;
+	    config false;
+	    description
+		"Set to 'true' if this virtual router is the owner.";
+	}
+
+	leaf master-down-interval {
+	    type uint32;
+	    units centiseconds;
+	    config false;
+	    description
+		"Time interval for the backup virtual router to declare
+		 'master down'.";
+	}
+
+	leaf skew-time {
+	    type uint32;
+	    units microseconds;
+	    config false;
+	    description
+		"Calculated based on the priority and advertisement
+		 interval configuration command parameters.    See RFC 3768.";
+	}
+
+    } // vrrp-state-attributes
+
+
+    augment "/ngif:interfaces-config/ngif:interface/ngif:ipv4" {
+	description
+	    "Augments IPv4 interface.";
+
+	container vrrp {
+	    description
+		"Configures VRRP version 3 for IPv4.";
+
+	    list vrrp-instance {
+		key "vrid";
+		description
+		    "Defines a virtual router, identified by a VRID, within the
+		     IPv4 address space.";
+
+		uses vrrp-ipv4-attributes;
+	    }
+	}
+    } // augments ipv4
+
+    augment "/ngif:interfaces-config/ngif:interface/ngif:ipv6" {
+	description
+	    "Augments IPv6 interface.";
+
+	container vrrp {
+	    description
+		"Configures VRRP version 3 for IPv6.";
+
+	    list vrrp-instance {
+		key "vrid";
+		description
+		    "Defines a virtual router, identified by a VRID, within the
+		     IPv6 address space.";
+
+		uses vrrp-ipv6-attributes;
+	    }
+	}
+    } // augments ipv6
+
+    augment "/ngif:interfaces-state/ngif:interface/ngif:ipv4" {
+	description
+	    "Augments IPv4 interface state.";
+
+	container vrrp {
+	    description
+		"Configures VRRP version 3 for IPv4.";
+
+	    list vrrp-instance {
+		key "vrid";
+		description
+		    "Defines a virtual router, identified by a VRID, within the
+		     IPv4 address space.";
+
+		uses vrrp-ipv4-attributes;
+		uses vrrp-state-attributes;
+	    }
+	}
+    } // augments ipv4
+
+    augment "/ngif:interfaces-state/ngif:interface/ngif:ipv6" {
+	description
+	    "Augments IPv6 interface state data.";
+
+	container vrrp {
+	    description
+		"Configures VRRP version 3 for IPv6.";
+
+	    list vrrp-instance {
+		key "vrid";
+		description
+		    "Defines a virtual router, identified by a VRID, within the
+		     IPv6 address space.";
+
+		uses vrrp-ipv6-attributes;
+		uses vrrp-state-attributes;
+	    }
+	}
+    } // augments ipv6
+}

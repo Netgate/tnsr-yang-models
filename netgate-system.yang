@@ -7,6 +7,10 @@ module netgate-system {
 	prefix "inet";
     }
 
+    import ietf-netconf-acm {
+	prefix "nacm";
+    }
+
     organization "Netgate";
 
     contact "Web: <http://www.netgate.com>";
@@ -17,6 +21,11 @@ module netgate-system {
 
 	 Copyright 2018-2019 Rubicon Communications, LLC.
 	 ";
+
+    revision 2019-08-30 {
+	description
+	    "TNSR Release 19.08.";
+    }
 
     revision 2019-05-30 {
 	description
@@ -241,7 +250,9 @@ module netgate-system {
 		}
 
 		leaf user-password {
-		    type string;
+		    type string {
+			length 6..256;
+		    }
 		    description
 			"the hash of the users password";
 		}
@@ -334,6 +345,41 @@ module netgate-system {
 	    type uint64;
 	    description
 		"Free swap space for this host.";
+	}
+
+	container product {
+	    description
+		"Product specific information.";
+
+	    leaf product-vendor {
+	        type string;
+		description
+		    "product vendor name.";
+	    }
+
+	    leaf product-name {
+	        type string;
+		description
+		    "product name.";
+ 	    }
+
+	    leaf product-model {
+	        type string;
+		description
+		    "product model.";
+ 	    }
+
+	    leaf product-version {
+	        type string;
+		description
+		    "product version.";
+ 	    }
+
+	    leaf product-serial {
+	        type string;
+		description
+		    "product serial number.";
+ 	    }
 	}
 
 	container platform {

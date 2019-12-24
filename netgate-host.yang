@@ -25,6 +25,11 @@ module netgate-host {
 	 Copyright 2019 Rubicon Communications, LLC.
 	";
 
+    revision 2019-08-30 {
+	description
+	    "TNSR Release 19.08.";
+    }
+
     revision 2019-05-30 {
 	description
 	    "TNSR Release 19.05.";
@@ -40,7 +45,7 @@ module netgate-host {
 	    "Initial revision.";
     }
 
-    typedef host-acl-protocol {
+    typedef host-acl-protocol-name {
 	type enumeration {
 	    enum icmp {
 		description
@@ -58,6 +63,20 @@ module netgate-host {
 	    }
 	}
     }
+
+    typedef host-acl-protocol-number {
+	type uint8;
+	description
+	    "Host acl protocol number.";
+    }
+
+    typedef host-acl-protocol {
+	type union {
+	    type host-acl-protocol-name;
+	    type host-acl-protocol-number;
+	}
+    }
+
 
     typedef host-acl-icmp-type {
 	type enumeration {

@@ -22,6 +22,11 @@ module netgate-acl {
 	 Copyright 2017-2019 Rubicon Communications, LLC.
 	 ";
 
+    revision 2019-08-30 {
+	description
+	    "TNSR Release 19.08.";
+    }
+
     revision 2019-05-30 {
 	description
 	    "TNSR Release 19.05.";
@@ -37,20 +42,40 @@ module netgate-acl {
 	    "Initial revision.";
     }
 
-    typedef acl-protocol {
+    typedef acl-protocol-name {
 	type enumeration {
+	    enum any {
+		description "any protocol";
+		value 0;
+	    }
 	    enum tcp {
-		description
-		    "TCP";
+		description "TCP";
+		value 6;
 	    }
 	    enum udp {
-		description
-		    "UDP";
+		description "UDP";
+		value 17;
 	    }
 	    enum icmp {
-		description
-		    "ICMP";
+		description "ICMP";
+		value 1;
 	    }
+	    enum icmpv6 {
+		description "ICMPv6";
+		value 58;
+	    }
+	}
+    }
+
+    typedef acl-protocol-number {
+	type uint8;
+	description "ip protocol number";
+    }
+
+    typedef acl-protocol {
+	type union {
+	    type acl-protocol-name;
+	    type acl-protocol-number;
 	}
     }
 
@@ -177,8 +202,7 @@ module netgate-acl {
 			leaf protocol {
 			    type acl-protocol;
 			    description
-				"One of the L4 protocol strings 'tcp', 'udp'
-				 or 'icmp'.";
+				"IP protocol";
 			}
 
 			leaf icmp-first-type {

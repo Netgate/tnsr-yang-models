@@ -15,6 +15,10 @@ module netgate-interface {
 	prefix "ngcom";
     }
 
+    import netgate-nat {
+	prefix "ngnat";
+    }
+
     organization "Netgate";
 
     contact "Web: <http://www.netgate.com>";
@@ -25,6 +29,11 @@ module netgate-interface {
 	 Copyright 2017-2019 Rubicon Communications, LLC.
 	";
 
+
+    revision 2019-08-30 {
+	description
+	    "TNSR Release 19.08.";
+    }
 
     revision 2019-05-30 {
 	description
@@ -291,18 +300,10 @@ module netgate-interface {
 		     interface will send and receive.";
 	    }
 
-	    leaf inside {
-		type boolean;
+	    leaf nat-interface {
+		type ngnat:nat-side;
 		description
-		    "If set true, this interface is used as a NAT
-		     inside interface.";
-	    }
-
-	    leaf outside {
-		type boolean;
-		description
-		    "If set true, this interface is used as a NAT
-		    outside interface.";
+		    "NAT role.";
 	    }
 
 	    leaf mac-address {
@@ -340,6 +341,16 @@ module netgate-interface {
 			    "An IPv4 address on the interface.";
 		    }
 		}
+
+		container reassembly {
+		    description
+		        "ip-reassembly feature control.";
+		    leaf enabled {
+			type boolean;
+			description
+			    "IPv4 reassembly enabled for interface";
+		    }
+		}
 	    }
 
 	    container ipv6 {
@@ -361,6 +372,16 @@ module netgate-interface {
 			type inet:ipv6-prefix;
 			description
 			    "An IPv6 address on the interface.";
+		    }
+		}
+
+		container reassembly {
+		    description
+		        "ip-reassembly feature control.";
+		    leaf enabled {
+			type boolean;
+			description
+			    "IPv6 reassembly enabled for interface";
 		    }
 		}
 	    }
@@ -490,6 +511,12 @@ module netgate-interface {
 			     rule-set from the ACL MACIP tables.";
 		    }
 		}
+	    }
+
+	    leaf collect-detailed-stats {
+		type boolean;
+		description
+		    "enable detailed counter keeping in VPP";
 	    }
 
 	    container lldp {
@@ -1027,6 +1054,7 @@ module netgate-interface {
 		}
 	    }
 	}
+
     }
 
     container interfaces-state {
@@ -1085,6 +1113,17 @@ module netgate-interface {
 		description
 		    "The size, in octets, of the largest packet that the
 		     interface will send and receive.";
+	    }
+
+	    leaf if-index {
+		type int32 {
+		    range "1..2147483647";
+		}
+		description
+		    "The ifIndex value for the ifEntry represented by this
+		     interface.";
+		reference
+		    "RFC 2863: The Interfaces Group MIB - ifIndex";
 	    }
 
 	    leaf mac-address {
@@ -1163,6 +1202,12 @@ module netgate-interface {
 		    description
 		        "time counters reset in seconds since
 			 midnight 1/1/1970 UTC";
+		}
+
+		leaf detailed-counters {
+		    type boolean;
+		    description
+		        "true if detailed counters are enabled";
 		}
 
 		leaf rx-bytes {

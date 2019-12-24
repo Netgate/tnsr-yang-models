@@ -21,6 +21,11 @@ module netgate-nat {
 
 	 Copyright 2017-2019 Rubicon Communications, LLC.";
 
+    revision 2019-08-30 {
+	description
+	    "TNSR Release 19.08.";
+    }
+
     revision 2019-05-30 {
 	description
 	    "TNSR Release 19.05.";
@@ -38,18 +43,20 @@ module netgate-nat {
 
     typedef nat-side {
 	type enumeration {
+	    enum none {
+		description "no NAT";
+	    }
 	    enum inside {
-		description
-		    "Inside";
+		description "inside interface";
 	    }
 	    enum outside {
-		description
-		    "Outside";
+		description "outside interface";
 	    }
+	    /*
 	    enum both {
-		description
-		    "Both";
+		description "inside/outside interface";
 	    }
+	    */
 	}
     }
 
@@ -89,6 +96,32 @@ module netgate-nat {
 			"NAT44 forwarding option. Used 'true' or 'false'.";
 
 		    type boolean;
+		}
+	    }
+
+	    container timeouts {
+		description
+		    "NAT global timeouts";
+
+		leaf udp {
+		    type uint32;
+		    description
+			"NAT UDP idle-timeout";
+		}
+		leaf tcp_established {
+		    type uint32;
+		    description
+			"NAT TCP established connection idle-timeout";
+		}
+		leaf tcp_transitory {
+		    type uint32;
+		    description
+			"NAT TCP transitory connection idle-timeout";
+		}
+		leaf icmp {
+		    type uint32;
+		    description
+			"NAT ICMP idle-timeout";
 		}
 	    }
 	}
@@ -425,6 +458,27 @@ module netgate-nat {
 		type boolean;
 		description
 		    "NAT44 Forwarding enabled";
+	    }
+
+	    leaf timeout-udp {
+		type uint32;
+		description
+		    "NAT UDP idle-timeout";
+	    }
+	    leaf timeout-tcp_established {
+		type uint32;
+		description
+		    "NAT TCP established connection idle-timeout";
+	    }
+	    leaf timeout-tcp_transitory {
+		type uint32;
+		description
+		    "NAT TCP transitory connection idle-timeout";
+	    }
+	    leaf timeout-icmp {
+		type uint32;
+		description
+		    "NAT ICMP idle-timeout";
 	    }
 	}
 

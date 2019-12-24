@@ -34,16 +34,15 @@ module netgate-bgp {
 	 Copyright 2019 Rubicon Communications, LLC.
 	 ";
 
+    revision 2019-08-30 {
+	description
+	    "TNSR Release 19.08.";
+    }
+
     revision 2019-05-30 {
 	description
 	    "TNSR Release 19.05.";
     }
-
-    revision 2019-03-06 {
-	description
-	    "Initial release.";
-    }
-
 
     typedef bgp-orf-prefix-list {
 	type enumeration {
@@ -72,47 +71,13 @@ module netgate-bgp {
 		description
 		"Connected";
 	    }
-	    enum rip {
-		description
-		"RIP";
-	    }
-	    /*
 	    enum ospf {
 		description
 		"OSPF";
 	    }
-	    */
-	    enum isis {
-		description
-		"ISIS";
-	    }
-	    enum pim {
-		description
-		"PIM";
-	    }
-	    enum eigrp {
-		description
-		"EIGRP";
-	    }
-	    enum nhrp {
-		description
-		"NHRP";
-	    }
 	    enum table {
 		description
 		"Table";
-	    }
-	    enum vnc {
-		description
-		"VNC";
-	    }
-	    enum vnc-direct {
-		description
-		    "VNC Direct";
-	    }
-	    enum babel {
-		description
-		"Babel";
 	    }
 	}
     }
@@ -223,6 +188,19 @@ module netgate-bgp {
 	    enum detail {
 		description
 		    "detail";
+	    }
+	}
+    }
+
+    typedef bgp-ip-family {
+	type enumeration {
+	    enum ipv4 {
+		description
+		    "IPv4 address";
+	    }
+	    enum ipv6 {
+		description
+		    "IPv6 address";
 	    }
 	}
     }
@@ -715,15 +693,6 @@ module netgate-bgp {
 		    "If present, this network announcement is present
 		     and configured.";
 
-		leaf label-index {
-		    type uint32 {
-			range "0..1048560";
-		    }
-		    description
-			"An optional label index in the range
-			 [0..1048560] to associate with the prefix.";
-		}
-
 		leaf route-map-name {
 		    type string;
 		    description
@@ -762,15 +731,6 @@ module netgate-bgp {
 		    "If present, this network announcement is present
 		     and configured.";
 
-		leaf label-index {
-		    type uint32 {
-			range "0..1048560";
-		    }
-		    description
-			"An optional label index in the range
-			 [0..1048560] to associate with the prefix.";
-		}
-
 		leaf route-map-name {
 		    type string;
 		    description
@@ -798,7 +758,8 @@ module netgate-bgp {
 		leaf source {
 		    type bgp-source;
 		    description
-			"The route source.";
+			"The route source.  One of 'kernel',
+			 'connected', 'ospf', 'table'.";
 		}
 
 		container route-data {
@@ -822,48 +783,6 @@ module netgate-bgp {
 		}
 	    }
 	}
-
-	/*
-	container ospf-instances {
-	    description
-		"Route redistributions to OSPF instances.";
-
-	    list instance {
-		key "id";
-		description
-		    "OSPF route tables and non-main kernel route
-		     tables.";
-
-		leaf id {
-		    type uint16 {
-			range "1..65535";
-		    }
-		    description
-			"OSPF or route table id.";
-		}
-
-		container instance-data {
-		    presence
-			"If present, this redistribution is present
-			 and configured.";
-
-		    leaf metric {
-			type uint32;
-			description
-			    "Metric for redistributed
-			     routes.";
-		    }
-
-		    leaf route-map {
-			type string;
-			description
-			    "Route map for
-			     redistributed routes";
-		    }
-		}
-	    }
-	}
-	*/
 
 	container kernel-tables {
 	    description
@@ -932,6 +851,11 @@ module netgate-bgp {
 		     'advertised-routes', 'dampened-routes',
 		     'flap-statistics', 'prefix-counts', 'received',
 		     'received-routes', 'routes', or 'detail'.";
+	    }
+	    leaf family {
+		type bgp-ip-family;
+		description
+		    "IP family";
 	    }
 	}
 	output {
@@ -1836,7 +1760,9 @@ module netgate-bgp {
 			    }
 
 			    leaf password {
-				type string;
+				type string {
+				    length "1..63";
+				}
 				description
 				    "The neighbor password.";
 			    }
@@ -2944,7 +2870,9 @@ module netgate-bgp {
 			    }
 
 			    leaf password {
-				type string;
+				type string {
+				    length "1..63";
+				}
 				description
 				    "The neighbor password.";
 			    }

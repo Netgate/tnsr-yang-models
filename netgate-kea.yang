@@ -24,6 +24,11 @@ module netgate-kea {
 
 	 Copyright 2019 Rubicon Communications, LLC.";
 
+    revision 2019-08-30 {
+	description
+	    "TNSR Release 19.08.";
+    }
+
     revision 2019-05-30 {
 	description
 	    "TNSR Release 19.05.";
@@ -569,307 +574,79 @@ module netgate-kea {
 
     typedef kea-logger-name {
 	type enumeration {
-	    enum * {
-		description
-		    "Wildcard all Kea logger names.";
-	    }
-
-	    enum kea-ctrl-agent {
-		description
-		    "The root logger for the Control Agent exposing
-		     RESTful control API. All components used by the
-		     Control Agent inherit the settings from this
-		     logger.";
-	     }
-
-	     enum kea-ctrl-agent.http {
-		 description
-		     "A logger which outputs log messages related to
-		      receiving, parsing and sending HTTP messages.";
-	     }
-
 	    enum kea-dhcp4 {
 		description
-		    "The root logger for the DHCPv4 server. All
-		     components used by the DHCPv4 server inherit the
-		     settings from this logger.";
+		    "DHCPv4 server default logging";
 	    }
 
 	    enum kea-dhcp4.alloc-engine {
 		description
-		    "Used by the lease allocation engine, which is
-		     responsible for managing leases in the lease
-		     database, i.e. create, modify and remove DHCPv4
-		     leases as a result of processing messages from
-		     the clients.";
+		    "DHCPv4 lease allocation";
 	    }
 
 	    enum kea-dhcp4.bad-packets {
 		description
-		    "Used by the DHCPv4 server daemon for logging
-		     inbound client packets that were dropped or to
-		     which the server responded with a DHCPNAK. It
-		     allows administrators to configure a separate log
-		     output that contains only packet drop and reject
-		     entries.";
+		    "DHCPv4 packets that are dropped or rejected";
 	    }
 
 	    enum kea-dhcp4.callouts {
 		description
-		    "Used to log messages pertaining to the callouts
-		     registration and execution for the particular
-		     hook point.";
+		    "DHCPv4 hook point callout registration/execution";
 	    }
 
 	    enum kea-dhcp4.commands {
 		description
-		    "Used to log messages relating to the handling of
-		     commands received by the the DHCPv4 server over
-		     the command channel.";
+		    "DHCPv4 commands received over the command channel";
 	    }
 
 	    enum kea-dhcp4.ddns {
 		description
-		    "Used by the DHCPv4 server to log messages related
-		     to the Client FQDN and Hostname option
-		     processing. It also includes log messages related
-		     to the relevant DNS updates.";
+		    "DHCPv4 client FQDN and Hostname option processing";
 	    }
 
 	    enum kea-dhcp4.dhcp4 {
 		description
-		    "Used by the DHCPv4 server daemon to log basic
-		     operations.";
+		    "DHCPv4 server basic operations";
 	    }
 
 	    enum kea-dhcp4.dhcpsrv {
 		description
-		    "The base logger for the libdhcpsrv library.";
+		    "DHCPv4 libkea-dhcpsrv library default logging";
 	    }
 
 	    enum kea-dhcp4.eval {
 		description
-		    "Used to log messages relating to the client
-		     classification expression evaluation code.";
+		    "DHCPv4 client classification expression evaluation";
 	    }
 
 	    enum kea-dhcp4.hooks {
 		description
-		    "Used to log messages related to management of
-		     hooks libraries, e.g. registration and
-		     deregistration of the libraries, and to the
-		     initialization of the callouts execution for
-		     various hook points within the DHCPv4 server.";
+		    "DHCPv4 hook registration/deregistration";
 	    }
 
 	    enum kea-dhcp4.hosts {
 		description
-		    "Used within the libdhcpsrv and it logs messages
-		     related to the management of the DHCPv4 host
-		     reservations, i.e. retrieval of the reservations
-		     and adding new reservations.";
+		    "DHCPv4 host reservation management";
 	    }
 
 	    enum kea-dhcp4.leases {
 		description
-		    "Used by the DHCPv4 server to log messages related
-		     to the lease allocation. The messages include
-		     detailed information about the allocated or
-		     offered leases, errors during the lease
-		     allocation etc.";
+		    "DHCPv4 lease allocation";
 	    }
 
 	    enum kea-dhcp4.options {
 		description
-		    "Used by the DHCPv4 server to log messages related
-		     to processing of the options in the DHCPv4
-		     messages, i.e. parsing options, encoding options
-		     into on-wire format and packet classification
-		     using options contained in the received
-		     packets.";
+		    "DHCPv4 option processing/parsing/encoding";
 	    }
 
 	    enum kea-dhcp4.packets {
 		description
-		    "This logger is mostly used to log messages
-		     related to transmission of the DHCPv4 packets,
-		     i.e. packet reception and sending a
-		     response. Such messages include information about
-		     the source and destination IP addresses and
-		     interfaces used to transmit packets. The logger
-		     is also used to log messages related to subnet
-		     selection, as this selection is usually based on
-		     the IP addresses and/or interface names, which
-		     can be retrieved from the received packet, even
-		     before the DHCPv4 message carried in the packet
-		     is parsed.";
+		    "DHCPv4 packet reception/transmission";
 	    }
 
 	    enum kea-dhcp4.stat-cmds-hooks {
 		description
-		    "This logger is used to log messages related to
-		     operation of the Stats Cmds hooks library. In
-		     general these will pertain to loading and
-		     unloading the library and the execution of
-		     commands by the library.";
-	    }
-
-	    enum kea-dhcp6 {
-		description
-		    "The root logger for the DHCPv6 server. All
-		     components used by the DHCPv6 server inherit the
-		     settings from this logger if there is no
-		     specialized logger provided.";
-	    }
-
-	    enum kea-dhcp6.alloc-engine {
-		description
-		    "Used by the lease allocation engine, which is
-		     responsible for managing leases in the lease
-		     database, i.e. create, modify and remove DHCPv6
-		     leases as a result of processing messages from
-		     the clients.";
-	    }
-
-	    enum kea-dhcp6.bad-packets {
-		description
-		    "Used by the DHCPv6 server daemon for logging
-		     inbound client packets that were dropped.";
-	    }
-
-	    enum kea-dhcp6.callouts {
-		description
-		    "Used to log messages pertaining to the callouts
-		     registration and execution for the particular
-		     hook point.";
-	    }
-
-	    enum kea-dhcp6.commands {
-		description
-		    "Used to log messages relating to the handling of
-		     commands received by the the DHCPv6 server over
-		     the command channel.";
-	    }
-
-	    enum kea-dhcp6.ddns {
-		description
-		    "This logger is used by the DHCPv6 server to log
-		     messages related to the Client FQDN option
-		     processing. It also includes log messages related
-		     to the relevant DNS updates.";
-	    }
-
-	    enum kea-dhcp6.dhcp6 {
-		description
-		    "Used DHCPv6 server daemon to log basic operations.";
-	    }
-
-	    enum kea-dhcp6.dhcpsrv {
-		description
-		    "The base logger for the libdhcpsrv library.";
-	    }
-
-	    enum kea-dhcp6.eval {
-		description
-		    "Used to log messages relating to the client
-		     classification expression evaluation code.";
-	    }
-
-	    enum kea-dhcp6.hooks {
-		description
-		    "This logger is used to log messages related to
-		     management of hooks libraries, e.g. registration
-		     and deregistration of the libraries, and to the
-		     initialization of the callouts execution for
-		     various hook points within the DHCPv6 server.";
-	    }
-
-	    enum kea-dhcp6.hosts {
-		description
-		    "Used within the libdhcpsrv and it logs messages
-		     related to the management of the DHCPv6 host
-		     reservations, i.e. retrieval of the reservations
-		     and adding new reservations.";
-	    }
-
-	    enum kea-dhcp6.leases {
-		description
-		    "Used by the DHCPv6 server to log messages related
-		     to the lease allocation. The messages include
-		     detailed information about the allocated or
-		     offered leases, errors during the lease
-		     allocation etc.";
-	    }
-
-	    enum kea-dhcp6.options {
-		description
-		    "Used by the DHCPv6 server to log messages related
-		     to processing of the options in the DHCPv6
-		     messages, i.e. parsing options, encoding options
-		     into on-wire format and packet classification
-		     using options contained in the received
-		     packets.";
-	    }
-
-	    enum kea-dhcp6.packets {
-		description
-		    "This logger is mostly used to log messages
-		    related to transmission of the DHCPv6 packets,
-		    i.e. packet reception and sending a response. Such
-		    messages include the information about the source
-		    and destination IP addresses and interfaces used
-		    to transmit packets. This logger is also used to
-		    log messages related to subnet selection, as this
-		    selection is usually based on the IP addresses
-		    and/or interface names, which can be retrieved
-		    from the received packet, even before the DHCPv6
-		    message carried in the packet is parsed.";
-	    }
-
-	    enum kea-dhcp6.stat-cmds-hooks {
-		description
-		    "This logger is used to log messages related to
-		     operation of the Stats Cmds hooks library. In
-		     general these will pertain to loading and
-		     unloading the library and the execution of
-		     commands by the library.";
-	    }
-
-	    enum kea-dhcp-ddns {
-		description
-		    "The root logger for the kea-dhcp-ddns daemon. All
-		     components used by this daemon inherit the
-		     settings from this logger if there is no
-		     specialized logger provided.";
-	    }
-
-	    enum kea-dhcp-ddns.dctl {
-		description
-		    "The logger used by the kea-dhcp-ddns daemon for
-		     logging basic information about the process,
-		     received signals and triggered
-		     reconfigurations.";
-	    }
-
-	    enum kea-dhcp-ddns.dhcpddns {
-		description
-		    "The logger used by the kea-dhcp-ddns daemon for
-		    logging events related to DDNS operations.";
-	    }
-
-	    enum kea-dhcp-ddns.dhcp-to-d2 {
-		description
-		    "Used by the kea-dhcp-ddns daemon for logging
-		     information about events dealing with receiving
-		     messages from the DHCP servers and adding them to
-		     the queue for processing.";
-	    }
-
-	    enum kea-dhcp-ddns.d2-to-dns {
-		description
-		    "Used by the kea-dhcp-ddns daemon for logging
-		     information about events dealing with sending and
-		     receiving messages with the DNS servers.";
+		    "DHCPv4 libdhcp_stat_cmds library default logging";
 	    }
 	}
     }
@@ -1388,6 +1165,7 @@ module netgate-kea {
 
 			leaf hw-address {
 			    type yang:mac-address;
+			    mandatory true;
 			    description
 				"The host's MAC address.";
 			}

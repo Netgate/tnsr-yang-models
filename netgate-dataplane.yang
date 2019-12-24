@@ -25,6 +25,11 @@ module netgate-dataplane {
          Copyright 2018-2019 Rubicon Communications, LLC.
         ";
 
+    revision 2019-08-30 {
+	description
+	    "TNSR Release 19.08.";
+    }
+
     revision 2019-05-30 {
 	description
 	    "TNSR Release 19.05.";
@@ -311,7 +316,36 @@ module netgate-dataplane {
                         "The name of the vdev type.";
                 }
             }
+
+	    leaf num-crypto-mbufs {
+		    type uint32 {
+			range "1..4294967295";
+		    }
+		    description
+		        "Number of crypto buffers.";
+	    }
         }
+
+	container buffers {
+	    description
+		"VPP pre-allocated buffers configuration";
+
+	    leaf buffers-per-numa {
+		type uint32 {
+		    range "1..4294967295";
+		}
+		description
+		    "Pre-allocated buffers count";
+	    }
+
+	    leaf default-data-size {
+		type uint32 {
+		    range "1..4294967295";
+		}
+		description
+		    "Amount of memory allocated per-buffer";
+	    }
+	}
 
         container ip {
 

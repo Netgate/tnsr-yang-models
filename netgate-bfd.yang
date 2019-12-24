@@ -18,6 +18,11 @@ module netgate-bfd {
 	 Copyright 2017-2019 Rubicon Communications, LLC.
 	 ";
 
+    revision 2019-08-30 {
+	description
+	    "TNSR Release 19.08.";
+    }
+
     revision 2019-02-15 {
 	description
 	    "TNSR Release 19.02.";
@@ -83,6 +88,7 @@ module netgate-bfd {
 
 		leaf type {
 		    type bfd-auth-key-type;
+		    mandatory true;
 		    description
 			"This is one of the supported key-types 'keyed-sha1',
 			 or 'meticulous-keyed-sha1'.  The other key types
@@ -93,6 +99,7 @@ module netgate-bfd {
 		    type string {
 		        pattern '(([0-9a-fA-F]{2}){1,20})';
 		    }
+		    mandatory true;
 		    description
 			"This is the hex encoded secret with maximum
 			length 20 bytes.";
@@ -118,18 +125,21 @@ module netgate-bfd {
 
 		leaf interface {
 		    type string;
+		    mandatory true;
 		    description
 		        "The session's interface name.";
 		}
 
 		leaf local-ip-address {
 		    type inet:ip-address-no-zone;
+		    mandatory true;
 		    description
 			"The session's local IPv4 or IPv6 address.";
 		}
 
 		leaf peer-ip-address {
 		    type inet:ip-address-no-zone;
+		    mandatory true;
 		    description
 			"The session's peer IPv4 or IPv6 address.";
 		}
@@ -138,6 +148,7 @@ module netgate-bfd {
 		    type uint32 {
 		        range "1..4294967295";
 		    }
+		    mandatory true;
 		    description
 			"This is the minimum interval, in
                          microseconds, that the local system would
@@ -148,6 +159,7 @@ module netgate-bfd {
 
 		leaf required-min-rx {
 		    type uint32;
+		    mandatory true;
 		    description
 		        "This is the minimum interval, in
                          microseconds, between received BFD Control
@@ -163,6 +175,7 @@ module netgate-bfd {
 		    type uint8 {
 		        range "1..255";
 		    }
+		    mandatory true;
 		    description
 		        "The desired Detection Time multiplier for BFD
                          Control packets on the local system.  This
@@ -186,8 +199,11 @@ module netgate-bfd {
 
 		leaf enable {
 		    type boolean;
+		    default true;
 		    description
-		        "If true, BFD is enabled on this interface. ";
+		        "If true, BFD is enabled on this interface.
+			 This is defaulted to true because when VPP
+			 creates a session, this is how it is created.";
 		}
 
 		leaf delayed {

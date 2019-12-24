@@ -1,0 +1,3044 @@
+module netgate-ospf {
+
+    namespace "urn:netgate:xml:yang:netgate-ospf";
+    prefix "ngospf";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import ietf-yang-types {
+	prefix "yang";
+    }
+
+    import netgate-route {
+	prefix "ngrt";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data-model
+	 for OSPF data.
+
+	 Copyright 2019 Rubicon Communications, LLC.
+	 ";
+
+    revision 2019-08-30 {
+	description
+	    "TNSR Release 19.08.";
+    }
+
+    typedef ospf-instance {
+	type union {
+	    type string {
+		pattern 'default';
+	    }
+
+	    /*
+	     * Later these may be added into the mix.
+	     * Presently, only the default instance is supported.
+	     *
+	     * type uint16 {
+	     *     range "1..65535";
+	     * }
+	     */
+	}
+    }
+
+    typedef ospf-passive-if-name {
+	type union {
+	    type string {
+		pattern 'default';
+	    }
+	    type string;	/* FIXME: limit to IF names */
+	}
+    }
+
+    typedef ospf-area-id {
+	type union {
+	    type uint32;
+	    type yang:dotted-quad;
+	}
+    }
+
+    typedef ospf-ip4-or-any {
+	type union {
+	    type inet:ipv4-address-no-zone;
+	    type string {
+		pattern '\*';
+	    }
+	}
+    }
+
+    typedef ospf-abr-type {
+	type enumeration {
+	    enum cisco {
+		description
+		    "Alternative ABR, Cisco implementation.";
+	    }
+	    enum ibm {
+		description
+		    "Alternative ABR, IBM implementation.";
+	    }
+	    enum shortcut {
+		description
+		    "Shortcut ABR.";
+	    }
+	    enum standard {
+		description
+		    "Standard ABR, RFC-2328.";
+	    }
+	}
+    }
+
+    typedef ospf-nssa-translation {
+	type enumeration {
+	    enum always {
+		description
+		    "Always translate.";
+	    }
+	    enum candidate {
+		description
+		    "Translation elections.";
+	    }
+	    enum never {
+		description
+		    "Never translate.";
+	    }
+	}
+    }
+
+    typedef ospf-if-auth {
+	type enumeration {
+	    enum message-digest {
+		description
+		    "Use MD5 HMAC message digest authentication.";
+	    }
+
+	    enum null {
+		description
+		    "Use null authentication.";
+	    }
+	}
+    }
+
+    typedef ospf-redistribution {
+	type enumeration {
+	    enum bgp {
+		description
+		    "BGP";
+	    }
+	    enum connected {
+		description
+		    "Connected";
+	    }
+	    enum kernel {
+		description
+		    "Kernel";
+	    }
+	    enum ospf {
+		description
+		    "OSPF";
+	    }
+	    enum table {
+		description
+		    "Table";
+	    }
+	}
+    }
+
+    typedef ospf-route-out {
+	type enumeration {
+	    enum babel {
+		description
+		    "Babel";
+	    }
+	    enum bgp {
+		description
+		    "BGP";
+	    }
+	    enum connected {
+		description
+		    "Connected";
+	    }
+	    enum eigrp {
+		description
+		    "EIGRP";
+	    }
+	    enum isis {
+		description
+		    "ISIS";
+	    }
+	    enum kernel {
+		description
+		    "Kernel";
+	    }
+	    enum nhrp {
+		description
+		    "NHRP";
+	    }
+	    enum rip {
+		description
+		    "RIP";
+	    }
+	    enum sharp {
+		description
+		    "SHARP";
+	    }
+	    enum static {
+		description
+		    "Static";
+	    }
+	    enum table {
+		description
+		    "Table";
+	    }
+	    enum vnc {
+		description
+		    "VNC";
+	    }
+	}
+    }
+
+    typedef ospf-shortcut-mode {
+	type enumeration {
+	    enum default {
+		description
+		    "Default shortcutting behavior.";
+	    }
+	    enum enable {
+		description
+		    "Enable shortcutting through the area.";
+	    }
+	    enum disable {
+		description
+		    "Disable shortcutting through the area.";
+	    }
+	}
+    }
+
+    typedef ospf-auth-key-8 {
+	type string {
+	    length "1..8";
+	}
+    }
+
+    typedef ospf-md5-key-16 {
+	type string {
+	    length "1..16";
+	}
+    }
+
+    typedef ospf-network-type {
+	type enumeration {
+	    enum broadcast {
+		description
+		    "Broadcast multi-access network.";
+	    }
+
+	    enum non-broadcast {
+		description
+		    "Non-broadcast mult-access network.";
+	    }
+
+	    enum point-to-multipoint {
+		description
+		    "Point-to-multipoint network.";
+	    }
+
+	    enum point-to-point {
+		description
+		    "Point-to-point network.";
+	    }
+	}
+    }
+
+    typedef ospf-dead-interval {
+	type union {
+	    type uint16 {
+		range "1..65535";
+	    }
+	    type string {
+		pattern "minimal";
+	    }
+	}
+    }
+
+    typedef ospf-packet-send-recv {
+	type enumeration {
+	    enum send {
+		description
+		    "If specified, only sent packets are requested.";
+	    }
+
+	    enum recv {
+		description
+		    "If specified, only received  packets are requested.";
+	    }
+	}
+    }
+
+    typedef ospf-show-request {
+	type enumeration {
+	    enum border-routers {
+		description
+		    "Show all the ABR's and ASBR's.";
+	    }
+
+	    enum database {
+		description
+		    "Database summary.";
+	    }
+
+	    enum default {
+		description
+		    "Show default information.";
+	    }
+
+	    enum interface {
+		description
+		    "Interface information.";
+	    }
+
+	    enum neighbor {
+		description
+		    "Neighbor list.";
+	    }
+
+	    enum route {
+		description
+		    "OSPF routing table.";
+	    }
+
+	    enum router-info {
+		description
+		    "Router Information.";
+	    }
+	}
+    }
+
+    typedef ospf-show-parameter {
+	type enumeration {
+	    enum asbr-summary {
+		description
+		    "ASBR summary link states.";
+	    }
+
+	    enum external {
+		description
+		    "External link states.";
+	    }
+
+	    enum max-age {
+		description
+		    "LSAs in MaxAge list.";
+	    }
+
+	    enum network {
+		description
+		    "Network link states.";
+	    }
+
+	    enum nssa-external {
+		description
+		    "NSSA external link state.";
+	    }
+
+	    enum opaque-area {
+		description
+		    "Link area Opaque-LSA.";
+	    }
+
+	    enum opaque-as {
+		description
+		    "Link AS Opaque-LSA.";
+	    }
+
+	    enum opaque-link {
+		description
+		    "Link local Opaque-LSA.";
+	    }
+
+	    enum router {
+		description
+		    "Router link states.";
+	    }
+
+	    enum self-originate {
+		description
+		    "Self-originated link states.";
+	    }
+
+	    enum summary {
+		description
+		    "Network summary link states.";
+	    }
+	}
+    }
+
+    grouping ospf-packet-send-recv {
+	description
+	    "Packet debug flags can specify a either a 'send' or
+	     a 'recv' direction limiter, or if absent, both.
+	     In addition a 'detail' flag may be requested.";
+
+	leaf direction {
+	    type ospf-packet-send-recv;
+	    description
+		"Debug packets sent or received.
+		Missing is both.";
+	}
+
+	leaf detail {
+	    type boolean;
+	    description
+		"Debug packets in detail.";
+	}
+    }
+
+    rpc ospf-show {
+	input {
+	    leaf request {
+		type ospf-show-request;
+		description
+		    "An OSPF show request type.  One of the strings
+		     'default', 'border-routers', 'database',
+		     'interface', 'neighbor', 'route', or
+		     'router-info'.";
+	    }
+	    leaf param {
+		type ospf-show-parameter;
+		description
+		    "An additional parameter string.  One of the strings
+		     'asbr-summary', 'external', 'max-age', 'network',
+		     'nssa-external', 'opaque-area', 'opaque-as',
+		     'opaque-link', 'router', 'self-originate',
+		     or 'summary'.";
+	    }
+	}
+	output {
+	    leaf stdout {
+		type string;
+	    }
+	}
+    }
+
+    augment "/ngrt:route-config/ngrt:dynamic" {
+
+	container ospf {
+
+	    container global-options {
+		description
+		    "These are options that apply to the OSPF Server or
+		     to all OSPF Router configurations.";
+
+		container debug {
+		    description
+			"OSPF debug configurations.";
+
+		    leaf event {
+			type boolean;
+			description
+			    "Enable OSPF Event debug.";
+		    }
+
+		    container ism {
+			description
+			    "Debug OSPF interface state machine";
+
+			leaf events {
+			    type boolean;
+			    description
+				"ISM Event information";
+			}
+
+			leaf status {
+			    type boolean;
+			    description
+				"ISM status information";
+			}
+
+			leaf timers {
+			    type boolean;
+			    description
+				"ISM timer information";
+			}
+		    }
+
+		    container lsa {
+			description
+			    "Debug OSPF link state advertisement";
+
+			leaf flooding {
+			    type boolean;
+			    description
+				"LSA Flooding information";
+			}
+
+			leaf generate {
+			    type boolean;
+			    description
+				"LSA Generation information";
+			}
+
+			leaf install {
+			    type boolean;
+			    description
+				"LSA install/delete information";
+			}
+
+			leaf refresh {
+			    type boolean;
+			    description
+				"LSA Refresh information";
+			}
+		    }
+
+		    container nsm {
+			description
+			    "Debug OSPF neighbor state machine";
+
+			leaf events {
+			    type boolean;
+			    description
+				"NSM Event information";
+			}
+
+			leaf status {
+			    type boolean;
+			    description
+				"NSM Status information";
+			}
+
+			leaf timers {
+			    type boolean;
+			    description
+				"NSM Timer information";
+			}
+		    }
+
+		    leaf nssa {
+			type boolean;
+			description
+			    "Debug OSPF not-so-stubby-area information";
+		    }
+
+		    container packet {
+			description
+			    "Debug OSPF packets";
+
+			container dd {
+			    presence
+				"If present, debug database
+				 description packets.";
+
+			    uses ospf-packet-send-recv;
+			}
+
+			container hello {
+			    presence
+				"If present, debug hello packets.";
+
+			    uses ospf-packet-send-recv;
+			}
+
+			container ls-ack {
+			    presence
+				"If present, debug link state ACK packets.";
+
+			    uses ospf-packet-send-recv;
+			}
+
+			container ls-request {
+			    presence
+				"If present, debug link state request
+				 packets.";
+
+			    uses ospf-packet-send-recv;
+			}
+
+			container ls-update {
+			    presence
+				"If present, debug ls-update packets.";
+
+			    uses ospf-packet-send-recv;
+			}
+		    }
+
+		    container te {
+			description
+			    "Debug OSPF traffic engineering";
+
+			leaf enable {
+			    type boolean;
+			    description
+				"If true, OSPF traffic-engineering debug
+				 is enabled.";
+			}
+		    }
+
+		    container zebra {
+			description
+			    "Debug OSPF Zebra messages.";
+
+			leaf interface {
+			    type boolean;
+			    description
+				"Debug OSPF Zebra interface messages.";
+			}
+
+			leaf redistribute {
+			    type boolean;
+			    description
+				"Debug OSPF Zebra redistribute messages.";
+			}
+		    }
+		}
+
+		leaf enable {
+		    type boolean;
+		    default false;
+		    description
+			"If true, the OSPF Daemon is enabled.";
+		}
+	    }
+
+	    container interfaces {
+		description
+		    "OSPF configuration information for interfaces includes
+		     enablement, authentication, cost and timing data.";
+
+		list if {
+		    key if-name;
+
+		    leaf if-name {
+			type string;
+			description
+			    "The interface with OSPF enabled on it.";
+		    }
+
+		    container ipv4 {
+			description
+			    "Interface configuration for IPv4 address
+			    family.";
+
+			container area {
+			    description
+				"Enable OSPF for an area on this interface.";
+
+			    list address {
+				key ip4-address;
+
+				leaf ip4-address {
+				    type ospf-ip4-or-any;
+				    description
+					"If present, an IPv4 address
+					 on this interface.";
+				}
+
+				leaf area-id {
+				    type ospf-area-id;
+				    description
+					"The area ID of the interface.";
+				}
+			    }
+			}
+
+			container authentication {
+			    presence
+				"If present, authentication is enabled.";
+
+			    list address {
+				key ip4-address;
+
+				leaf ip4-address {
+				    type ospf-ip4-or-any;
+				    description
+					"If present, an IPv4 address
+					 on this interface.";
+				}
+
+				leaf if-auth {
+				    type ospf-if-auth;
+				    description
+					"Use 'message-digest' or 'null'
+					 authentication.";
+				}
+			    }
+			}
+
+			container authentication-key {
+			    list address {
+				key ip4-address;
+
+				leaf ip4-address {
+				    type ospf-ip4-or-any;
+				    description
+					"If present, an IPv4 address
+					 on this interface.";
+				}
+
+				leaf key {
+				    type ospf-auth-key-8;
+				    description
+					"The OSPF authentication password.";
+				}
+			    }
+			}
+
+			container cost {
+			    list address {
+				key ip4-address;
+
+				leaf ip4-address {
+				    type ospf-ip4-or-any;
+				    description
+					"If present, an IPv4 address
+					 on this interface.";
+				}
+
+				leaf link-cost {
+				    type uint16;
+				    description
+					"The interface link cost used in the
+					 Router LSA metric field, and used in
+					 the SPF calculations.";
+				}
+			    }
+			}
+
+			container dead-interval {
+			    description
+				"Interval time after which a neighbor is
+				 declared dead.  The interval is a number of
+				 seconds in the range [1..65535], or the word
+				 'minimal', in which case 1s is used and
+				 fast sub-second hellos are sent.";
+
+			    list address {
+				key ip4-address;
+
+				leaf ip4-address {
+				    type ospf-ip4-or-any;
+				    description
+					"If present, an IPv4 address
+					 on this interface.";
+				}
+
+				leaf interval {
+				    type ospf-dead-interval;
+				    description
+					"Interval time after which a neighbor is
+					 declared dead.";
+				}
+
+				leaf multiplier {
+				    type uint8 {
+					range "1..10";
+				    }
+				    description
+					"Only when the interval is
+					 'minimal', use 1s dead-interval
+					 with fast sub-second hellos.
+					 This is the number of hellos to
+					 send each second.";
+				}
+			    }
+			}
+
+			container hello-interval {
+			    description
+				"The interval between hello packets.";
+
+			    list address {
+				key ip4-address;
+
+				leaf ip4-address {
+				    type ospf-ip4-or-any;
+				    description
+					"If present, an IPv4 address
+					 on this interface.";
+				}
+
+				leaf interval {
+				    type uint16 {
+					range "1..65535";
+				    }
+				    description
+					"The interval between hello packets,
+					 in seconds.";
+				}
+			    }
+			}
+
+			container message-digest-keys {
+			    description
+				"A list of MD5 keys index by unique key IDs.";
+
+			    list address {
+				key ip4-address;
+
+				leaf ip4-address {
+				    type ospf-ip4-or-any;
+				    description
+					"If present, an IPv4 address
+					 on this interface.";
+				}
+
+				container keys {
+				    list key-id {
+					key "id";
+
+					leaf id {
+					    type uint8 {
+						range "1..255";
+					    }
+					    description
+						"The unique key ID for
+						 an MD5 key (password).";
+					}
+
+					leaf key {
+					    type ospf-md5-key-16;
+					    description
+						"An OSPF MD5 password, 1..16
+						 characters.";
+					}
+				    }
+				}
+			    }
+			}
+
+			container mtu {
+			    description
+				"MTU parameters for an interface.";
+
+			    list address {
+				key ip4-address;
+
+				leaf ip4-address {
+				    type ospf-ip4-or-any;
+				    description
+					"If present, an IPv4 address
+					 on this interface.";
+				}
+
+				leaf ignore {
+				    type boolean;
+				    description
+					"If true, MTU mismatch detection on
+					 this interface will be disabled.";
+				}
+			    }
+			}
+
+			container network {
+			    description
+				"Network parameters";
+
+			    leaf type {
+				type ospf-network-type;
+				description
+				    "OSPF Network type is one of 'broadcast',
+				     'non-broadcast', 'point-to-multipoint', or
+				     'point-to-point'.";
+			    }
+			}
+
+			container retransmit-interval {
+			    description
+				"Time in seconds between retransmitting lost
+				 link state advertisements (RxmtInterval
+				 timer).";
+
+			    list address {
+				key ip4-address;
+
+				leaf ip4-address {
+				    type ospf-ip4-or-any;
+				    description
+					"If present, an IPv4 address
+					 on this interface.";
+				}
+
+				leaf interval {
+				    type uint16 {
+					range "3..65535";
+				    }
+				    description
+					"Interval between retransmitting lost
+					 LSA (RxmtInterval timer). Default 5,
+					 in seconds.";
+				}
+			    }
+			}
+
+			container priority {
+			    description
+				"The priority of this router.";
+
+			    list address {
+				key ip4-address;
+
+				leaf ip4-address {
+				    type ospf-ip4-or-any;
+				    description
+					"If present, an IPv4 address
+					 on this interface.";
+				}
+
+				leaf priority {
+				    type uint8;
+				    description
+					"Router priority, 0..255.";
+				}
+			    }
+			}
+
+			container transmit-delay {
+			    description
+				"The LSA age increment value (InfTransDelay).";
+
+			    list address {
+				key ip4-address;
+
+				leaf ip4-address {
+				    type ospf-ip4-or-any;
+				    description
+					"If present, an IPv4 address
+					 on this interface.";
+				}
+
+				leaf delay {
+				    type uint16 {
+					range "1..65535";
+				    }
+				    description
+					"The LSA age increment.  Default is 1,
+					 in seconds.";
+				}
+			    }
+			}
+		    }
+		}
+	    }
+
+	    container routers {
+		description
+		    "Table of OSPF Router instances .";
+
+		container router {
+		    description
+			"The router contains all information for one instance
+			 of the OSPF protocol as supported by FRR.";
+
+		    leaf instance {
+			type ospf-instance;
+			default "default";
+			description
+			    "Each router is identified using an
+			     instance number between 1..65535, or the
+			     'default'.  Presently, only the 'default'
+			     instance is supported.  If this field is
+			     missing, 'default' is assumed.";
+		    }
+
+		    container auto-cost {
+			leaf reference-bandwidth {
+			    type uint32 {
+				range "1..4294967";
+			    }
+			    description
+				"The reference bandwidth, 1..4294967,
+				 in MBits/sec.";
+			}
+		    }
+
+		    container capability {
+			leaf opaque-lsa {
+			    type boolean;
+			    description
+				"If true, enable opaque LSAs.";
+			}
+		    }
+
+		    container compatible {
+			leaf rfc1583 {
+			    type boolean;
+			    description
+				"If true, ensure compatibility with RFC-1583.";
+			}
+		    }
+
+		    container default-information {
+
+			container originate {
+			    description
+				"Originate an AS-External Type-5 LSA that
+				 describes a default route into all
+				 external-routing capable areas using the
+				 given metric and metric-type.  If 'always'
+				 is present, the default is advertised even
+				 when there is no default present in the
+				 routing tables.";
+
+			    presence
+				"If present, a default route will be
+				 distributed.";
+
+			    leaf always {
+				type boolean;
+				description
+				    "A default route will always be
+				     advertised.";
+			    }
+
+			    leaf metric {
+				type uint32 {
+				    range "0..16777214";
+				}
+				description
+				    "The OSPF default metric, range
+				     0..16777214.";
+			    }
+
+			    leaf metric-type {
+				type uint8 {
+				    range "1..2";
+				}
+				description
+				    "The OSPF External Metric type, 1 or 2.";
+			    }
+
+			    leaf route-map {
+				type string;
+				description
+				    "Route map reference.";
+			    }
+			}
+		    }
+
+		    leaf default-metric {
+			type uint32 {
+			    range "0..16777214";
+			}
+			description
+			    "The default metric for redistributed routes.";
+		    }
+
+		    container distance {
+			description
+			    "OSPF administrative distances for routes.";
+
+			leaf administrative {
+			    type uint8 {
+				range "1..255";
+			    }
+			    description
+				"OSPF administrative distance.";
+			}
+
+			leaf external {
+			    type uint8 {
+				range "1..255";
+			    }
+			    description
+				"OSPF administrative distance for external
+				 routes.";
+			}
+
+			leaf inter-area {
+			    type uint8 {
+				range "1..255";
+			    }
+			    description
+				"OSPF administrative distance for inter-area
+				 routes.";
+			}
+
+			leaf intra-area {
+			    type uint8 {
+				range "1..255";
+			    }
+			    description
+				"OSPF administrative distance for intra-area
+				 routes.";
+			}
+		    }
+
+		    container distribute-list {
+			description
+			    "Distribution lists to filter networks for
+			     outgoing routing updates.";
+
+			list out {
+			    key "route-out";
+
+			    leaf route-out {
+				type ospf-route-out;
+			    }
+
+			    leaf access-list-name {
+				type string;
+				description
+				    "Apply this access-list to redistributed
+				     routes of the named type before allowing
+				     them to be distributed into OSPF.";
+			    }
+			}
+		    }
+
+		    container log-adjacency-changes {
+			presence
+			    "If present, adjacency state changes will
+			     be logged.";
+
+			leaf detail {
+			    type boolean;
+			    description
+				"All state changes will be logged.";
+			}
+		    }
+
+		    container max-metric {
+			description
+			    "OSPF maximum/infinite-distance metric.";
+
+			container router-lsa {
+			    description
+				"Advertise own Router-LSA with infinite
+				 distance (stub router).";
+
+			    leaf on-shutdown {
+				type uint8 {
+				    range "5..100";
+				}
+				description
+				    "Time to wait until full shutdown,
+				     in seconds.";
+			    }
+
+			    leaf on-startup {
+				type uint32 {
+				    range "5..86400";
+				}
+				description
+				    "Time to advertise self as a stub-router,
+				     in seconds.";
+			    }
+			}
+		    }
+
+		    container neighbors {
+			description
+			    "Specifications for neighboring routers,
+			     indexed by neighbor IPv4 address.";
+
+			list neighbor {
+			    key "ip4-address";
+
+			    leaf ip4-address {
+				type inet:ipv4-address-no-zone;
+				description
+				    "IPv4 address of neighboring router.";
+			    }
+
+			    container neighbor-data {
+				presence
+				    "If present, the neighbor exists at the
+				     configured IPv4 address, but has no
+				     further configuration attributes.";
+
+				leaf poll-interval {
+				    type uint16 {
+					range "1..65535";
+				    }
+				    description
+					"The dead neighbor pollling interval,
+					 1..65535, in seconds.";
+				}
+
+				leaf priority {
+				    type uint8;
+				    description
+					"The neighbor priority, 0..255.";
+				}
+			    }
+			}
+		    }
+
+		    container networks {
+			description
+			    "The list of networks specifies the interfaces
+			     on which OSPF is enabled.";
+
+			list network {
+			    key prefix;
+
+			    leaf prefix {
+				type inet:ipv4-prefix;
+				description
+				    "The OSPF-enabled network prefix.";
+			    }
+
+			    leaf area-id {
+				type ospf-area-id;
+				description
+				    "The area ID of the prefix.";
+			    }
+			}
+		    }
+
+		    container ospf {
+			description
+			    "OSPF attributes.";
+
+			leaf abr-type {
+			    type ospf-abr-type;
+			    description
+				"The ABR type defines some fundamental
+				 behavior in the handling of route
+				 summaries learned through
+				 non-backbone areas, primarily to
+				 avoid routing loops.  Types 'cisco'
+				 and 'ibm' are equivalent and lift
+				 restrictions on such summaries.  Also
+				 see RFC-3509.";
+			}
+
+			leaf router-id {
+			    type yang:dotted-quad;
+			    description
+				"The unique ID of this OSPF router as a
+				 dotted-quad.";
+			}
+
+			leaf write-multiplier {
+			    type uint8 {
+				range "1..100";
+			    }
+			    description
+				"Maximum number of interface serviced
+				 per write.";
+			}
+		    }
+
+		    container passive-interfaces {
+			description
+			    "Passive interfaces will be adertised as
+			     stub links in this router's Router LSA.
+			     Addresses on passive interfaces may be
+			     advertised without having to originate
+			     AS-External Type-5 LSAs.  This is the
+			     only way to advertise non-OSPF links into
+			     stub areas.";
+
+			list passive-if {
+			    key if-name;
+
+			    leaf if-name {
+				type ospf-passive-if-name;
+				description
+				    "The name of an interface or 'default'.";
+			    }
+
+			    container passive-data {
+				presence
+				    "If present, the interface will be
+				     passive.";
+
+				leaf ip4-address {
+				    type inet:ipv4-address-no-zone;
+				    description
+					"If present, a specific IPv4
+					 address on this interface.";
+				}
+			    }
+			}
+		    }
+
+		    container pce {
+			description
+			    "If configured, OSPF will announce Path
+			     Computation Element (PCE) discovery
+			     information using Router Information LSAs.
+			     See RFC-5088.";
+
+			leaf ip4-address {
+			    type inet:ipv4-address;
+			    description
+				"The stable IPv4 address of the PCE.";
+			}
+
+			leaf domain {
+			    type uint16;
+			    description
+				"The AS number specifies a PCE-Domain
+				 (area or AS) where the PCE has topology
+				 visibility and through which the PCE can
+				 compute paths.";
+			}
+
+			leaf flags {
+			    type uint32;
+			    description
+				"The advertised set of PCE capabilities.
+				 For bit assignment, see RFC-5088 sec 7.2.";
+			}
+
+			container neighbors {
+			    description
+				"The set of AS numbers where the PCE has
+				 topology visibility and through which the
+				 PCE can compute paths.";
+
+			    leaf-list asn {
+				type uint16;
+				description
+				    "The AS number of a PCE-domain where the
+				     PCE has topology visibility and through
+				     which the PCE can compute paths.";
+			    }
+			}
+
+			leaf scope {
+			    type uint32;
+			    description
+				"The PCE path computation scope, which
+				 refers to the PCE's ability to compute or
+				 take part in the computation of paths for
+				 intra-area, inter-area, inter-AS, or
+				 inter-layer TE LSPs.  For bit
+				 assignment see RFC-5088, sec 4.2.";
+			}
+		    }
+
+		    container redistributions {
+			description
+			    "Configure which route types from other protocols
+			     should be distributed into OSPF.";
+
+			list redistribution {
+			    key source;
+
+			    leaf source {
+				type ospf-redistribution;
+				description
+				    "The source of routes that will be
+				     distributed into OSPF.";
+			    }
+
+			    container redistribution-data {
+				presence
+				    "If present, routes from this source will
+				     be distributed into OSPF.";
+
+				leaf metric-type {
+				    type uint8 {
+					range "1..2";
+				    }
+				    description
+					"The OSPF exterior metric type, 1 or 2,
+					 for redistributed routes.";
+				}
+
+				leaf metric {
+				    type uint32 {
+					range "0..16777214";
+				    }
+				    description
+					"The metric for redistributed routes.";
+				}
+
+				leaf route-map {
+				    type string;
+				    description
+					"Route-map used to filter routes into
+					 OSPF.";
+				}
+
+				leaf ospf-instance {
+				    type uint32 {
+					range "1..65535";
+				    }
+				    description
+					"When the source is OSPF, and
+					if present, this value
+					specifies which instance to
+					use.";
+				}
+
+				leaf table-instance {
+				    type uint32 {
+					range "1..65535";
+				    }
+				    description
+					"When the source is table, and
+					 if present, a non-main kernel
+					 routing table is used as the
+					 source of routes.";
+				}
+			    }
+			}
+		    }
+
+		    container refresh {
+			description
+			    "Refresh parameters.";
+
+			leaf timer {
+			    type uint32 {
+				range "10..1800";
+			    }
+			    description
+				"The refresh timer value, 10..1800, in
+				 seconds.";
+			}
+		    }
+
+		    container router-information {
+			description
+			    "Router Information configuration flooding scope.";
+
+			leaf as {
+			    type boolean;
+			    description
+				"If true, Router Information functionality
+				 will be be enabled with AS flooding scope.";
+			}
+		    }
+
+		    container timers {
+			description
+			    "OSPF timer configurations.";
+
+			container lsa {
+			    description
+				"OSPF LSA timer configurations.";
+
+			    leaf min-arrival {
+				type uint32 {
+				    range "0..600000";
+				}
+				description
+				    "Mimimum delay in receiving new
+				     versions of an LSA, in ms.";
+			    }
+			}
+
+			container throttle {
+			    description
+				"Throttle adaptive timer configurations.";
+
+			    container lsa {
+				description
+				    "Delay between LSA transmissions.";
+
+				leaf all {
+				    type uint32 {
+					range "0..5000";
+				    }
+				    description
+					"Delay for all LSA types, in ms.";
+				}
+			    }
+
+			    container spf {
+				description
+				    "SPF timers.";
+
+				leaf delay {
+				    type uint32 {
+					range "0..600000";
+				    }
+				    description
+					"Delay from first received change until
+					 SPF calculation, in ms.";
+				}
+
+				leaf initial-hold {
+				    type uint32 {
+					range "0..600000";
+				    }
+				    description
+					"Initial hold time between consecutive
+					 SPF calculation, in ms.";
+				}
+
+				leaf maximum-hold {
+				    type uint32 {
+					range "0..600000";
+				    }
+				    description
+					"Maximum hold time, in ms.";
+				}
+			    }
+			}
+		    }
+
+		    container areas {
+			description
+			    "The OSPF protocol operates on independent
+			     link state regions called 'areas'.  Each
+			     area must be connected to a common
+			     backbone area by an area border routed
+			     (ABR).  The ABR summarizes link-state
+			     routing information for an area using
+			     link-state announcements (LSAs).";
+
+			list area {
+			    key area-id;
+
+			    leaf area-id {
+				type ospf-area-id;
+				description
+				    "Each area must have a unique ID
+				     that takes the form of either a
+				     dotted-quad or an unsigned 32-bit
+				     number, interchangeably.  That
+				     is, dotted-quad 0.0.0.1 is the
+				     same as the unsigned number 1.";
+			    }
+
+			    container authentication {
+				presence
+				    "If present, authentication is enabled.";
+
+				leaf message-digest {
+				    type boolean;
+				    description
+					"Use message-digest authentication.";
+				}
+			    }
+
+			    leaf default-cost {
+				type uint32 {
+				    range "0..16777215";
+				}
+				description
+				    "Stub's advertised default summary cost.";
+			    }
+
+			    leaf export-list {
+				type string;
+				description
+				    "The access-list filter for Type-3 Summary
+				     LSA networks announced to other areas
+				     originated from intra-area paths from
+				     this area.  This router must be an ABR.";
+			    }
+
+			    leaf import-list {
+				type string;
+				description
+				    "The access-list filter for networks
+				     imported into this area from other areas
+				     as Type-3 Summary LSAs.";
+			    }
+
+			    leaf filter-list-in {
+				type string;
+				description
+				    "The prefix-list filter for Type-3 Summary
+				     LSA networks imported from other areas.
+				     Applicable to an ABR only.";
+			    }
+
+			    leaf filter-list-out {
+				type string;
+				description
+				    "The prefix-list filter for Type-3 Summary
+				     LSA networks exported to other areas.
+				     Applicable to an ABR only.";
+			    }
+
+			    container nssa {
+				presence
+				    "If present, this area is a NSSA.";
+
+				leaf no-summary {
+				    type boolean;
+				    description
+					"If true, do not inject
+					 inter-area routes into this NSSA.";
+				}
+
+				leaf translate {
+				    type ospf-nssa-translation;
+				    description
+					"One of the values 'always',
+					 'candidate', or 'never'.
+					 'Always' indicates the
+					 NSSA-ABR will always translate,
+					 'candidate' indicates it will do
+					 translation election, the default,
+					 and 'never' indicates it will never
+					 do translations.";
+				}
+			    }
+
+			    container ranges {
+				description
+				    "Summarize intra-area paths from
+				     speified area into one Type-3
+				     Summary LSA announced to other areas.";
+
+				list range {
+				    key "prefix";
+
+				    leaf prefix {
+					type inet:ipv4-prefix;
+					description
+					    "Area range IPv4 prefix.";
+				    }
+
+				    container range-data {
+					presence
+					    "If present, hold range
+					     data for the prefix.";
+
+					leaf not-advertise {
+					    type boolean;
+					    description
+						"If true, do not advertise
+						this prefix.";
+					}
+
+					leaf cost {
+					    type uint32 {
+						range "0..16777215";
+					    }
+					    description
+						"Cost metric for this range.";
+					}
+
+					leaf substitute {
+					    type inet:ipv4-prefix;
+					    description
+						"Announce the area range
+						 as another prefix.";
+					}
+				    }
+				}
+			    }
+
+			    leaf shortcut {
+				type ospf-shortcut-mode;
+				description
+				    "When the router is an ABR, its shortcut
+				     mode may be set to one of 'default',
+				     'enable', or 'disable'.";
+			    }
+
+			    container stub {
+				presence
+				    "If present, this area will be a stub.";
+
+				leaf no-summary {
+				    type boolean;
+				    description
+					"If true, inter-area routes will not
+					 be injected into the stub.";
+				}
+			    }
+
+			    container virtual-links {
+				description
+				    "Parameters for virtual links";
+
+				list vlink {
+				    key router-id;
+
+				    leaf router-id {
+					type yang:dotted-quad;
+					description
+					    "Router ID of the remote ABR.";
+				    }
+
+				    container vlink-data {
+					presence
+					    "If present and empty, the
+					     virtual link has no other
+					     attributes.";
+
+					leaf authentication-key {
+					    type string {
+						length "1..8";
+					    }
+					}
+
+					leaf dead-interval {
+					    type uint32 {
+						range "1..65535";
+					    }
+					    description
+						"Interval time in seconds
+						 after which a neighbor is
+						 declared down.";
+					}
+
+					leaf hello-interval {
+					    type uint32 {
+						range "1..65535";
+					    }
+					    description
+						"Interval time in seconds
+						 between HELLO packets.";
+					}
+
+					leaf retransmit-interval {
+					    type uint32 {
+						range "1..65535";
+					    }
+					    description
+						"Interval time in seconds
+						 between retransmitting lost
+						 link state advertisements.";
+					}
+
+					leaf transmit-delay {
+					    type uint32 {
+						range "1..65535";
+					    }
+					    description
+						"Link state transmit delay in
+						 seconds.";
+					}
+
+					container message-digest-keys {
+					    description
+						"Pairs of Key-ID and
+						 MD5 keys.";
+
+					    list key-id {
+						key "id";
+
+						leaf id {
+						    type uint8 {
+							range "1..255";
+						    }
+						    description
+							"The unique key ID
+							 for an MD5 key
+							 (password).";
+						}
+
+						leaf key {
+						    type ospf-md5-key-16;
+						    description
+							"An OSPF MD5 password,
+							 1..16 characters.";
+						}
+					    }
+					}
+				    }
+				}
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+
+    augment "/ngrt:route-state/ngrt:dynamic" {
+
+	container ospf {
+
+	    config "false";
+
+	    container global-options {
+		description
+		    "These are options that apply to the OSPF Server or
+		     to all OSPF Router configurations.";
+
+		container debug {
+		    description
+			"OSPF debug configurations.";
+
+		    leaf event {
+			type boolean;
+			description
+			    "Enable OSPF Event debug.";
+		    }
+
+		    container ism {
+			description
+			    "Debug OSPF interface state machine";
+
+			leaf events {
+			    type boolean;
+			    description
+				"ISM Event information";
+			}
+
+			leaf status {
+			    type boolean;
+			    description
+				"ISM status information";
+			}
+
+			leaf timers {
+			    type boolean;
+			    description
+				"ISM timer information";
+			}
+		    }
+
+		    container lsa {
+			description
+			    "Debug OSPF link state advertisement";
+
+			leaf flooding {
+			    type boolean;
+			    description
+				"LSA Flooding information";
+			}
+
+			leaf generate {
+			    type boolean;
+			    description
+				"LSA Generation information";
+			}
+
+			leaf install {
+			    type boolean;
+			    description
+				"LSA install/delete information";
+			}
+
+			leaf refresh {
+			    type boolean;
+			    description
+				"LSA Refresh information";
+			}
+		    }
+
+		    container nsm {
+			description
+			    "Debug OSPF neighbor state machine";
+
+			leaf events {
+			    type boolean;
+			    description
+				"NSM Event information";
+			}
+
+			leaf status {
+			    type boolean;
+			    description
+				"NSM Status information";
+			}
+
+			leaf timers {
+			    type boolean;
+			    description
+				"NSM Timer information";
+			}
+		    }
+
+		    leaf nssa {
+			type boolean;
+			description
+			    "Debug OSPF not-so-stubby-area information";
+		    }
+
+		    container packet {
+			description
+			    "Debug OSPF packets";
+
+			container dd {
+			    presence
+				"If present, debug database
+				 description packets.";
+
+			    uses ospf-packet-send-recv;
+			}
+
+			container hello {
+			    presence
+				"If present, debug hello packets.";
+
+			    uses ospf-packet-send-recv;
+			}
+
+			container ls-ack {
+			    presence
+				"If present, debug link state ACK packets.";
+
+			    uses ospf-packet-send-recv;
+			}
+
+			container ls-request {
+			    presence
+				"If present, debug link state request
+				 packets.";
+
+			    uses ospf-packet-send-recv;
+			}
+
+			container ls-update {
+			    presence
+				"If present, debug ls-update packets.";
+
+			    uses ospf-packet-send-recv;
+			}
+		    }
+
+		    container te {
+			description
+			    "Debug OSPF traffic engineering";
+
+			leaf enable {
+			    type boolean;
+			    description
+				"If true, OSPF traffic-engineering debug
+				 is enabled.";
+			}
+		    }
+
+		    container zebra {
+			description
+			    "Debug OSPF Zebra messages.";
+
+			leaf interface {
+			    type boolean;
+			    description
+				"Debug OSPF Zebra interface messages.";
+			}
+
+			leaf redistribute {
+			    type boolean;
+			    description
+				"Debug OSPF Zebra redistribute messages.";
+			}
+		    }
+		}
+
+		leaf enable {
+		    type boolean;
+		    default false;
+		    description
+			"If true, the OSPF Daemon is enabled.";
+		}
+	    }
+
+	    container interfaces {
+		description
+		    "OSPF configuration information for interfaces includes
+		     enablement, authentication, cost and timing data.";
+
+		list if {
+		    key if-name;
+
+		    leaf if-name {
+			type string;
+			description
+			    "The interface with OSPF enabled on it.";
+		    }
+
+		    container ipv4 {
+			description
+			    "Interface configuration for IPv4 address
+			    family.";
+
+			container area {
+			    description
+				"Enable OSPF for an area on this interface.";
+
+			    list address {
+				key ip4-address;
+
+				leaf ip4-address {
+				    type ospf-ip4-or-any;
+				    description
+					"If present, an IPv4 address
+					 on this interface.";
+				}
+
+				leaf area-id {
+				    type ospf-area-id;
+				    description
+					"The area ID of the interface.";
+				}
+			    }
+			}
+
+			container authentication {
+			    presence
+				"If present, authentication is enabled.";
+
+			    list address {
+				key ip4-address;
+
+				leaf ip4-address {
+				    type ospf-ip4-or-any;
+				    description
+					"If present, an IPv4 address
+					 on this interface.";
+				}
+
+				leaf if-auth {
+				    type ospf-if-auth;
+				    description
+					"Use 'message-digest' or 'null'
+					 authentication.";
+				}
+			    }
+			}
+
+			container authentication-key {
+			    list address {
+				key ip4-address;
+
+				leaf ip4-address {
+				    type ospf-ip4-or-any;
+				    description
+					"If present, an IPv4 address
+					 on this interface.";
+				}
+
+				leaf key {
+				    type ospf-auth-key-8;
+				    description
+					"The OSPF authentication password.";
+				}
+			    }
+			}
+
+			container cost {
+			    list address {
+				key ip4-address;
+
+				leaf ip4-address {
+				    type ospf-ip4-or-any;
+				    description
+					"If present, an IPv4 address
+					 on this interface.";
+				}
+
+				leaf link-cost {
+				    type uint16;
+				    description
+					"The interface link cost used in the
+					 Router LSA metric field, and used in
+					 the SPF calculations.";
+				}
+			    }
+			}
+
+			container dead-interval {
+			    description
+				"Interval time after which a neighbor is
+				 declared dead.  The inerval is a numvber of
+				 seconds in the range [1..65535], or the word
+				 'minimal', in which case 1s is used and
+				 fast sub-second hellos are sent.";
+
+			    list address {
+				key ip4-address;
+
+				leaf ip4-address {
+				    type ospf-ip4-or-any;
+				    description
+					"If present, an IPv4 address
+					 on this interface.";
+				}
+
+				leaf interval {
+				    type ospf-dead-interval;
+				    description
+					"Interval time after which a neighbor is
+					 declared dead.";
+				}
+
+				leaf multiplier {
+				    type uint8 {
+					range "1..10";
+				    }
+				    description
+					"Only when the interval is
+					 'minimal', use 1s dead-interval
+					 with fast sub-second hellos.
+					 This is the number of hellos to
+					 send each second.";
+				}
+			    }
+			}
+
+			container hello-interval {
+			    description
+				"The interval between hello packets.";
+
+			    list address {
+				key ip4-address;
+
+				leaf ip4-address {
+				    type ospf-ip4-or-any;
+				    description
+					"If present, an IPv4 address
+					 on this interface.";
+				}
+
+				leaf interval {
+				    type uint16 {
+					range "1..65535";
+				    }
+				    description
+					"The interval between hello packets,
+					 in seconds.";
+				}
+			    }
+			}
+
+			container message-digest-keys {
+			    description
+				"A list of MD5 keys index by unique key IDs.";
+
+			    list address {
+				key ip4-address;
+
+				leaf ip4-address {
+				    type ospf-ip4-or-any;
+				    description
+					"If present, an IPv4 address
+					 on this interface.";
+				}
+
+				container keys {
+				    list key-id {
+					key "id";
+
+					leaf id {
+					    type uint8 {
+						range "1..255";
+					    }
+					    description
+						"The unique key ID for an MD5 key
+						 (password).";
+					}
+
+					leaf key {
+					    type ospf-md5-key-16;
+					    description
+						"An OSPF MD5 password, 1..16
+						characters.";
+					}
+				    }
+				}
+			    }
+			}
+
+			container mtu {
+			    description
+				"MTU parameters for an interface.";
+
+			    list address {
+				key ip4-address;
+
+				leaf ip4-address {
+				    type ospf-ip4-or-any;
+				    description
+					"If present, an IPv4 address
+					 on this interface.";
+				}
+
+				leaf ignore {
+				    type boolean;
+				    description
+					"If true, MTU mismatch detection on
+					 this interface will be disabled.";
+				}
+			    }
+			}
+
+			container network {
+			    description
+				"Network parameters";
+
+			    leaf type {
+				type ospf-network-type;
+				description
+				    "OSPF Network type is one of 'broadcast',
+				     'non-broadcast', 'point-to-multipoint', or
+				     'point-to-point'.";
+			    }
+			}
+
+			container retransmit-interval {
+			    description
+				"Time in seconds between retransmitting lost
+				 link state advertisements (RxmtInterval
+				 timer).";
+
+			    list address {
+				key ip4-address;
+
+				leaf ip4-address {
+				    type ospf-ip4-or-any;
+				    description
+					"If present, an IPv4 address
+					 on this interface.";
+				}
+
+				leaf interval {
+				    type uint16 {
+					range "3..65535";
+				    }
+				    description
+					"Interval between retransmitting lost
+					 LSA (RxmtInterval timer). Default 5,
+					 in seconds.";
+				}
+			    }
+			}
+
+			container priority {
+			    description
+				"The priority of this router.";
+
+			    list address {
+				key ip4-address;
+
+				leaf ip4-address {
+				    type ospf-ip4-or-any;
+				    description
+					"If present, an IPv4 address
+					 on this interface.";
+				}
+
+				leaf priority {
+				    type uint8;
+				    description
+					"Router priority, 0..255.";
+				}
+			    }
+			}
+
+			container transmit-delay {
+			    description
+				"The LSA age increment value (InfTransDelay).";
+
+			    list address {
+				key ip4-address;
+
+				leaf ip4-address {
+				    type ospf-ip4-or-any;
+				    description
+					"If present, an IPv4 address
+					 on this interface.";
+				}
+
+				leaf delay {
+				    type uint16 {
+					range "1..65535";
+				    }
+				    description
+					"The LSA age increment.  Default is 1,
+					 in seconds.";
+				}
+			    }
+			}
+		    }
+		}
+	    }
+
+	    container routers {
+		description
+		    "Table of OSPF Router instances .";
+
+		container router {
+		    description
+			"The router contains all information for one instance
+			 of the OSPF protocol as supported by FRR.";
+
+		    leaf instance {
+			type ospf-instance;
+			default "default";
+			description
+			    "Each router is identified using an
+			     instance number between 1..65535, or the
+			     'default'.  Presently, only the 'default'
+			     instance is supported.  If this field is
+			     missing, 'default' is assumed.";
+		    }
+
+		    container auto-cost {
+			leaf reference-bandwidth {
+			    type uint32 {
+				range "1..4294967";
+			    }
+			    description
+				"The reference bandwidth, 1..4294967,
+				 in MBits/sec.";
+			}
+		    }
+
+		    container capability {
+			leaf opaque-lsa {
+			    type boolean;
+			    description
+				"If true, enable opaque LSAs.";
+			}
+		    }
+
+		    container compatible {
+			leaf rfc1583 {
+			    type boolean;
+			    description
+				"If true, ensure compatibility with RFC-1583.";
+			}
+		    }
+
+		    container default-information {
+
+			container originate {
+			    description
+				"Originate an AS-External Type-5 LSA that
+				 describes a default route into all
+				 external-routing capable areas using the
+				 given metric and metric-type.  If 'always'
+				 is present, the default is advertised even
+				 when there is no default present in the
+				 routing tables.";
+
+			    presence
+				"If present, a default route will be
+				 distributed.";
+
+			    leaf always {
+				type boolean;
+				description
+				    "A default route will always be
+				     advertised.";
+			    }
+
+			    leaf metric {
+				type uint32 {
+				    range "0..16777214";
+				}
+				description
+				    "The OSPF default metric, range
+				     0..16777214.";
+			    }
+
+			    leaf metric-type {
+				type uint8 {
+				    range "1..2";
+				}
+				description
+				    "The OSPF External Metric type, 1 or 2.";
+			    }
+
+			    leaf route-map {
+				type string;
+				description
+				    "Route map reference.";
+			    }
+			}
+		    }
+
+		    leaf default-metric {
+			type uint32 {
+			    range "0..16777214";
+			}
+			description
+			    "The default metric for redistributed routes.";
+		    }
+
+		    container distance {
+			description
+			    "OSPF administrative distances for routes.";
+
+			leaf administrative {
+			    type uint8 {
+				range "1..255";
+			    }
+			    description
+				"OSPF administrative distance.";
+			}
+
+			leaf external {
+			    type uint8 {
+				range "1..255";
+			    }
+			    description
+				"OSPF administrative distance for external
+				 routes.";
+			}
+
+			leaf inter-area {
+			    type uint8 {
+				range "1..255";
+			    }
+			    description
+				"OSPF administrative distance for inter-area
+				 routes.";
+			}
+
+			leaf intra-area {
+			    type uint8 {
+				range "1..255";
+			    }
+			    description
+				"OSPF administrative distance for intra-area
+				 routes.";
+			}
+		    }
+
+		    container distribute-list {
+			description
+			    "Distribution lists to filter networks for
+			     outgoing routing updates.";
+
+			list out {
+			    key "route-out";
+
+			    leaf route-out {
+				type ospf-route-out;
+			    }
+
+			    leaf access-list-name {
+				type string;
+				description
+				    "Apply this access-list to redistributed
+				     routes of the named type before allowing
+				     them to be distributed into OSPF.";
+			    }
+			}
+		    }
+
+		    container log-adjacency-changes {
+			presence
+			    "If present, adjacency state changes will
+			     be logged.";
+
+			leaf detail {
+			    type boolean;
+			    description
+				"All state changes will be logged.";
+			}
+		    }
+
+		    container max-metric {
+			description
+			    "OSPF maximum/infinite-distance metric.";
+
+			container router-lsa {
+			    description
+				"Advertise own Router-LSA with infinite
+				 distance (stub router).";
+
+			    leaf on-shutdown {
+				type uint8 {
+				    range "5..100";
+				}
+				description
+				    "Time to wait until full shutdown,
+				     in seconds.";
+			    }
+
+			    leaf on-startup {
+				type uint32 {
+				    range "5..86400";
+				}
+				description
+				    "Time to advertise self as a stub-router,
+				     in seconds.";
+			    }
+			}
+		    }
+
+		    container neighbors {
+			description
+			    "Specifications for neighboring routers,
+			     indexed by neighbor IPv4 address.";
+
+			list neighbor {
+			    key "ip4-address";
+
+			    leaf ip4-address {
+				type inet:ipv4-address-no-zone;
+				description
+				    "IPv4 address of neighboring router.";
+			    }
+
+			    container neighbor-data {
+				presence
+				    "If present, the neighbor exists at the
+				     configured IPv4 address, but has no
+				     further configuration attributes.";
+
+				leaf poll-interval {
+				    type uint16 {
+					range "1..65535";
+				    }
+				    description
+					"The dead neighbor pollling interval,
+					 1..65535, in seconds.";
+				}
+
+				leaf priority {
+				    type uint8;
+				    description
+					"The neighbor priority, 0..255.";
+				}
+			    }
+			}
+		    }
+
+		    container ospf {
+			description
+			    "OSPF attributes.";
+
+			leaf abr-type {
+			    type ospf-abr-type;
+			    description
+				"The ABR type defines some fundamental
+				 behavior in the handling of route
+				 summaries learned through
+				 non-backbone areas, primarily to
+				 avoid routing loops.  Types 'cisco'
+				 and 'ibm' are equivalent and lift
+				 restrictions on such summaries.  Also
+				 see RFC-3509.";
+			}
+
+			leaf router-id {
+			    type yang:dotted-quad;
+			    description
+				"The unique ID of this OSPF router as a
+				 dotted-quad.";
+			}
+
+			leaf write-multiplier {
+			    type uint8 {
+				range "1..100";
+			    }
+			    description
+				"Maximum number of interface serviced
+				 per write.";
+			}
+		    }
+
+		    container passive-interfaces {
+			description
+			    "Passive interfaces will be adertised as
+			     stub links in this router's Router LSA.
+			     Addresses on passive interfaces may be
+			     advertised without having to originate
+			     AS-External Type-5 LSAs.  This is the
+			     only way to advertise non-OSPF links into
+			     stub areas.";
+
+			list passive-if {
+			    key if-name;
+
+			    leaf if-name {
+				type ospf-passive-if-name;
+				description
+				    "The name of an interface or 'default'.";
+			    }
+
+			    container passive-data {
+				presence
+				    "If present, the interface will be
+				     passive.";
+
+				leaf ip4-address {
+				    type inet:ipv4-address-no-zone;
+				    description
+					"If present, a specific IPv4
+					 address on this interface.";
+				}
+			    }
+			}
+		    }
+
+		    container pce {
+			description
+			    "If configured, OSPF will announce Path
+			     Computation Element (PCE) discovery
+			     information using Router Information LSAs.
+			     See RFC-5088.";
+
+			leaf ip4-address {
+			    type inet:ipv4-address;
+			    description
+				"The stable IPv4 address of the PCE.";
+			}
+
+			leaf domain {
+			    type uint16;
+			    description
+				"The AS number specifies a PCE-Domain
+				 (area or AS) where the PCE has topology
+				 visibility and through which the PCE can
+				 compute paths.";
+			}
+
+			leaf flags {
+			    type uint32;
+			    description
+				"The advertised set of PCE capabilities.
+				 For bit assignment, see RFC-5088 sec 7.2.";
+			}
+
+			container neighbors {
+			    description
+				"The set of AS numbers where the PCE has
+				 topology visibility and through which the
+				 PCE can compute paths.";
+
+			    leaf-list asn {
+				type uint16;
+				description
+				    "The AS number of a PCE-domain where the
+				     PCE has topology visibility and through
+				     which the PCE can compute paths.";
+			    }
+			}
+
+			leaf scope {
+			    type uint32;
+			    description
+				"The PCE path computation scope, which
+				 refers to the PCE's ability to compute or
+				 take part in the computation of paths for
+				 intra-area, inter-area, inter-AS, or
+				 inter-layer TE LSPs.  For bit
+				 assignment see RFC-5088, sec 4.2.";
+			}
+		    }
+
+		    container redistributions {
+			description
+			    "Configure which route types from other protocols
+			     should be distributed into OSPF.";
+
+			list redistribution {
+			    key source;
+
+			    leaf source {
+				type ospf-redistribution;
+				description
+				    "The source of routes that will be
+				     distributed into OSPF.";
+			    }
+
+			    container redistribution-data {
+				presence
+				    "If present, routes from this source will
+				     be distributed into OSPF.";
+
+				leaf metric-type {
+				    type uint8 {
+					range "1..2";
+				    }
+				    description
+					"The OSPF exterior metric type, 1 or 2,
+					 for redistributed routes.";
+				}
+
+				leaf metric {
+				    type uint32 {
+					range "0..16777214";
+				    }
+				    description
+					"The metric for redistributed routes.";
+				}
+
+				leaf route-map {
+				    type string;
+				    description
+					"Route-map used to filter routes into
+					 OSPF.";
+				}
+
+				leaf ospf-instance {
+				    type uint32 {
+					range "1..65535";
+				    }
+				    description
+					"When the source is OSPF, and
+					if present, this value
+					specifies which instance to
+					use.";
+				}
+
+				leaf table-instance {
+				    type uint32 {
+					range "1..65535";
+				    }
+				    description
+					"When the source is table, and
+					 if present, a non-main kernel
+					 routing table is used as the
+					 source of routes.";
+				}
+			    }
+			}
+		    }
+
+		    container refresh {
+			description
+			    "Refresh parameters.";
+
+			leaf timer {
+			    type uint32 {
+				range "10..1800";
+			    }
+			    description
+				"The refresh timer value, 10..1800, in
+				 seconds.";
+			}
+		    }
+
+		    container router-information {
+			description
+			    "Router Information configuration flooding scope.";
+
+			leaf as {
+			    type boolean;
+			    description
+				"If true, Router Information functionality
+				 will be be enabled with AS flooding scope.";
+			}
+		    }
+
+		    container timers {
+			description
+			    "OSPF timer configurations.";
+
+			container lsa {
+			    description
+				"OSPF LSA timer configurations.";
+
+			    leaf min-arrival {
+				type uint32 {
+				    range "0..600000";
+				}
+				description
+				    "Mimimum delay in receiving new
+				     versions of an LSA, in ms.";
+			    }
+			}
+
+			container throttle {
+			    description
+				"Throttle adaptive timer configurations.";
+
+			    container lsa {
+				description
+				    "Delay between LSA transmissions.";
+
+				leaf all {
+				    type uint32 {
+					range "0..5000";
+				    }
+				    description
+					"Delay for all LSA types, in ms.";
+				}
+			    }
+
+			    container spf {
+				description
+				    "SPF timers.";
+
+				leaf delay {
+				    type uint32 {
+					range "0..600000";
+				    }
+				    description
+					"Delay from first received change until
+					 SPF calculation, in ms.";
+				}
+
+				leaf initial-hold {
+				    type uint32 {
+					range "0..600000";
+				    }
+				    description
+					"Initial hold time between consecutive
+					 SPF calculation, in ms.";
+				}
+
+				leaf maximum-hold {
+				    type uint32 {
+					range "0..600000";
+				    }
+				    description
+					"Maximum hold time, in ms.";
+				}
+			    }
+			}
+		    }
+
+		    container areas {
+			description
+			    "The OSPF protocol operates on independent
+			     link state regions called 'areas'.  Each
+			     area must be connected to a common
+			     backbone area by an area border routed
+			     (ABR).  The ABR summarizes link-state
+			     routing information for an area using
+			     link-state announcements (LSAs).";
+
+			list area {
+			    key area-id;
+
+			    leaf area-id {
+				type ospf-area-id;
+				description
+				    "Each area must have a unique ID
+				     that takes the form of either a
+				     dotted-quad or an unsigned 32-bit
+				     number, interchangeably.  That
+				     is, dotted-quad 0.0.0.1 is the
+				     same as the unsigned number 1.";
+			    }
+
+			    container authentication {
+				presence
+				    "If present, authentication is enabled.";
+
+				leaf message-digest {
+				    type boolean;
+				    description
+					"Use message-digest authentication.";
+				}
+			    }
+
+			    leaf default-cost {
+				type uint32 {
+				    range "0..16777215";
+				}
+				description
+				    "Stub's advertised default summary cost.";
+			    }
+
+			    leaf export-list {
+				type string;
+				description
+				    "The access-list filter for Type-3 Summary
+				     LSA networks announced to other areas
+				     originated from intra-area paths from
+				     this area.  This router must be an ABR.";
+			    }
+
+			    leaf import-list {
+				type string;
+				description
+				    "The access-list filter for networks
+				     imported into this area from other areas
+				     as Type-3 Summary LSAs.";
+			    }
+
+			    leaf filter-list-in {
+				type string;
+				description
+				    "The prefix-list filter for Type-3 Summary
+				     LSA networks imported from other areas.
+				     Applicable to an ABR only.";
+			    }
+
+			    leaf filter-list-out {
+				type string;
+				description
+				    "The prefix-list filter for Type-3 Summary
+				     LSA networks exported to other areas.
+				     Applicable to an ABR only.";
+			    }
+
+			    container nssa {
+				presence
+				    "If present, this area is a NSSA.";
+
+				leaf no-summary {
+				    type boolean;
+				    description
+					"If true, do not inject
+					 inter-area routes into this NSSA.";
+				}
+
+				leaf translate {
+				    type ospf-nssa-translation;
+				    description
+					"One of the values 'always',
+					 'candidate', or 'never'.
+					 'Always' indicates the
+					 NSSA-ABR will always translate,
+					 'candidate' indicates it will do
+					 translation election, the default,
+					 and 'never' indicates it will never
+					 do translations.";
+				}
+			    }
+
+			    container ranges {
+				description
+				    "Summarize intra-area paths from
+				     speified area into one Type-3
+				     Summary LSA announced to other areas.";
+
+				list range {
+				    key "prefix";
+
+				    leaf prefix {
+					type inet:ipv4-prefix;
+					description
+					    "Area range IPv4 prefix.";
+				    }
+
+				    container range-data {
+					presence
+					    "If present, hold range
+					     data for the prefix.";
+
+					leaf not-advertise {
+					    type boolean;
+					    description
+						"If true, do not advertise
+						this prefix.";
+					}
+
+					leaf cost {
+					    type uint32 {
+						range "0..16777215";
+					    }
+					    description
+						"Cost metric for this range.";
+					}
+
+					leaf substitute {
+					    type inet:ipv4-prefix;
+					    description
+						"Announce the area range
+						 as another prefix.";
+					}
+				    }
+				}
+			    }
+
+			    leaf shortcut {
+				type ospf-shortcut-mode;
+				description
+				    "When the router is an ABR, its shortcut
+				     mode may be set to one of 'default',
+				     'enable', or 'disable'.";
+			    }
+
+			    container stub {
+				presence
+				    "If present, this area will be a stub.";
+
+				leaf no-summary {
+				    type boolean;
+				    description
+					"If true, inter-area routes will not
+					 be injected into the stub.";
+				}
+			    }
+
+			    container virtual-links {
+				description
+				    "Parameters for virtual links";
+
+				list vlink {
+				    key router-id;
+
+				    leaf router-id {
+					type yang:dotted-quad;
+					description
+					    "Router ID of the remote ABR.";
+				    }
+
+				    container vlink-data {
+					presence
+					    "If present and empty, the
+					     virtual link has no other
+					     attributes.";
+
+					leaf authentication-key {
+					    type string {
+						length "1..8";
+					    }
+					}
+
+					leaf dead-interval {
+					    type uint32 {
+						range "1..65535";
+					    }
+					    description
+						"Interval time in seconds
+						 after which a neighbor is
+						 declared down.";
+					}
+
+					leaf hello-interval {
+					    type uint32 {
+						range "1..65535";
+					    }
+					    description
+						"Interval time in seconds
+						 between HELLO packets.";
+					}
+
+					leaf retransmit-interval {
+					    type uint32 {
+						range "1..65535";
+					    }
+					    description
+						"Interval time in seconds
+						 between retransmitting lost
+						 link state advertisements.";
+					}
+
+					leaf transmit-delay {
+					    type uint32 {
+						range "1..65535";
+					    }
+					    description
+						"Link state transmit delay in
+						 seconds.";
+					}
+
+					container message-digest-keys {
+					    description
+						"Pairs of Key-ID and
+						 MD5 keys.";
+
+					    list key-id {
+						key "id";
+
+						leaf id {
+						    type uint8 {
+							range "1..255";
+						    }
+						    description
+							"The unique key ID
+							 for an MD5 key
+							 (password).";
+						}
+
+						leaf key {
+						    type ospf-md5-key-16;
+						    description
+							"An OSPF MD5 password,
+							 1..16 characters.";
+						}
+					    }
+					}
+				    }
+				}
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+}

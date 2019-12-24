@@ -42,6 +42,11 @@ module netgate-frr {
 	 Copyright 2017-2019 Rubicon Communications, LLC.
 	 ";
 
+    revision 2019-08-30 {
+	description
+	    "TNSR Release 19.08.";
+    }
+
     revision 2019-05-30 {
 	description
 	    "TNSR Release 19.05.";
@@ -61,6 +66,56 @@ module netgate-frr {
 	description
 	    "Initial revision.";
     }
+
+
+    typedef zebra-packet-send-recv {
+	type enumeration {
+	    enum send {
+		description
+		    "If specified, only sent packets are requested.";
+	    }
+
+	    enum recv {
+		description
+		    "If specified, only received  packets are requested.";
+	    }
+	}
+    }
+
+
+    grouping zebra-packet-send-recv {
+	description
+	    "Packet debug flags can specify a either a 'send' or
+	     a 'recv' direction limiter, or if absent, both.";
+
+	leaf direction {
+	    type zebra-packet-send-recv;
+	    description
+		"Debug packets sent or received.
+		Missing is both.";
+	}
+    }
+
+    grouping zebra-packet-send-recv-detail {
+	description
+	    "Packet debug flags can specify a either a 'send' or
+	     a 'recv' direction limiter, or if absent, both.
+	     In addition a 'detail' flag may be requested.";
+
+	leaf direction {
+	    type zebra-packet-send-recv;
+	    description
+		"Debug packets sent or received.
+		Missing is both.";
+	}
+
+	leaf detail {
+	    type boolean;
+	    description
+		"Debug packets in detail.";
+	}
+    }
+
 
     rpc frr-control {
 	input {
@@ -162,7 +217,7 @@ module netgate-frr {
 		}
 	    }
 	}
-	
+
 	container prefix-lists {
 	    description
 		"Table of Prefix lists, indexed by name.  Each entry
@@ -452,7 +507,9 @@ module netgate-frr {
 			    leaf source-protocol {
 				type frr:route-map-source-protocol;
 				description
-				  "Match the route source protocol.";
+				    "Match the route source protocol.
+				     One of 'bgp', 'connected', 'kernel',
+				     'ospf', 'ospf6', 'system'.";
 			    }
 
 			    leaf tag {
@@ -721,15 +778,6 @@ module netgate-frr {
 				}
 			    }
 
-			    leaf label-index {
-				type uint32 {
-				    range "0..1048560";
-				}
-				description
-				    "Label index to associate with
-				     the prefix.";
-			    }
-
 			    container large-community {
 				description
 				    "Information about large communities.";
@@ -785,7 +833,9 @@ module netgate-frr {
 				    "Attributes for setting the metric.";
 
 				leaf value {
-				    type uint32;
+				    type string {
+					pattern "\+?([0-9]|[1-9][0-9]+)";
+				    }
 				    description
 					"Set the metric attribute to
 					 this value.";
@@ -901,7 +951,7 @@ module netgate-frr {
 
 		    container kernel {
 			presence
-			    "If present, enable debugging bwtween zebra
+			    "If present, enable debugging between zebra
 			     and the kernel.";
 
 			container msgdump {
@@ -911,18 +961,7 @@ module netgate-frr {
 				 receive flag, both sent and received
 				 messages are printed.";
 
-			    leaf receive {
-				type boolean;
-				description
-				    "If true, only received messages are
-				     printed.";
-			    }
-
-			    leaf send {
-				type boolean;
-				description
-				    "If true, only sent messages are printed.";
-			    }
+			    uses zebra-packet-send-recv;
 			}
 		    }
 
@@ -930,30 +969,14 @@ module netgate-frr {
 			presence
 			    "If present, enable Zebra packet debugging.";
 
-			leaf receive {
-			    type boolean;
-			    description
-				"If true, debug received packets.";
-			}
-
-			leaf send {
-			    type boolean;
-			    description
-				"If true, debug sent packets.";
-			}
-
-			leaf detailed {
-			    type boolean;
-			    description
-				"If true, debug packets in detail.";
-			}
+			uses zebra-packet-send-recv-detail;
 		    }
 
 		    container rib {
 			presence
 			    "If present, enable Zebra RIB event debugging.";
 
-			leaf detailed {
+			leaf detail {
 			    type boolean;
 			    description
 				"If true, debug packets in detail.";
@@ -1359,7 +1382,11 @@ module netgate-frr {
 			    leaf source-protocol {
 				type frr:route-map-source-protocol;
 				description
-				    "Match the route source protocol.";
+				    "Match the route source protocol.
+				     One of 'babel', 'bgp', 'connected',
+				     'eigrp', 'isis', 'kernel', 'nhrp',
+				     'ospf', 'ospf6', 'pim', 'rip',
+				     'ripng', 'static', 'system'.";
 			    }
 
 			    leaf tag {
@@ -1628,15 +1655,6 @@ module netgate-frr {
 				}
 			    }
 
-			    leaf label-index {
-				type uint32 {
-				    range "0..1048560";
-				}
-				description
-				    "Label index to associate with
-				     the prefix.";
-			    }
-
 			    container large-community {
 				description
 				    "Information about large communities.";
@@ -1809,7 +1827,7 @@ module netgate-frr {
 
 		    container kernel {
 			presence
-			    "If present, enable debugging bwtween zebra
+			    "If present, enable debugging between zebra
 			     and the kernel.";
 
 			container msgdump {
@@ -1819,18 +1837,7 @@ module netgate-frr {
 				 receive flag, both sent and received
 				 messages are printed.";
 
-			    leaf receive {
-				type boolean;
-				description
-				    "If true, only received messages are
-				     printed.";
-			    }
-
-			    leaf send {
-				type boolean;
-				description
-				    "If true, only sent messages are printed.";
-			    }
+			    uses zebra-packet-send-recv;
 			}
 		    }
 
@@ -1838,30 +1845,14 @@ module netgate-frr {
 			presence
 			    "If present, enable Zebra packet debugging.";
 
-			leaf receive {
-			    type boolean;
-			    description
-				"If true, debug received packets.";
-			}
-
-			leaf send {
-			    type boolean;
-			    description
-				"If true, debug sent packets.";
-			}
-
-			leaf detailed {
-			    type boolean;
-			    description
-				"If true, debug packets in detail.";
-			}
+			uses zebra-packet-send-recv-detail;
 		    }
 
 		    container rib {
 			presence
 			    "If present, enable Zebra RIB event debugging.";
 
-			leaf detailed {
+			leaf detail {
 			    type boolean;
 			    description
 				"If true, debug packets in detail.";

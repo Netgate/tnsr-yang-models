@@ -21,6 +21,11 @@ module netgate-unbound {
 	 Copyright 2018-2019 Rubicon Communications, LLC.
 	";
 
+    revision 2019-08-30 {
+	description
+	    "TNSR Release 19.08.";
+    }
+
     revision 2019-05-30 {
 	description
 	    "TNSR Release 19.05.";
@@ -66,10 +71,6 @@ module netgate-unbound {
 	    enum allow {
 		description
 		    "Allow access for a client.";
-	    }
-	    enum allow_setrd {
-		description
-		    "Allow access for a client and ignore the RD bit.";
 	    }
 	    enum allow_snoop {
 		description
@@ -265,6 +266,20 @@ module netgate-unbound {
 			    }
 			}
 		    }
+		}
+	    }
+
+	    container outgoing-interfaces {
+		description
+		    "The IP addresses of interfaces that should be used
+		     for outgoing queries.  If more than one IP address
+		     is configured, a random interface will be selected
+		     from the list.";
+
+		leaf-list ip-address {
+		    type inet:ip-address;
+		    description
+			"An IP address to use for outbound queries.";
 		}
 	    }
 
