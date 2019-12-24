@@ -7,6 +7,10 @@ module netgate-ipsec {
         prefix "inet";
     }
 
+    import netgate-common {
+        prefix "ngcom";
+    }
+
     organization "Netgate";
 
     contact "Web: <http://www.netgate.com>";
@@ -17,6 +21,11 @@ module netgate-ipsec {
 
          Copyright 2016-2019 Rubicon Communications, LLC.
         ";
+
+    revision 2019-05-30 {
+	description
+	    "TNSR Release 19.05.";
+    }
 
     revision 2019-02-15 {
 	description
@@ -31,6 +40,10 @@ module netgate-ipsec {
     
     typedef ng-ike-encryption-algorithm-t {
         type enumeration {
+            enum 3des {
+                description
+                    "Triple-DES";
+            }
             enum aes128 {
                 description
                     "128 bit AES-CBC";
@@ -210,6 +223,10 @@ module netgate-ipsec {
             enum aes256gcm16 {
                 description
                     "256 bit AES-GCM with 16 byte ICV";
+            }
+            enum 3des {
+                description
+                    "Triple-DES";
             }
             enum aes128 {
                 description
@@ -621,13 +638,24 @@ module netgate-ipsec {
             "Type of IKE/IPsec peer";
     } 
 
-    /*
-     * END TYPES
-     */
 
-    /*
-     * BEGIN CONFIGURATION DATA
-     */
+    rpc ike-coredump {
+	input {
+	    leaf operation {
+		mandatory true;
+		type ngcom:service-op-enable-disable;
+		description
+		    "One of the strings 'enable', or 'disable'.";
+	    }
+	}
+	output {
+	    leaf stdout {
+		type string;
+	    }
+	}
+    }
+
+
     container ipsec-config {
         list tunnel {
             description

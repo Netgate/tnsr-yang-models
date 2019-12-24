@@ -24,6 +24,11 @@ module netgate-kea {
 
 	 Copyright 2019 Rubicon Communications, LLC.";
 
+    revision 2019-05-30 {
+	description
+	    "TNSR Release 19.05.";
+    }
+
     revision 2019-02-15 {
 	description
 	    "TNSR Release 19.02.";
@@ -957,13 +962,24 @@ module netgate-kea {
 		    "One of the strings 'start', 'stop', 'reload',
 		     or 'status'.";
 	    }
-	    leaf option {
-		type string;
-		description
-		    "Option on operation";
-	    }
 	    leaf kea-service {
 		type string;
+	    }
+	}
+	output {
+	    leaf stdout {
+		type string;
+	    }
+	}
+    }
+
+    rpc kea-coredump {
+	input {
+	    leaf operation {
+		mandatory true;
+		type ngcom:service-op-enable-disable;
+		description
+		    "One of the strings 'enable', or 'disable'.";
 	    }
 	}
 	output {

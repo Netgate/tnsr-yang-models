@@ -7,10 +7,6 @@ module netgate-acl {
 	prefix "inet";
     }
 
-    import ietf-yang-types {
-	prefix "yang";
-    }
-
     import netgate-common {
 	prefix "ngcom";
     }
@@ -25,6 +21,11 @@ module netgate-acl {
 
 	 Copyright 2017-2019 Rubicon Communications, LLC.
 	 ";
+
+    revision 2019-05-30 {
+	description
+	    "TNSR Release 19.05.";
+    }
 
     revision 2019-02-15 {
 	description
@@ -66,19 +67,6 @@ module netgate-acl {
 	    enum reflect {
 		description
 		    "Reflect";
-	    }
-	}
-    }
-
-    typedef macip-rule-action {
-	type enumeration {
-	    enum deny {
-		description
-		    "Deny";
-	    }
-	    enum permit {
-		description
-		    "Permit";
 	    }
 	}
     }
@@ -136,15 +124,24 @@ module netgate-acl {
 
 			leaf action {
 			    type acl-rule-action;
+			    mandatory true;
 			    description
 				"One of the actions 'deny', 'permit', or
 				 'reflect'.";
 			}
 
+			leaf ip-version {
+			    type inet:ip-version;
+			    mandatory true;
+			    description
+				"indicates the IP version (ipv4 or ipv6)
+			         applicable to this ACL rule";
+			}
+
 			leaf src-ip-prefix {
 			    type inet:ip-prefix;
 			    description
-				"The IPv4 or IPv6 source prefix.";
+				"IP source prefix.";
 			}
 
 			leaf src-first-port {
@@ -162,7 +159,7 @@ module netgate-acl {
 			leaf dst-ip-prefix {
 			    type inet:ip-prefix;
 			    description
-				"The IPv4 or IPv6 destination prefix.";
+				"IP destination prefix.";
 			}
 
 			leaf dst-first-port {
@@ -218,70 +215,6 @@ module netgate-acl {
 			    type uint8;
 			    description
 				"The TCP flags value.";
-			}
-		    }
-		}
-	    }
-	}
-
-	container macip-table {
-	    description
-		"Table of MACIP lists, indexed by name.  Each entry
-		 contains a set of MACIP Rules ordered by sequence number.";
-
-	    list macip-list {
-		key "macip-name";
-		description
-		    "MACIP list name.";
-
-		leaf macip-name {
-		    type string;
-		    mandatory true;
-		    description
-			"The MACIP name as supplied by the developer.
-			 It is a unique name used to identify this
-			 set of MACIP Rules.";
-		}
-
-		container macip-rules {
-		    description
-			"MACIP Rule Table ordered by sequence number.";
-
-		    list macip-rule {
-			key "sequence";
-			description
-			    "A List of MACIP Rules.";
-
-			leaf sequence {
-			    type uint32;
-			    description
-				"Rules are executed in increasing sequence
-				 number.";
-			}
-
-			leaf action {
-			    type macip-rule-action;
-			    description
-				"One of the actions 'deny' or 'permit'.";
-			}
-
-			leaf mac-address {
-			    type yang:mac-address;
-			    description
-			        "The L2 MAC address to be matched.";
-			}
-
-			leaf mac-mask {
-			    type yang:mac-address;
-			    description
-			        "The L2 MAC mask ANDed with packet MAC
-				addresses.";
-			}
-
-			leaf ip-prefix {
-			    type inet:ip-prefix;
-			    description
-				"The IPv4 or IPv6 source prefix.";
 			}
 		    }
 		}
@@ -342,17 +275,18 @@ module netgate-acl {
 			        "A text description for the ACL rule.";
 			}
 
-			leaf address-family {
-			    type ngcom:ip-address-family;
-			    description
-				"One of 'ipv4' or 'ipv6'.";
-			}
-
 			leaf action {
 			    type acl-rule-action;
 			    description
 				"One of the actions 'deny', 'permit', or
 				 'reflect'.";
+			}
+
+			leaf ip-version {
+			    type inet:ip-version;
+			    description
+				"indicates the IP version (ipv4 or ipv6)
+			         applicable to this ACL rule";
 			}
 
 			leaf src-ip-prefix {
@@ -372,6 +306,7 @@ module netgate-acl {
 			    description
 				"The last source port in a range.";
 			}
+
 
 			leaf dst-ip-prefix {
 			    type inet:ip-prefix;
@@ -437,76 +372,5 @@ module netgate-acl {
 		}
 	    }
 	}
-
-	container macip-table {
-	    description
-		"Table of MACIP lists, indexed by name.  Each entry
-		 contains a set of MACIP Rules ordered by sequence number.";
-
-	    list macip-list {
-		key "macip-name";
-		description
-		    "MACIP list name.";
-
-		leaf macip-name {
-		    type string;
-		    mandatory true;
-		    description
-			"The MACIP name as supplied by the developer.
-			 It is a unique name used to identify this
-			 set of MACIP Rules.";
-		}
-
-		container macip-rules {
-		    description
-			"MACIP Rule Table ordered by sequence number.";
-
-		    list macip-rule {
-			key "sequence";
-			description
-			    "A List of MACIP Rules.";
-
-			leaf sequence {
-			    type uint32;
-			    description
-				"Rules are executed in increasing sequence
-				 number.";
-			}
-
-			leaf address-family {
-			    type ngcom:ip-address-family;
-			    description
-				"One of 'ipv4' or 'ipv6'.";
-			}
-
-			leaf action {
-			    type macip-rule-action;
-			    description
-				"One of the actions 'deny' or 'permit'.";
-			}
-
-			leaf mac-address {
-			    type yang:mac-address;
-			    description
-			        "The L2 MAC address to be matched.";
-			}
-
-			leaf mac-mask {
-			    type yang:mac-address;
-			    description
-			        "The L2 MAC mask ANDed with packet MAC
-				addresses.";
-			}
-
-			leaf ip-prefix {
-			    type inet:ip-prefix;
-			    description
-				"The IPv4 or IPv6 source prefix.";
-			}
-		    }
-		}
-	    }
-	}
     }
-
 }

@@ -18,22 +18,14 @@ module netgate-system {
 	 Copyright 2018-2019 Rubicon Communications, LLC.
 	 ";
 
-    revision 2019-02-15 {
+    revision 2019-05-30 {
 	description
-	    "TNSR Release 19.02.";
+	    "TNSR Release 19.05.";
     }
 
     revision 2017-11-01 {
 	description
 	    "Initial revision.";
-    }
-
-    rpc system-running-to-startup {
-	output {
-	    leaf results {
-		type string;
-	    }
-	}
     }
 
     rpc system-ping {
@@ -53,9 +45,9 @@ module netgate-system {
 		    "Interface source";
 	    }
 	    leaf source {
-		type inet:ipv4-address-no-zone;
+		type inet:ip-address-no-zone;
 		description
-		    "IPv4 address source";
+		    "IP address source";
 	    }
 	    leaf count {
 		type uint32;
@@ -82,6 +74,11 @@ module netgate-system {
 		description
 		    "Time to live";
 	    }
+	    leaf timeout {
+		type uint32;
+		description
+		    "Absolute wait time.";
+	    }
 	}
 	output {
 	    leaf stdout {
@@ -107,9 +104,9 @@ module netgate-system {
 		    "Interface source";
 	    }
 	    leaf source {
-		type inet:ipv4-address-no-zone;
+		type inet:ip-address-no-zone;
 		description
-		    "IPv4 address source";
+		    "IP address source";
 	    }
 	    leaf ipv4-only {
 		type boolean;
@@ -140,6 +137,27 @@ module netgate-system {
 		type uint32;
 		description
 		    "Probe response wait time.";
+	    }
+	    leaf timeout {
+		type uint32;
+		description
+		    "Timeout for response";
+	    }
+	}
+	output {
+	    leaf stdout {
+		type string;
+	    }
+	}
+    }
+
+
+    rpc system-nft {
+	input {
+	    leaf command {
+		type string;
+		description
+		    "Netfilter utility command";
 	    }
 	    leaf timeout {
 		type uint32;
@@ -209,10 +227,6 @@ module netgate-system {
 	}
 
 	container auth {
-	    leaf system-certificate {
-		type string;
-	    }
-
 	    list user {
 		key "user-name";
 		description

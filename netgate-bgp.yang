@@ -1,0 +1,3180 @@
+module netgate-bgp {
+
+    namespace "urn:netgate:xml:yang:netgate-bgp";
+    prefix "ngbgp";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import ietf-yang-types {
+	prefix "yang";
+    }
+
+    import netgate-interface {
+	prefix "ngif";
+    }
+
+    import netgate-frr-types {
+	prefix "frr";
+    }
+
+    import netgate-route {
+	prefix "ngrt";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data-model
+	 for BGP data.
+
+	 Copyright 2019 Rubicon Communications, LLC.
+	 ";
+
+    revision 2019-05-30 {
+	description
+	    "TNSR Release 19.05.";
+    }
+
+    revision 2019-03-06 {
+	description
+	    "Initial release.";
+    }
+
+
+    typedef bgp-orf-prefix-list {
+	type enumeration {
+	    enum send {
+		description
+		"Send";
+	    }
+	    enum receive {
+		description
+		"Receive";
+	    }
+	    enum both {
+		description
+		"Both";
+	    }
+	}
+    }
+
+    typedef bgp-source {
+	type enumeration {
+	    enum kernel {
+		description
+		"Kernel";
+	    }
+	    enum connected {
+		description
+		"Connected";
+	    }
+	    enum rip {
+		description
+		"RIP";
+	    }
+	    /*
+	    enum ospf {
+		description
+		"OSPF";
+	    }
+	    */
+	    enum isis {
+		description
+		"ISIS";
+	    }
+	    enum pim {
+		description
+		"PIM";
+	    }
+	    enum eigrp {
+		description
+		"EIGRP";
+	    }
+	    enum nhrp {
+		description
+		"NHRP";
+	    }
+	    enum table {
+		description
+		"Table";
+	    }
+	    enum vnc {
+		description
+		"VNC";
+	    }
+	    enum vnc-direct {
+		description
+		    "VNC Direct";
+	    }
+	    enum babel {
+		description
+		"Babel";
+	    }
+	}
+    }
+
+    typedef community-list-value-type {
+	type enumeration {
+	    enum standard {
+		description
+		"The rules are normal numbers.";
+	    }
+	    enum expanded {
+		description
+		"The rules are regular expressions.";
+	    }
+	}
+    }
+
+    typedef community-list-value-size {
+	type enumeration {
+	    enum normal {
+		description
+		"Rules allow the original, normal communities values.";
+	    }
+	    enum extended {
+		description
+		"Rules allow IPv4-based policies and matches 8 octets
+		     per community from RFC 5668.";
+	    }
+	    enum large {
+		description
+		"Rules allow 12-octet values from RFC 8092.";
+	    }
+	}
+    }
+
+    typedef community-list-action {
+	type enumeration {
+	    enum deny {
+		description
+		"Deny";
+	    }
+	    enum permit {
+		description
+		"Permit";
+	    }
+	}
+    }
+
+    typedef bgp-show-request {
+	type enumeration {
+	    enum config {
+		description
+		    "Configuration";
+	    }
+	    enum neighbors {
+		description
+		    "Neighbors";
+	    }
+	    enum network {
+		description
+		    "Network";
+	    }
+	    enum nexthop {
+		description
+		    "Nexthop";
+	    }
+	    enum peer-group {
+		description
+		    "Peer-group";
+	    }
+	    enum summary {
+		description
+		    "Summary";
+	    }
+	}
+    }
+
+    typedef bgp-show-parameter {
+	type enumeration {
+	    enum advertised-routes {
+		description
+		    "advertised-routes";
+	    }
+	    enum dampened-routes {
+		description
+		    "dampened-routes";
+	    }
+	    enum flap-statistics {
+		description
+		    "flap-statistics";
+	    }
+	    enum prefix-counts {
+		description
+		    "prefix-counts";
+	    }
+	    enum received {
+		description
+		    "received'";
+	    }
+	    enum received-routes {
+		description
+		    "received-routes";
+	    }
+	    enum routes {
+		description
+		    "routes";
+	    }
+	    enum detail {
+		description
+		    "detail";
+	    }
+	}
+    }
+
+    grouping bgp-ipv4-aggregations {
+	description
+	    "IPv4 address aggregation.";
+
+	list aggregation {
+	    key "ip-address";
+	    description
+		"Aggregated IP address and optional prefix";
+
+	    leaf ip-address {
+		type inet:ipv4-prefix;
+		description
+		    "Specifies aggregated adddresses as an IPv4
+		     address and prefix.";
+	    }
+
+	    container aggregation-data {
+		presence
+		    "If present, the IPv4 prefix has
+		     configured aggregation data.";
+
+		leaf as-set {
+		    type boolean;
+		    description
+			"Resulting routes include AS set.";
+		}
+
+		leaf summary-only {
+		    type boolean;
+		    description
+			"Aggregated routes will not be announced.";
+		}
+	    }
+	}
+    }
+
+    grouping bgp-ipv6-aggregations {
+	description
+	    "IPv6 address aggregation.";
+
+	list aggregation {
+	    key "ip-address";
+	    description
+		"Aggregated IP address and optional prefix";
+
+	    leaf ip-address {
+		type inet:ipv6-prefix;
+		description
+		    "Specifies aggregated adddresses as an IPv4
+		     address and prefix.";
+	    }
+
+	    container aggregation-data {
+		presence
+		    "If present, the IPv6 prefix has
+		     configured aggregation data.";
+
+		leaf summary-only {
+		    type boolean;
+		    description
+			"Aggregated routes will not be announced.";
+		}
+	    }
+	}
+    }
+
+    grouping bgp-ipv4-distance-admin {
+	description
+	    "Administrative distance specification.";
+
+	leaf distance {
+	    type uint8;
+	    description
+		"The administrative distance.";
+	}
+
+	leaf ip-src-prefix {
+	    type inet:ipv4-prefix;
+	    description
+		"The source IPv4 address and prefix.";
+	}
+
+	leaf access-list-name {
+	    type string;
+	    description
+		"An optional Access List name.";
+	}
+    }
+
+    grouping bgp-ipv6-distance-admin {
+	description
+	    "Administrative distance specification.";
+
+	leaf distance {
+	    type uint8;
+	    description
+		"The administrative distance.";
+	}
+
+	leaf ip-src-prefix {
+	    type inet:ipv6-prefix;
+	    description
+		"The source IPv6 address and prefix.";
+	}
+
+	leaf access-list-name {
+	    type string;
+	    description
+		"An optional Access List name.";
+	}
+    }
+
+    grouping bgp-distance-bgp {
+	description
+	    "BGP distance specification.";
+
+	leaf external {
+	    type uint8;
+	    description
+		"The distance for external routes.";
+	}
+
+	leaf internal {
+	    type uint8;
+	    description
+		"The distance for internal routes.";
+	}
+
+	leaf local {
+	    type uint8;
+	    description
+		"The distance for local routes.";
+	}
+    }
+
+    grouping bgp-multiple-path-maximums {
+	description
+	    "If packets should be forwarded over multiple paths, these
+	     parameters specify the maximum number of paths.";
+
+	leaf non-ibgp-paths {
+	    type uint8 {
+		range "1..255";
+	    }
+	    description
+		"Number of non-iBGP paths.";
+	}
+
+	leaf ibgp-paths {
+	    type uint8 {
+		range "1..255";
+	    }
+	    description
+		"Number of iBGP paths.";
+	}
+
+	leaf equal-cluster-length {
+	    type boolean;
+	    description
+		"If true, cluster lengths should match for iBGP paths.";
+	}
+    }
+
+    grouping bgp-neighbors {
+	description
+	    "Address-family-specific attributes that are per neighbor.";
+
+	list neighbor {
+	    key "peer";
+	    description
+		"List of neighbors within an address-family clause,
+		 indexed by peer.";
+
+	    leaf peer {
+		type string;
+		mandatory true;
+		description
+		    "The IPv4 or IPv6 address of the neighboring BGP
+		     peer, or the name of a peer group.";
+	    }
+
+	    leaf activate {
+		type boolean;
+		description
+		    "Enable the Address Family for this Neighbor.";
+	    }
+
+	    leaf addpath-tx-all-paths {
+		type boolean;
+		description
+		    "Use addpath to advertise all paths to a neighbor.";
+	    }
+
+	    leaf addpath-tx-bestpath-per-as {
+		type boolean;
+		description
+		    "Use addpath to advertise the bestpath per each
+		     neighboring AS.";
+	    }
+
+	    container allowas-in {
+		presence
+		    "Enables the allowas-in clause.  One of
+		     'occurences' and 'origin' may also be present.";
+
+		description
+		    "Accept an AS-path with my AS present in it.";
+
+		leaf occurences {
+		    type uint8;
+		    description
+			"A number in the range [1..10] giving the
+			 number of occurences allowed.";
+		}
+
+		leaf origin {
+		    type boolean;
+		    description
+			"If true, only accept my AS in the AS--path if
+			 the route originated in my AS.";
+		}
+	    }
+
+	    leaf as-override {
+		type boolean;
+		description
+		    "Override ASNs in outbound updates if as-path
+		     equals remote-as.";
+	    }
+
+	    container attribute-unchanged {
+		presence
+		    "With no other leafs in this list, the presence of
+		     this container indicates a bare command that
+		     causes all attributes to be passed unchanged to
+		     this peer.";
+
+		description
+		    "BGP attributes that are propagated unchanged to
+		     this neighbor.";
+
+		leaf-list attr {
+		    type string;
+		    description
+			"Possible attributes are: 'as-path', 'med', or
+			 'next-hop'.";
+		}
+	    }
+
+	    container capability-advertise {
+		description
+		    "Peer capability advertisement
+		     directives.";
+
+		leaf orf-prefix-list {
+		    type bgp-orf-prefix-list;
+		    description
+			"One of the values 'send', 'receive', or 'both'.";
+		}
+	    }
+
+	    container default-originate {
+		presence
+		    "If present, the default-originate attribute is
+		     set and default routes will be announced to this
+		     peer.  It also has an optional route-map.";
+
+		leaf route-map {
+		    type string;
+		    description
+			"A route map to specify criteria to originate
+			 default.";
+		}
+	    }
+
+	    leaf distribute-list-in {
+		type string;
+		description
+		    "The name of an 'in' distribution access list used
+		     to filter incoming updates.";
+	    }
+
+	    leaf distribute-list-out {
+		type string;
+		description
+		    "The name of an 'out' distribution access list
+		     used to filter outgoing updates.";
+	    }
+
+	    leaf filter-list-in {
+		type string;
+		description
+		    "The name of an 'in' AS-path access-list name used
+		     to filter incoming routes.";
+	    }
+
+	    leaf filter-list-out {
+		type string;
+		description
+		    "The name of an 'in' AS-path access-list name used
+		     to filter outgoing routes.";
+
+	    }
+
+	    container maximum-prefix {
+		description
+		    "The maximum number of prefixes to accept from
+		     this peer, options to control a warning
+		     threshold, and actions to take.  If the limit is
+		     absent, none of these values will be in effect.";
+
+		leaf limit {
+		    type uint32;
+		    description
+			"Maximum number of prefixes to accept from
+			 this peer.";
+		}
+
+		leaf warning-threshold {
+		    type uint8;
+		    description
+			"Threshold percentage at which a marning
+			 message is generate.";
+		}
+
+		leaf warning-only {
+		    type boolean;
+		    description
+			"Only issue warning messages when the limit is
+			 exceeded.";
+		}
+
+		leaf restart-interval {
+		    type uint16;
+		    description
+			"After limit is exceeded, restart BGP
+			 connection.  Restart interval in minutes.";
+		}
+	    }
+
+	    leaf next-hop-self {
+		type boolean;
+		description
+		    "If true, disable the next hop calculation for
+		     this neighbor.";
+	    }
+
+	    leaf next-hop-self-force {
+		type boolean;
+		description
+		    "If true, set the next hop to self for reflected
+		     routes.";
+	    }
+
+	    leaf prefix-list-in {
+		type string;
+		description
+		    "If present, this is the name of the 'in' prefix
+		     list used to filter incoming updates.";
+	    }
+
+	    leaf prefix-list-out {
+		type string;
+		description
+		    "If present, this is the name of the 'out' prefix
+		     list used to filter outgoing updates.";
+	    }
+
+	    container remove-private-as {
+		presence
+		    "Present if a bare 'remove-private-as' applies to
+		     indicate private ASNs in outbound updates should
+		     be removed.";
+
+		leaf all {
+		    type boolean;
+		    description
+			"Apply to all AS numbers.";
+		}
+
+		leaf replace-as {
+		    type boolean;
+		    description
+			"Replace private ASNs with our ASN in outbound
+			 updates.";
+		}
+	    }
+
+	    leaf route-map-in {
+		type string;
+		description
+		    "The name of a route-map to apply to incoming
+		     routes.";
+	    }
+
+	    leaf route-map-out {
+		type string;
+		description
+		    "The name of a route-map to apply to outbound
+		     routes.";
+	    }
+
+	    leaf route-reflector-client {
+		type boolean;
+		description
+		    "Configure this neighbor as a Route Reflector
+		     client.";
+	    }
+
+	    leaf route-server-client {
+		type boolean;
+		description
+		    "Configure this neighbor as a Route Server
+		     client.";
+	    }
+
+	    container send-community {
+		description
+		    "Send 'standard', 'large' or 'extended' community
+		     attributes.  The default is all.";
+
+		leaf standard {
+		    type boolean;
+		    default true;
+		    description
+			"Send standard community attributes.";
+		}
+
+		leaf large {
+		    type boolean;
+		    default true;
+		    description
+			"Send large community attributes.";
+		}
+
+		leaf extended {
+		    type boolean;
+		    default true;
+		    description
+			"Send extended community attributes.";
+		}
+	    }
+
+	    leaf soft-reconfiguration-inbound {
+		type boolean;
+		description
+		    "Allow inbound soft reconfiguration for this
+		     neighbor.";
+	    }
+
+	    leaf unsuppress-route-map {
+		type string;
+		description
+		    "The name of a route map to use to selectively
+		     unspress otherwise suppressed routes.";
+	    }
+
+	    leaf weight {
+		type uint16;
+		description
+		    "Set default weight for routes from this
+		     neighbor.";
+	    }
+	}
+    }
+
+    grouping bgp-ipv4-network-announcements {
+	description
+	    "This is the list of networks that will be announced to
+	     each neighbor.  It is a list of IPv4 networks and
+	     attributes.";
+
+	list network {
+	    key ip-prefix;
+	    description
+		"The list of announced networks.";
+
+	    leaf ip-prefix {
+		type inet:ipv4-prefix;
+		description
+		    "The announced IPv4 prefix";
+	    }
+
+	    container announcement {
+		presence
+		    "If present, this network announcement is present
+		     and configured.";
+
+		leaf label-index {
+		    type uint32 {
+			range "0..1048560";
+		    }
+		    description
+			"An optional label index in the range
+			 [0..1048560] to associate with the prefix.";
+		}
+
+		leaf route-map-name {
+		    type string;
+		    description
+			"An optional route map name used to modify
+			 attributes.";
+		}
+
+		leaf backdoor {
+		    type boolean;
+		    description
+			"If true, this is a BGP backdoor route.";
+		}
+	    }
+	}
+    }
+
+    grouping bgp-ipv6-network-announcements {
+	description
+	    "This is the list of networks that will be announced to
+	     each neighbor.  It is a list of IPv6 networks and
+	     attributes.";
+
+	list network {
+	    key ip-prefix;
+	    description
+		"The list of announced networks.";
+
+	    leaf ip-prefix {
+		type inet:ipv6-prefix;
+		description
+		    "The announced IPv6 prefix";
+	    }
+
+	    container announcement {
+		presence
+		    "If present, this network announcement is present
+		     and configured.";
+
+		leaf label-index {
+		    type uint32 {
+			range "0..1048560";
+		    }
+		    description
+			"An optional label index in the range
+			 [0..1048560] to associate with the prefix.";
+		}
+
+		leaf route-map-name {
+		    type string;
+		    description
+			"An optional route map name used to modify
+			 attributes.";
+		}
+	    }
+	}
+    }
+
+    grouping bgp-redistributions {
+	description
+	    "Route redistribution directives.";
+
+	container named-sources {
+	    description
+		"Named, fixed source of routes that are redistributed
+		 to BGP.";
+
+	    list route-source {
+		key "source";
+		description
+		    "List of route sources that can be redistributed";
+
+		leaf source {
+		    type bgp-source;
+		    description
+			"The route source.";
+		}
+
+		container route-data {
+		    presence
+			"If present, this redistribution is present
+			 and configured.";
+
+		    leaf metric {
+			type uint32;
+			description
+			    "Metric for redistributed
+			     routes.";
+		    }
+
+		    leaf route-map {
+			type string;
+			description
+			    "Route map for
+			     redistributed routes";
+		    }
+		}
+	    }
+	}
+
+	/*
+	container ospf-instances {
+	    description
+		"Route redistributions to OSPF instances.";
+
+	    list instance {
+		key "id";
+		description
+		    "OSPF route tables and non-main kernel route
+		     tables.";
+
+		leaf id {
+		    type uint16 {
+			range "1..65535";
+		    }
+		    description
+			"OSPF or route table id.";
+		}
+
+		container instance-data {
+		    presence
+			"If present, this redistribution is present
+			 and configured.";
+
+		    leaf metric {
+			type uint32;
+			description
+			    "Metric for redistributed
+			     routes.";
+		    }
+
+		    leaf route-map {
+			type string;
+			description
+			    "Route map for
+			     redistributed routes";
+		    }
+		}
+	    }
+	}
+	*/
+
+	container kernel-tables {
+	    description
+		"Route redistributions to kernel tables.";
+
+	    list table {
+		key "id";
+		description
+		    "Non-main kernel tables.";
+
+		leaf id {
+		    type uint16 {
+			range "1..65535";
+		    }
+		    description
+			"Non-main kernel table id.";
+		}
+
+		container table-data {
+		    presence
+			"If present, this redistribution is present
+			 and configured.";
+
+		    leaf metric {
+			type uint32;
+			description
+			    "Metric for redistributed
+			     routes.";
+		    }
+
+		    leaf route-map {
+			type string;
+			description
+			    "Route map for
+			     redistributed routes";
+		    }
+		}
+	    }
+	}
+    }
+
+
+    rpc bgp-show {
+	input {
+	    leaf request {
+		type bgp-show-request;
+		description
+		    "A BGP show request type.  One of the strings
+		     'config', 'running', 'summary', 'peer-group',
+		     'nexthop', 'network', or 'neighbor'.";
+	    }
+	    leaf peer {
+		type string;
+		description
+		    "A BGP peer name or IP address.";
+	    }
+	    leaf net {
+		type string;
+		description
+		    "Network or prefix.";
+	    }
+	    leaf param {
+		type bgp-show-parameter;
+		description
+		    "An additional parameter string.  One of the strings
+		     'advertised-routes', 'dampened-routes',
+		     'flap-statistics', 'prefix-counts', 'received',
+		     'received-routes', 'routes', or 'detail'.";
+	    }
+	}
+	output {
+	    leaf stdout {
+		type string;
+	    }
+	}
+    }
+
+    rpc bgp-clear {
+	input {
+	    leaf peer {
+		type string;
+		description
+		    "A BGP peer AS, IP address or * for all.";
+	    }
+	    leaf soft {
+		type boolean;
+		description
+		    "Soft reconfiguration.";
+	    }
+	}
+	output {
+	    leaf stdout {
+		type string;
+	    }
+	}
+    }
+
+    augment "/ngrt:route-config/ngrt:dynamic" {
+
+	container bgp {
+
+	    container global-options {
+		description
+		    "These are options that apply to the BGP Server or
+		     to all BGP Router configurations.";
+
+		container debug {
+		    description
+			"BGP debug options.";
+
+		    leaf allow-martians {
+			type boolean;
+			description
+			    "If true, allow martian next hops.";
+		    }
+
+		    container as4 {
+			description
+			    "AS4 debug action.";
+			
+			leaf all {
+			    type boolean;
+			    description
+				"If true, debug AS4 actions.";
+			}
+
+			leaf segment {
+			    type boolean;
+			    description
+				"If true, debug AS4 AS-path segment handling.";
+			}
+		    }
+
+		    container bestpath {
+			description
+			    "bestpath debug action.";
+
+			leaf ipv6-prefix {
+			    type inet:ipv6-prefix;
+			    description
+				"Debug bestpath of this IPv6 prefix.";
+			}
+		    }
+
+		    container keepalive {
+			description
+			    "Debug BGP neighbor keepalive.";
+
+			leaf all {
+			    type boolean;
+			    description
+				"Enable BGP neighbor keepalive debug.";
+			}
+
+			leaf peer {
+			    type string;
+			    description
+				"Debug specific BGP neighbor.";
+			}
+		    }
+
+		    container neighbor-events {
+			description
+			    "Debug BGP neighbor events.";
+			
+			leaf all {
+			    type boolean;
+			    description
+				"Enable BGP neighbor events debug.";
+			}
+
+			leaf peer {
+			    type string;
+			    description
+				"Debug specific BGP neighbor.";
+			}
+		    }
+
+		    leaf nht {
+			type boolean;
+			description
+			    "If true, enable next hop tracking events.";
+		    }
+
+		    leaf update-groups {
+			type boolean;
+			description
+			    "If true, update-groups.";
+		    }
+
+		    container updates {
+			description
+			    "Debug BGP neighbor events.";
+
+			leaf all {
+			    type boolean;
+			    description
+				"Debug BGP updates.";
+			}
+
+			leaf in-peer {
+			    type string;
+			    description
+				"Debug specific BGP neighbor in-updates.";
+			}
+
+			leaf out-peer {
+			    type string;
+			    description
+				"Debug specific BGP neighbor out-updates.";
+			}
+
+			leaf prefix {
+			    type inet:ip-prefix;
+			    description
+				"Debug specific BGP IPV4 or IPv6 prefix.";
+			}
+		    }
+
+		    container zebra {
+			description
+			    "Debug BGP Zebra messages.";
+
+			leaf all {
+			    type boolean;
+			    description
+				"Debug BGP Zebra messages.";
+			}
+
+			leaf prefix {
+			    type inet:ip-prefix;
+			    description
+				"Debug specific BGP IPV4 or IPv6 prefix.";
+			}
+		    }
+		}
+
+		leaf enable {
+		    type boolean;
+		    default false;
+		    description
+			"If true, the BGP Daemon is enabled.";
+		}
+
+		leaf route-map-delay-timer {
+		    type uint16 {
+			range "0..600";
+		    }
+		    description
+			"The delay time in seconds before processing
+			 route-map changes.";
+		}
+	    }
+
+	    container routers {
+		description
+		    "Table of BGP Router instances index by ASN.";
+
+		list router {
+		    key "asn";
+		    description
+			"Each router is identified using its AS-Number.";
+
+		    leaf asn {
+			type uint32;
+			mandatory true;
+			description
+			    "The BGP Router instance is identified by this
+			     AS-Number.";
+		    }
+
+		    leaf always-compare-med {
+			type boolean;
+			description
+			    "Always compare the Multi-exit-discriminator.";
+		    }
+
+		    leaf bestpath-as-path-multipath-relax {
+			type boolean;
+			description
+			    "Best path decisions should consider paths of
+			     equal AS-path length candidates for multipath
+			     computation.  Allow load sharing on routes with
+			     different AS-paths of the same length.";
+		    }
+
+		    leaf bestpath-as-path-multipath-relax-as-set {
+			type boolean;
+			description
+			    "If true, generate an AS-set.";
+		    }
+
+		    leaf bestpath-as-path-confed {
+			type boolean;
+			description
+			    "Best path decisions should be based on the length
+			     of confederation path sets.";
+		    }
+
+		    leaf bestpath-as-path-ignore {
+			type boolean;
+			description
+			    "Best path decisions should ignore AS-path
+			    lengths.";
+		    }
+
+		    leaf bestpath-compare-routerid {
+			type boolean;
+			description
+			    "Break otherwise equal route ties using
+			    router id.";
+		    }
+
+		    container bestpath-med {
+			leaf confed {
+			    type boolean;
+			    description
+				"Compare MED attribute among confederation
+				 paths.";
+			}
+
+			leaf missing-as-worst {
+			    type boolean;
+			    description
+				"Treat a missing MED attribute as the
+				 least preferred value.";
+			}
+		    }
+
+		    leaf client-to-client-reflection {
+			type boolean;
+			description
+			    "Allow client-to-client route reflection.";
+		    }
+
+		    leaf cluster-id {
+			type union {
+			    type inet:ipv4-address-no-zone;
+			    type uint32;
+			}
+			description
+			    "The route-reflector cluster id expressed as
+			     either an IPv4 address or an unsigned 32-bit
+			     integer.";
+		    }
+
+		    leaf coalesce-time {
+			type uint32;
+			description
+			    "Subgroup coalesce timer in ms.";
+		    }
+
+		    container confederation {
+			description
+			    "Confederation Parameters.";
+
+			leaf identifier {
+			    type uint32;
+			    description
+				"The confederation identifier; an AS number.";
+			}
+
+			container peers {
+			    leaf-list peer {
+				type uint32;
+				description
+				    "A list of AS numbers for each peer.";
+			    }
+			}
+		    }
+
+		    container dampening {
+			description
+			    "Route flap dampening parameters.";
+
+			leaf enable {
+			    type boolean;
+			    description
+				"Enable route-flap dampening.";
+			}
+
+			leaf penalty-half-life {
+			    type uint8 {
+				range "1..45";
+			    }
+			    description
+				"The penalty half-life value [1-45].";
+			}
+
+			leaf route-reuse {
+			    type uint16 {
+				range "1..20000";
+			    }
+			    description
+				"The route reuse start value.";
+			}
+
+			leaf route-suppression {
+			    type uint16 {
+				range "1..20000";
+			    }
+			    description
+				"The route suppression start value.";
+			}
+
+			leaf route-suppression-maximum {
+			    type uint8;
+			    description
+				"The route suppression maximum value.";
+			}
+		    }
+
+		    leaf deterministic-med {
+			type boolean;
+			description
+			    "Always produce deterministic route-selection by
+			     picking the best MED path advertised from the
+			     neighboring AS.";
+		    }
+
+		    leaf disable-ebgp-connected-route-check {
+			type boolean;
+			description
+			    "Disable checking if nexthop is connected an
+			     eBGP session";
+		    }
+
+		    leaf enforce-first-as {
+			type boolean;
+			description
+			    "Enforce the first AS for eBGP routes.";
+		    }
+
+		    leaf listen-limit {
+			type uint16 {
+			    range "1..5000";
+			}
+			description
+			    "The maximum number of dynamic neighbors that
+			     can be created.";
+		    }
+
+		    leaf listen-range {
+			type string;
+			description
+			    "An IPv4 or IPv6 prefix range on which listening
+			     for dynamic neighbors will take place.";
+		    }
+
+		    leaf listen-peer-group-name {
+			type string;
+			description
+			    "The peer group name for dynamically created
+			     neighbors.";
+		    }
+
+		    container max-med {
+			container administrative {
+			    presence
+				"If present without a specific value,
+				 administratively advertise routes with
+				 maximum MED for an indefinite period.";
+
+			    leaf med-value {
+				type uint32;
+				description
+				    "The maximum MED value to use.";
+			    }
+			}
+
+			container on-startup {
+			    leaf time-period {
+				type uint32;
+				description
+				    "The time period, in seconds, for
+				    max-med.";
+			    }
+
+			    leaf med-value {
+				type uint32;
+				description
+				    "The max MED value is effective on
+				     startup, and has this time period
+				     in seconds.";
+			    }
+			}
+		    }
+
+		    leaf network-import-check {
+			type boolean;
+			description
+			    "If true, check if BGP network route exists
+			     in IGP.";
+		    }
+
+		    leaf route-reflector-allow-outbound-policy {
+			type boolean;
+			description
+			    "If true, also allow attribure modifications to
+			     the route-map-out policy.";
+		    }
+
+		    leaf router-id {
+			type yang:dotted-quad;
+			description
+			    "Dotted-quad Id of the router.  Can be any 32-bit
+			     unsigned value in dotted-quad format but
+			     is usually the IP address of the router.
+			     RFC4271 Section 4.2";
+		    }
+
+		    container timers {
+			description
+			    "Various FSM timers.";
+
+			leaf keep-alive {
+			    type uint16;
+			    description
+				"Keepalive interval in seconds. Default is 1/3
+				 of the hold-time value.";
+			}
+
+			leaf hold-time {
+			    type uint16;
+			    description
+				"Hold-time in seconds. Default 90
+				seconds, maybe.";
+			}
+		    }
+
+		    leaf update-delay-updates {
+			type uint16 {
+			    range "0..3600";
+			}
+			description
+			    "Force initial delay, [0..3600] seconds, for
+			     best-path and updates.  Default 120 seconds.";
+		    }
+
+		    leaf update-delay-peer-wait {
+			type uint16 {
+			    range "1..3600";
+			}
+			description
+			    "Time to wait for a peer to establish connection.
+			     Default 120 seconds.";
+		    }
+
+		    leaf write-quanta {
+			type uint16;
+			description
+			    "The number of packets to write to peer sockets
+			     per update.  Default 10 packets.";
+		    }
+
+		    container address-families {
+			description
+			    "Address-family specific information.";
+
+			container ipv4 {
+			    description
+				"Address family IPv4 configuration.";
+
+			    container flowspec {
+				description
+				    "Address family IPv4-flowspec
+				     configuration.";
+			    }
+
+			    container labeled-unicast {
+				description
+				    "Address family IPv4-labeled-unicast
+				     configuration.";
+			    }
+
+			    container multicast {
+				description
+				    "Address family IPv4-multicast
+				     configuration.";
+
+				container aggregations {
+				    description
+					"Address aggregation.";
+
+				    uses bgp-ipv4-aggregations;
+				}
+
+				container distance-admin {
+				    description
+					"Adminstrative distances.";
+
+				    uses bgp-ipv4-distance-admin;
+				}
+
+				container distance-bgp {
+				    description
+					"BGP distances.";
+
+				    uses bgp-distance-bgp;
+				}
+
+				container neighbors {
+				    description
+					"BGP neighbors.";
+
+				    uses bgp-neighbors;
+				}
+
+				container network-announcements {
+				    description
+					"Network announcements.";
+
+				    uses bgp-ipv4-network-announcements;
+				}
+
+				leaf table-map {
+				    type string;
+				    description
+					"A route-map to use as a BGP
+					 to RIB router download filter.";
+				}
+			    }
+
+			    container unicast {
+				description
+				    "Address family IPv4-unicast
+				     configuration.";
+
+				container aggregations {
+				    description
+					"Address aggregation.";
+
+				    uses bgp-ipv4-aggregations;
+				}
+
+				container distance-admin {
+				    description
+					"Adminstrative distances.";
+
+				    uses bgp-ipv4-distance-admin;
+				}
+
+				container distance-bgp {
+				    description
+					"BGP distances.";
+
+				    uses bgp-distance-bgp;
+				}
+
+				container mutliple-path-maximums {
+				    description
+					"Multi-path maximums.";
+
+				    uses bgp-multiple-path-maximums;
+				}
+
+				container neighbors {
+				    description
+					"BGP neighbors.";
+
+				    uses bgp-neighbors;
+				}
+
+				container network-announcements {
+				    description
+					"Network announcements.";
+
+				    uses bgp-ipv4-network-announcements;
+				}
+
+				container redistributions {
+				    description
+					"Route redistributions.";
+
+				    uses bgp-redistributions;
+				}
+
+				leaf table-map {
+				    type string;
+				    description
+					"A route-map to use as a BGP
+					 to RIB router download filter.";
+				}
+			    }
+
+			    container vpn {
+				description
+				    "Address family IPv4-vpn
+				     configuration.";
+			    }
+			}
+
+			container ipv6 {
+			    description
+				"Address family IPv6 configuration.";
+
+			    container flowspec {
+				description
+				    "Address family IPv6-flowspec
+				     configuration.";
+			    }
+
+			    container labeled-unicast {
+				description
+				    "Address family IPv6-labeled-unicast
+				     configuration.";
+			    }
+
+			    container multicast {
+				description
+				    "Address family IPv6-multicast
+				     configuration.";
+
+				container distance-admin {
+				    description
+					"Adminstrative distances.";
+
+				    uses bgp-ipv4-distance-admin;
+				}
+
+				container distance-bgp {
+				    description
+					"BGP distances.";
+
+				    uses bgp-distance-bgp;
+				}
+
+				container neighbors {
+				    description
+					"BGP neighbors.";
+
+				    uses bgp-neighbors;
+				}
+
+				container network-announcements {
+				    description
+					"Network announcements.";
+
+				    uses bgp-ipv6-network-announcements;
+				}
+			    }
+
+			    container unicast {
+				description
+				    "Address family IPv6-unicast
+				     configuration.";
+
+				container aggregations {
+				    description
+					"Address aggregation.";
+
+				    uses bgp-ipv6-aggregations;
+				}
+
+				container distance-admin {
+				    description
+					"Adminstrative distances.";
+
+				    uses bgp-ipv4-distance-admin;
+				}
+
+				container distance-bgp {
+				    description
+					"BGP distances.";
+
+				    uses bgp-distance-bgp;
+				}
+
+				container mutliple-path-maximums {
+				    description
+					"Multi-path maximums.";
+
+				    uses bgp-multiple-path-maximums;
+				}
+
+				container neighbors {
+				    description
+					"BGP neighbors.";
+
+				    uses bgp-neighbors;
+				}
+
+				container network-announcements {
+				    description
+					"Network announcements.";
+
+				    uses bgp-ipv6-network-announcements;
+				}
+
+				container redistributions {
+				    description
+					"Route redistributions.";
+
+				    uses bgp-redistributions;
+				}
+
+				leaf table-map {
+				    type string;
+				    description
+					"A route-map to use as a BGP
+					 to RIB router download filter.";
+				}
+			    }
+
+			    container vpn {
+				description
+				    "Address family IPv6-vpn
+				     configuration.";
+			    }
+			}
+		    }
+
+		    container neighbors {
+			description
+			    "Table of BGP Neighbors.";
+
+			list neighbor {
+			    key "peer";
+			    description
+				"List of neighbors indexed by peer.";
+
+			    leaf peer {
+				type string;
+				mandatory true;
+				description
+				    "The IPv4 or IPv6 address of the
+				     neighboring BGP peer, or the name of
+				     a peer group.";
+			    }
+
+			    leaf advertisement-interval {
+				type uint16;
+				description
+				    "The minimum time in seconds
+				     between sending BGP routing
+				     updates to this peer.";
+			    }
+
+			    container bidirectional-forwarding-detection {
+				presence
+				    "Present if BFD is enabled.";
+				description
+				    "Attributes describing Bidirectional
+				     Forwarding Detection (BFD).";
+
+				leaf detect-multiplier {
+				    type uint16;
+				    description
+					"BFD Multiplier, range [2-255].";
+				}
+
+				leaf minimum-receive-interval {
+				    type uint16;
+				    description
+					"Required minimum receive
+					 interval, range [50-60000].";
+				}
+
+				leaf minimum-transmit-interval {
+				    type uint16;
+				    description
+					"Desired minimum transmit
+					 interval, range [50-60000].";
+				}
+			    }
+
+			    container capability-advertise {
+				description
+				    "This is the set of capabilities that
+				     are advertised to this neighbor.";
+
+				leaf dynamic {
+				    type boolean;
+				    description
+					"If true, advertise dynamic capability
+					 to this neighbor.";
+				}
+
+				leaf extended-nexthop {
+				    type boolean;
+				    description
+					"If true, advertise extended
+					 next-hop capability to this
+					 neighbor.";
+				}
+			    }
+
+			    leaf capability-negotiate {
+				type boolean;
+				default true;
+				description
+				    "Should neighbor capabilities be
+				    negotiated?.";
+			    }
+
+			    leaf description {
+				type string;
+				description
+				    "A user description of the neighbor.";
+			    }
+
+			    leaf disable-connected-check {
+				type boolean;
+				description
+				    "If true, disable one-hop away EBGP
+				     peer using loopback address.";
+			    }
+
+			    container ebgp-multihop {
+				presence
+				    "Allow eBGP neighbors not on directly
+				     connected netowrks.";
+				description
+				    "Control multi-hop neighbors.";
+
+				leaf max-hop-count {
+				    type uint8;
+				    description
+					"Allow neighbors to be
+					 multi-hop distant.  Mutually
+					 exclusive with 'ttl
+					 security'.";
+				}
+			    }
+
+			    leaf enforce-multihop {
+				type boolean;
+				description
+				    "Enforce EBGP neighbors perform multihop.";
+			    }
+
+			    leaf local-as-number {
+				type uint32 {
+				    range "1..4294967295";
+				}
+				description
+				    "If present, this value is an alternate
+				     AS-number for this BGP instance.
+				     Valid for only eBGP peers.";
+			    }
+
+			    leaf local-as-no-prepend {
+				type boolean;
+				description
+				    "If true, don't prepend the local-as
+				     to the received AS_PATH.
+				     Valid for only eBGP peers.";
+			    }
+
+			    leaf local-as-replace-as {
+				type boolean;
+				description
+				    "If true, then only the supplied local-as
+				     is prepended to the AS_PATH when
+				     transmitting local-route updates.
+				     Valid for only eBGP peers.";
+			    }
+
+			    leaf override-capability {
+				type boolean;
+				description
+				    "A neighbor attribute.";
+			    }
+
+			    leaf passive {
+				type boolean;
+				description
+				    "If true, don't send open messages to
+				     this neighbor.";
+			    }
+
+			    leaf password {
+				type string;
+				description
+				    "The neighbor password.";
+			    }
+
+			    leaf peer-group-name {
+				type string;
+				description
+				    "If present, this is the name of a peer
+				     group template from which attributes are
+				     obtained for this neighbor.";
+			    }
+
+			    leaf port {
+				type uint16;
+				description
+				    "IP Port.";
+			    }
+
+			    leaf remote-asn {
+				type uint32;
+				description
+				    "The AS-number of the neighbor.";
+			    }
+
+			    leaf enable {
+				type boolean;
+				description
+				    "If true, the neighbor interface
+				    is enabled.";
+			    }
+
+			    leaf solo {
+				type boolean;
+				description
+				    "If true, the neighbor is part of its
+				     own update group.";
+			    }
+
+			    leaf strict-capability-match {
+				type boolean;
+				description
+				    "Capabilites should be matched strictly.";
+			    }
+
+			    container timers {
+				description
+				    "Various FSM timers per neighbor.";
+
+				leaf connect {
+				    type uint16;
+				    description
+					"BGP Connection timer.";
+				}
+
+				leaf keep-alive {
+				    type uint16;
+				    description
+					"Keepalive interval in
+					 seconds. Default is 1/3 of the
+					 hold-time value.";
+				}
+
+				leaf hold-time {
+				    type uint16;
+				    description
+					"Hold-time in seconds. Default 90
+					 seconds, maybe.";
+				}
+			    }
+
+			    leaf ttl-security-hops {
+				type uint8 {
+				    range "1..254";
+				}
+				description
+				    "Limit neighbors to being exactly <n-hops>
+				     distant.	Mutually exclusive with the
+				     'ebgp-multihop' option.";
+			    }
+
+			    leaf update-source {
+				type string;
+				description
+				    "The source from which updates will come.
+				     It is either an if-name or ipv4-address.";
+			    }
+			}
+		    }
+		}
+	    }
+
+	    container as-path-table {
+		description
+		    "Table of AS Paths, indexed by name.  Each entry
+		     contains a single regular expression pattern.";
+
+		list as-path {
+		    key "name";
+		    description
+			"AS Path name.";
+
+		    leaf name {
+			type string;
+			mandatory true;
+			description
+			    "The AS Path name as supplied by the developer.
+			     It is a unique name used to identify this
+			     regular expression pattern.";
+		    }
+
+		    container patterns {
+			description
+			    "Each AS Path can have multiple, ordered
+			     policy and regular expression patterns pairs.";
+
+			list pattern {
+			    key sequence;
+			    description
+				"The set of ordered policiy and patterns pairs
+				 for an AS-path.";
+
+			    leaf sequence {
+				type uint32;
+				description
+				    "Pattern order is explicitly managed.";
+			    }
+
+			    leaf policy {
+				type frr:as-path-policy;
+				description
+				    "One of the policies 'deny', 'permit'.";
+			    }
+
+			    leaf regex {
+				type string;
+				description
+				    "The AS Path regular expression pattern.";
+			    }
+			}
+		    }
+		}
+	    }
+
+	    container community-lists {
+		description
+		    "Table of Community Lists, indexed by name.	 Each entry
+		     contains a set of rules ordered by sequence number.";
+
+		list community {
+		    key "name";
+		    description
+			"Community List entries indexed by name.";
+
+		    leaf name {
+			type string;
+			mandatory true;
+			description
+			    "The Community List name as supplied by
+			     the developer.  It is a unique name used
+			     to identify this set of Community List
+			     Rules.";
+		    }
+
+		    leaf description {
+			type string;
+			description
+			    "A user description of the community list.";
+		    }
+
+		    leaf value-type {
+			type community-list-value-type;
+			description
+			    "One of 'standard' or 'expanded'.
+			     If 'standard' the rules are normal numbers.
+			     If 'expanded', the rules are regular
+			     expressions.";
+		    }
+
+		    leaf value-size {
+			type community-list-value-size;
+			default "normal";
+			description
+			    "Optionally one of 'normal', 'extended' or 'large'.
+			     When 'normal', the default, rules allow
+			     the original, normal communities values.
+			     When 'extended', rules allow IPv4-based policies
+			     and matches 8 octets per community from RFC 5668.
+			     When 'large', rules allow 12-octet values
+			     from RFC 8092.";
+		    }
+
+		    container rules {
+			description
+			    "Community List Rule Table ordered by sequence
+			     number.";
+
+			list rule {
+			    key "sequence";
+			    description
+				"A set of Community List Rules.";
+
+			    leaf sequence {
+				type uint32;
+				description
+				    "Rules are executed in increasing sequence
+				     number.";
+			    }
+
+			    leaf action {
+				type community-list-action;
+				description
+				    "One of the actions 'deny', 'permit'.";
+			    }
+
+			    leaf community {
+				type string;
+				description
+				    "The Community value.  A standard community
+				     value can be one of <ASN>:<policy>,
+				     'internet', 'no-export', 'local-AS',
+				     'no-advertise', or.  With 'extended',
+				     <ip-address>:<policy> is also allowed.
+				      An expanded value is a regular
+				      expression.";
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+
+    augment "/ngrt:route-state/ngrt:dynamic" {
+
+	container bgp {
+
+	    container global-options {
+		description
+		    "These are options that apply to the BGP Server or
+		     to all BGP Router configurations.";
+
+		container debug {
+		    description
+			"BGP debug options.";
+
+		    leaf allow-martians {
+			type boolean;
+			description
+			    "If true, allow martian next hops.";
+		    }
+
+		    container as4 {
+			description
+			    "AS4 debug action.";
+
+			leaf all {
+			    type boolean;
+			    description
+				"If true, debug AS4 actions.";
+			}
+
+			leaf segment {
+			    type boolean;
+			    description
+				"If true, debug AS4 AS-path segment handling.";
+			}
+		    }
+
+		    container bestpath {
+			description
+			    "bestpath debug action.";
+
+			leaf ipv6-prefix {
+			    type inet:ipv6-prefix;
+			    description
+				"Debug bestpath of this IPv6 prefix.";
+			}
+		    }
+
+		    container keepalive {
+			description
+			    "Debug BGP neighbor keepalive.";
+
+			leaf all {
+			    type boolean;
+			    description
+				"Enable BGP neighbor keepalive debug.";
+			}
+
+			leaf peer {
+			    type string;
+			    description
+				"Debug specific BGP neighbor.";
+			}
+		    }
+
+		    container neighbor-events {
+			description
+			    "Debug BGP neighbor events.";
+
+			leaf all {
+			    type boolean;
+			    description
+				"Enable BGP neighbor events debug.";
+			}
+
+			leaf peer {
+			    type string;
+			    description
+				"Debug specific BGP neighbor.";
+			}
+		    }
+
+		    leaf nht {
+			type boolean;
+			description
+			    "If true, enable next hop tracking events.";
+		    }
+
+		    leaf update-groups {
+			type boolean;
+			description
+			    "If true, update-groups.";
+		    }
+
+		    container updates {
+			description
+			    "Debug BGP neighbor events.";
+
+			leaf all {
+			    type boolean;
+			    description
+				"Debug BGP updates.";
+			}
+
+			leaf in-peer {
+			    type string;
+			    description
+				"Debug specific BGP neighbor in-updates.";
+			}
+
+			leaf out-peer {
+			    type string;
+			    description
+				"Debug specific BGP neighbor out-updates.";
+			}
+
+			leaf prefix {
+			    type inet:ip-prefix;
+			    description
+				"Debug specific BGP IPV4 or IPv6 prefix.";
+			}
+		    }
+
+		    container zebra {
+			description
+			    "Debug BGP Zebra messages.";
+
+			leaf all {
+			    type boolean;
+			    description
+				"Debug BGP Zebra messages.";
+			}
+
+			leaf prefix {
+			    type inet:ip-prefix;
+			    description
+				"Debug specific BGP IPV4 or IPv6 prefix.";
+			}
+		    }
+		}
+
+		leaf enable {
+		    type boolean;
+		    default false;
+		    description
+			"If true, the BGP Daemon is enabled.";
+		}
+
+		leaf route-map-delay-timer {
+		    type uint16 {
+			range "0..600";
+		    }
+		    description
+			"The delay time in seconds before processing
+		    route-map changes.";
+		}
+	    }
+
+	    container routers {
+		description
+		    "Table of BGP Router instances index by ASN.";
+
+		list router {
+		    key "asn";
+		    description
+			"Each router is identified using its AS-Number.";
+
+		    leaf asn {
+			type uint32;
+			mandatory true;
+			description
+			    "The BGP Router instance is identified by this
+			     AS-Number.";
+		    }
+
+		    leaf always-compare-med {
+			type boolean;
+			description
+			    "Always compare the Multi-exit-discriminator.";
+		    }
+
+		    leaf bestpath-as-path-multipath-relax {
+			type boolean;
+			description
+			    "Best path decisions should consider paths of
+			     equal AS-path length candidates for multipath
+			     computation.  Allow load sharing on routes with
+			     different AS-paths of the same length.";
+		    }
+
+		    leaf bestpath-as-path-multipath-relax-as-set {
+			type boolean;
+			description
+			    "If true, generate an AS-set.";
+		    }
+
+		    leaf bestpath-as-path-confed {
+			type boolean;
+			description
+			    "Best path decisions should be based on the length
+			     of confederation path sets.";
+		    }
+
+		    leaf bestpath-as-path-ignore {
+			type boolean;
+			description
+			    "Best path decisions should ignore AS-path
+			    lengths.";
+		    }
+
+		    leaf bestpath-compare-routerid {
+			type boolean;
+			description
+			    "Break otherwise equal route ties using
+			    router id.";
+		    }
+
+		    container bestpath-med {
+			leaf confed {
+			    type boolean;
+			    description
+				"Compare MED attribute among confederation
+				 paths.";
+			}
+
+			leaf missing-as-worst {
+			    type boolean;
+			    description
+				"Treat a missing MED attribute as the
+				 least preferred value.";
+			}
+		    }
+
+		    leaf client-to-client-reflection {
+			type boolean;
+			description
+			    "Allow client-to-client route reflection.";
+		    }
+
+		    leaf cluster-id {
+			type union {
+			    type inet:ipv4-address-no-zone;
+			    type uint32;
+			}
+			description
+			    "The route-reflector cluster id expressed as
+			     either an IPv4 address or an unsigned 32-bit
+			     integer.";
+		    }
+
+		    leaf coalesce-time {
+			type uint32;
+			description
+			    "Subgroup coalesce timer in ms.";
+		    }
+
+		    container confederation {
+			description
+			    "Confederation Parameters.";
+
+			leaf identifier {
+			    type uint32;
+			    description
+				"The confederation identifier; an AS number.";
+			}
+
+			container peers {
+			    leaf-list peer {
+				type uint32;
+				description
+				    "A list of AS numbers for each peer.";
+			    }
+			}
+		    }
+
+		    container dampening {
+			description
+			    "Route flap dampening parameters.";
+
+			leaf enable {
+			    type boolean;
+			    description
+				"Enable route-flap dampening.";
+			}
+
+			leaf penalty-half-life {
+			    type uint8 {
+				range "1..45";
+			    }
+			    description
+				"The penalty half-life value [1-45].";
+			}
+
+			leaf route-reuse {
+			    type uint16 {
+				range "1..20000";
+			    }
+			    description
+				"The route reuse start value.";
+			}
+
+			leaf route-suppression {
+			    type uint16 {
+				range "1..20000";
+			    }
+			    description
+				"The route suppression start value.";
+			}
+
+			leaf route-suppression-maximum {
+			    type uint8;
+			    description
+				"The route suppression maximum value.";
+			}
+		    }
+
+		    leaf deterministic-med {
+			type boolean;
+			description
+			    "Always produce deterministic route-selection by
+			     picking the best MED path advertised from the
+			     neighboring AS.";
+		    }
+
+		    leaf disable-ebgp-connected-route-check {
+			type boolean;
+			description
+			    "Disable checking if nexthop is connected an
+			     eBGP session";
+		    }
+
+		    leaf enforce-first-as {
+			type boolean;
+			description
+			    "Enforce the first AS for eBGP routes.";
+		    }
+
+		    leaf listen-limit {
+			type uint16 {
+			    range "1..5000";
+			}
+			description
+			    "The maximum number of dynamic neighbors that
+			     can be created.";
+		    }
+
+		    leaf listen-range {
+			type string;
+			description
+			    "An IPv4 or IPv6 prefix range on which listening
+			 for dynamic neighbors will take place.";
+		    }
+
+		    leaf listen-peer-group-name {
+			type string;
+			description
+			    "The peer group name for dynamically created
+			     neighbors.";
+		    }
+
+		    container max-med {
+			container administrative {
+			    presence
+				"If present without a specific value,
+				 administratively advertise routes with
+				 maximum MED for an indefinite period.";
+
+			    leaf med-value {
+				type uint32;
+				description
+				    "The maximum MED value to use.";
+			    }
+			}
+
+			container on-startup {
+			    leaf time-period {
+				type uint32;
+				description
+				    "The time period, in seconds, for
+				    max-med.";
+			    }
+
+			    leaf med-value {
+				type uint32;
+				description
+				    "The max MED value is effective on
+				     startup, and has this time period
+				     in seconds.";
+			    }
+			}
+		    }
+
+		    leaf network-import-check {
+			type boolean;
+			description
+			    "If true, check if BGP network route exists
+			     in IGP.";
+		    }
+
+		    leaf route-reflector-allow-outbound-policy {
+			type boolean;
+			description
+			    "If true, also allow attribure modifications to
+			     the route-map-out policy.";
+		    }
+
+		    leaf router-id {
+			type yang:dotted-quad;
+			description
+			    "Dotted-quad Id of the router.  Can be any 32-bit
+			     unsigned value in dotted-quad format but
+			     is usually the IP address of the router.
+			     RFC4271 Section 4.2";
+		    }
+
+		    container timers {
+			description
+			    "Various FSM timers.";
+
+			leaf keep-alive {
+			    type uint16;
+			    description
+				"Keepalive interval in seconds. Default is 1/3
+				 of the hold-time value.";
+			}
+
+			leaf hold-time {
+			    type uint16;
+			    description
+				"Hold-time in seconds. Default 90
+				seconds, maybe.";
+			}
+		    }
+
+		    leaf update-delay-updates {
+			type uint16 {
+			    range "0..3600";
+			}
+			description
+			    "Force initial delay, [0..3600] seconds, for
+			     best-path and updates.  Default 120 seconds.";
+		    }
+
+		    leaf update-delay-peer-wait {
+			type uint16 {
+			    range "1..3600";
+			}
+			description
+			    "Time to wait for a peer to establish connection.
+			     Default 120 seconds.";
+		    }
+
+		    leaf write-quanta {
+			type uint16;
+			description
+			    "The number of packets to write to peer sockets
+			     per update.  Default 10 packets.";
+		    }
+
+		    container address-families {
+			description
+			    "Address-family specific information.";
+
+			container ipv4 {
+			    description
+				"Address family IPv4 configuration.";
+
+			    container flowspec {
+				description
+				    "Address family IPv4-flowspec
+				     configuration.";
+			    }
+
+			    container labeled-unicast {
+				description
+				    "Address family IPv4-labeled-unicast
+				     configuration.";
+			    }
+
+			    container multicast {
+				description
+				    "Address family IPv4-multicast
+				     configuration.";
+
+				container aggregations {
+				    description
+					"Address aggregation.";
+
+				    uses bgp-ipv4-aggregations;
+				}
+
+				container distance-admin {
+				    description
+					"Adminstrative distances.";
+
+				    uses bgp-ipv4-distance-admin;
+				}
+
+				container distance-bgp {
+				    description
+					"BGP distances.";
+
+				    uses bgp-distance-bgp;
+				}
+
+				container neighbors {
+				    description
+					"BGP neighbors.";
+
+				    uses bgp-neighbors;
+				}
+
+				container network-announcements {
+				    description
+					"Network announcements.";
+
+				    uses bgp-ipv4-network-announcements;
+				}
+
+				leaf table-map {
+				    type string;
+				    description
+					"A route-map to use as a BGP
+					 to RIB router download filter.";
+				}
+			    }
+
+			    container unicast {
+				description
+				    "Address family IPv4-unicast
+				     configuration.";
+
+				container aggregations {
+				    description
+					"Address aggregation.";
+
+				    uses bgp-ipv4-aggregations;
+				}
+
+				container distance-admin {
+				    description
+					"Adminstrative distances.";
+
+				    uses bgp-ipv4-distance-admin;
+				}
+
+				container distance-bgp {
+				    description
+					"BGP distances.";
+
+				    uses bgp-distance-bgp;
+				}
+
+				container mutliple-path-maximums {
+				    description
+					"Multi-path maximums.";
+
+				    uses bgp-multiple-path-maximums;
+				}
+
+				container neighbors {
+				    description
+					"BGP neighbors.";
+
+				    uses bgp-neighbors;
+				}
+
+				container network-announcements {
+				    description
+					"Network announcements.";
+
+				    uses bgp-ipv4-network-announcements;
+				}
+
+				container redistributions {
+				    description
+					"Route redistributions.";
+
+				    uses bgp-redistributions;
+				}
+
+				leaf table-map {
+				    type string;
+				    description
+					"A route-map to use as a BGP
+					 to RIB router download filter.";
+				}
+			    }
+
+			    container vpn {
+				description
+				    "Address family IPv4-vpn
+				     configuration.";
+			    }
+			}
+
+			container ipv6 {
+			    description
+				"Address family IPv6 configuration.";
+
+			    container flowspec {
+				description
+				    "Address family IPv6-flowspec
+				     configuration.";
+			    }
+
+			    container labeled-unicast {
+				description
+				    "Address family IPv6-labeled-unicast
+				     configuration.";
+			    }
+
+			    container multicast {
+				description
+				    "Address family IPv6-multicast
+				     configuration.";
+
+				container distance-admin {
+				    description
+					"Adminstrative distances.";
+
+				    uses bgp-ipv4-distance-admin;
+				}
+
+				container distance-bgp {
+				    description
+					"BGP distances.";
+
+				    uses bgp-distance-bgp;
+				}
+
+				container neighbors {
+				    description
+					"BGP neighbors.";
+
+				    uses bgp-neighbors;
+				}
+
+				container network-announcements {
+				    description
+					"Network announcements.";
+
+				    uses bgp-ipv6-network-announcements;
+				}
+			    }
+
+			    container unicast {
+				description
+				    "Address family IPv6-unicast
+				     configuration.";
+
+				container aggregations {
+				    description
+					"Address aggregation.";
+
+				    uses bgp-ipv6-aggregations;
+				}
+
+				container distance-admin {
+				    description
+					"Adminstrative distances.";
+
+				    uses bgp-ipv4-distance-admin;
+				}
+
+				container distance-bgp {
+				    description
+					"BGP distances.";
+
+				    uses bgp-distance-bgp;
+				}
+
+				container mutliple-path-maximums {
+				    description
+					"Multi-path maximums.";
+
+				    uses bgp-multiple-path-maximums;
+				}
+
+				container neighbors {
+				    description
+					"BGP neighbors.";
+
+				    uses bgp-neighbors;
+				}
+
+				container network-announcements {
+				    description
+					"Network announcements.";
+
+				    uses bgp-ipv6-network-announcements;
+				}
+
+				container redistributions {
+				    description
+					"Route redistributions.";
+
+				    uses bgp-redistributions;
+				}
+
+				leaf table-map {
+				    type string;
+				    description
+					"A route-map to use as a BGP
+					 to RIB router download filter.";
+				}
+			    }
+
+			    container vpn {
+				description
+				    "Address family IPv6-vpn
+				     configuration.";
+			    }
+			}
+		    }
+
+		    container neighbors {
+			description
+			    "Table of BGP Neighbors.";
+
+			list neighbor {
+			    key "peer";
+			    description
+				"List of neighbors indexed by peer.";
+
+			    leaf peer {
+				type string;
+				mandatory true;
+				description
+				    "The IPv4 or IPv6 address of the
+				     neighboring BGP peer, or the name of
+				     a peer group.";
+			    }
+
+			    leaf advertisement-interval {
+				type uint16;
+				description
+				    "The minimum time in seconds
+				     between sending BGP routing
+				     updates to this peer.";
+			    }
+
+			    container bidirectional-forwarding-detection {
+				presence
+				    "Present if BFD is enabled.";
+				description
+				    "Attributes describing Bidirectional
+				     Forwarding Detection (BFD).";
+
+				leaf detect-multiplier {
+				    type uint16;
+				    description
+					"BFD Multiplier, range [2-255].";
+				}
+
+				leaf minimum-receive-interval {
+				    type uint16;
+				    description
+					"Required minimum receive
+					 interval, range [50-60000].";
+				}
+
+				leaf minimum-transmit-interval {
+				    type uint16;
+				    description
+					"Desired minimum transmit
+					 interval, range [50-60000].";
+				}
+			    }
+
+			    container capability-advertise {
+				description
+				    "This is the set of capabilities that
+				     are advertised to this neighbor.";
+
+				leaf dynamic {
+				    type boolean;
+				    description
+					"If true, advertise dynamic capability
+					 to this neighbor.";
+				}
+
+				leaf extended-nexthop {
+				    type boolean;
+				    description
+					"If true, advertise extended
+					 next-hop capability to this
+					 neighbor.";
+				}
+			    }
+
+			    leaf capability-negotiate {
+				type boolean;
+				default true;
+				description
+				    "Should neighbor capabilities be
+				    negotiated?.";
+			    }
+
+			    leaf description {
+				type string;
+				description
+				    "A user description of the neighbor.";
+			    }
+
+			    leaf disable-connected-check {
+				type boolean;
+				description
+				    "If true, disable one-hop away EBGP
+				     peer using loopback address.";
+			    }
+
+			    container ebgp-multihop {
+				presence
+				    "Allow eBGP neighbors not on directly
+				     connected netowrks.";
+				description
+				    "Control multi-hop neighbors.";
+
+				leaf max-hop-count {
+				    type uint8;
+				    description
+					"Allow neighbors to be
+					 multi-hop distant.  Mutually
+					 exclusive with 'ttl
+					 security'.";
+				}
+			    }
+
+			    leaf enforce-multihop {
+				type boolean;
+				description
+				    "Enforce EBGP neighbors perform multihop.";
+			    }
+
+			    leaf local-as-number {
+				type uint32 {
+				    range "1..4294967295";
+				}
+				description
+				    "If present, this value is an alternate
+				     AS-number for this BGP instance.
+				     Valid for only eBGP peers.";
+			    }
+
+			    leaf local-as-no-prepend {
+				type boolean;
+				description
+				    "If true, don't prepend the local-as
+				     to the received AS_PATH.
+				     Valid for only eBGP peers.";
+			    }
+
+			    leaf local-as-replace-as {
+				type boolean;
+				description
+				    "If true, then only the supplied local-as
+				     is prepended to the AS_PATH when
+				     transmitting local-route updates.
+				     Valid for only eBGP peers.";
+			    }
+
+			    leaf override-capability {
+				type boolean;
+				description
+				    "A neighbor attribute.";
+			    }
+
+			    leaf passive {
+				type boolean;
+				description
+				    "If true, don't send open messages to
+				     this neighbor.";
+			    }
+
+			    leaf password {
+				type string;
+				description
+				    "The neighbor password.";
+			    }
+
+			    leaf peer-group-name {
+				type string;
+				description
+				    "If present, this is the name of a peer
+				     group template from which attributes are
+				     obtained for this neighbor.";
+			    }
+
+			    leaf port {
+				type uint16;
+				description
+				    "IP Port.";
+			    }
+
+			    leaf remote-asn {
+				type uint32;
+				description
+				    "The AS-number of the neighbor.";
+			    }
+
+			    leaf enable {
+				type boolean;
+				description
+				    "If true, the neighbor interface
+				    is enabled.";
+			    }
+
+			    leaf solo {
+				type boolean;
+				description
+				    "If true, the neighbor is part of its
+				     own update group.";
+			    }
+
+			    leaf strict-capability-match {
+				type boolean;
+				description
+				    "Capabilites should be matched strictly.";
+			    }
+
+			    container timers {
+				description
+				    "Various FSM timers per neighbor.";
+
+				leaf connect {
+				    type uint16;
+				    description
+					"BGP Connection timer.";
+				}
+
+				leaf keep-alive {
+				    type uint16;
+				    description
+					"Keepalive interval in
+					 seconds. Default is 1/3 of the
+					 hold-time value.";
+				}
+
+				leaf hold-time {
+				    type uint16;
+				    description
+					"Hold-time in seconds. Default 90
+					 seconds, maybe.";
+				}
+			    }
+
+			    leaf ttl-security-hops {
+				type uint8 {
+				    range "1..254";
+				}
+				description
+				    "Limit neighbors to being exactly <n-hops>
+				     distant.	Mutually exclusive with the
+				     'ebgp-multihop' option.";
+			    }
+
+			    leaf update-source {
+				type string;
+				description
+				    "The source from which updates will come.
+				     It is either an if-name or ipv4-address.";
+			    }
+			}
+		    }
+		}
+	    }
+
+	    container as-path-table {
+		description
+		    "Table of AS Paths, indexed by name.  Each entry
+		     contains a single regular expression pattern.";
+
+		list as-path {
+		    key "name";
+		    description
+			"AS Path name.";
+
+		    leaf name {
+			type string;
+			mandatory true;
+			description
+			    "The AS Path name as supplied by the developer.
+			     It is a unique name used to identify this
+			     regular expression pattern.";
+		    }
+
+		    container patterns {
+			description
+			    "Each AS Path can have multiple, ordered
+			     policy and regular expression patterns pairs.";
+
+			list pattern {
+			    key sequence;
+			    description
+				"The set of ordered policiy and patterns pairs
+				 for an AS-path.";
+
+			    leaf sequence {
+				type uint32;
+				description
+				    "Pattern order is explicitly managed.";
+			    }
+
+			    leaf policy {
+				type frr:as-path-policy;
+				description
+				    "One of the policies 'deny', 'permit'.";
+			    }
+
+			    leaf regex {
+				type string;
+				description
+				    "The AS Path regular expression pattern.";
+			    }
+			}
+		    }
+		}
+	    }
+
+	    container community-lists {
+		description
+		    "Table of Community Lists, indexed by name.	 Each entry
+		     contains a set of rules ordered by sequence number.";
+
+		list community {
+		    key "name";
+		    description
+			"Community List entries indexed by name.";
+
+		    leaf name {
+			type string;
+			mandatory true;
+			description
+			    "The Community List name as supplied by
+			     the developer.  It is a unique name used
+			     to identify this set of Community List
+			     Rules.";
+		    }
+
+		    leaf description {
+			type string;
+			description
+			    "A user description of the community list.";
+		    }
+
+		    leaf value-type {
+			type community-list-value-type;
+			description
+			    "One of 'standard' or 'expanded'.
+			     If 'standard' the rules are normal numbers.
+			     If 'expanded', the rules are regular
+			     expressions.";
+		    }
+
+		    leaf value-size {
+			type community-list-value-size;
+			default "normal";
+			description
+			    "Optionally one of 'normal', 'extended' or 'large'.
+			     When 'normal', the default, rules allow
+			     the original, normal communities values.
+			     When 'extended', rules allow IPv4-based policies
+			     and matches 8 octets per community from RFC 5668.
+			     When 'large', rules allow 12-octet values
+			     from RFC 8092.";
+		    }
+
+		    container rules {
+			description
+			    "Community List Rule Table ordered by sequence
+			     number.";
+
+			list rule {
+			    key "sequence";
+			    description
+				"A set of Community List Rules.";
+
+			    leaf sequence {
+				type uint32;
+				description
+				    "Rules are executed in increasing sequence
+				     number.";
+			    }
+
+			    leaf action {
+				type community-list-action;
+				description
+				    "One of the actions 'deny', 'permit'.";
+			    }
+
+			    leaf community {
+				type string;
+				description
+				    "The Community value.  A standard community
+				     value can be one of <ASN>:<policy>,
+				     'internet', 'no-export', 'local-AS',
+				     'no-advertise', or.  With 'extended',
+				     <ip-address>:<policy> is also allowed.
+				      An expanded value is a regular
+				      expression.";
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+}
+

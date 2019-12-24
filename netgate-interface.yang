@@ -25,9 +25,10 @@ module netgate-interface {
 	 Copyright 2017-2019 Rubicon Communications, LLC.
 	";
 
-    revision 2019-02-15 {
+
+    revision 2019-05-30 {
 	description
-	    "TNSR Release 19.02.";
+	    "TNSR Release 19.05.";
     }
 
     revision 2017-01-06 {
@@ -441,8 +442,8 @@ module netgate-interface {
 			leaf sequence {
 			    type uint32;
 			    description
-				"Rules are applied in ascending
-				sequence number.";
+				"Set the ordering of the ACLs. Rules are
+				 applied in ascending sequence number.";
 			}
 		    }
 		}
@@ -469,8 +470,8 @@ module netgate-interface {
 			leaf sequence {
 			    type uint32;
 			    description
-				"Rules are applied in ascending
-				sequence number.";
+				"Set the ordering of the ACLs. Rules are
+				 applied in ascending sequence number.";
 			}
 		    }
 		}
@@ -564,6 +565,36 @@ module netgate-interface {
 			 translations.  If false, this interface is
 			 performing encapsuations.  Valid only when
 			 also enabled.";
+		}
+	    }
+
+	    container vlan-tag-rewrite {
+		leaf operation {
+		    type intf-tag-rewrite-op;
+		    description
+			"A tag rewrite operation is one of the strings:
+			 'disable', 'pop-1', 'pop-2', 'push-1', 'push-2',
+			 'translate-1-1', 'translate-1-2',
+			 'translate-2-1', 'translate-2-2'.";
+		}
+
+		leaf push-dot1q {
+		    type boolean;
+		    description
+			"If true the first pushed tag is of type dot1q,
+			 otherwise it will be of type dot1ad.";
+		}
+
+		leaf tag1 {
+		    type uint32;
+		    description
+			"The first pushed tag value.";
+		}
+
+		leaf tag2 {
+		    type uint32;
+		    description
+			"The second pushed tag value.";
 		}
 	    }
 	}
@@ -864,36 +895,6 @@ module netgate-interface {
 			     between 1 and 4095 inclusive, or the word 'any'.";
 		    }
 		}
-
-		container vlan-tag-rewrite {
-		    leaf operation {
-			type intf-tag-rewrite-op;
-			description
-			    "A tag rewrite operation is one of the strings:
-			     'disable', 'pop-1', 'pop-2', 'push-1', 'push-2',
-			     'translate-1-1', 'translate-1-2',
-			     'translate-2-1', 'translate-2-2'.";
-		    }
-
-		    leaf push-dot1q {
-			type boolean;
-			description
-			    "If true the first pushed tag is of type dot1q,
-			     otherwise it will be of type dot1ad.";
-		    }
-
-		    leaf tag1 {
-			type uint32;
-			description
-			    "The first pushed tag value.";
-		    }
-
-		    leaf tag2 {
-			type uint32;
-			description
-			    "The second pushed tag value.";
-		    }
-		}
 	    }
 	}
 
@@ -1065,9 +1066,9 @@ module netgate-interface {
 	    }
 
 	    leaf link-speed {
-		type string;
+		type uint32;
 		description
-		    "The link speed.";
+		    "The link speed in kbps.";
 	    }
 
 	    leaf link-duplex {
@@ -1424,6 +1425,36 @@ module netgate-interface {
 			description
 			    "The name of the slave interface.";
 		    }
+		}
+	    }
+
+	    container vlan-tag-rewrite {
+		leaf operation {
+		    type intf-tag-rewrite-op;
+		    description
+			"A tag rewrite operation is one of the strings:
+			 'disable', 'pop-1', 'pop-2', 'push-1', 'push-2',
+			 'translate-1-1', 'translate-1-2',
+			 'translate-2-1', 'translate-2-2'.";
+		}
+
+		leaf push-dot1q {
+		    type boolean;
+		    description
+			"If true the first pushed tag is of type dot1q,
+			 otherwise it will be of type dot1ad.";
+		}
+
+		leaf tag1 {
+		    type uint32;
+		    description
+			"The first pushed tag value.";
+		}
+
+		leaf tag2 {
+		    type uint32;
+		    description
+			"The second pushed tag value.";
 		}
 	    }
 	}

@@ -25,6 +25,11 @@ module netgate-dataplane {
          Copyright 2018-2019 Rubicon Communications, LLC.
         ";
 
+    revision 2019-05-30 {
+	description
+	    "TNSR Release 19.05.";
+    }
+
     revision 2019-02-15 {
 	description
 	    "TNSR Release 19.02.";
@@ -43,10 +48,21 @@ module netgate-dataplane {
                 description
                     "The operation to perform";
             }
-            leaf option {
+        }
+        output {
+            leaf stdout {
                 type string;
+            }
+        }
+    }
+
+    rpc dataplane-coredump {
+        input {
+            leaf operation {
+                mandatory true;
+                type ngcom:service-op-enable-disable;
                 description
-                    "Option on operation";
+		    "One of the strings 'enable' or 'disable'.";
             }
         }
         output {
@@ -116,6 +132,35 @@ module netgate-dataplane {
 	}
     }
 
+    typedef dataplane-scheduler-policy {
+	type enumeration {
+	    enum rr {
+		description
+		    "Round-robin scheduling.";
+	    }
+
+	    enum fifo {
+		description
+		    "First in-first out scheduling.";
+	    }
+
+	    enum batch {
+		description
+		    "Scheduling batch processes.";
+	    }
+
+	    enum idle {
+		description
+		    "Scheduling very low priority jobs.";
+	    }
+
+	    enum other {
+		description
+		    "Default Linux time-sharing scheduling.";
+	    }
+	}
+    }
+
     container dataplane-config {
         description
             "dataplane startup configurations";
@@ -129,6 +174,59 @@ module netgate-dataplane {
                 description
                     "Number of worker threads";
             }
+
+	    leaf main-core {
+		type uint32;
+		description
+		    "Assign main thread to a specific core.";
+	    }
+
+	    leaf skip-cores {
+		type uint32 {
+		    range "1..max";
+		}
+		description
+		    "Sets number of CPU core(s) to be skipped.";
+	    }
+
+	    choice core-workers {
+		case coremask {
+		    leaf coremask-workers {
+			type uint64 {
+			    range "1..max";
+			}
+			description
+			    "Place worker threads according to the
+			     bitmap hex-mask.";
+		    }
+		}
+
+		case corelist {
+		    container corelist-workers {
+			leaf-list corelist-worker {
+			    type uint32;
+			    description
+				"Place worker threads according to the
+				 list of cores.";
+			}
+		    }
+		}
+	    }
+
+	    leaf scheduler-policy {
+		type dataplane-scheduler-policy;
+		description
+		    "Scheduling algorithm.";
+	    }
+
+	    leaf scheduler-priority {
+		type uint32 {
+		    range "1..99";
+		}
+		description
+		    "Scheduling priority. Only valid if the 'scheduler-policy'
+		     is set to 'fifo' or 'rr'.";
+	    }
         }
 
         container dpdk {
@@ -137,6 +235,7 @@ module netgate-dataplane {
 
             list dev {
                 key "id";
+                unique "name";
                 description
                     "Configs for a NIC or crypto device";
 
@@ -158,6 +257,12 @@ module netgate-dataplane {
                         "Device enabled, no attributes necessarily set";
                 }
 
+                leaf name {
+                    type ngcom:if-identifier-31;
+                    description
+                        "Given name for a dpdk device.";
+                }
+
                 leaf num-rx-queues {
                     type uint16;
                     description
@@ -176,6 +281,12 @@ module netgate-dataplane {
                         "VLAN strip offload on/off";
                 }
             }
+
+	    leaf no-multi-seg {
+		type boolean;
+		description
+		    "Disable mutli-segment buffers.";
+	    }
 
 	    leaf no-tx-checksum-offload {
 		type boolean;
@@ -274,6 +385,105 @@ module netgate-dataplane {
 			type boolean;
 			description
 			    "out2in dpo";
+		    }
+		}
+	    }
+	}
+
+	container statseg {
+	    description
+	        "Statistics segment settings";
+
+	    leaf socket-name {
+		type string {
+		    pattern '/[0-9a-zA-Z/\._-]+';
+		}
+		description
+		    "Absolute filesystem path to stats segment unix socket";
+	    }
+
+	    leaf heap-size {
+		type string {
+		    pattern '[0-9]+([kKmMgG])?';
+		}
+		default 96M;
+		description
+                    "Size of heap for stats segment. Should be a number. "+
+                    "Optionally followed by a specified of k, m, or g, "+
+                    "to indicate kilo, mega, or giga bytes. ";
+	    }
+
+	    container per-node-counters {
+		leaf enabled {
+		    type boolean;
+		    default false;
+		    description
+			"Whether to enable per-node counters in the stats
+			 segment";
+		}
+	    }
+	}
+    }
+
+    container dataplane-state {
+	description
+	    "dataplane state";
+
+	config "false";
+
+	container cpu {
+	    description
+		"cpu stanza";
+
+	    container threads {
+		description
+		    "Threads.";
+
+		list thread {
+		    key "id";
+		    description
+			"Thread data.";
+
+		    leaf id {
+			type uint32;
+			description
+			    "Thread index.";
+		    }
+
+		    leaf name {
+			type ngcom:identifier-64;
+			description
+			    "Thread name (i.e. vpp_main or vpp_wk_0).";
+		    }
+
+		    leaf type {
+			type ngcom:identifier-64;
+			description
+			    "Thread type (i.e. workers or stats).";
+		    }
+
+		    leaf pid {
+			type uint32;
+			description
+			    "Thread process id.";
+		    }
+
+		    leaf cpu-id {
+			type uint32;
+			description
+			    "Thread pinned to cpu (logical cores).";
+		    }
+
+		    leaf core {
+			type uint32;
+			description
+			    "Thread pinned to actual physical core.";
+		    }
+
+		    leaf cpu-socket {
+			type uint32;
+			description
+			    "Thread is running on which cpu socket.";
 		    }
 		}
 	    }

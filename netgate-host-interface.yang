@@ -28,7 +28,7 @@ module netgate-host-interface {
 
     revision 2018-08-23 {
 	description
-	    "A day that will live in Dental Infamy.";
+	    "Initial revision.";
     }
 
     container host-if-config {

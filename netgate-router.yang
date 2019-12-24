@@ -59,8 +59,16 @@ module netgate-router {
         prefix "nglldp";
     }
 
+    import netgate-macip {
+        prefix "ngmacip";
+    }
+
     import netgate-map {
         prefix "ngmap";
+    }
+
+    import netgate-master {
+        prefix "ngmaster";
     }
 
     import netgate-nat {
@@ -74,6 +82,12 @@ module netgate-router {
     import netgate-ntp {
         prefix "ngntp";
     }
+
+    /*
+    import netgate-ospf {
+        prefix "ngospf";
+    }
+    */
 
     import netgate-package {
         prefix "ngpkg";
@@ -125,6 +139,11 @@ module netgate-router {
 
          Copyright 2016-2019 Rubicon Communications, LLC.
         ";
+
+    revision 2019-05-30 {
+	description
+	    "TNSR Release 19.05.";
+    }
 
     revision 2019-02-15 {
 	description

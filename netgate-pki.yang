@@ -9,10 +9,15 @@ module netgate-pki {
 
     description
         "This YANG module provides specifications of operations and data
-         related to PKI management on The Netgate Security Router.
+         related to PKI management on TNSR.
 
          Copyright 2018-2019 Rubicon Communications, LLC.
         ";
+
+    revision 2019-05-30 {
+	description
+	    "TNSR Release 19.05.";
+    }
 
     revision 2019-02-15 {
 	description

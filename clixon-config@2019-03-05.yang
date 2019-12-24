@@ -1,6 +1,6 @@
 module clixon-config {
     yang-version 1.1;
-    namespace "http://clicon.org";
+    namespace "http://clicon.org/config";
     prefix cc;
 
     organization
@@ -12,7 +12,7 @@ module clixon-config {
     description
       "Clixon configuration file
        ***** BEGIN LICENSE BLOCK *****
-       Copyright (C) 2009-2018 Olof Hagsand and Benny Holmgren
+       Copyright (C) 2009-2019 Olof Hagsand and Benny Holmgren
        
        This file is part of CLIXON
 
@@ -39,6 +39,15 @@ module clixon-config {
 
        ***** END LICENSE BLOCK *****";
 
+    revision 2019-03-05 {
+	description
+	    "Changed URN. Changed top-level symbol to clixon-config.
+             Released in Clixon 3.10";
+    }
+    revision 2019-02-06 {
+	description
+	    "Released in Clixon 3.9";
+    }
     revision 2018-10-21 {
 	description
 	    "Released in Clixon 3.8";
@@ -117,7 +126,7 @@ module clixon-config {
 	    }
 	}
     }
-    container config {
+    container clixon-config {
        leaf-list CLICON_FEATURE {
            description
                "Supported features as used by YANG feature/if-feature
@@ -131,9 +140,13 @@ module clixon-config {
 	leaf CLICON_CONFIGFILE{
 	    type string;
 	    description
-		"Location of configuration-file for default values (this file)";
+               "Location of configuration-file for default values (this file).
+                 Default is CLIXON_DEFAULT_CONFIG=/usr/local/etc/clicon.xml
+                 set in configure. Note that due to bootstrapping, a default
+                 value here does not work.";
 	}
 	leaf-list CLICON_YANG_DIR {
+	    ordered-by user;
 	    type string;
 	    description
 		"Yang directory path for finding module and submodule files. 
@@ -145,7 +158,9 @@ module clixon-config {
 	leaf CLICON_YANG_MAIN_FILE {
 	    type string;
 	    description
-		"If specified load a yang module in a specific absolute filename";
+		"If specified load a yang module in a specific absolute filename.
+                 This corresponds to the -y command-line option in most CLixon
+                 programs.";
 	}
 	leaf CLICON_YANG_MAIN_DIR {
 	    type string;
@@ -221,7 +236,9 @@ module clixon-config {
 	}
 	leaf CLICON_CLISPEC_FILE {
 	    type string;
-	    description "Specific frontend .cli cligen spec file.";
+	    description "Specific frontend .cli cligen spec file as simple
+                         alternative to CLICON_CLISPEC_DIR. Also available as
+                         -c in clixon_cli.";
 	}
 	leaf CLICON_CLI_MODE {
 	    type string;
@@ -271,6 +288,14 @@ module clixon-config {
 		"Set to 0 if you want CLI to wrap to next line.
                  Set to 1 if you  want CLI to scroll sideways when approaching 
                       right margin";
+	}
+	leaf CLICON_CLI_UTF8 {
+	    type int8;
+	    default 0;
+	    description
+		"Set to 1 to enable CLIgen UTF-8 experimental mode.
+                 Note that this feature is EXPERIMENTAL and may not properly handle 
+                 scrolling, control characters, etc";
 	}
 	leaf CLICON_SOCK_FAMILY {
 	    type string;
@@ -344,23 +369,13 @@ module clixon-config {
                  If set, insert spaces and line-feeds making the XML/JSON human
                  readable. If not set, make the XML/JSON more compact.";
 	}
-	leaf CLICON_XML_SORT {
+	leaf CLICON_XMLDB_MODSTATE {
 	    type boolean;
-	    default true;
-	    description
-		"If set, sort XML lists and leaf-lists alphabetically and uses binary
-                 search. Unless ordered-by user is used. 
-                 Only works for Yang specified XML.
-                 If not set, all lists accessed via linear search.";
-	}
-	leaf CLICON_XML_NS_ITERATE {
-	    type boolean;
-	    default true;
-	    description
-		"If set, iterate through modules to find the matching datanode
-                 or rpc if no xmlns attribute specifies namespace.
-                 This is loose semantics of finding namespaces.
-                 And it is wrong, but is the way Clixon originally was written.";
+	    default false;
+       	    description
+		"If set, tag datastores with RFC 7895 YANG Module Library 
+                 info. When loaded at startup, a check is made if the system
+                 yang modules match";
 	}
 	leaf CLICON_USE_STARTUP_CONFIG {
 	    type int32;
@@ -458,13 +473,6 @@ module clixon-config {
                          data to store before dropping. 0 means no retention";
 
 	}
-    }
-    rpc debug {
-	description "Set debug level of backend.";
-	input {
-	    leaf level {
-		type uint32;
-	    }
-	}
+
     }
 }
