@@ -1,5 +1,7 @@
 module netgate-bfd {
 
+    yang-version 1.1;
+
     namespace "urn:netgate:xml:yang:netgate-bfd";
     prefix "ngbfd";
 
@@ -15,8 +17,13 @@ module netgate-bfd {
 	"This YANG module provides a Netgate-defined data-model
 	 for Bidirectional Forwarding Detection (BFD) data.
 
-	 Copyright 2017-2019 Rubicon Communications, LLC.
+	 Copyright 2017-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-12-15 {
 	description
@@ -53,7 +60,7 @@ module netgate-bfd {
 
     typedef bfd-session-state-type {
 	type enumeration {
-	    enum admin_down {
+	    enum admin-down {
 		description
 		    "admin_down";
 	    }
@@ -222,10 +229,10 @@ module netgate-bfd {
     }
 
     container "bfd-state" {
+	config "false";
+
 	description
 	    "The bfd-config node contains BFD keys and session.";
-
-	config "false";
 
 	container key-table {
 	    description

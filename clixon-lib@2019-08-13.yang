@@ -40,6 +40,10 @@ module clixon-lib {
 
        ***** END LICENSE BLOCK *****";
 
+    revision 2019-08-13 {
+	description
+	    "No changes (reverted change)";
+    }
     revision 2019-06-05 {
 	description
 	    "ping rpc added for liveness";

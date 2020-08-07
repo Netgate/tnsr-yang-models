@@ -1,5 +1,7 @@
 module netgate-acl {
 
+    yang-version 1.1;
+
     namespace "urn:netgate:xml:yang:netgate-acl";
     prefix "ngacl";
 
@@ -19,8 +21,13 @@ module netgate-acl {
 	"This YANG module provides a Netgate-defined data-model
 	 for Access Control Lists.
 
-	 Copyright 2017-2019 Rubicon Communications, LLC.
+	 Copyright 2017-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-08-30 {
 	description
@@ -45,24 +52,24 @@ module netgate-acl {
     typedef acl-protocol-name {
 	type enumeration {
 	    enum any {
-		description "any protocol";
 		value 0;
+		description "any protocol";
 	    }
 	    enum tcp {
-		description "TCP";
 		value 6;
+		description "TCP";
 	    }
 	    enum udp {
-		description "UDP";
 		value 17;
+		description "UDP";
 	    }
 	    enum icmp {
-		description "ICMP";
 		value 1;
+		description "ICMP";
 	    }
 	    enum icmpv6 {
-		description "ICMPv6";
 		value 58;
+		description "ICMPv6";
 	    }
 	}
     }
@@ -247,10 +254,10 @@ module netgate-acl {
     }
 
     container "acl-state" {
+	config "false";
+
 	description
 	    "Access Control Lists (ACL) state data.";
-
-	config "false";
 
 	container acl-table {
 	    description

@@ -1,5 +1,7 @@
 module netgate-map {
 
+    yang-version 1.1;
+
     namespace "urn:netgate:xml:yang:netgate-map";
     prefix "ngmap";
 
@@ -23,8 +25,13 @@ module netgate-map {
 	"This YANG module provides a Netgate-defined data-model
 	 for Mapping Address and Port (MAP) data.
 
-	 Copyright 2018-2019 Rubicon Communications, LLC.
+	 Copyright 2018-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-02-15 {
 	description
@@ -122,77 +129,6 @@ module netgate-map {
 			    type inet:ipv6-address-no-zone;
 			    description
 				"Use this IPv6 as the re-resolved next-hop.";
-			}
-		    }
-		}
-
-		container reassembly {
-		    description
-			"Fragmentation reassembly parameters.";
-
-		    container ipv4 {
-			description
-			    "IPv4 fragmentation reassembly parameters.";
-
-			leaf lifetime {
-			    type uint16;
-			    description
-				"This parameters specifies the valid lifetime
-				 of a reassembly in ms.";
-			}
-			leaf pool-size {
-			    type uint16;
-			    description
-				"This parameters specifies the reassembly
-				 pool size in bytes.";
-			}
-			leaf buffers {
-			    type uint32;
-			    description
-				"This parameters specifies the number of
-				 buffers in the reassembly pool.";
-			}
-			leaf ht-ratio {
-			    type decimal64 {
-				fraction-digits 2;
-			    }
-			    description
-				"This parameters specifies a multiplier ratio
-				 for the reassembly pool hash table.  It is a
-				 small-ish (< 100.00) 2-decimal fraction.";
-			}
-		    }
-
-		    container ipv6 {
-			description
-			    "IPv6 fragmentation reassembly parameters.";
-
-			leaf lifetime {
-			    type uint16;
-			    description
-				"This parameters specifies the valid lifetime
-				 of a reassembly in ms.";
-			}
-			leaf pool-size {
-			    type uint16;
-			    description
-				"This parameters specifies the reassembly
-				 pool size in bytes.";
-			}
-			leaf buffers {
-			    type uint32;
-			    description
-				"This parameters specifies the number of
-				 buffers in the reassembly pool.";
-			}
-			leaf ht-ratio {
-			    type decimal64 {
-				fraction-digits 2;
-			    }
-			    description
-				"This parameters specifies a multiplier ratio
-				 for the reassembly pool hash table.  It is a
-				 small-ish (< 100.00) 2-decimal fraction.";
 			}
 		    }
 		}
@@ -341,10 +277,10 @@ module netgate-map {
     augment "/ngnat:nat-state/ngnat:nat64" {
 
 	container map {
+	    config "false";
+
 	    description
 		"State for MAP-E and MAP-t translations.";
-
-	    config "false";
 
 	    container parameters {
 		description
@@ -428,77 +364,6 @@ module netgate-map {
 			    type inet:ipv6-address-no-zone;
 			    description
 				"Use this IPv6 as the re-resolved next-hop.";
-			}
-		    }
-		}
-
-		container reassembly {
-		    description
-			"Fragmentation reassembly parameters.";
-
-		    container ipv4 {
-			description
-			    "IPv4 fragmentation reassembly parameters.";
-
-			leaf lifetime {
-			    type uint16;
-			    description
-				"This parameters specifies the valid lifetime
-				 of a reassembly in ms.";
-			}
-			leaf pool-size {
-			    type uint16;
-			    description
-				"This parameters specifies the reassembly
-				 pool size in bytes.";
-			}
-			leaf buffers {
-			    type uint32;
-			    description
-				"This parameters specifies the number of
-				 buffers in the reassembly pool.";
-			}
-			leaf ht-ratio {
-			    type decimal64 {
-				fraction-digits 2;
-			    }
-			    description
-				"This parameters specifies a multiplier ratio
-				 for the reassembly pool hash table.  It is a
-				 small-ish (< 100.00) 2-decimal fraction.";
-			}
-		    }
-
-		    container ipv6 {
-			description
-			    "IPv6 fragmentation reassembly parameters.";
-
-			leaf lifetime {
-			    type uint16;
-			    description
-				"This parameters specifies the valid lifetime
-				 of a reassembly in ms.";
-			}
-			leaf pool-size {
-			    type uint16;
-			    description
-				"This parameters specifies the reassembly
-				 pool size in bytes.";
-			}
-			leaf buffers {
-			    type uint32;
-			    description
-				"This parameters specifies the number of
-				 buffers in the reassembly pool.";
-			}
-			leaf ht-ratio {
-			    type decimal64 {
-				fraction-digits 2;
-			    }
-			    description
-				"This parameters specifies a multiplier ratio
-				 for the reassembly pool hash table.  It is a
-				 small-ish (< 100.00) 2-decimal fraction.";
 			}
 		    }
 		}

@@ -1,5 +1,7 @@
 module netgate-common {
 
+    yang-version 1.1;
+
     namespace "urn:netgate:xml:yang:netgate-common";
     prefix "ngcom";
 
@@ -11,7 +13,12 @@ module netgate-common {
         "Definitions of common elements (types, etc) used by multiple modules
          of the Netgate router.
 
-    Copyright 2017 Rubicon Communications, LLC. All rights reserved.";
+    Copyright 2017-2020 Rubicon Communications, LLC. All rights reserved.";
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-05-30 {
 	description
@@ -91,16 +98,13 @@ module netgate-common {
 
     typedef rt-identifier-63 {
 	type string {
-	    pattern '[a-zA-Z_][a-zA-Z0-9_:-]*';
 	    length "1..63";
+	    pattern '[a-zA-Z_][a-zA-Z0-9_:-]*';
 	}
     }
 
 
     typedef ip-address-family {
-	description
-	    "Enumeration of basic IP address family types.";
-
 	type enumeration {
 	    enum ipv4 {
 		description
@@ -111,12 +115,11 @@ module netgate-common {
 		    "IPv4";
 	    }
 	}
+	description
+	    "Enumeration of basic IP address family types.";
     }
 
     typedef ng-tunnel-type {
-        description
-            "Supported types of tunnel/encapsulation.";
-
         type enumeration {
             enum none {
                 value 0;
@@ -134,12 +137,11 @@ module netgate-common {
                     "Generic Routing Encapsulation";
             }
         }
+        description
+            "Supported types of tunnel/encapsulation.";
     }
 
     typedef service-operation {
-        description
-            "Common operations that can be performed on a service";
-
         type enumeration {
             enum start {
                 description
@@ -158,6 +160,8 @@ module netgate-common {
                     "Check status";
             }
         }
+        description
+            "Common operations that can be performed on a service";
     }
 
     typedef service-op-enable-disable {

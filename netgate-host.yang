@@ -1,5 +1,7 @@
 module netgate-host {
 
+    yang-version 1.1;
+
     namespace "urn:netgate:xml:yang:netgate-host";
     prefix "nghost";
 
@@ -22,8 +24,13 @@ module netgate-host {
     description
 	"This YANG module provides a data model for host data.
 
-	 Copyright 2019 Rubicon Communications, LLC.
+	 Copyright 2019-2020 Rubicon Communications, LLC.
 	";
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-08-30 {
 	description

@@ -1,5 +1,7 @@
 module netgate-ipsec {
 
+    yang-version 1.1;
+
     namespace "urn:netgate:xml:yang:netgate-ipsec";
     prefix "ngipsec";
 
@@ -19,8 +21,13 @@ module netgate-ipsec {
 	"This YANG module provides mappings of the CLI command structure
 	to the underlying data-model elements for the Netgate router.
 
-	Copyright 2016-2019 Rubicon Communications, LLC.
+	Copyright 2016-2020 Rubicon Communications, LLC.
 	";
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-08-30 {
 	description
@@ -651,8 +658,8 @@ module netgate-ipsec {
     rpc ike-coredump {
 	input {
 	    leaf operation {
-		mandatory true;
 		type ngcom:service-op-enable-disable;
+		mandatory true;
 		description
 		    "One of the strings 'enable', or 'disable'.";
 	    }
@@ -667,10 +674,11 @@ module netgate-ipsec {
 
     container ipsec-config {
 	list tunnel {
+	    key "instance";
+
 	    description
 		"IPsec tunnel configurations";
 
-	    key "instance";
 	    leaf instance {
 		type uint32;
 		description
@@ -709,10 +717,10 @@ module netgate-ipsec {
 		    "Tunnel cryptographic settings";
 
 		leaf config-type {
-		    description
-			"Crypto config/keying method";
 		    type ipsec-crypto-config-type-t;
 		    default "ike";
+		    description
+			"Crypto config/keying method";
 		}
 
 		container ike {
@@ -751,11 +759,11 @@ module netgate-ipsec {
 		    }
 
 		    list proposals {
+			key "name";
 
 			description
 			    "Proposed parameters for IKE SA";
 
-			key "name";
 			leaf "name" {
 			    type string;
 			    description
@@ -791,10 +799,11 @@ module netgate-ipsec {
 		    }
 
 		    list identity {
+			key "peer";
+
 			description
 			    "The ID data for one peer in the SA";
 
-			key "peer";
 			leaf peer {
 			    type peer-position-t;
 			    description
@@ -817,10 +826,11 @@ module netgate-ipsec {
 		    }
 
 		    list authentication {
+			key "peer";
+
 			description
 			    "The auth data for an IKE peer";
 
-			key "peer";
 			leaf peer {
 			    type peer-position-t;
 			    description
@@ -828,10 +838,11 @@ module netgate-ipsec {
 			}
 
 			list round {
+			    key "number";
+
 			    description
 				"An authentication round for one peer.";
 
-			    key "number";
 			    leaf number {
 				type uint8 {
 				    range "1..2";
@@ -857,14 +868,17 @@ module netgate-ipsec {
 		    }
 
 		    list child-sa {
+			key "name";
+
 			description
 			    "Child (phase 2) SA.";
-			key "name";
 			leaf name {
+
 			    type string;
 			    description
 				"Name of the child SA";
 			}
+
 			leaf lifetime {
 			    type uint32 {
 				range "60..214783647";
@@ -874,6 +888,7 @@ module netgate-ipsec {
 				"The length of time in seconds until "+
 				"the child SA is no longer valid.";
 			}
+
 			leaf mode {
 			    type ipsec-mode-t;
 			    default tunnel;
@@ -881,6 +896,7 @@ module netgate-ipsec {
 				"The ESP mode: tunnel or transport. The "+
 				"only supported value currently is tunnel.";
 			}
+
 			list proposal {
 			    key "name";
 			    leaf name {
@@ -909,6 +925,7 @@ module netgate-ipsec {
 				    "Extended or regular sequence numbers";
 			    }
 			}
+
 			leaf protocol {
 			    type ipsec-protocol-t;
 			    default esp;
@@ -916,6 +933,7 @@ module netgate-ipsec {
 				"The IPsec protocol: ESP or AH. Currently "+
 				"only ESP is supported.";
 			}
+
 			leaf replay-window {
 			    type uint32;
 			    description
@@ -924,13 +942,16 @@ module netgate-ipsec {
 				"supported value. Setting anything here "+
 				"will enable a 64 packet replay window.";
 			}
+
 			/* traffic selectors not used for interface-based */
 			list traffic-selector {
+			    key "number";
+
 			    description
 				"Local and remote address ranges that match "+
 				"packets that should go over a policy-based "+
 				"IPsec tunnel.";
-			    key "number";
+
 			    leaf number {
 				type uint8;
 				description
@@ -942,6 +963,7 @@ module netgate-ipsec {
 				description
 				    "Local network prefix.";
 			    }
+
 			    leaf remote-net {
 				type string;
 				description
@@ -980,14 +1002,16 @@ module netgate-ipsec {
 
     container ipsec-state {
 	config false;
+
 	description
 	    "Operational state data for IPsec.";
 
 	list tunnel {
+	    key "instance";
+
 	    description
 		"IPsec tunnel";
 
-	    key "instance";
 	    leaf instance {
 		type uint32;
 		description
@@ -995,10 +1019,11 @@ module netgate-ipsec {
 	    }
 
 	    list "ike-sa" {
+		key "ike-unique-id";
+
 		description
 		    "IKE SA";
 
-		key "ike-unique-id";
 		leaf ike-unique-id {
 		    type uint32;
 		    description
@@ -1049,9 +1074,10 @@ module netgate-ipsec {
 		    }
 
 		    leaf rekey-time {
-			type uint32;
+			type int32;
 			description
-			    "Seconds until rekey";
+			    "Seconds until rekey, negative value implies
+			     rekey is past due";
 		    }
 
 		    leaf reauth-time {
@@ -1129,10 +1155,10 @@ module netgate-ipsec {
 		}
 
 		list child-sa {
+		    key "name";
+
 		    description
 			"Child SA";
-
-		    key "name";
 
 		    leaf name {
 			type string;
@@ -1141,10 +1167,11 @@ module netgate-ipsec {
 		    }
 
 		    list sa {
+			key "unique-id";
+
 			description
 			    "Child SA instance";
 
-			key "unique-id";
 			leaf unique-id {
 			    type uint32;
 			    description
@@ -1233,13 +1260,14 @@ module netgate-ipsec {
 			    }
 
 			    leaf rekey-time {
-				type uint32;
+				type int32;
 				description
-				    "Seconds until rekey";
+				    "Seconds until rekey, negative value
+				     implies rekey is past due";
 			    }
 
 			    leaf expire-time {
-				type uint32;
+				type int32;
 				description
 				    "Seconds until expiration";
 			    }

@@ -1,5 +1,7 @@
 module netgate-route-table {
 
+    yang-version 1.1;
+
     namespace "urn:netgate:xml:yang:netgate-route-table";
     prefix "ngrttab";
 
@@ -19,7 +21,12 @@ module netgate-route-table {
 	"This YANG module provides a Netgate-defined data-model
 	 for Route Tables.
 
-	 Copyright 2017-2019 Rubicon Communications, LLC.";
+	 Copyright 2017-2020 Rubicon Communications, LLC.";
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-02-15 {
 	description
@@ -304,10 +311,10 @@ module netgate-route-table {
     }
 
     container route-table-state {
+	config "false";
+
 	description
 	    "Route Table define a set of static IPv4 and IPv6 routes.";
-
-	config "false";
 
 	container static-routes {
 	    description

@@ -1,5 +1,7 @@
 module netgate-span {
 
+    yang-version 1.1;
+
     namespace "urn:netgate:xml:yang:netgate-span";
     prefix "ngspan";
 
@@ -15,8 +17,13 @@ module netgate-span {
 	"This YANG module provides a Netgate-defined data-model
 	 for SPAN data.
 
-	 Copyright 2018-2019 Rubicon Communications, LLC.
+	 Copyright 2018-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-02-15 {
 	description
@@ -41,7 +48,7 @@ module netgate-span {
 	}
     }
 
-    typedef span-state {
+    typedef span-state-t {
 	type enumeration {
 	    enum disabled {
 		description
@@ -105,7 +112,7 @@ module netgate-span {
 			}
 
 			leaf state {
-			    type span-state;
+			    type span-state-t;
 			    description
 				"One of 'rx', 'tx', or 'both'.";
 			}
@@ -116,10 +123,10 @@ module netgate-span {
     }
 
     container span-state {
+	config "false";
+
 	description
 	    "Switched Port Analyzer (SPAN) state.";
-
-	config "false";
 
 	container span-table {
 	    description
@@ -160,7 +167,7 @@ module netgate-span {
 			}
 
 			leaf state {
-			    type span-state;
+			    type span-state-t;
 			    description
 				"One of 'rx', 'tx', or 'both'.";
 			}

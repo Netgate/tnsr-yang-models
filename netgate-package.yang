@@ -1,5 +1,7 @@
 module netgate-package {
 
+    yang-version 1.1;
+
     namespace "urn:netgate:xml:yang:netgate-package";
     prefix "ngpkg";
 
@@ -10,8 +12,13 @@ module netgate-package {
     description
 	"This YANG module provides a data model for network interfaces.
 
-	 Copyright 2018-2019 Rubicon Communications, LLC.
+	 Copyright 2018-2020 Rubicon Communications, LLC.
 	";
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-02-15 {
 	description

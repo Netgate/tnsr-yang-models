@@ -1,5 +1,7 @@
 module netgate-bgp {
 
+    yang-version 1.1;
+
     namespace "urn:netgate:xml:yang:netgate-bgp";
     prefix "ngbgp";
 
@@ -9,10 +11,6 @@ module netgate-bgp {
 
     import ietf-yang-types {
 	prefix "yang";
-    }
-
-    import netgate-interface {
-	prefix "ngif";
     }
 
     import netgate-frr-types {
@@ -31,8 +29,13 @@ module netgate-bgp {
 	"This YANG module provides a Netgate-defined data-model
 	 for BGP data.
 
-	 Copyright 2019 Rubicon Communications, LLC.
+	 Copyright 2019-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-12-15 {
 	description
@@ -368,6 +371,10 @@ module netgate-bgp {
 
 	leaf equal-cluster-length {
 	    type boolean;
+	    must "../ibgp-paths != ''" {
+		error-message
+		    "equal-cluster-length requires ibgp-paths to be set.";
+	    }
 	    description
 		"If true, cluster lengths should match for iBGP paths.";
 	}
@@ -1336,14 +1343,16 @@ module netgate-bgp {
 			type uint16 {
 			    range "1..3600";
 			}
+			/* this checks the message and NOT the database!
 			must "current() <= ../update-delay-updates" {
-			    description
-				"The peer-wait delay must not be more
-				 than the maximum update-delay.";
 			    error-message
 			        "The peer-wait delay must not be more "
 				+ "than the maximum update-delay.";
+			    description
+				"The peer-wait delay must not be more
+				 than the maximum update-delay.";
 			}
+			*/
 			description
 			    "Time to wait for a peer to establish connection.
 			     Must not be greater than initial, maximum delay.
@@ -1704,12 +1713,6 @@ module netgate-bgp {
 					 exclusive with 'ttl
 					 security'.";
 				}
-			    }
-
-			    leaf enforce-multihop {
-				type boolean;
-				description
-				    "Enforce EBGP neighbors perform multihop.";
 			    }
 
 			    leaf local-as-number {
@@ -2793,12 +2796,6 @@ module netgate-bgp {
 					 exclusive with 'ttl
 					 security'.";
 				}
-			    }
-
-			    leaf enforce-multihop {
-				type boolean;
-				description
-				    "Enforce EBGP neighbors perform multihop.";
 			    }
 
 			    leaf local-as-number {

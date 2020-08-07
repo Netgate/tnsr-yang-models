@@ -1,5 +1,7 @@
 module netgate-system {
 
+    yang-version 1.1;
+
     namespace "urn:netgate:xml:yang:netgate-system";
     prefix "ngsys";
 
@@ -19,8 +21,13 @@ module netgate-system {
 	"This YANG module provides a Netgate-defined data-model
 	 for SYSTEM data.
 
-	 Copyright 2018-2019 Rubicon Communications, LLC.
+	 Copyright 2018-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-08-30 {
 	description
@@ -40,11 +47,11 @@ module netgate-system {
     rpc system-ping {
 	input {
 	    leaf destination {
-		mandatory true;
 		type union {
 		    type inet:domain-name;
 		    type inet:ip-address-no-zone;
 		}
+		mandatory true;
 		description
 		    "Destination being pinged.";
 	    }
@@ -99,11 +106,11 @@ module netgate-system {
     rpc system-traceroute {
 	input {
 	    leaf destination {
-		mandatory true;
 		type union {
 		    type inet:domain-name;
 		    type inet:ip-address-no-zone;
 		}
+		mandatory true;
 		description
 		    "Destination being pinged.";
 	    }

@@ -1,5 +1,7 @@
 module netgate-pki {
 
+    yang-version 1.1;
+
     namespace "urn:netgate:xml:yang:netgate-pki";
     prefix "ngpki";
 
@@ -11,8 +13,13 @@ module netgate-pki {
         "This YANG module provides specifications of operations and data
          related to PKI management on TNSR.
 
-         Copyright 2018-2019 Rubicon Communications, LLC.
+         Copyright 2018-2020 Rubicon Communications, LLC.
         ";
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-05-30 {
 	description

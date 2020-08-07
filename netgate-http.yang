@@ -1,5 +1,7 @@
 module netgate-http {
 
+    yang-version 1.1;
+
     namespace "urn:ietf:params:xml:ns:yang:netgate-http";
     prefix "nghttp";
 
@@ -14,8 +16,13 @@ module netgate-http {
     description
 	"This YANG module provides a data-model for the HTTP daemon.
 
-	 Copyright 2018-2019 Rubicon Communications, LLC.
+	 Copyright 2018-2020 Rubicon Communications, LLC.
 	";
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-05-30 {
 	description
@@ -33,9 +40,6 @@ module netgate-http {
     }
 
     typedef http-auth-type {
-	description
-	    "Enumeration of HTTP authorization types.";
-
 	type enumeration {
 	    enum client-certificate {
 		description
@@ -50,6 +54,8 @@ module netgate-http {
 		    "No authentication, no security.";
 	    }
 	}
+	description
+	    "Enumeration of HTTP authorization types.";
     }
 
     container http-config {
@@ -96,57 +102,11 @@ module netgate-http {
 	}
     }
 
-    container http-state {
-	description
-	    "HTTP daemon configuration.";
-
-	config "false";
-
-	container restconf {
-	    description
-		"RESTconf configuration values.";
-
-	    leaf enable {
-		type boolean;
-		description
-		    "If true, RESTconf is enabled.";
-	    }
-	}
-
-	container authentication {
-	    description
-		"Authentication configuration.";
-
-	    leaf auth-type {
-		type http-auth-type;
-		description
-		    "The authentication type.";
-	    }
-
-	    leaf client-cert-ca {
-		type string;
-		description
-		    "Client certificate.";
-	    }
-	}
-
-	container encryption {
-	    description
-		"Encryption.";
-
-	    leaf server-certificate {
-		type string;
-		description
-		    "Server certificate.";
-	    }
-	}
-    }
-
     rpc http-control {
 	input {
 	    leaf operation {
-		mandatory true;
 		type ngcom:service-operation;
+		mandatory true;
 		description
 		    "One of the strings 'start', 'stop', 'restart',
 		     or 'status'.";
@@ -162,8 +122,8 @@ module netgate-http {
     rpc http-coredump {
 	input {
 	    leaf operation {
-		mandatory true;
 		type ngcom:service-op-enable-disable;
+		mandatory true;
 		description
 		    "One of the strings 'enable', or 'disable'.";
 	    }

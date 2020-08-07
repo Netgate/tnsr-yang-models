@@ -1,5 +1,7 @@
 module netgate-interface {
 
+    yang-version 1.1;
+
     namespace "urn:netgate:xml:yang:netgate-interface";
     prefix "ngif";
 
@@ -26,9 +28,14 @@ module netgate-interface {
     description
 	"This YANG module provides a data model for network interfaces.
 
-	 Copyright 2017-2019 Rubicon Communications, LLC.
+	 Copyright 2017-2020 Rubicon Communications, LLC.
 	";
 
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-12-15 {
 	description
@@ -145,6 +152,26 @@ module netgate-interface {
 	}
     }
 
+    typedef bond-xor-lacp-load-balance {
+	type enumeration {
+	    enum l2 {
+		value 0;
+		description
+		    "L2";
+	    }
+	    enum l34 {
+		value 1;
+		description
+		    "L34";
+	    }
+	    enum l23 {
+		value 2;
+		description
+		    "L23";
+	    }
+	}
+    }
+
     typedef bond-load-balance {
 	type enumeration {
 	    enum l2 {
@@ -152,15 +179,30 @@ module netgate-interface {
 		description
 		    "L2";
 	    }
+	    enum l34 {
+		value 1;
+		description
+		    "L34";
+	    }
 	    enum l23 {
 		value 2;
 		description
 		    "L23";
 	    }
-	    enum l34 {
-		value 1;
+	    enum round-robin {
+		value 3;
 		description
-		    "L34";
+		    "round-robin";
+	    }
+	    enum broadcast {
+		value 4;
+		description
+		    "broadcast";
+	    }
+	    enum active-backup {
+		value 5;
+		description
+		    "active-backup";
 	    }
 	}
     }
@@ -256,6 +298,21 @@ module netgate-interface {
 		value 3;
 		description
 		    "Periodic transmission";
+	    }
+	}
+    }
+
+    typedef ip-reassembly-type {
+	type enumeration {
+	    enum full {
+		value 0;
+		description
+		    "Full ip-reassembly";
+	    }
+	    enum virtual {
+		value 1;
+		description
+		    "Shallow virtual ip-reassembly";
 	    }
 	}
     }
@@ -368,6 +425,12 @@ module netgate-interface {
 			description
 			    "IPv4 reassembly enabled for interface";
 		    }
+		    leaf reassembly-type {
+			type ip-reassembly-type;
+			default full;
+			description
+			    "Type of ip-reassembly on interface";
+		    }
 		}
 	    }
 
@@ -400,6 +463,12 @@ module netgate-interface {
 			type boolean;
 			description
 			    "IPv6 reassembly enabled for interface";
+		    }
+		    leaf reassembly-type {
+			type ip-reassembly-type;
+			default full;
+			description
+			    "Type of ip-reassembly on interface";
 		    }
 		}
 	    }
@@ -775,9 +844,7 @@ module netgate-interface {
 		     filename.";
 
 		leaf id {
-		    type uint32 {
-			range "1..4294967294";
-		    }
+		    type uint32;
 		    mandatory true;
 		    description
 			"This is the user assigned id of the socket
@@ -1064,7 +1131,7 @@ module netgate-interface {
 		}
 
 		leaf load-balance {
-		    type bond-load-balance;
+		    type bond-xor-lacp-load-balance;
 		    default l2;
 		    description
 			"The load balance for the interface
@@ -1076,10 +1143,10 @@ module netgate-interface {
     }
 
     container interfaces-state {
+	config "false";
+
 	description
 	    "Interface state information.";
-
-	config "false";
 
 	list interface {
 	    key "name";
@@ -1125,7 +1192,7 @@ module netgate-interface {
 
 	    leaf link-mtu {
 		type uint16 {
-		    range "68..max";
+		    range "0 | 68..max";
 		}
 		units octets;
 		description
@@ -1684,9 +1751,7 @@ module netgate-interface {
 		     filename.";
 
 		leaf id {
-		    type uint32 {
-			range "1..4294967294";
-		    }
+		    type uint32;
 		    mandatory true;
 		    description
 			"This is the user assigned id of the socket

@@ -1,0 +1,62 @@
+module netgate-interface-extensions {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-ifext";
+    prefix "ngifext";
+
+    import netgate-interface {
+	prefix "ngif";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a data model for extended data for
+	 a network interface.
+
+	 Copyright 2019-2020 Rubicon Communications, LLC.";
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
+
+    grouping interface-extensions {
+	description
+	    "The interface extensions data contains interface
+	     information that is not covered by standard data models.";
+	
+	list rx-queue {
+	    key rx-queue-id;
+
+	    leaf rx-queue-id {
+		type uint16;
+		description
+		    "Queue number";
+	    }
+
+	    leaf pinned-cpu-id {
+		type uint16;
+		mandatory true;
+		description
+		    "CPU ID";
+	    }
+	}
+    }
+
+    augment "/ngif:interfaces-config/ngif:interface" {
+	container rx-queues {
+	    uses interface-extensions;
+	}
+    }
+
+    augment "/ngif:interfaces-state/ngif:interface" {
+	container rx-queues {
+	    uses interface-extensions;
+	}
+    }
+
+}

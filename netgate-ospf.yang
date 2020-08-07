@@ -1,5 +1,7 @@
 module netgate-ospf {
 
+    yang-version 1.1;
+
     namespace "urn:netgate:xml:yang:netgate-ospf";
     prefix "ngospf";
 
@@ -23,8 +25,13 @@ module netgate-ospf {
 	"This YANG module provides a Netgate-defined data-model
 	 for OSPF data.
 
-	 Copyright 2019 Rubicon Communications, LLC.
+	 Copyright 2019-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-12-15 {
 	description
@@ -965,6 +972,10 @@ module netgate-ospf {
 		    container default-information {
 
 			container originate {
+			    presence
+				"If present, a default route will be
+				 distributed.";
+
 			    description
 				"Originate an AS-External Type-5 LSA that
 				 describes a default route into all
@@ -973,10 +984,6 @@ module netgate-ospf {
 				 is present, the default is advertised even
 				 when there is no default present in the
 				 routing tables.";
-
-			    presence
-				"If present, a default route will be
-				 distributed.";
 
 			    leaf always {
 				type boolean;
@@ -2292,6 +2299,10 @@ module netgate-ospf {
 		    container default-information {
 
 			container originate {
+			    presence
+				"If present, a default route will be
+				 distributed.";
+
 			    description
 				"Originate an AS-External Type-5 LSA that
 				 describes a default route into all
@@ -2300,10 +2311,6 @@ module netgate-ospf {
 				 is present, the default is advertised even
 				 when there is no default present in the
 				 routing tables.";
-
-			    presence
-				"If present, a default route will be
-				 distributed.";
 
 			    leaf always {
 				type boolean;

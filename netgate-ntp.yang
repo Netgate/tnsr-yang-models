@@ -1,5 +1,7 @@
 module netgate-ntp {
 
+    yang-version 1.1;
+
     namespace "urn:netgate:xml:yang:netgate-ntp";
     prefix "ngntp";
 
@@ -18,8 +20,13 @@ module netgate-ntp {
     description
 	"This YANG module provides a data-model for the NTP service.
 
-	 Copyright 2018-2019 Rubicon Communications, LLC.
+	 Copyright 2018-2020 Rubicon Communications, LLC.
 	";
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-05-30 {
 	description
@@ -37,10 +44,6 @@ module netgate-ntp {
     }
 
     typedef ntp-restriction-special {
-	description
-	    "Enumeration of special NTP restriction values other than
-	     network specifications.";
-
 	type enumeration {
 	    enum default {
 		description
@@ -51,24 +54,24 @@ module netgate-ntp {
 		    "Source restrictions";
 	    }
 	}
+	description
+	    "Enumeration of special NTP restriction values other than
+	     network specifications.";
     }
 
     typedef ntp-restriction-address {
-	description
-	    "NTP restriction address type which can be a special name
-	     or an IP prefix.";
-
 	type union {
 	    type inet:ip-prefix;
 	    type inet:domain-name;
 	    type ntp-restriction-special;
 	}
+	description
+	    "NTP restriction address type which can be a special name
+	     or an IP prefix.";
+
     }
 
     typedef ntp-interface-action {
-	description
-	    "List of special interface address class names.";
-
 	type enumeration {
 	    enum listen {
 		description
@@ -84,12 +87,12 @@ module netgate-ntp {
 		     the received packets without examination.";
 	    }
 	}
+	description
+	    "List of special interface address class names.";
+
     }
 
     typedef ntp-server-mode {
-	description
-	    "Enumeration of server types.";
-
 	type enumeration {
 	    enum server {
 		description
@@ -100,6 +103,9 @@ module netgate-ntp {
 		    "Pool";
 	    }
 	}
+	description
+	    "Enumeration of server types.";
+
     }
 
     typedef ntp-log-action {
@@ -573,11 +579,11 @@ module netgate-ntp {
     }
 
     container ntp-state {
+	config false;
+
 	description
 	    "Network Time Protocol daemon configuration for time
 	     keeping and services.";
-
-	config false;
 
 	container parameters {
 	    description
@@ -964,8 +970,8 @@ module netgate-ntp {
     rpc ntp-control {
 	input {
 	    leaf operation {
-		mandatory true;
 		type ngcom:service-operation;
+		mandatory true;
 		description
 		    "One of the strings 'start', 'stop', 'restart',
 		     or 'status'.";
@@ -981,8 +987,8 @@ module netgate-ntp {
     rpc ntp-coredump {
 	input {
 	    leaf operation {
-		mandatory true;
 		type ngcom:service-op-enable-disable;
+		mandatory true;
 		description
 		    "One of the strings 'enable', or 'disable'.";
 	    }

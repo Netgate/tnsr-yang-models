@@ -1,5 +1,7 @@
 module netgate-dataplane {
 
+    yang-version 1.1;
+
     namespace "urn:netgate:xml:yang:netgate-dataplane";
     prefix "ngdataplane";
 
@@ -22,8 +24,13 @@ module netgate-dataplane {
          address assigned to an interface or IP routes. 
          to the underlying data-model elements for the Netgate router.
 
-         Copyright 2018-2019 Rubicon Communications, LLC.
+         Copyright 2018-2020 Rubicon Communications, LLC.
         ";
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-12-15 {
 	description
@@ -53,8 +60,8 @@ module netgate-dataplane {
     rpc dataplane-control {
         input {
             leaf operation {
-                mandatory true;
                 type ngcom:service-operation;
+                mandatory true;
                 description
                     "The operation to perform";
             }
@@ -69,8 +76,8 @@ module netgate-dataplane {
     rpc dataplane-coredump {
         input {
             leaf operation {
-                mandatory true;
                 type ngcom:service-op-enable-disable;
+                mandatory true;
                 description
 		    "One of the strings 'enable' or 'disable'.";
             }
@@ -99,6 +106,19 @@ module netgate-dataplane {
         }
     }
 
+    typedef iova-mode-t {
+        type enumeration {
+            enum pa {
+                description
+                    "IOVA as physical addresses mode";
+	    }
+	    enum va {
+                description
+                    "IOVA as virtual adresses mode";
+	    }
+	}
+    }
+
     typedef vdev-type-t {
         type enumeration {
             enum aesni_mb {
@@ -121,6 +141,10 @@ module netgate-dataplane {
             enum crypto {
                 description
                     "Cryptographic accelerator";
+            }
+            enum crypto-vf {
+                description
+                    "VF of cryptographic accelerator";
             }
         }
     }
@@ -316,11 +340,23 @@ module netgate-dataplane {
 		    "Disable transmit checksum offload.";
 	    }
 
+	    leaf no-pci {
+		type boolean;
+		description
+		    "Disable PCI bus.";
+	    }
+
             leaf uio-driver {
                 type uio-driver-t;
                 description
                     "Name of the uio driver";
             }
+
+            leaf iova-mode {
+                type iova-mode-t;
+                description
+                    "IO virtual addresses mode";
+	    }
 
             list vdev {
                 key "vdev-type";
@@ -510,10 +546,10 @@ module netgate-dataplane {
     }
 
     container dataplane-state {
+	config "false";
+
 	description
 	    "dataplane state";
-
-	config "false";
 
 	container cpu {
 	    description
@@ -541,7 +577,9 @@ module netgate-dataplane {
 		    }
 
 		    leaf type {
-			type ngcom:identifier-64;
+			type string {
+			    length "0..64";
+			}
 			description
 			    "Thread type (i.e. workers or stats).";
 		    }

@@ -1,5 +1,7 @@
 module netgate-kea {
 
+    yang-version 1.1;
+
     namespace "urn:netgate:xml:yang:netgate-kea";
     prefix "ngkea";
 
@@ -22,7 +24,12 @@ module netgate-kea {
     description
 	"This YANG module provides a data model for the Kea DHCP server.
 
-	 Copyright 2019 Rubicon Communications, LLC.";
+	 Copyright 2019-2020 Rubicon Communications, LLC.";
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-12-15 {
 	description
@@ -185,7 +192,7 @@ module netgate-kea {
 	}
     }
 
-    typedef kea-dhcp4-option {
+    typedef kea-dhcp4-option-standard {
 	type enumeration {
 	    enum time-offset {
 		description
@@ -689,6 +696,17 @@ module netgate-kea {
 	}
     }
 
+    typedef kea-dhcp4-option {
+	type union {
+	    type kea-dhcp4-option-standard;
+
+	    type leafref {
+		path "/ngkea:kea-config/dhcp4-server/Dhcp4"
+		    + "/option-def/name";
+	    }
+	}
+    }
+
     typedef kea-logger-name {
 	type enumeration {
 	    enum kea-dhcp4 {
@@ -871,8 +889,8 @@ module netgate-kea {
     rpc kea-control {
 	input {
 	    leaf operation {
-		mandatory true;
 		type kea-operation;
+		mandatory true;
 		description
 		    "One of the strings 'start', 'stop', 'reload',
 		     or 'status'.";
@@ -891,8 +909,8 @@ module netgate-kea {
     rpc kea-coredump {
 	input {
 	    leaf operation {
-		mandatory true;
 		type ngcom:service-op-enable-disable;
+		mandatory true;
 		description
 		    "One of the strings 'enable', or 'disable'.";
 	    }
@@ -926,10 +944,37 @@ module netgate-kea {
 	}
     }
 
+    typedef kea-lease-state {
+	type enumeration {
+	    enum default {
+		value 0;
+		description
+		    "Default lease state.";
+	    }
+	    enum declined {
+		value 1;
+		description
+		    "Declined lease.";
+	    }
+	    enum expired {
+		value 2;
+		description
+		    "Expired and reclaimed lease.";
+	    }
+	    enum unknown {
+		description
+		    "Unknown state.";
+	    }
+	}
+	description
+	    "Lease state values.";
+    }
+
     rpc kea-show {
 	input {
 	    leaf request {
 		type kea-show-request;
+		mandatory true;
 		description
 		    "A Kea show request type.  The string 'config'
 		     along with parameter 'dhcp4' or 'keactrl'.
@@ -938,6 +983,7 @@ module netgate-kea {
 	    }
 	    leaf param {
 		type kea-show-parameter;
+		mandatory true;
 		description
 		    "One of the strings 'dhcp4', or 'keactrl'.";
 	    }
@@ -953,7 +999,7 @@ module netgate-kea {
 	description
 	    "Kea DHCPv4 custom option definition information.";
 
-	list option-def-data {
+	list option-def {
 	    key name;
 	    description
 		"List of DHCPv4 custom option definition.";
@@ -973,10 +1019,10 @@ module netgate-kea {
 	    }
 
 	    leaf code {
-		type uint32;
+		type uint8;
 		mandatory true;
 		description
-		    "The numeric uint32 option code.";
+		    "The numeric uint8 option code.";
 	    }
 
 	    leaf encapsulate {
@@ -1017,7 +1063,7 @@ module netgate-kea {
 		"List of DHCPv4 options and values.";
 
 	    leaf name {
-		type string;
+		type kea-dhcp4-option;
 		description
 		    "The server requires an option name to identify an
 		     option.";
@@ -1391,256 +1437,83 @@ module netgate-kea {
     container kea-state {
 
 	config "false";
-
-	container keactrl {
-	    description
-		"This section contains parameters for the keactrl
-		 configuration file.";
-
-	    leaf verbose {
-		type boolean;
-		description
-		    "If true, the Kea Control daemon will be verbose.";
-	    }
-
-	    container dhcp4 {
-		description
-		    "Parameters for the DHCP IPv4 server.";
-
-		leaf enable {
-		    type boolean;
-		    description
-			"If true, the Kea dhcp4 server is enabled.";
-		}
-	    }
-	}
+	description
+	    "Kea state.";
 
 	container dhcp4-server {
 	    description
-		"Gather all the parts that contribute to the DHCP4 server.";
+		"DHCPv4 state.";
 
-	    container Dhcp4 {
+	    list leases {
+		key ip-address;
 		description
-		    "Configuration for the Kea DHCP IPv4 Server";
+		    "List of Kea DHCPv4 leases.";
 
-		uses kea-dhcp4-option-def-group;
-
-		uses kea-dhcp4-option-group;
-
-		leaf decline-probation-period {
-		    type uint32;
-		    description
-			"The decline-probation-period specifies the period
-			 in seconds in which the server will recycle
-			 declined leases.  The default period is 86400
-			 seconds (24 hours).";
-		}
-
-		leaf description {
-		    type string;
-		    description
-			"A user-supplied description of the server.";
-		}
-
-		leaf echo-client-id {
-		    type boolean;
-		    description
-			"The echo-client-id boolean value specifies that
-			 the server should or should-not reply with the
-			 client-id if the client sent it.  Setting this to
-			 false enables RFC-2131 backward compatibitlity.";
-		}
-
-		leaf match-client-id {
-		    type boolean;
-		    description
-			"If match-client-id is false, the DHCP server will
-			 match clients using the 'chaddr' field.";
-		}
-
-		leaf next-server {
+		leaf ip-address {
 		    type inet:ipv4-address;
+		    mandatory true;
 		    description
-			"This next-server IPv4 address is used as the
-			siaddr field.";
+			"Lease IP address.";
 		}
 
-		leaf rebind-timer {
-		    type uint32;
+		leaf hw-address {
+		    type yang:mac-address;
+		    mandatory true;
 		    description
-			"The RFC-2131 T2 rebind value in seconds.";
-		}
-
-		leaf renew-timer {
-		    type uint32;
-		    description
-			"The RFC-2131 T1 renewal value in seconds.";
+			"Lease MAC address.";
 		}
 
 		leaf valid-lifetime {
 		    type uint32;
+		    mandatory true;
 		    description
 			"The valid duration for an assigned lease in
 			seconds.";
 		}
 
-		container lease-database {
-		    leaf type {
-			type string;
-			default "memfile";
-			description
-			    "The database type used to store the lease
-			     information.  Currently only the type
-			     'memfile' is supported.";
-		    }
-
-		    leaf name {
-			type string;
-			description
-			    "Name of the DHCPv4 leases file on disk.
-			     This should be a name ending in '.csv'.
-			     FIXME: We should probably make this file be
-			     permanently stored under /var/kea/leases/ or
-			     something.";
-		    }
-
-		    leaf persist {
-			type boolean;
-			default true;
-			description
-			    "If set to TRUE, new leases and updates to
-			     existing leases are written to the leases
-			     file on disk.  If leases aren't written to
-			     disk, no assurance can be made that leases
-			     will persist across a server restart.";
-		    }
-
-		    leaf lfc-interval {
-			type uint32;
-			default 0;
-			description
-			    "The lfc-interval specifies the interval in
-			     seconds at which the server will perform a
-			     lease file cleanup to remove the unused,
-			     historical information from the lease file.
-			     The default, 0, disables the LFC operation.";
-		    }
-		}
-
-		container interfaces-config {
+		leaf cltt {
+		    type uint32;
+		    mandatory true;
 		    description
-			"The interfaces-config holds configuration
-			 information about each interface used by the
-			 DHCPv4 server.";
-
-		    list interfaces {
-			key interface;
-			description
-			    "The interfaces is a list of interface names
-			     or interface names with unicast addresses on
-			     them on which the server will listen for DHCP
-			     requests.";
-
-			leaf interface {
-			    type ngcom:if-identifier-63;
-			    description
-				"The name of aninterface on which the
-				 server will listen for IPv4 DHCP
-				 requests.";
-			}
-		    }
-
-		    leaf dhcp-socket-type {
-			type string;
-			default "raw";
-			description
-			    "Sockets used for listening on the set of
-			     interfaces will be opened as either'raw' IP
-			     sockets, or 'udp' sockets.";
-		    }
+			"Lease client last transmission time";
 		}
 
-		list subnet4 {
-		    key subnet;
+		leaf subnet-id {
+		    type uint32;
+		    mandatory true;
 		    description
-			"An IPv4 subnet configuration within the DHCPv4
-			server.";
-
-		    leaf subnet {
-			type inet:ipv4-prefix;
-			description
-			    "The IPv4 subnet prefix.";
-		    }
-
-		    leaf id {
-			type uint32;
-			description
-			    "Manually assigned subnet id.";
-		    }
-
-		    leaf interface {
-			type ngcom:if-identifier-63;
-			mandatory true;
-			description
-			    "Interface on which subnet is located.";
-		    }
-
-		    uses kea-dhcp4-option-group;
-
-		    list pools {
-			key pool;
-			description
-			    "A list of leased address pools.  Each pool
-			     is specfied as a start and optional end IPv4
-			     addresses, or as an IPv4 address and prefix.";
-
-			leaf pool {
-			    type ipv4-prefix-or-range;
-			    description
-				"A pool is specfied as a start and
-				 optional end IPv4 addresses, or as an
-				 IPv4 address and prefix.";
-			}
-
-			leaf pool-present {
-			    type boolean;
-			    /* CONSIDER DEPRECATION */
-			}
-
-			uses kea-dhcp4-option-group;
-		    }
-
-		    list reservations {
-			key ip-address;
-			description
-			    "List of host reservations.";
-
-			leaf ip-address {
-			    type inet:ipv4-address;
-			    description
-				"The IPv4 address for the host.";
-			}
-
-			leaf hw-address {
-			    type yang:mac-address;
-			    description
-				"The host's MAC address.";
-			}
-
-			leaf hostname {
-			    type inet:domain-name;
-			    description
-				"The host name of the identified host.";
-			}
-		    }
+			"Lease subnet id.";
 		}
-	    }
 
-	    container Logging {
-		description
-		    "Configuration for the Kea Logging";
+		leaf client-id {
+		    type string;
+		    description
+			"Lease identifying client-id address.";
+		}
 
-		uses kea-logging-group;
+		leaf fqdn-fwd {
+		    type boolean;
+		    description
+			"Forward DNS update flag.";
+		}
+
+		leaf fqdn-rev {
+		    type boolean;
+		    description
+			"Reverse DNS update flag.";
+		}
+
+		leaf hostname {
+		    type string;
+		    description
+			"Client hostname.";
+		}
+
+		leaf state {
+		    type kea-lease-state;
+		    description
+			"Lease state.";
+		}
 	    }
 	}
     }

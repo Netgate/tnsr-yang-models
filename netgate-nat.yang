@@ -1,5 +1,7 @@
 module netgate-nat {
 
+    yang-version 1.1;
+
     namespace "urn:netgate:xml:yang:netgate-nat";
     prefix "ngnat";
 
@@ -19,7 +21,13 @@ module netgate-nat {
 	"This YANG module provides a Netgate-defined data-model
 	 for Network Address Translation data.
 
-	 Copyright 2017-2019 Rubicon Communications, LLC.";
+	 Copyright 2017-2020 Rubicon Communications, LLC.";
+
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-08-30 {
 	description
@@ -92,10 +100,9 @@ module netgate-nat {
 		    "NAT44 options";
 
 		leaf forwarding-enabled {
+		    type boolean;
 		    description
 			"NAT44 forwarding option. Used 'true' or 'false'.";
-
-		    type boolean;
 		}
 	    }
 
@@ -126,49 +133,6 @@ module netgate-nat {
 	    }
 	}
 
-	container reassembly {
-	    description
-		"Attributes that control NAT fragmentation reassembly.";
-
-	    list address-family {
-		key "family";
-		description
-		    "Select either 'ipv4' or 'ipv6'.";
-
-		leaf family {
-		    type ngcom:ip-address-family;
-		    description
-			"One of 'ipv4' or 'ipv6'.";
-		}
-
-		leaf enable {
-		    type boolean;
-		    description
-			"If true, NAT reassembly is enabled for this
-			 address family.";
-		}
-
-		leaf timeout {
-		    type uint32;
-		    description
-			"The period of time in seconds between fragments
-			 in a NAT reassembly before the reassmbly expires.";
-		}
-
-		leaf max-concurrent-reassemblies {
-		    type uint16;
-		    description
-			"The maximum number of concurrent reassemblies.";
-		}
-
-		leaf max-fragments {
-		    type uint8;
-		    description
-			"The max number of fragments that can be reassembled.";
-		}
-	    }
-	}
-	
 	container deterministic {
 	    description
 		"Deterministic NAT information.";
@@ -385,10 +349,10 @@ module netgate-nat {
     }
 
     container "nat-state" {
+	config "false";
+
 	description
 	    "Network Address Translation (NAT) state data.";
-
-	config "false";
 
 	container parameters {
 	    description
@@ -479,49 +443,6 @@ module netgate-nat {
 		type uint32;
 		description
 		    "NAT ICMP idle-timeout";
-	    }
-	}
-
-	container reassembly {
-	    description
-		"Attributes that control NAT fragmentation reassembly.";
-
-	    list address-family {
-		key "family";
-		description
-		    "Select either 'ipv4' or 'ipv6'.";
-
-		leaf family {
-		    type ngcom:ip-address-family;
-		    description
-			"One of 'ipv4' or 'ipv6'.";
-		}
-
-		leaf enable {
-		    type boolean;
-		    description
-			"If true, NAT reassembly is enabled for this
-			 address family.";
-		}
-
-		leaf timeout {
-		    type uint32;
-		    description
-			"The period of time in seconds between fragments
-			 in a NAT reassembly before the reassmbly expires.";
-		}
-
-		leaf max-concurrent-reassemblies {
-		    type uint16;
-		    description
-			"The maximum number of concurrent reassemblies.";
-		}
-
-		leaf max-fragments {
-		    type uint8;
-		    description
-			"The max number of fragments that can be reassembled.";
-		}
 	    }
 	}
 
@@ -947,10 +868,10 @@ module netgate-nat {
     }
 
     container "dslite-state" {
+	config "false";
+
 	description
 	    "Dual-Stack Lite (DS-Lite) state.";
-
-	config "false";
 
 	container dynamic {
 	    description

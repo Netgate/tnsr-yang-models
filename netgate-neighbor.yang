@@ -1,5 +1,7 @@
 module netgate-neighbor {
 
+    yang-version 1.1;
+
     namespace "urn:netgate:xml:yang:netgate-neighbor";
     prefix "ngneigh";
 
@@ -23,7 +25,12 @@ module netgate-neighbor {
 	"This YANG module provides a Netgate-defined data-model
 	 for neighbor data.
 
-	 Copyright 2017-2019 Rubicon Communications, LLC.";
+	 Copyright 2017-2020 Rubicon Communications, LLC.";
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-02-15 {
 	description
@@ -88,10 +95,10 @@ module netgate-neighbor {
     }
 
     container "neighbor-state" {
+	config "false";
+
 	description
 	    "Neighbor table state.";
-
-	config "false";
 
 	container neighbor-table {
 	    description

@@ -1,5 +1,7 @@
 module netgate-master {
 
+    yang-version 1.1;
+
     namespace "urn:netgate:xml:yang:netgate-master";
     prefix "ngmaster";
 
@@ -13,7 +15,12 @@ module netgate-master {
 
     description
         "Definitions of master data and operations.
-	 Copyright 2019 Rubicon Communications, LLC. All rights reserved.";
+	 Copyright 2019-2020 Rubicon Communications, LLC. All rights reserved.";
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-05-30 {
 	description

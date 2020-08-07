@@ -1,5 +1,7 @@
 module netgate-vrrp {
 
+    yang-version 1.1;
+
     namespace "urn:netgate:xml:yang:netgate-vrrp";
     prefix "ngvrrp";
 
@@ -7,16 +9,8 @@ module netgate-vrrp {
 	prefix "inet";
     }
 
-    import ietf-yang-types {
-	prefix "yang";
-    }
-
     import netgate-interface {
 	prefix "ngif";
-    }
-
-    import netgate-common {
-	prefix "ngcom";
     }
 
     organization "Netgate";
@@ -28,8 +22,13 @@ module netgate-vrrp {
 	 duplicated directly, to the extent possible, from the IETF VRRP
 	 data model introduced by RFC 8347.
 
-	 Copyright 2019 Rubicon Communications, LLC.
+	 Copyright 2019-2020 Rubicon Communications, LLC.
 	";
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-12-15 {
 	description
@@ -195,16 +194,16 @@ module netgate-vrrp {
 			must "/ngif:interfaces-config/"
 			     + "ngif:interface[ngif:name=current()]/"
 			     + "ngif:ipv4" {
-			    description
-				"Interface is IPv4.";
 			    error-message
 				"IPv4 VR can only track interfaces with "
 				+ "IPv4 configured.";
-			}
-			must "current() != ../../../../../../../name" {
 			    description
-				"VR cannot track its own interface.";
+				"Interface is IPv4.";
+			}
+			must "current() != ../../../../../../../ngif:name" {
 			    error-message
+				"VR cannot track its own interface.";
+			    description
 				"VR cannot track its own interface.";
 			}
 			description
@@ -291,16 +290,16 @@ module netgate-vrrp {
 			must "/ngif:interfaces-config/"
 			     + "ngif:interface[ngif:name=current()]/"
 			     + "ngif:ipv6" {
-			    description
-				"Interface is IPv6.";
 			    error-message
 				"IPv6 VR can only track interfaces with "
 				+ "IPv6 configured.";
-			}
-			must "current() != ../../../../../../../name" {
 			    description
-				"VR cannot track its own interface.";
+				"Interface is IPv6.";
+			}
+			must "current() != ../../../../../../../ngif:name" {
 			    error-message
+				"VR cannot track its own interface.";
+			    description
 				"VR cannot track its own interface.";
 			}
 			description

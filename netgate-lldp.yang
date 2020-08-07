@@ -1,5 +1,7 @@
 module netgate-lldp {
 
+    yang-version 1.1;
+
     namespace "urn:netgate:xml:yang:netgate-lldp";
     prefix "nglldp";
 
@@ -10,7 +12,12 @@ module netgate-lldp {
     description
         "This YANG module provides a data model for the VPP LLDP Service.
 
-	 Copyright 2019 Rubicon Communications, LLC.";
+	 Copyright 2019-2020 Rubicon Communications, LLC.";
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-02-15 {
 	description

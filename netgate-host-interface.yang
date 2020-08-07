@@ -1,5 +1,7 @@
 module netgate-host-interface {
 
+    yang-version 1.1;
+
     namespace "urn:netgate:xml:yang:netgate-hostif";
     prefix "nghif";
 
@@ -18,8 +20,13 @@ module netgate-host-interface {
     description
 	"This YANG module provides a data model for host interfaces.
 
-	 Copyright 2018-2019 Rubicon Communications, LLC.
+	 Copyright 2018-2020 Rubicon Communications, LLC.
 	";
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-02-15 {
 	description
@@ -103,10 +110,10 @@ module netgate-host-interface {
     }
 
     container host-if-state {
+	config "false";
+
 	description
 	    "Interface configuration parameters.";
-
-	config "false";
 
 	list interface {
 	    key "name";
@@ -140,12 +147,12 @@ module netgate-host-interface {
 
 	    leaf link-mtu {
 		type uint16 {
-		    range "68..max";
+		    range "0 | 68..max";
 		}
 		units octets;
 		description
 		    "The size, in octets, of the largest packet that the
-		     interface will send and receive.";
+		     interface will send and receive. 0 indicates not known";
 	    }
 
 	    leaf mac-address {

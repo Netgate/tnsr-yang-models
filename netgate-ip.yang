@@ -1,12 +1,9 @@
 module netgate-ip {
 
+    yang-version 1.1;
+
     namespace "urn:netgate:xml:yang:netgate-ip";
     prefix "ngip";
-
-
-    import netgate-common {
-	prefix "ngcom";
-    }
 
     organization "Netgate";
 
@@ -15,8 +12,13 @@ module netgate-ip {
     description
 	"This YANG module provides global ip configuration such as ip-reassembly.
 
-	 Copyright 2019 Rubicon Communications, LLC.
+	 Copyright 2019-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-12-15 {
 	description
@@ -30,7 +32,27 @@ module netgate-ip {
 
     container ip-config {
 	container reassembly {
+	    container full {
+		uses reassembly-grouping;
+	    }
+	    container virtual {
+		uses reassembly-grouping;
+	    }
+	}
+    }
 
+    container ip-state {
+	container reassembly {
+	    container full {
+		uses reassembly-grouping;
+	    }
+	    container virtual {
+		uses reassembly-grouping;
+	    }
+	}
+    }
+
+    grouping reassembly-grouping {
 	    container ipv4 {
 		description
 		    "Ip4-reassembly settings.";
@@ -70,7 +92,6 @@ module netgate-ip {
 			"Maximum reassemblies count.";
 		}
 	    }
-	}
     }
 
 }

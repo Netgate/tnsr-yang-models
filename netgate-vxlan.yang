@@ -1,5 +1,7 @@
 module netgate-vxlan {
 
+    yang-version 1.1;
+
     namespace "urn:netgate:xml:yang:netgate-vxlan";
     prefix "ngvxlan";
 
@@ -19,7 +21,12 @@ module netgate-vxlan {
 	"This YANG module provides a Netgate-defined data-model
 	 for VXLAN data.
 
-	 Copyright 2018-2019 Rubicon Communications, LLC. ";
+	 Copyright 2018-2020 Rubicon Communications, LLC. ";
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-05-30 {
 	description
@@ -110,10 +117,10 @@ module netgate-vxlan {
     }
 
     container "vxlan-state" {
+	config "false";
+
 	description
 	    "State of the VXLAN tunnels.";
-
-	config "false";
 
 	container vxlan-table {
 	    description

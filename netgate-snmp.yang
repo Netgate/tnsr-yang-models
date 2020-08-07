@@ -1,5 +1,6 @@
-
 module netgate-snmp {
+
+    yang-version 1.1;
 
     namespace "https://netgate.com/ns/netgate-snmp";
     prefix "ngsnmp";
@@ -18,7 +19,12 @@ module netgate-snmp {
     description
 	"This YANG module provides a data model for the VPP LLDP Service.
 
-	 Copyright 2019 Rubicon Communications, LLC.";
+	 Copyright 2019-2020 Rubicon Communications, LLC.";
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-12-15 {
 	description
@@ -30,10 +36,6 @@ module netgate-snmp {
 	    "TNSR Release 19.08.";
     }
 
-
-    /*
-     * type definitions
-     */
 
     typedef snmp-view-type {
 	type enumeration {
@@ -80,23 +82,20 @@ module netgate-snmp {
     rpc snmp-control {
         input {
 	    leaf operation {
-	        mandatory true;
 	        type ngcom:service-operation;
+	        mandatory true;
 	        description
                     "One of the strings 'start', 'stop', 'restart',
                      or 'status'.";
 	    }
         }
+
         output {
 	    leaf stdout {
 	        type string;
             }
         }
     }
-
-    /*
-     * configuration data
-     */
 
     container snmp-config {
 	leaf snmp-enable {
@@ -109,9 +108,10 @@ module netgate-snmp {
 	container snmp-access-control {
 
 	    list community-map {
-		description "maps community name from SNMP request to security name";
-
 		key "community-name";
+
+		description
+		    "maps community name from SNMP request to security name";
 
 		leaf community-name {
 		    type string;
@@ -127,8 +127,8 @@ module netgate-snmp {
 		    }
 
 		    leaf source {
-			description "host name or IP address for source host";
 			type snmp-source;
+			description "host name or IP address for source host";
 		    }
 
 		    leaf security-name {
@@ -140,16 +140,21 @@ module netgate-snmp {
 	    }
 
 	    list group {
-		description "maps security name to group";
 		key "group-name";
+
+		description "maps security name to group";
+
 		leaf group-name {
 		    type string;
 		}
+
 		list group-entry {
 		    key "security-name security-model";
+
 		    leaf security-name {
 			type string;
 		    }
+
 		    leaf security-model {
 			type snmp-security-model;
 		    }
@@ -157,9 +162,9 @@ module netgate-snmp {
 	    }
 
 	    list view {
-		description "defines a subset of the OID tree";
-
 		key "view-name";
+
+		description "defines a subset of the OID tree";
 
 		leaf view-name {
 		    type string;
@@ -169,14 +174,16 @@ module netgate-snmp {
 		    key "type oid";
 
 		    leaf type {
-			description "exclude|include";
 			type snmp-view-type;
+			description "exclude|include";
 		    }
+
 		    leaf oid {
-			description "SNMP OID";
 			type string;
 			mandatory true;
+			description "SNMP OID";
 		    }
+
 		    leaf mask {
 			type string;
 		    }
@@ -184,10 +191,10 @@ module netgate-snmp {
 	    }
 
 	    list access {
+		key "group-name";
+
 		description
 		    "maps from group to views";
-
-		key "group-name";
 
 		leaf group-name {
 		    type string;
@@ -199,25 +206,29 @@ module netgate-snmp {
 		    leaf context {
 			type string;
 		    }
+
 		    leaf prefix {
 			type snmp-context-match;
 		    }
+
 		    leaf security-model {
 			type snmp-security-model;
 		    }
+
 		    leaf security-level {
 			type snmp-security-level;
 		    }
 
 		    leaf read {
+			type string;
+			mandatory true;
 			description "view to use for read ops";
-			type string;
-			mandatory true;
 		    }
+
 		    leaf write {
-			description "view to use for write ops";
 			type string;
 			mandatory true;
+			description "view to use for write ops";
 		    }
 		}
 	    }

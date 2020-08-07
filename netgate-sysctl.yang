@@ -1,5 +1,7 @@
 module netgate-sysctl {
 
+    yang-version 1.1;
+
     namespace "urn:netgate:xml:yang:netgate-sysctl";
     prefix "ngsysctl";
 
@@ -9,8 +11,13 @@ module netgate-sysctl {
 	"This YANG module provides a Netgate-defined data-model
 	 for Linux Kernel sysctl parameters.
 
-	 Copyright 2018-2019 Rubicon Communications, LLC.
+	 Copyright 2018-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2020-02-15 {
+	description
+	    "TNSR Release 20.02.";
+    }
 
     revision 2019-02-15 {
 	description
@@ -56,10 +63,10 @@ module netgate-sysctl {
     }
 
     container sysctl-state {
+	config "false";
+
 	description
 	    "Linux kernel sysctl parameters.";
-
-	config "false";
 
 	container vm {
 	    description
