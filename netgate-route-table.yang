@@ -9,6 +9,10 @@ module netgate-route-table {
 	prefix "inet";
     }
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     import netgate-common {
 	prefix "ngcom";
     }
@@ -22,6 +26,11 @@ module netgate-route-table {
 	 for Route Tables.
 
 	 Copyright 2017-2020 Rubicon Communications, LLC.";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-07-15 {
 	description
@@ -50,29 +59,29 @@ module netgate-route-table {
 
 
     rpc route-lookup {
-        input {
-            leaf table-name {
+	input {
+	    leaf table-name {
 		type ngcom:rt-identifier-63;
 		description
 		    "The name of a Route Table.";
-                mandatory true;
-            }
+		mandatory true;
+	    }
 
-            leaf prefix {
+	    leaf prefix {
 		type inet:ip-prefix;
 		description
 		    "A prefix to lookup.";
-                mandatory true;
-            }
+		mandatory true;
+	    }
 
-            leaf exact {
+	    leaf exact {
 		type boolean;
 		description
 		    "If present and true, the lookup must match exactly.";
-            }
-        }
+	    }
+	}
 
-        output {
+	output {
 	    container route {
 		description
 		    "Route matching prefix lookup.";
@@ -148,7 +157,7 @@ module netgate-route-table {
 		    }
 		}
 	    }
-        }
+	}
     }
 
 
@@ -166,23 +175,22 @@ module netgate-route-table {
 		    "Route table entries are indexed by their name.
 		     Table names are unique across all address families.";
 
+		ngcliext:node-fmt "route table @{name}$n";
+		ngcliext:pre-children-op "push";
+		ngcliext:post-node-fmt "$n";
+
 		leaf name {
 		    type ngcom:rt-identifier-15;
 		    description
 			"The name of a Route Table.";
 		}
 
-		leaf address-family {
-		    type ngcom:ip-address-family;
-		    description
-			"The address family in this route table.
-			 One of 'ipv4' or 'ipv6'.";
-		}
-
 		leaf description {
 		    type string;
 		    description
 			"A description of the route table.";
+		    ngcliext:context "static-routes";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf id {
@@ -190,6 +198,7 @@ module netgate-route-table {
 		    description
 			"Numeric VRF table ID. " +
 			"The value 0 is used by default tables";
+		    ngcliext:node-fmt "^$% @@$n";
 		    default 0;
 		}
 
@@ -202,6 +211,10 @@ module netgate-route-table {
 			description
 			    "Routes are index by their destination.";
 
+			ngcliext:context "static-routes";
+			ngcliext:node-fmt "^route @{destination-prefix}$";
+			ngcliext:pre-children-op "push";
+
 			leaf destination-prefix {
 			    type inet:ipv4-prefix;
 			    description
@@ -212,6 +225,8 @@ module netgate-route-table {
 			    type ngcom:description-63;
 			    description
 				"A description of the route.";
+			    ngcliext:context "static-routes";
+			    ngcliext:node-fmt "^$% @@$n";
 			}
 
 			leaf priority {
@@ -219,8 +234,9 @@ module netgate-route-table {
 			    description
 				"Administrative distance
 				preference.";
+			    ngcliext:context "static-routes";
+			    ngcliext:node-fmt "^$% @@$n";
 			}
-
 
 			container next-hop {
 			    description
@@ -230,6 +246,9 @@ module netgate-route-table {
 				key "hop-id";
 				description
 				    "A list of next-hops.";
+
+				ngcliext:context "static-routes";
+				ngcliext:node-fmt "^next-hop @{hop-id} via ";
 
 				leaf hop-id {
 				    type uint32;
@@ -242,18 +261,24 @@ module netgate-route-table {
 				    type inet:ipv4-address;
 				    description
 					"The next hop IPv4 address.";
+				    ngcliext:context "static-routes";
+				    ngcliext:node-fmt "@@%{if-name}%{next-hop-table-name}%{weight}%{resolve-host}%{resolve-attached}$n";
 				}
 
 				leaf if-name {
 				    type ngcom:if-identifier-63;
 				    description
 					"The next hop interface name.";
+				    ngcliext:context "static-routes";
+				    ngcliext:sibling-fmt " @@";
 				}
 
 				leaf next-hop-table-name {
 				    type ngcom:rt-identifier-63;
 				    description
 					"The next hop route table name.";
+				    ngcliext:context "static-routes";
+				    ngcliext:sibling-fmt " next-hop-table @@";
 				}
 
 				leaf classify-table-name {
@@ -261,6 +286,8 @@ module netgate-route-table {
 				    description
 					"Use the given Classify Table
 					 name as the next hop.";
+				    ngcliext:context "static-routes";
+				    ngcliext:node-fmt "classify @@$n";
 				}
 
 				leaf weight {
@@ -269,18 +296,26 @@ module netgate-route-table {
 				    }
 				    description
 					"Multipath route weight.";
+				    ngcliext:context "static-routes";
+				    ngcliext:sibling-fmt " $% @@";
 				}
 
 				leaf drop {
 				    type boolean;
 				    description
 					"Drop the packet.";
+				    ngcliext:context "static-routes";
+				    ngcliext:node-op "bool";
+				    ngcliext:node-fmt "|$%$n";
 				}
 
 				leaf local {
 				    type boolean;
 				    description
 					"Receive the packet locally.";
+				    ngcliext:context "static-routes";
+				    ngcliext:node-op "bool";
+				    ngcliext:node-fmt "|$%$n";
 				}
 
 				leaf null-send-unreach {
@@ -288,6 +323,9 @@ module netgate-route-table {
 				    description
 					"Drop packet with an
 					 'unreachable' reply.";
+				    ngcliext:context "static-routes";
+				    ngcliext:node-op "bool";
+				    ngcliext:node-fmt "|$%$n";
 				}
 
 				leaf null-send-prohibit {
@@ -295,23 +333,30 @@ module netgate-route-table {
 				    description
 					"Drop packet with a
 					 'prohibited' reply.";
+				    ngcliext:context "static-routes";
+				    ngcliext:node-op "bool";
+				    ngcliext:node-fmt "|$%$n";
 				}
 
 				leaf resolve-host {
 				    type boolean;
 				    description
 					"Resolve host";
+				    ngcliext:context "static-routes";
+				    ngcliext:node-op "bool";
+				    ngcliext:node-fmt "|resolve-via-host$n";
 				}
 
 				leaf resolve-attached {
 				    type boolean;
 				    description
 					"Resolve attached";
+				    ngcliext:context "static-routes";
+				    ngcliext:node-op "bool";
+				    ngcliext:node-fmt "|resolve-via-attached$n";
 				}
-
 			    }
 			}
-
 		    }
 		}
 
@@ -324,6 +369,10 @@ module netgate-route-table {
 			description
 			    "Routes are index by their destination.";
 
+			ngcliext:context "static-routes";
+			ngcliext:node-fmt "^route @{destination-prefix}$";
+			ngcliext:pre-children-op "push";
+
 			leaf destination-prefix {
 			    type inet:ipv6-prefix;
 			    description
@@ -334,6 +383,8 @@ module netgate-route-table {
 			    type string;
 			    description
 				"A description of the route.";
+			    ngcliext:context "static-routes";
+			    ngcliext:node-fmt "^$% @@$n";
 			}
 
 			leaf priority {
@@ -341,6 +392,8 @@ module netgate-route-table {
 			    description
 				"Administrative distance
 				preference.";
+			    ngcliext:context "static-routes";
+			    ngcliext:node-fmt "^$% @@$n";
 			}
 
 			container next-hop {
@@ -351,6 +404,9 @@ module netgate-route-table {
 				key "hop-id";
 				description
 				    "A list of next-hops.";
+
+				ngcliext:context "static-routes";
+				ngcliext:node-fmt "^next-hop @{hop-id} via ";
 
 				leaf hop-id {
 				    type uint32;
@@ -363,18 +419,24 @@ module netgate-route-table {
 				    type inet:ipv6-address;
 				    description
 					"The next hop IPv6 address.";
+				    ngcliext:context "static-routes";
+				    ngcliext:node-fmt "@@%{if-name}%{next-hop-table-name}%{weight}%{resolve-host}%{resolve-attached}$n";
 				}
 
 				leaf if-name {
 				    type ngcom:if-identifier-63;
 				    description
 					"The next hop interface name.";
+				    ngcliext:context "static-routes";
+				    ngcliext:sibling-fmt " @@";
 				}
 
 				leaf next-hop-table-name {
 				    type string;
 				    description
 					"The next hop route table name.";
+				    ngcliext:context "static-routes";
+				    ngcliext:sibling-fmt " next-hop-table @@";
 				}
 
 				leaf classify-table-name {
@@ -382,6 +444,8 @@ module netgate-route-table {
 				    description
 					"Use the given Classify Table
 					 name as the next hop.";
+				    ngcliext:context "static-routes";
+				    ngcliext:node-fmt "classify @@$n";
 				}
 
 				leaf weight {
@@ -390,18 +454,26 @@ module netgate-route-table {
 				    }
 				    description
 					"Multipath route weight.";
+				    ngcliext:context "static-routes";
+				    ngcliext:sibling-fmt " $% @@";
 				}
 
 				leaf drop {
 				    type boolean;
 				    description
 					"Drop the packet.";
+				    ngcliext:context "static-routes";
+				    ngcliext:node-op "bool";
+				    ngcliext:node-fmt "|$%$n";
 				}
 
 				leaf local {
 				    type boolean;
 				    description
 					"Receive the packet locally.";
+				    ngcliext:context "static-routes";
+				    ngcliext:node-op "bool";
+				    ngcliext:node-fmt "|$%$n";
 				}
 
 				leaf null-send-unreach {
@@ -409,6 +481,9 @@ module netgate-route-table {
 				    description
 					"Drop packet with an
 					 'unreachable' reply.";
+				    ngcliext:context "static-routes";
+				    ngcliext:node-op "bool";
+				    ngcliext:node-fmt "|$%$n";
 				}
 
 				leaf null-send-prohibit {
@@ -416,18 +491,27 @@ module netgate-route-table {
 				    description
 					"Drop packet with a
 					 'prohibited' reply.";
+				    ngcliext:context "static-routes";
+				    ngcliext:node-op "bool";
+				    ngcliext:node-fmt "|$%$n";
 				}
 
 				leaf resolve-host {
 				    type boolean;
 				    description
 					"Resolve host";
+				    ngcliext:context "static-routes";
+				    ngcliext:node-op "bool";
+				    ngcliext:node-fmt "|resolve-via-host$n";
 				}
 
 				leaf resolve-attached {
 				    type boolean;
 				    description
 					"Resolve attached";
+				    ngcliext:context "static-routes";
+				    ngcliext:node-op "bool";
+				    ngcliext:node-fmt "|resolve-via-attached$n";
 				}
 			    }
 			}
@@ -457,13 +541,6 @@ module netgate-route-table {
 		    type ngcom:rt-identifier-63;
 		    description
 			"The name of a Route Table.";
-		}
-
-		leaf address-family {
-		    type ngcom:ip-address-family;
-		    description
-			"The address family in this route table.
-			 One of 'ipv4' or 'ipv6'.";
 		}
 
 		leaf description {

@@ -5,6 +5,10 @@ module netgate-http {
     namespace "urn:ietf:params:xml:ns:yang:netgate-http";
     prefix "nghttp";
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     import netgate-common {
 	prefix "ngcom";
     }
@@ -18,6 +22,11 @@ module netgate-http {
 
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -75,6 +84,8 @@ module netgate-http {
 		type boolean;
 		description
 		    "If true, RESTconf is enabled.";
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "|http enable restconf$n";
 	    }
 	}
 
@@ -87,34 +98,49 @@ module netgate-http {
 		description
 		    "If true, HTTP server is enabled for dataplane
 		    interfaces.";
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "|http dataplane enable$n";
 	    }
 	}
 
-	container authentication {
+	container daemon {
 	    description
-		"Authentication configuration.";
+		"HTTP Daemon configuration.";
 
-	    leaf auth-type {
-		type http-auth-type;
+	    ngcliext:node-fmt "http server$n";
+	    ngcliext:pre-children-op "push";
+
+	    container authentication {
 		description
-		    "The authentication type.";
+		    "Authentication configuration.";
+
+		ngcliext:parent-fmt "^authentication";
+
+		leaf auth-type {
+		    type http-auth-type;
+		    description
+			"The authentication type.";
+		    ngcliext:node-fmt "$< type @@$n";
+		}
+
+		leaf client-cert-ca {
+		    type string;
+		    description
+			"Client certificate.";
+		    ngcliext:node-fmt "$< client-certificate-ca @@$n";
+		}
 	    }
 
-	    leaf client-cert-ca {
-		type string;
+	    container encryption {
 		description
-		    "Client certificate.";
-	    }
-	}
+		    "Encryption.";
 
-	container encryption {
-	    description
-		"Encryption.";
-
-	    leaf server-certificate {
-		type string;
-		description
-		    "Server certificate.";
+		leaf server-certificate {
+		    type string;
+		    description
+			"Server certificate.";
+		    ngcliext:node-fmt "^server certificate @@$n";
+		}
 	    }
 	}
     }

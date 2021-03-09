@@ -15,7 +15,13 @@ module netgate-master {
 
     description
         "Definitions of master data and operations.
-	 Copyright 2019-2020 Rubicon Communications, LLC. All rights reserved.";
+	 Copyright 2019-2020 Rubicon Communications, LLC.
+	 All rights reserved.";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -38,6 +44,29 @@ module netgate-master {
     }
 
 
+    typedef show-cli-option {
+	type enumeration {
+	    enum list-plugins {
+		description
+		    "Request a list of plugins.";
+	    }
+	    enum list-all-modules {
+		description
+		    "Request a list of all modules.";
+	    }
+	    enum list-cli-modules {
+		description
+		    "Request a list of modules that have CLI configuration
+		     commands.";
+	    }
+	    enum get-commands {
+		description
+		    "Request the CLI commands for a given database.";
+	    }
+	}
+    }
+
+
     rpc backend-coredump {
 	input {
 	    leaf operation {
@@ -50,6 +79,67 @@ module netgate-master {
 	output {
 	    leaf stdout {
 		type string;
+	    }
+	}
+    }
+
+    rpc cli-show-cli {
+	input {
+	    leaf operation {
+		type show-cli-option;
+		mandatory true;
+		description
+		    "One of the operations 'list-plugins', 'list-modules',
+		     or 'get-commands'.";
+	    }
+	    leaf database {
+		type ngcom:database-name;
+		description
+		    "For 'get-commands', one of the database names 'running',
+		     'candidate', or 'startup'.";
+	    }
+	    leaf module {
+		type string {
+		    length "1..63";
+		}
+		description
+		    "For 'get-commands', and when set, the generated
+		     CLI commands are limited to the given module.";
+	    }
+	    leaf indent {
+		type boolean;
+		description
+		    "For 'get-commands', and if true, the generated CLI
+		     commands will be indented.";
+	    }
+	}
+	output {
+	    leaf stdout {
+		type string;
+		description
+		    "The generated CLI commands.";
+	    }
+	    container plugins {
+		list plugin {
+		    key name;
+		    leaf name {
+			type string;
+		    }
+		    leaf brief {
+			type string;
+		    }
+		}
+	    }
+	    container modules {
+		list module {
+		    key name;
+		    leaf name {
+			type string;
+		    }
+		    leaf xml-root {
+			type string;
+		    }
+		}
 	    }
 	}
     }

@@ -5,6 +5,10 @@ module netgate-ssh-server {
     namespace "urn:netgate:xml:yang:netgate-ssh-server";
     prefix "ngsshs";
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     import netgate-common {
 	prefix "ngcom";
     }
@@ -17,6 +21,11 @@ module netgate-ssh-server {
 	"This YANG module provides a data model for the SSH server.
 
 	 Copyright 2020 Rubicon Communications, LLC.";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -61,15 +70,21 @@ module netgate-ssh-server {
         description
             "Configuration for the SSH server.";
 
+	ngcliext:parent-fmt "ssh";
+
 	container dataplane {
 	    description
 		"Dataplane-specific parameters of SSH server.";
+
+	    ngcliext:parent-fmt "$< dataplane";
 
 	    leaf enable {
 		type boolean;
 		description
 		    "If true, SSH server is enabled for dataplane
 		    interfaces.";
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "|$< enable$n";
 	    }
 	}
     }

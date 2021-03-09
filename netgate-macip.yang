@@ -13,6 +13,10 @@ module netgate-macip {
 	prefix "yang";
     }
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     import netgate-common {
 	prefix "ngcom";
     }
@@ -27,6 +31,11 @@ module netgate-macip {
 
 	 Copyright 2019-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -75,6 +84,9 @@ module netgate-macip {
 		description
 		    "MACIP list name.";
 
+		ngcliext:node-fmt "macip @{macip-name}$n";
+		ngcliext:pre-children-op "push";
+
 		leaf macip-name {
 		    type string;
 		    mandatory true;
@@ -88,6 +100,7 @@ module netgate-macip {
 		    type ngcom:description-63;
 		    description
 		        "A text description for the MACIP.";
+		    ngcliext:node-fmt "^description @@$n";
 		}
 
 		container macip-rules {
@@ -98,6 +111,9 @@ module netgate-macip {
 			key "sequence";
 			description
 			    "A List of MACIP Rules.";
+
+			ngcliext:node-fmt "^rule @{sequence}$n";
+			ngcliext:pre-children-op "push";
 
 			leaf sequence {
 			    type uint32;
@@ -110,18 +126,21 @@ module netgate-macip {
 			    type ngcom:description-63;
 			    description
 				"A text description for the MACIP.";
+			    ngcliext:node-fmt "^description @@$n";
 			}
 
 			leaf action {
 			    type macip-rule-action;
 			    description
 				"One of the actions 'deny' or 'permit'.";
+			    ngcliext:node-fmt "^$% @@$n";
 			}
 
 			leaf mac-address {
 			    type yang:mac-address;
 			    description
 			        "The L2 MAC address to be matched.";
+			    ngcliext:node-fmt "^mac address @@$n";
 			}
 
 			leaf mac-mask {
@@ -129,6 +148,7 @@ module netgate-macip {
 			    description
 			        "The L2 MAC mask ANDed with packet MAC
 				addresses.";
+			    ngcliext:node-fmt "^mac mask @@$n";
 			}
 
 			leaf ip-version {
@@ -137,12 +157,14 @@ module netgate-macip {
 			    description
 				"indicates the IP version (ipv4 or ipv6)
 			         applicable to this ACL rule";
+			    ngcliext:node-fmt "^$% @@$n";
 			}
 
 			leaf ip-prefix {
 			    type inet:ip-prefix;
 			    description
 				"IP prefix.";
+			    ngcliext:node-fmt "^$% @@$n";
 			}
 		    }
 		}

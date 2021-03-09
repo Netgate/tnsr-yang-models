@@ -9,6 +9,10 @@ module netgate-map {
 	prefix "inet";
     }
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     import netgate-common {
 	prefix "ngcom";
     }
@@ -27,6 +31,11 @@ module netgate-map {
 
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -52,19 +61,28 @@ module netgate-map {
 	    description
 		"Configuration for MAP-E and MAP-t translations.";
 
+	    ngcliext:parent-fmt "$< map";
+
 	    container parameters {
 		description
 		    "Global MAP parameters.";
 
+		ngcliext:node-fmt "$< $%$n";
+		ngcliext:pre-children-op "push";
+
 		container fragment {
 		    description
-			"Parameters that indicate how MAP framentation
+			"Parameters that indicate how MAP fragmentation
 			 should happen.";
+
+		    ngcliext:parent-fmt "^fragment";
 
 		    leaf inner {
 			type boolean;
 			description
 			    "If needed, inner packets should be fragmented.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
 		    }
 
 		    leaf ignore-df {
@@ -72,6 +90,8 @@ module netgate-map {
 			description
 			    "If true, perform IPv4 fragmentation despite the
 			     value of the DF bit.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
 		    }
 		}
 
@@ -84,6 +104,7 @@ module netgate-map {
 			description
 			    "This parameter specifies the ICMP error relay
 			     source address.";
+			ngcliext:node-fmt "^icmp $% @@$n";
 		    }
 		}
 
@@ -95,6 +116,8 @@ module netgate-map {
 			type boolean;
 			description
 			    "If true, generate ICMP6 unreachable messages.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^icmp6 $% enable$n";
 		    }
 		}
 
@@ -108,6 +131,7 @@ module netgate-map {
 			    "The Maximum Segment Size is the largest
 			     amount of data, specified in bytes, that TCP
 			     is willing to receive in a single segment.";
+			ngcliext:node-fmt "^tcp $% @@$n";
 		    }
 		}
 
@@ -123,6 +147,7 @@ module netgate-map {
 			    type inet:ipv4-address-no-zone;
 			    description
 				"Use this IPv4 as the re-resolved next-hop.";
+			    ngcliext:node-fmt "^pre-resolve ipv4 $% @@$n";
 			}
 		    }
 
@@ -134,6 +159,7 @@ module netgate-map {
 			    type inet:ipv6-address-no-zone;
 			    description
 				"Use this IPv6 as the re-resolved next-hop.";
+			    ngcliext:node-fmt "^pre-resolve ipv6 $% @@$n";
 			}
 		    }
 		}
@@ -148,12 +174,17 @@ module netgate-map {
 			description
 			    "If true, perform security checks on the first
 			     inbound packet.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^security-check enable$n";
 		    }
+
 		    leaf fragments {
 			type boolean;
 			description
 			    "If true, also perform security checks on the
 			     subsequent inbound fragments too.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^security-check $% enable$n";
 		    }
 		}
 
@@ -168,13 +199,17 @@ module netgate-map {
 			     copied from the original packet to the
 			     encapsulating header.  If false, the 'tc'
 			     value is encoded instead.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^traffic-class $% enable$n";
 		    }
+
 		    leaf tc {
 			type uint8;
 			description
 			    "If the 'copy' field is false, encode this value
 			     as the traffic-class/TOS field in encapsulated
 			     headers.";
+			ngcliext:node-fmt "^traffic-class tc @@$n";
 		    }
 		}
 	    }
@@ -183,10 +218,15 @@ module netgate-map {
 		description
 		    "MAP table.";
 
+		ngcliext:node-fmt "$<";
+
 		list domain {
 		    key "name";
 		    description
 			"MAP domain name.";
+
+		    ngcliext:node-fmt "$< @{name}$n";
+		    ngcliext:pre-children-op "push";
 
 		    leaf name {
 			type ngcom:identifier-63;
@@ -198,18 +238,21 @@ module netgate-map {
 			type string;
 			description
 			    "An arbitrary description of the MAP domain.";
+			ngcliext:node-fmt "^$% @@$n";
 		    }
 
 		    leaf ip4-prefix {
 			 type inet:ipv4-prefix;
 			 description
 			    "The Rule IPv4 prefix.";
+			ngcliext:node-fmt "^ipv4 prefix @@$n";
 		    }
 
 		    leaf ip6-prefix {
 			 type inet:ipv6-prefix;
 			 description
 			    "The Rule IPv6 prefix.";
+			ngcliext:node-fmt "^ipv6 prefix @@$n";
 		    }
 
 		    leaf ip6-src-prefix {
@@ -219,6 +262,7 @@ module netgate-map {
 			     tunnel source.  For MAP-E, this prefix
 			     must be a full /128 address.  For MAP-T,
 			     this prefix must be /96 or /64.";
+			ngcliext:node-fmt "^ipv6 source @@$n";
 		    }
 
 		    leaf ea-bits-length {
@@ -227,28 +271,32 @@ module netgate-map {
 			}
 			description
 			    "The width of the embedded address field in bits.";
+			ngcliext:node-fmt "^embedded-address bit-length @@$n";
 		    }
 
 		    leaf psid-offset {
 			type uint8 {
-			    range "0..64";		/* FIXME: 16? */
+			    range "0..64";
 			}
 			description
 			    "The offset of the Port Set Identifier (PSID).";
+			ngcliext:node-fmt "^port-set offset @@$n";
 		    }
 
 		    leaf psid-length {
 			type uint8 {
-			    range "0..64";		/* FIXME: 16? */
+			    range "0..64";
 			}
 			description
 			    "The length of the Port Set Identifier (PSID).";
+			ngcliext:node-fmt "^port-set length @@$n";
 		    }
 
 		    leaf mtu {
 			type uint16;
 			description
 			    "MTU";
+			ngcliext:node-fmt "^$% @@$n";
 		    }
 
 		    container rules {
@@ -259,6 +307,8 @@ module netgate-map {
 			    key "psid";
 			    description
 				"Port Set Identifier";
+
+			    ngcliext:node-fmt "^$% @{psid} ipv6-destination @{ip6-destination}$n";
 
 			    leaf psid {
 				type uint32;
@@ -293,7 +343,7 @@ module netgate-map {
 
 		container fragment {
 		    description
-			"Parameters that indicate how MAP framentation
+			"Parameters that indicate how MAP fragmentation
 			 should happen.";
 
 		    leaf inner {
@@ -465,7 +515,7 @@ module netgate-map {
 
 		    leaf psid-offset {
 			type uint8 {
-			    range "0..64";		/* FIXME: 16? */
+			    range "0..64";
 			}
 			description
 			    "The offset of the Port Set Identifier (PSID).";
@@ -473,7 +523,7 @@ module netgate-map {
 
 		    leaf psid-length {
 			type uint8 {
-			    range "0..64";		/* FIXME: 16? */
+			    range "0..64";
 			}
 			description
 			    "The length of the Port Set Identifier (PSID).";

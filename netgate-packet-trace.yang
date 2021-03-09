@@ -1,0 +1,141 @@
+module netgate-packet-trace {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-packet-trace";
+    prefix "ngpt";
+
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    import netgate-packet-fields {
+	prefix "ngpf";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data-model
+	 for tracing packets using Classifier filters.
+
+	 Copyright 2020 Rubicon Communications, LLC.";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
+
+    revision 2021-02-01 {
+	description
+	    "TNSR Release 21.02.";
+    }
+
+    container packet-trace-config {
+	description
+	    "Configuration for packet tracing filters.";
+
+	container filters {
+	    description
+		"Table of filters that select gtraced packets.";
+
+	    list filter {
+		key name;
+		description
+		    "An unordered list of named filters.";
+
+		ngcliext:node-fmt "trace match @{name}$n";
+		ngcliext:pre-children-op "push";
+
+		leaf name {
+		    type ngcom:identifier-31;
+		    description
+			"The trace filter's name.";
+		}
+
+		leaf description {
+		    type ngcom:description-63;
+		    description
+			"The brief description of the trace filter.";
+		    ngcliext:node-fmt "^$% @@$n";
+		}
+
+		container match {
+		    description
+			"Trace filter match values.";
+
+		    container l2 {
+			description
+			    "L2 fields\n";
+
+			container ethernet {
+			    description
+				"L2 ethernet fields";
+
+			    ngcliext:node-fmt "^$%$n";
+			    ngcliext:pre-children-op "push";
+
+			    uses ngpf:l2-ethernet;
+			}
+		    }
+
+		    container l3 {
+			description
+			    "L3 fields";
+
+		        container ipv4 {
+			    description
+				"L3 IPv4 fields";
+
+			    ngcliext:node-fmt "^ip4$n";
+			    ngcliext:pre-children-op "push";
+
+			    uses ngpf:l3-ip4;
+			}
+
+		        container ipv6 {
+			    description
+				"L3 IPv6 fields";
+
+			    ngcliext:node-fmt "^ip6$n";
+			    ngcliext:pre-children-op "push";
+
+			    uses ngpf:l3-ip6;
+			}
+		    }
+
+		    container l4 {
+			description
+			    "L4 fields";
+
+		        container udp {
+			    description
+				"L4 UDP fields";
+
+			    ngcliext:node-fmt "^ip6$n";
+			    ngcliext:pre-children-op "push";
+
+			    uses ngpf:l4-udp;
+			}
+
+		        container tcp {
+			    description
+				"L4 TCP fields";
+
+			    ngcliext:node-fmt "^$%$n";
+			    ngcliext:pre-children-op "push";
+
+			    uses ngpf:l4-tcp;
+			}
+		    }
+		}
+	    }
+	}
+    }
+}

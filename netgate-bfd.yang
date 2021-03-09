@@ -9,6 +9,10 @@ module netgate-bfd {
 	prefix "inet";
     }
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     organization "Netgate";
 
     contact "Web: <http://www.netgate.com>";
@@ -19,6 +23,11 @@ module netgate-bfd {
 
 	 Copyright 2017-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -97,6 +106,9 @@ module netgate-bfd {
 		description
 		    "BFD Conf Key Entry.";
 
+		ngcliext:node-fmt "bfd conf-key-id @{conf-key-id}$n";
+		ngcliext:pre-children-op "push";
+
 		leaf conf-key-id {
 		    type uint32;
 		    description
@@ -110,6 +122,7 @@ module netgate-bfd {
 			"This is one of the supported key-types 'keyed-sha1',
 			 or 'meticulous-keyed-sha1'.  The other key types
 			 from RFC-5880 are not supported.";
+		    ngcliext:node-fmt "^authentication type @@$n";
 		}
 
 		leaf secret {
@@ -120,6 +133,7 @@ module netgate-bfd {
 		    description
 			"This is the hex encoded secret with maximum
 			length 20 bytes.";
+		    ngcliext:node-fmt "^secret @@$n";
 		}
 	    }
 	}
@@ -133,6 +147,9 @@ module netgate-bfd {
 		description
 		    "Each session has its own unique name.";
 
+		ngcliext:node-fmt "bfd session @{name}$n";
+		ngcliext:pre-children-op "push";
+
 		leaf name {
 		    type string;
 		    mandatory true;
@@ -145,6 +162,7 @@ module netgate-bfd {
 		    mandatory true;
 		    description
 		        "The session's interface name.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf local-ip-address {
@@ -152,6 +170,7 @@ module netgate-bfd {
 		    mandatory true;
 		    description
 			"The session's local IPv4 or IPv6 address.";
+		    ngcliext:node-fmt "^local address @@$n";
 		}
 
 		leaf peer-ip-address {
@@ -159,6 +178,7 @@ module netgate-bfd {
 		    mandatory true;
 		    description
 			"The session's peer IPv4 or IPv6 address.";
+		    ngcliext:node-fmt "^peer address @@$n";
 		}
 
 		leaf desired-min-tx {
@@ -172,6 +192,7 @@ module netgate-bfd {
                          like to use when transmitting BFD Control
                          packets, less any jitter applied.  The value
                          zero is reserved.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf required-min-rx {
@@ -186,6 +207,7 @@ module netgate-bfd {
                          transmitting system does not want the remote
                          system to send any periodic BFD Control
                          packets.";
+		    ngcliext:node-fmt "^$% @@$n";
                 }
 
 		leaf detect-multiplier {
@@ -200,18 +222,21 @@ module netgate-bfd {
                          value is (roughly speaking, due to jitter)
                          the number of packets that have to be missed
                          in a row to declare the session to be down.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf bfd-key-id {
 		    type uint32;
 		    description
 		        "The BFD key.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf conf-key-id {
 		    type uint32;
 		    description
 		        "The conf authentication key id.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf enable {
@@ -221,6 +246,7 @@ module netgate-bfd {
 		        "If true, BFD is enabled on this interface.
 			 This is defaulted to true because when VPP
 			 creates a session, this is how it is created.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf delayed {
@@ -228,6 +254,7 @@ module netgate-bfd {
 		    description
 		        "If true, authentication begins when a packet
 			 is received from the peer.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 	    }
 	}

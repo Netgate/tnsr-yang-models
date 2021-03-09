@@ -5,6 +5,12 @@ module netgate-sysctl {
     namespace "urn:netgate:xml:yang:netgate-sysctl";
     prefix "ngsysctl";
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
+    organization "Netgate";
+
     contact "Web: <http://www.netgate.com>";
 
     description
@@ -13,6 +19,11 @@ module netgate-sysctl {
 
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -38,20 +49,26 @@ module netgate-sysctl {
 	description
 	    "Linux kernel sysctl parameters.";
 
+	ngcliext:parent-fmt "sysctl";
+
 	container vm {
 	    description
 		"VM sysctl parameters.";
+
+	    ngcliext:parent-fmt "$< vm";
 
 	    leaf nr_hugepages {
 		type uint64;
 		description
 		    "Number of hugepages.";
+		ngcliext:node-fmt "$< $% @@$n";
 	    }
 
 	    leaf max_map_count {
 		type uint64;
 		description
 		    "Maximum map count.";
+		ngcliext:node-fmt "$< $% @@$n";
 	    }
 	}
 
@@ -59,10 +76,13 @@ module netgate-sysctl {
 	    description
 		"Kernel sysctl parameters.";
 
+	    ngcliext:parent-fmt "$< $%";
+
 	    leaf shmmax {
 	        type uint64;
 		description
 		    "Shared memory maximum.";
+		ngcliext:node-fmt "$< $% @@$n";
 	    }
 	}
     }

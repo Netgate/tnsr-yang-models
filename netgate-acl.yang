@@ -9,6 +9,10 @@ module netgate-acl {
 	prefix "inet";
     }
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     import netgate-common {
 	prefix "ngcom";
     }
@@ -23,6 +27,11 @@ module netgate-acl {
 
 	 Copyright 2017-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -121,6 +130,9 @@ module netgate-acl {
 		description
 		    "ACL list name.";
 
+		ngcliext:node-fmt "acl @{acl-name}$n";
+		ngcliext:pre-children-op "push";
+
 		leaf acl-name {
 		    type string;
 		    mandatory true;
@@ -134,6 +146,7 @@ module netgate-acl {
 		    type ngcom:description-63;
 		    description
 		        "A text description for the ACL.";
+		    ngcliext:node-fmt "^description @@$n";
 		}
 
 		container acl-rules {
@@ -144,6 +157,9 @@ module netgate-acl {
 			key "sequence";
 			description
 			    "A List of ACL Rules.";
+
+			ngcliext:node-fmt "^rule @{sequence}$n";
+			ngcliext:pre-children-op "push";
 
 			leaf sequence {
 			    type uint32;
@@ -156,6 +172,7 @@ module netgate-acl {
 			    type ngcom:description-63;
 			    description
 			        "A text description for the ACL rule.";
+			    ngcliext:node-fmt "^description @@$n";
 			}
 
 			leaf action {
@@ -164,6 +181,7 @@ module netgate-acl {
 			    description
 				"One of the actions 'deny', 'permit', or
 				 'reflect'.";
+			    ngcliext:node-fmt "^$% @@$n";
 			}
 
 			leaf ip-version {
@@ -172,84 +190,101 @@ module netgate-acl {
 			    description
 				"indicates the IP version (ipv4 or ipv6)
 			         applicable to this ACL rule";
+			    ngcliext:node-fmt "^$% @@$n";
 			}
 
 			leaf src-ip-prefix {
 			    type inet:ip-prefix;
 			    description
 				"IP source prefix.";
+			    ngcliext:node-fmt "^source address @@$n";
 			}
 
 			leaf src-first-port {
 			    type uint16;
 			    description
 				"The first source port in a range.";
+				ngcliext:node-fmt "^source port @@%{src-last-port}$n";
 			}
 
 			leaf src-last-port {
 			    type uint16;
 			    description
 				"The last source port in a range.";
+			    ngcliext:sibling-fmt " @@";
 			}
 
 			leaf dst-ip-prefix {
 			    type inet:ip-prefix;
 			    description
 				"IP destination prefix.";
+			    ngcliext:node-fmt "^destination address @@$n";
 			}
 
 			leaf dst-first-port {
 			    type uint16;
 			    description
 				"The first destination port in a range.";
+				ngcliext:node-fmt "^destination port @@%{dst-last-port}$n";
 			}
 
 			leaf dst-last-port {
 			    type uint16;
 			    description
 				"The last destination port in a range.";
+			    ngcliext:sibling-fmt " @@";
 			}
 
 			leaf protocol {
 			    type acl-protocol;
 			    description
 				"IP protocol";
+			    ngcliext:node-fmt "^$% @@$n";
 			}
 
 			leaf icmp-first-type {
 			    type uint16;
 			    description
 				"The first ICMP type in a range.";
+				ngcliext:node-fmt "^icmp type @@%{icmp-last-type}$n";
 			}
 
 			leaf icmp-last-type {
 			    type uint16;
 			    description
 				"The last ICMP type in a range.";
+			    ngcliext:node-op "prune";
+			    ngcliext:sibling-fmt " - @@";
 			}
 
 			leaf icmp-first-code {
 			    type uint16;
 			    description
 				"The first ICMP code in a range.";
+				ngcliext:node-fmt "^icmp code @@%{icmp-last-code}$n";
 			}
 
 			leaf icmp-last-code {
 			    type uint16;
 			    description
 				"The last ICMP code in a range.";
+			    ngcliext:node-op "prune";
+			    ngcliext:sibling-fmt " - @@";
 			}
 
 			leaf tcp-flags-mask {
 			    type uint8;
 			    description
 				"The TCP flags mask.";
+				ngcliext:node-fmt "^tcp flags mask @@ %{tcp-flags-value}$n";
 			}
 
 			leaf tcp-flags-value {
 			    type uint8;
 			    description
 				"The TCP flags value.";
+			    ngcliext:node-op "prune";
+			    ngcliext:sibling-fmt "value @@";
 			}
 		    }
 		}

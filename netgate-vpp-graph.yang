@@ -16,6 +16,11 @@ module netgate-vpp-graph {
 	 Copyright 2020 Rubicon Communications, LLC.
 	";
 
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
+
     revision 2020-05-02 {
 	description
 	    "Initial VPP graph RPC definitions.";

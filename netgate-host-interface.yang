@@ -13,6 +13,10 @@ module netgate-host-interface {
 	prefix "yang";
     }
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     organization "Netgate";
 
     contact "Web: <http://www.netgate.com>";
@@ -22,6 +26,11 @@ module netgate-host-interface {
 
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -53,6 +62,9 @@ module netgate-host-interface {
 	    description
 		"The list of configured host interfaces on the device.";
 
+	    ngcliext:node-fmt "host interface @{name}$n";
+	    ngcliext:pre-children-op "push";
+
 	    leaf name {
 		type string;
 		description
@@ -63,6 +75,7 @@ module netgate-host-interface {
 		type string;
 		description
 		    "A textual description of the host interface.";
+		ngcliext:node-fmt "^$% @@$n";
 	    }
 
 	    leaf enabled {
@@ -70,6 +83,8 @@ module netgate-host-interface {
 		description
 		    "This leaf contains the configured, desired state of
 		     the interface.";
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "|^enabled$n";
 	    }
 
 	    leaf mtu {
@@ -80,6 +95,7 @@ module netgate-host-interface {
 		description
 		    "The size, in octets, of the largest packet that the
 		     interface will send and receive.";
+		ngcliext:node-fmt "^$% @@$n";
 	    }
 
 	    container ipv4 {
@@ -93,6 +109,7 @@ module netgate-host-interface {
 			type inet:ipv4-prefix;
 			description
 			    "An IPv4 prefix on the host interface.";
+			ngcliext:node-fmt "^ip address @@$n";
 		    }
 		}
 	    }
@@ -108,6 +125,7 @@ module netgate-host-interface {
 			type inet:ipv6-prefix;
 			description
 			    "An IPv6 prefix on the host interface.";
+			ngcliext:node-fmt "^ipv6 address @@$n";
 		    }
 		}
 	    }

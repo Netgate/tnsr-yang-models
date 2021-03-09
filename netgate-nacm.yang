@@ -1,0 +1,102 @@
+module netgate-nacm {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-nacm";
+    prefix "ngnacm";
+
+    import ietf-netconf-acm {
+	prefix "nacm";
+    }
+
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides Netgate extensions for IETF NACM.
+
+	 Copyright 2021 Rubicon Communications, LLC.";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
+
+
+    augment "/nacm:nacm" {
+	ngcliext:parent-fmt "nacm";
+    }
+
+    augment "/nacm:nacm/nacm:enable-nacm" {
+	ngcliext:node-op "bool";
+	ngcliext:node-fmt "|$< enable$n";
+    }
+
+    augment "/nacm:nacm/nacm:read-default" {
+	ngcliext:node-fmt "$< $% @@$n";
+    }
+
+    augment "/nacm:nacm/nacm:write-default" {
+	ngcliext:node-fmt "$< $% @@$n";
+    }
+
+    augment "/nacm:nacm/nacm:exec-default" {
+	ngcliext:node-fmt "$< $% @@$n";
+    }
+
+    augment "/nacm:nacm/nacm:groups" {
+	ngcliext:parent-fmt "$<";
+    }
+
+    augment "/nacm:nacm/nacm:groups/nacm:group" {
+    	    ngcliext:node-fmt "$< group @{name}$n";
+	    ngcliext:pre-children-op "push";
+    }
+
+    augment "/nacm:nacm/nacm:groups/nacm:group/nacm:user-name" {
+    	    ngcliext:node-fmt "^member @@$n";
+    }
+
+    augment "/nacm:nacm/nacm:rule-list" {
+    	    ngcliext:node-fmt "$< rule-list @{name}$n";
+	    ngcliext:pre-children-op "push";
+    }
+
+    augment "/nacm:nacm/nacm:rule-list/nacm:group" {
+    	    ngcliext:node-fmt "^group @@$n";
+    }
+
+    augment "/nacm:nacm/nacm:rule-list/nacm:rule" {
+    	    ngcliext:node-fmt "^rule @{name}$n";
+    	    ngcliext:pre-children-op "push";
+    }
+
+    augment "/nacm:nacm/nacm:rule-list/nacm:rule/nacm:access-operations" {
+    	    ngcliext:node-fmt "^$% $q@@$q$n";
+    }
+
+    augment "/nacm:nacm/nacm:rule-list/nacm:rule/nacm:action" {
+    	    ngcliext:node-fmt "^$% @@$n";
+    }
+
+    augment "/nacm:nacm/nacm:rule-list/nacm:rule/nacm:comment" {
+    	    ngcliext:node-fmt "^$% @@$n";
+    }
+
+    augment "/nacm:nacm/nacm:rule-list/nacm:rule/nacm:module-name" {
+    	    ngcliext:node-fmt "^module @@$n";
+    }
+
+    augment "/nacm:nacm/nacm:rule-list/nacm:rule/nacm:rule-type/nacm:protocol-operation/nacm:rpc-name" {
+    	    ngcliext:node-fmt "^rpc @@$n";
+    }
+
+    augment "/nacm:nacm/nacm:rule-list/nacm:rule/nacm:rule-type/nacm:data-node/nacm:path" {
+    	    ngcliext:node-fmt "^path @@$n";
+    }
+}

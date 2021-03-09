@@ -5,6 +5,10 @@ module netgate-span {
     namespace "urn:netgate:xml:yang:netgate-span";
     prefix "ngspan";
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     import netgate-common {
 	prefix "ngcom";
     }
@@ -19,6 +23,11 @@ module netgate-span {
 
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -87,6 +96,9 @@ module netgate-span {
 		description
 		    "Mirrored source interface.";
 
+		ngcliext:node-fmt "span @{if-name-src}$n";
+		ngcliext:pre-children-op "push";
+
 		leaf if-name-src {
 		    type ngcom:if-identifier-63;
 		    description
@@ -101,6 +113,8 @@ module netgate-span {
 			key "if-name-dst";
 			description
 			    "The destination interface.";
+
+			ngcliext:node-fmt "^onto @{if-name-dst} @{layer} @{state}$n";
 
 			leaf if-name-dst {
 			    type ngcom:if-identifier-63;

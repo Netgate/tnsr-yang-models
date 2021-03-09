@@ -5,6 +5,10 @@ module netgate-interface-extensions {
     namespace "urn:netgate:xml:yang:netgate-ifext";
     prefix "ngifext";
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     import netgate-interface {
 	prefix "ngif";
     }
@@ -18,6 +22,11 @@ module netgate-interface-extensions {
 	 a network interface.
 
 	 Copyright 2019-2020 Rubicon Communications, LLC.";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -36,6 +45,8 @@ module netgate-interface-extensions {
 	
 	list rx-queue {
 	    key rx-queue-id;
+
+	    ngcliext:node-fmt "^$% @{rx-queue-id} cpu @{pinned-cpu-id}$n";
 
 	    leaf rx-queue-id {
 		type uint16;

@@ -13,6 +13,10 @@ module netgate-kea {
 	prefix "yang";
     }
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     import netgate-common {
 	prefix "ngcom";
     }
@@ -25,6 +29,11 @@ module netgate-kea {
 	"This YANG module provides a data model for the Kea DHCP server.
 
 	 Copyright 2019-2020 Rubicon Communications, LLC.";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -1009,6 +1018,9 @@ module netgate-kea {
 	    description
 		"List of DHCPv4 custom option definition.";
 
+	    ngcliext:node-fmt "^$% @{name}$n";
+	    ngcliext:pre-children-op "push";
+
 	    leaf name {
 		type kea-dhcp4-option-def-id;
 		description
@@ -1021,6 +1033,7 @@ module netgate-kea {
 		description
 		    "If true, specifies an array of values.  If false,
 		     specifies a singular datum or record.";
+		ngcliext:node-fmt "^$% @@$n";
 	    }
 
 	    leaf code {
@@ -1028,6 +1041,7 @@ module netgate-kea {
 		mandatory true;
 		description
 		    "The numeric uint8 option code.";
+		ngcliext:node-fmt "^$% @@$n";
 	    }
 
 	    leaf encapsulate {
@@ -1035,18 +1049,21 @@ module netgate-kea {
 		description
 		    "The name of the option space being encapsulated
 		     by the particular option.";
+		ngcliext:node-fmt "^$% @@$n";
 	    }
 
 	    leaf record-types {
 		type string;
 		description
 		    "A comma separated list of record field types.";
+		ngcliext:node-fmt "^$% @@$n";
 	    }
 
 	    leaf space {
 		type string;
 		description
 		    "The namespace for the option definition.";
+		ngcliext:node-fmt "^$% @@$n";
 	    }
 
 	    leaf type {
@@ -1054,6 +1071,7 @@ module netgate-kea {
 		mandatory true;
 		description
 		    "The data-type of the option's value.";
+		ngcliext:node-fmt "^$% @@$n";
 	    }
 	}
     }
@@ -1067,6 +1085,9 @@ module netgate-kea {
 	    description
 		"List of DHCPv4 options and values.";
 
+	    ngcliext:node-fmt "^option @{name}$n";
+	    ngcliext:pre-children-op "push";
+
 	    leaf name {
 		type kea-dhcp4-option;
 		description
@@ -1079,6 +1100,7 @@ module netgate-kea {
 		description
 		    "To enforce the addition of a particular option
 		     set the always-send flag to true.";
+		ngcliext:node-fmt "^$% @@$n";
 	    }
 
 	    leaf csv-format {
@@ -1088,6 +1110,7 @@ module netgate-kea {
 		     assume that the option data is specified as a
 		     list of comma separated values to be assigned to
 		     individual fields of the DHCP option.";
+		ngcliext:node-fmt "^$% @@$n";
 	    }
 
 	    leaf data {
@@ -1101,6 +1124,7 @@ module netgate-kea {
 		     and which the specification allows for the length
 		     of 0. For such options, the data parameter may be
 		     omitted in the configuration.";
+		ngcliext:node-fmt "^$% @@$n";
 	    }
 
 	    leaf space {
@@ -1109,6 +1133,7 @@ module netgate-kea {
 		    "If the option space is unspecified it will
 		     default to 'dhcp4' which is an option space
 		     holding DHCPv4 standard options";
+		ngcliext:node-fmt "^$% @@$n";
 	    }
 	}
     }
@@ -1122,6 +1147,9 @@ module netgate-kea {
 	    description
 		"List of logging facilities and parameters.";
 
+	    ngcliext:node-fmt "^logging @{name}$n";
+	    ngcliext:pre-children-op "push";
+
 	    leaf name {
 		type kea-logger-name;
 		description
@@ -1132,6 +1160,9 @@ module netgate-kea {
 		key output;
 		description
 		    "List of output options for a logger.";
+
+		ngcliext:node-fmt "^output @{output}$n";
+		ngcliext:pre-children-op "push";
 
 		leaf output {
 		    type kea-output-location;
@@ -1146,6 +1177,7 @@ module netgate-kea {
 		    description
 			"The maximum number of rotation log files
 			 to keep.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf maxsize {
@@ -1155,6 +1187,7 @@ module netgate-kea {
 		    description
 			"The maximum size of a rotating log file.
 			 The default is 10MB.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf flush {
@@ -1162,6 +1195,7 @@ module netgate-kea {
 		    description
 			"If true, each log message is flushed as it is
 			 logged at a slight performance penalty.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 	    }
 
@@ -1169,6 +1203,7 @@ module netgate-kea {
 		type kea-logger-severity;
 		description
 		    "A Kea logger severity level.";
+		ngcliext:node-fmt "^$% @@$n";
 	    }
 
 	    leaf debuglevel {
@@ -1177,6 +1212,7 @@ module netgate-kea {
 		}
 		description
 		    "A Kea debug level.";
+		ngcliext:node-fmt "^debug-level @@$n";
 	    }
 	}
     }
@@ -1198,10 +1234,14 @@ module netgate-kea {
 		description
 		    "Parameters for the DHCP IPv4 server.";
 
+		ngcliext:parent-fmt "dhcp4";
+
 		leaf enable {
 		    type boolean;
 		    description
 			"If true, the Kea dhcp4 server is enabled.";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|$< enable$n";
 		}
 	    }
 	}
@@ -1209,6 +1249,9 @@ module netgate-kea {
 	container dhcp4-server {
 	    description
 		"Gather all the parts that contribute to the DHCP4 server.";
+
+	    ngcliext:node-fmt "dhcp4 server$n";
+	    ngcliext:pre-children-op "push";
 
 	    container Dhcp4 {
 		description
@@ -1225,12 +1268,14 @@ module netgate-kea {
 			 in seconds in which the server will recycle
 			 declined leases.  The default period is 86400
 			 seconds (24 hours).";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf description {
 		    type string;
 		    description
 			"A user-supplied description of the server.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf echo-client-id {
@@ -1240,6 +1285,7 @@ module netgate-kea {
 			 the server should or should-not reply with the
 			 client-id if the client sent it.  Setting this to
 			 false enables RFC-2131 backward compatibitlity.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf match-client-id {
@@ -1247,6 +1293,7 @@ module netgate-kea {
 		    description
 			"If match-client-id is false, the DHCP server will
 			 match clients using the 'chaddr' field.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf next-server {
@@ -1254,18 +1301,21 @@ module netgate-kea {
 		    description
 			"This next-server IPv4 address is used as the
 			siaddr field.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf rebind-timer {
 		    type uint32;
 		    description
 			"The RFC-2131 T2 rebind value in seconds.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf renew-timer {
 		    type uint32;
 		    description
 			"The RFC-2131 T1 renewal value in seconds.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf valid-lifetime {
@@ -1273,9 +1323,13 @@ module netgate-kea {
 		    description
 			"The valid duration for an assigned lease in
 			seconds.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		container lease-database {
+
+		    ngcliext:parent-fmt "^lease";
+
 		    leaf type {
 			type string;
 			default "memfile";
@@ -1289,10 +1343,8 @@ module netgate-kea {
 			type string;
 			description
 			    "Name of the DHCPv4 leases file on disk.
-			     This should be a name ending in '.csv'.
-			     FIXME: We should probably make this file be
-			     permanently stored under /var/kea/leases/ or
-			     something.";
+			     This should be a name ending in '.csv'.";
+			ngcliext:node-fmt "$< filename @@$n";
 		    }
 
 		    leaf persist {
@@ -1304,6 +1356,7 @@ module netgate-kea {
 			     file on disk.  If leases aren't written to
 			     disk, no assurance can be made that leases
 			     will persist across a server restart.";
+			ngcliext:node-fmt "$< $% @@$n";
 		    }
 
 		    leaf lfc-interval {
@@ -1315,6 +1368,7 @@ module netgate-kea {
 			     lease file cleanup to remove the unused,
 			     historical information from the lease file.
 			     The default, 0, disables the LFC operation.";
+			ngcliext:node-fmt "$< $% @@$n";
 		    }
 		}
 
@@ -1324,6 +1378,8 @@ module netgate-kea {
 			 information about each interface used by the
 			 DHCPv4 server.";
 
+		    ngcliext:parent-fmt "^interface";
+
 		    list interfaces {
 			key interface;
 			description
@@ -1331,6 +1387,8 @@ module netgate-kea {
 			     or interface names with unicast addresses on
 			     them on which the server will listen for DHCP
 			     requests.";
+
+			ngcliext:node-fmt "$< listen @{interface}$n";
 
 			leaf interface {
 			    type ngcom:if-identifier-63;
@@ -1348,6 +1406,7 @@ module netgate-kea {
 			    "Sockets used for listening on the set of
 			     interfaces will be opened as either'raw' IP
 			     sockets, or 'udp' sockets.";
+			ngcliext:node-fmt "$< socket @@$n"; 
 		    }
 		}
 
@@ -1356,6 +1415,9 @@ module netgate-kea {
 		    description
 			"An IPv4 subnet configuration within the DHCPv4
 			server.";
+
+		    ngcliext:node-fmt "^subnet @{subnet}$n";
+		    ngcliext:pre-children-op "push";
 
 		    leaf subnet {
 			type inet:ipv4-prefix;
@@ -1367,6 +1429,7 @@ module netgate-kea {
 			type uint32;
 			description
 			    "Manually assigned subnet id.";
+			ngcliext:node-fmt "^$% @@$n";
 		    }
 
 		    leaf interface {
@@ -1374,6 +1437,7 @@ module netgate-kea {
 			mandatory true;
 			description
 			    "Interface on which subnet is located.";
+			ngcliext:node-fmt "^$% @@$n";
 		    }
 
 		    uses kea-dhcp4-option-group;
@@ -1385,6 +1449,9 @@ module netgate-kea {
 			     is specfied as a start and optional end IPv4
 			     addresses, or as an IPv4 address and prefix.";
 
+			ngcliext:node-fmt "^pool @{pool}$n";
+			ngcliext:pre-children-op "push";
+
 			leaf pool {
 			    type ipv4-prefix-or-range;
 			    description
@@ -1395,7 +1462,6 @@ module netgate-kea {
 
 			leaf pool-present {
 			    type boolean;
-			    /* CONSIDER DEPRECATION */
 			}
 
 			uses kea-dhcp4-option-group;
@@ -1403,8 +1469,13 @@ module netgate-kea {
 
 		    list reservations {
 			key ip-address;
+			unique hw-address;
+
 			description
 			    "List of host reservations.";
+
+			ngcliext:node-fmt "^reservation @{ip-address}$n";
+			ngcliext:pre-children-op "push";
 
 			leaf ip-address {
 			    type inet:ipv4-address;
@@ -1417,12 +1488,14 @@ module netgate-kea {
 			    mandatory true;
 			    description
 				"The host's MAC address.";
+			    ngcliext:node-fmt "^mac-address @@$n";
 			}
 
 			leaf hostname {
 			    type inet:domain-name;
 			    description
 				"The host name of the identified host.";
+			    ngcliext:node-fmt "^$% @@$n";
 			}
 
 			uses kea-dhcp4-option-group;

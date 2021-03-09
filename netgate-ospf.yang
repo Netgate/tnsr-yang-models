@@ -13,6 +13,10 @@ module netgate-ospf {
 	prefix "yang";
     }
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     import netgate-common {
 	prefix "ngcom";
     }
@@ -31,6 +35,11 @@ module netgate-ospf {
 
 	 Copyright 2019-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -61,7 +70,7 @@ module netgate-ospf {
 	    type string {
 		pattern 'default';
 	    }
-	    type string;	/* FIXME: limit to IF names */
+	    type string;
 	}
     }
 
@@ -380,12 +389,15 @@ module netgate-ospf {
 	    description
 		"Debug packets sent or received.
 		Missing is both.";
+	    ngcliext:node-fmt "$< @@$n";
 	}
 
 	leaf detail {
 	    type boolean;
 	    description
 		"Debug packets in detail.";
+	    ngcliext:node-op "bool";
+	    ngcliext:node-fmt "|$< $%$n";
 	}
     }
 
@@ -427,6 +439,9 @@ module netgate-ospf {
 
 	container ospf {
 
+	    ngcliext:node-fmt "route dynamic ospf$n";
+	    ngcliext:pre-children-op "push";
+
 	    container global-options {
 		description
 		    "These are options that apply to the OSPF Server or
@@ -436,32 +451,44 @@ module netgate-ospf {
 		    description
 			"OSPF debug configurations.";
 
+		    ngcliext:parent-fmt "^$%";
+
 		    leaf event {
 			type boolean;
 			description
 			    "Enable OSPF Event debug.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
 		    }
 
 		    container ism {
 			description
 			    "Debug OSPF interface state machine";
 
+			ngcliext:parent-fmt "$< $%";
+
 			leaf events {
 			    type boolean;
 			    description
 				"ISM Event information";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$< $%$n";
 			}
 
 			leaf status {
 			    type boolean;
 			    description
 				"ISM status information";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$< $%$n";
 			}
 
 			leaf timers {
 			    type boolean;
 			    description
 				"ISM timer information";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$< $%$n";
 			}
 		    }
 
@@ -469,16 +496,22 @@ module netgate-ospf {
 			description
 			    "Debug OSPF link state advertisement";
 
+			ngcliext:parent-fmt "$< $%";
+
 			leaf flooding {
 			    type boolean;
 			    description
 				"LSA Flooding information";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$< $%$n";
 			}
 
 			leaf generate {
 			    type boolean;
 			    description
 				"LSA Generation information";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$< $%$n";
 			}
 
 			leaf install {
@@ -491,6 +524,8 @@ module netgate-ospf {
 			    type boolean;
 			    description
 				"LSA Refresh information";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$< $%$n";
 			}
 		    }
 
@@ -498,22 +533,30 @@ module netgate-ospf {
 			description
 			    "Debug OSPF neighbor state machine";
 
+			ngcliext:parent-fmt "$< $%";
+
 			leaf events {
 			    type boolean;
 			    description
 				"NSM Event information";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$< $%$n";
 			}
 
 			leaf status {
 			    type boolean;
 			    description
 				"NSM Status information";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$< $%$n";
 			}
 
 			leaf timers {
 			    type boolean;
 			    description
 				"NSM Timer information";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$< $%$n";
 			}
 		    }
 
@@ -521,16 +564,24 @@ module netgate-ospf {
 			type boolean;
 			description
 			    "Debug OSPF not-so-stubby-area information";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
 		    }
 
 		    container packet {
 			description
 			    "Debug OSPF packets";
 
+			ngcliext:parent-fmt "$< $%";
+
 			container dd {
 			    presence
 				"If present, debug database
 				 description packets.";
+
+			    ngcliext:parent-fmt "$< $%";
+			    ngcliext:node-op "test-set:@{direction}@{detail}";
+			    ngcliext:node-fmt "$< $%$n|";
 
 			    uses ospf-packet-send-recv;
 			}
@@ -539,12 +590,20 @@ module netgate-ospf {
 			    presence
 				"If present, debug hello packets.";
 
+			    ngcliext:parent-fmt "$< $%";
+			    ngcliext:node-op "test-set:@{direction}@{detail}";
+			    ngcliext:node-fmt "$< $%$n|";
+
 			    uses ospf-packet-send-recv;
 			}
 
 			container ls-ack {
 			    presence
 				"If present, debug link state ACK packets.";
+
+			    ngcliext:parent-fmt "$< $%";
+			    ngcliext:node-op "test-set:@{direction}@{detail}";
+			    ngcliext:node-fmt "$< $%$n|";
 
 			    uses ospf-packet-send-recv;
 			}
@@ -554,12 +613,20 @@ module netgate-ospf {
 				"If present, debug link state request
 				 packets.";
 
+			    ngcliext:parent-fmt "$< $%";
+			    ngcliext:node-op "test-set:@{direction}@{detail}";
+			    ngcliext:node-fmt "$< $%$n|";
+
 			    uses ospf-packet-send-recv;
 			}
 
 			container ls-update {
 			    presence
 				"If present, debug ls-update packets.";
+
+			    ngcliext:parent-fmt "$< $%";
+			    ngcliext:node-op "test-set:@{direction}@{detail}";
+			    ngcliext:node-fmt "$< $%$n|";
 
 			    uses ospf-packet-send-recv;
 			}
@@ -569,11 +636,15 @@ module netgate-ospf {
 			description
 			    "Debug OSPF traffic engineering";
 
+			ngcliext:parent-fmt "$< $%";
+
 			leaf enable {
 			    type boolean;
 			    description
 				"If true, OSPF traffic-engineering debug
 				 is enabled.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$<$n";
 			}
 		    }
 
@@ -581,16 +652,20 @@ module netgate-ospf {
 			description
 			    "Debug OSPF Zebra messages.";
 
+			ngcliext:parent-fmt "$< $%";
+
 			leaf interface {
 			    type boolean;
 			    description
 				"Debug OSPF Zebra interface messages.";
+			    ngcliext:node-fmt "$< $%$n";
 			}
 
 			leaf redistribute {
 			    type boolean;
 			    description
 				"Debug OSPF Zebra redistribute messages.";
+			    ngcliext:node-fmt "$< $%$n";
 			}
 		    }
 		}
@@ -600,6 +675,8 @@ module netgate-ospf {
 		    default false;
 		    description
 			"If true, the OSPF Daemon is enabled.";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|^$%$n";
 		}
 	    }
 
@@ -610,6 +687,9 @@ module netgate-ospf {
 
 		list if {
 		    key if-name;
+
+		    ngcliext:node-fmt "^interface @{if-name}$n";
+		    ngcliext:pre-children-op "push";
 
 		    leaf if-name {
 			type string;
@@ -622,12 +702,18 @@ module netgate-ospf {
 			    "Interface configuration for IPv4 address
 			    family.";
 
+			ngcliext:parent-fmt "^ip";
+
 			container area {
 			    description
 				"Enable OSPF for an area on this interface.";
 
+			    ngcliext:parent-fmt "$<";
+
 			    list address {
 				key ip4-address;
+
+				ngcliext:node-fmt "$< $% @{ip4-address} area @{area-id}$n";
 
 				leaf ip4-address {
 				    type ospf-ip4-or-any;
@@ -648,8 +734,12 @@ module netgate-ospf {
 			    presence
 				"If present, authentication is enabled.";
 
+			    ngcliext:parent-fmt "$<";
+
 			    list address {
 				key ip4-address;
+
+				ngcliext:node-fmt "$< $% @{ip4-address} authentication${if-auth}$n";
 
 				leaf ip4-address {
 				    type ospf-ip4-or-any;
@@ -663,13 +753,19 @@ module netgate-ospf {
 				    description
 					"Use 'message-digest' or 'null'
 					 authentication.";
+				    ngcliext:child-fmt " @@";
 				}
 			    }
 			}
 
 			container authentication-key {
+
+			    ngcliext:parent-fmt "$<";
+
 			    list address {
 				key ip4-address;
+
+				ngcliext:node-fmt "$< $% @{ip4-address} authentication-key @{key}$n";
 
 				leaf ip4-address {
 				    type ospf-ip4-or-any;
@@ -687,8 +783,13 @@ module netgate-ospf {
 			}
 
 			container cost {
+
+			    ngcliext:parent-fmt "$<";
+
 			    list address {
 				key ip4-address;
+
+				ngcliext:node-fmt "$< $% @{ip4-address} cost @{link-cost}$n";
 
 				leaf ip4-address {
 				    type ospf-ip4-or-any;
@@ -715,8 +816,12 @@ module netgate-ospf {
 				 'minimal', in which case 1s is used and
 				 fast sub-second hellos are sent.";
 
+			    ngcliext:parent-fmt "$<";
+
 			    list address {
 				key ip4-address;
+
+				ngcliext:node-fmt "$< $% @{ip4-address} dead-interval @{interval}${multiplier}$n";
 
 				leaf ip4-address {
 				    type ospf-ip4-or-any;
@@ -742,6 +847,7 @@ module netgate-ospf {
 					 with fast sub-second hellos.
 					 This is the number of hellos to
 					 send each second.";
+				    ngcliext:child-fmt " hello @@";
 				}
 			    }
 			}
@@ -750,8 +856,12 @@ module netgate-ospf {
 			    description
 				"The interval between hello packets.";
 
+			    ngcliext:parent-fmt "$<";
+
 			    list address {
 				key ip4-address;
+
+				ngcliext:node-fmt "$< $% @{ip4-address} hello-interval @{interval}$n";
 
 				leaf ip4-address {
 				    type ospf-ip4-or-any;
@@ -775,8 +885,12 @@ module netgate-ospf {
 			    description
 				"A list of MD5 keys index by unique key IDs.";
 
+			    ngcliext:parent-fmt "$<";
+
 			    list address {
 				key ip4-address;
+
+				ngcliext:parent-fmt "$< $% @{ip4-address} message-digest-key";
 
 				leaf ip4-address {
 				    type ospf-ip4-or-any;
@@ -786,8 +900,13 @@ module netgate-ospf {
 				}
 
 				container keys {
+
+				    ngcliext:parent-fmt "$<";
+
 				    list key-id {
 					key "id";
+
+					ngcliext:node-fmt "$< key-id @{id} md5-key @{key}$n";
 
 					leaf id {
 					    type uint8 {
@@ -813,8 +932,12 @@ module netgate-ospf {
 			    description
 				"MTU parameters for an interface.";
 
+			    ngcliext:parent-fmt "$<";
+
 			    list address {
 				key ip4-address;
+
+				ngcliext:parent-fmt "$< address @{ip4-address}";
 
 				leaf ip4-address {
 				    type ospf-ip4-or-any;
@@ -828,20 +951,9 @@ module netgate-ospf {
 				    description
 					"If true, MTU mismatch detection on
 					 this interface will be disabled.";
+				    ngcliext:node-op "bool";
+				    ngcliext:node-fmt "|$< mtu-ignore$n";
 				}
-			    }
-			}
-
-			container network {
-			    description
-				"Network parameters";
-
-			    leaf type {
-				type ospf-network-type;
-				description
-				    "OSPF Network type is one of 'broadcast',
-				     'non-broadcast', 'point-to-multipoint', or
-				     'point-to-point'.";
 			    }
 			}
 
@@ -851,8 +963,12 @@ module netgate-ospf {
 				 link state advertisements (RxmtInterval
 				 timer).";
 
+			    ngcliext:parent-fmt "$<";
+
 			    list address {
 				key ip4-address;
+
+				ngcliext:node-fmt "$< $% @{ip4-address} retransmit-interval @{interval}$n";
 
 				leaf ip4-address {
 				    type ospf-ip4-or-any;
@@ -877,8 +993,12 @@ module netgate-ospf {
 			    description
 				"The priority of this router.";
 
+			    ngcliext:parent-fmt "$<";
+
 			    list address {
 				key ip4-address;
+
+				ngcliext:node-fmt "$< $% @{ip4-address} router-priority @{priority}$n";
 
 				leaf ip4-address {
 				    type ospf-ip4-or-any;
@@ -899,8 +1019,12 @@ module netgate-ospf {
 			    description
 				"The LSA age increment value (InfTransDelay).";
 
+			    ngcliext:parent-fmt "$<";
+
 			    list address {
 				key ip4-address;
+
+				ngcliext:node-fmt "$< $% @{ip4-address} transmit-delay @{delay}$n";
 
 				leaf ip4-address {
 				    type ospf-ip4-or-any;
@@ -925,6 +1049,24 @@ module netgate-ospf {
 			    description
 				"Bidirectional Forwarding Detection (BFD)
 				 is enabled for this interface.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$< $% enabled @@$n";
+			}
+
+			container network {
+			    description
+				"Network parameters";
+
+			    ngcliext:parent-fmt "$< network";
+
+			    leaf type {
+				type ospf-network-type;
+				description
+				    "OSPF Network type is one of 'broadcast',
+				     'non-broadcast', 'point-to-multipoint', or
+				     'point-to-point'.";
+				ngcliext:node-fmt "$< @@$n";
+			    }
 			}
 		    }
 		}
@@ -936,6 +1078,9 @@ module netgate-ospf {
 
 		list router {
 		    key vrf-id;
+
+		    ngcliext:node-fmt "^server vrf @{vrf-id}$n";
+		    ngcliext:pre-children-op "push";
 
 		    description
 			"The router contains all information for one
@@ -949,6 +1094,9 @@ module netgate-ospf {
 		    }
 
 		    container auto-cost {
+
+			ngcliext:parent-fmt "^$%";
+
 			leaf reference-bandwidth {
 			    type uint32 {
 				range "1..4294967";
@@ -956,31 +1104,48 @@ module netgate-ospf {
 			    description
 				"The reference bandwidth, 1..4294967,
 				 in MBits/sec.";
+			    ngcliext:node-fmt "$< $% @@$n";
 			}
 		    }
 
 		    container capability {
+
+			ngcliext:parent-fmt "^$%";
+
 			leaf opaque-lsa {
 			    type boolean;
 			    description
 				"If true, enable opaque LSAs.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$< $%$n";
 			}
 		    }
 
 		    container compatible {
+
+			ngcliext:parent-fmt "^$%";
+
 			leaf rfc1583 {
 			    type boolean;
 			    description
 				"If true, ensure compatibility with RFC-1583.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$< rfc-1583-compatibility$n";
 			}
 		    }
 
 		    container default-information {
 
+			ngcliext:parent-fmt "^$%";
+
 			container originate {
 			    presence
 				"If present, a default route will be
 				 distributed.";
+
+			    ngcliext:parent-fmt "$< $%";
+			    ngcliext:node-op "test-set:@{always}@{metric}@{route-map}";
+			    ngcliext:node-fmt "$< $%$n|";
 
 			    description
 				"Originate an AS-External Type-5 LSA that
@@ -996,6 +1161,8 @@ module netgate-ospf {
 				description
 				    "A default route will always be
 				     advertised.";
+				ngcliext:node-op "bool";
+				ngcliext:node-fmt "|$< $%$n";
 			    }
 
 			    leaf metric {
@@ -1005,6 +1172,7 @@ module netgate-ospf {
 				description
 				    "The OSPF default metric, range
 				     0..16777214.";
+				ngcliext:node-fmt "$< $% @@$n";
 			    }
 
 			    leaf metric-type {
@@ -1013,12 +1181,14 @@ module netgate-ospf {
 				}
 				description
 				    "The OSPF External Metric type, 1 or 2.";
+				ngcliext:node-fmt "$< type @@$n";
 			    }
 
 			    leaf route-map {
 				type string;
 				description
 				    "Route map reference.";
+				ngcliext:node-fmt "$< $% @@$n";
 			    }
 			}
 		    }
@@ -1029,11 +1199,14 @@ module netgate-ospf {
 			}
 			description
 			    "The default metric for redistributed routes.";
+			ngcliext:node-fmt "^$% @@$n";
 		    }
 
 		    container distance {
 			description
 			    "OSPF administrative distances for routes.";
+
+			ngcliext:parent-fmt "^$%";
 
 			leaf administrative {
 			    type uint8 {
@@ -1041,6 +1214,7 @@ module netgate-ospf {
 			    }
 			    description
 				"OSPF administrative distance.";
+			    ngcliext:node-fmt "$< @@$n";
 			}
 
 			leaf external {
@@ -1050,6 +1224,7 @@ module netgate-ospf {
 			    description
 				"OSPF administrative distance for external
 				 routes.";
+			    ngcliext:node-fmt "$< $% @@$n";
 			}
 
 			leaf inter-area {
@@ -1059,6 +1234,7 @@ module netgate-ospf {
 			    description
 				"OSPF administrative distance for inter-area
 				 routes.";
+			    ngcliext:node-fmt "$< $% @@$n";
 			}
 
 			leaf intra-area {
@@ -1068,6 +1244,7 @@ module netgate-ospf {
 			    description
 				"OSPF administrative distance for intra-area
 				 routes.";
+			    ngcliext:node-fmt "$< $% @@$n";
 			}
 		    }
 
@@ -1076,8 +1253,12 @@ module netgate-ospf {
 			    "Distribution lists to filter networks for
 			     outgoing routing updates.";
 
+			ngcliext:parent-fmt "^$%";
+
 			list out {
 			    key "route-out";
+
+			    ngcliext:node-fmt "$< out @{route-out} access-list @{access-list-name}$n";
 
 			    leaf route-out {
 				type ospf-route-out;
@@ -1098,10 +1279,14 @@ module netgate-ospf {
 			    "If present, adjacency state changes will
 			     be logged.";
 
+			ngcliext:node-fmt "^$%${detail}$n";
+
 			leaf detail {
 			    type boolean;
 			    description
 				"All state changes will be logged.";
+			    ngcliext:child-op "bool";
+			    ngcliext:child-fmt "| $%";
 			}
 		    }
 
@@ -1109,10 +1294,14 @@ module netgate-ospf {
 			description
 			    "OSPF maximum/infinite-distance metric.";
 
+			ngcliext:parent-fmt "^$%";
+
 			container router-lsa {
 			    description
 				"Advertise own Router-LSA with infinite
 				 distance (stub router).";
+
+			    ngcliext:parent-fmt "$< $%";
 
 			    leaf on-shutdown {
 				type uint8 {
@@ -1121,6 +1310,7 @@ module netgate-ospf {
 				description
 				    "Time to wait until full shutdown,
 				     in seconds.";
+				ngcliext:node-fmt "$< $% @@$n";
 			    }
 
 			    leaf on-startup {
@@ -1130,6 +1320,7 @@ module netgate-ospf {
 				description
 				    "Time to advertise self as a stub-router,
 				     in seconds.";
+				ngcliext:node-fmt "$< $% @@$n";
 			    }
 			}
 		    }
@@ -1138,6 +1329,8 @@ module netgate-ospf {
 			description
 			    "Specifications for neighboring routers,
 			     indexed by neighbor IPv4 address.";
+
+			ngcliext:parent-fmt "^neighbor";
 
 			list neighbor {
 			    key "ip4-address";
@@ -1148,11 +1341,17 @@ module netgate-ospf {
 				    "IPv4 address of neighboring router.";
 			    }
 
+			    ngcliext:parent-fmt "^neighbor @{ip4-address}";
+
 			    container neighbor-data {
 				presence
 				    "If present, the neighbor exists at the
 				     configured IPv4 address, but has no
 				     further configuration attributes.";
+
+				ngcliext:parent-fmt "$<";
+				ngcliext:node-op "test-set:@{poll-interval}@{priority}";
+				ngcliext:node-fmt "$<$n|";
 
 				leaf poll-interval {
 				    type uint16 {
@@ -1161,35 +1360,15 @@ module netgate-ospf {
 				    description
 					"The dead neighbor pollling interval,
 					 1..65535, in seconds.";
+				     ngcliext:node-fmt "$< $% @@$n";
 				}
 
 				leaf priority {
 				    type uint8;
 				    description
 					"The neighbor priority, 0..255.";
+				     ngcliext:node-fmt "$< $% @@$n";
 				}
-			    }
-			}
-		    }
-
-		    container networks {
-			description
-			    "The list of networks specifies the interfaces
-			     on which OSPF is enabled.";
-
-			list network {
-			    key prefix;
-
-			    leaf prefix {
-				type inet:ipv4-prefix;
-				description
-				    "The OSPF-enabled network prefix.";
-			    }
-
-			    leaf area-id {
-				type ospf-area-id;
-				description
-				    "The area ID of the prefix.";
 			    }
 			}
 		    }
@@ -1197,6 +1376,8 @@ module netgate-ospf {
 		    container ospf {
 			description
 			    "OSPF attributes.";
+
+			ngcliext:parent-fmt "^$%";
 
 			leaf abr-type {
 			    type ospf-abr-type;
@@ -1209,6 +1390,7 @@ module netgate-ospf {
 				 and 'ibm' are equivalent and lift
 				 restrictions on such summaries.  Also
 				 see RFC-3509.";
+			    ngcliext:node-fmt "$< $% @@$n";
 			}
 
 			leaf router-id {
@@ -1216,6 +1398,7 @@ module netgate-ospf {
 			    description
 				"The unique ID of this OSPF router as a
 				 dotted-quad.";
+			    ngcliext:node-fmt "$< $% @@$n";
 			}
 
 			leaf write-multiplier {
@@ -1225,6 +1408,7 @@ module netgate-ospf {
 			    description
 				"Maximum number of interface serviced
 				 per write.";
+			    ngcliext:node-fmt "$< $% @@$n";
 			}
 		    }
 
@@ -1238,8 +1422,13 @@ module netgate-ospf {
 			     only way to advertise non-OSPF links into
 			     stub areas.";
 
+			ngcliext:parent-fmt "^passive-interface";
+
 			list passive-if {
 			    key if-name;
+
+			    ngcliext:node-fmt "$< @{if-name}";
+	    		    ngcliext:post-node-fmt "$n";
 
 			    leaf if-name {
 				type ospf-passive-if-name;
@@ -1257,6 +1446,7 @@ module netgate-ospf {
 				    description
 					"If present, a specific IPv4
 					 address on this interface.";
+				    ngcliext:node-fmt " @@";
 				}
 			    }
 			}
@@ -1269,10 +1459,13 @@ module netgate-ospf {
 			     information using Router Information LSAs.
 			     See RFC-5088.";
 
+			ngcliext:parent-fmt "^$%";
+
 			leaf ip4-address {
 			    type inet:ipv4-address;
 			    description
 				"The stable IPv4 address of the PCE.";
+			    ngcliext:node-fmt "$< address @@$n";
 			}
 
 			leaf domain {
@@ -1282,6 +1475,7 @@ module netgate-ospf {
 				 (area or AS) where the PCE has topology
 				 visibility and through which the PCE can
 				 compute paths.";
+			    ngcliext:node-fmt "$< $% @@$n";
 			}
 
 			leaf flags {
@@ -1289,6 +1483,7 @@ module netgate-ospf {
 			    description
 				"The advertised set of PCE capabilities.
 				 For bit assignment, see RFC-5088 sec 7.2.";
+			    ngcliext:node-fmt "$< $% @@$n";
 			}
 
 			container neighbors {
@@ -1297,12 +1492,15 @@ module netgate-ospf {
 				 topology visibility and through which the
 				 PCE can compute paths.";
 
+			    ngcliext:parent-fmt "$<";
+
 			    leaf-list asn {
 				type uint16;
 				description
 				    "The AS number of a PCE-domain where the
 				     PCE has topology visibility and through
 				     which the PCE can compute paths.";
+				ngcliext:node-fmt "$< neighbor @@$n";
 			    }
 			}
 
@@ -1315,6 +1513,7 @@ module netgate-ospf {
 				 intra-area, inter-area, inter-AS, or
 				 inter-layer TE LSPs.  For bit
 				 assignment see RFC-5088, sec 4.2.";
+			    ngcliext:node-fmt "$< $% @@$n";
 			}
 		    }
 
@@ -1323,8 +1522,12 @@ module netgate-ospf {
 			    "Configure which route types from other protocols
 			     should be distributed into OSPF.";
 
+			ngcliext:parent-fmt "^redistribute";
+
 			list redistribution {
 			    key source;
+
+			    ngcliext:parent-fmt "$< @{source}";
 
 			    leaf source {
 				type ospf-redistribution;
@@ -1338,6 +1541,10 @@ module netgate-ospf {
 				    "If present, routes from this source will
 				     be distributed into OSPF.";
 
+				ngcliext:parent-fmt "$<";
+				ngcliext:node-op "test-set:@{metric-type}@{metric}@{route-map}@{ospf-instance}@{table-instance}";
+				ngcliext:node-fmt "$<$n|";
+
 				leaf metric-type {
 				    type uint8 {
 					range "1..2";
@@ -1345,6 +1552,7 @@ module netgate-ospf {
 				    description
 					"The OSPF exterior metric type, 1 or 2,
 					 for redistributed routes.";
+				    ngcliext:node-fmt "$< type @@$n";
 				}
 
 				leaf metric {
@@ -1353,6 +1561,7 @@ module netgate-ospf {
 				    }
 				    description
 					"The metric for redistributed routes.";
+				    ngcliext:node-fmt "$< $% @@$n";
 				}
 
 				leaf route-map {
@@ -1360,6 +1569,7 @@ module netgate-ospf {
 				    description
 					"Route-map used to filter routes into
 					 OSPF.";
+				    ngcliext:node-fmt "$< $% @@$n";
 				}
 
 				leaf ospf-instance {
@@ -1371,6 +1581,7 @@ module netgate-ospf {
 					if present, this value
 					specifies which instance to
 					use.";
+				    ngcliext:node-fmt "$< ospf-instance @@$n";
 				}
 
 				leaf table-instance {
@@ -1382,6 +1593,7 @@ module netgate-ospf {
 					 if present, a non-main kernel
 					 routing table is used as the
 					 source of routes.";
+				    ngcliext:node-fmt "$< table-id @@$n";
 				}
 			    }
 			}
@@ -1391,6 +1603,8 @@ module netgate-ospf {
 			description
 			    "Refresh parameters.";
 
+			ngcliext:parent-fmt "^$%";
+
 			leaf timer {
 			    type uint32 {
 				range "10..1800";
@@ -1398,6 +1612,7 @@ module netgate-ospf {
 			    description
 				"The refresh timer value, 10..1800, in
 				 seconds.";
+			    ngcliext:node-fmt "$< $% @@$n";
 			}
 		    }
 
@@ -1405,11 +1620,15 @@ module netgate-ospf {
 			description
 			    "Router Information configuration flooding scope.";
 
+			ngcliext:parent-fmt "^router-info";
+
 			leaf as {
 			    type boolean;
 			    description
 				"If true, Router Information functionality
 				 will be be enabled with AS flooding scope.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$< $%$n";
 			}
 		    }
 
@@ -1417,9 +1636,13 @@ module netgate-ospf {
 			description
 			    "OSPF timer configurations.";
 
+			ngcliext:parent-fmt "^$%";
+
 			container lsa {
 			    description
 				"OSPF LSA timer configurations.";
+
+			    ngcliext:parent-fmt "$< $%";
 
 			    leaf min-arrival {
 				type uint32 {
@@ -1428,6 +1651,7 @@ module netgate-ospf {
 				description
 				    "Mimimum delay in receiving new
 				     versions of an LSA, in ms.";
+				ngcliext:node-fmt "$< $% @@$n";
 			    }
 			}
 
@@ -1435,9 +1659,13 @@ module netgate-ospf {
 			    description
 				"Throttle adaptive timer configurations.";
 
+			    ngcliext:parent-fmt "$< $%";
+
 			    container lsa {
 				description
 				    "Delay between LSA transmissions.";
+
+				ngcliext:parent-fmt "$< $%";
 
 				leaf all {
 				    type uint32 {
@@ -1445,12 +1673,15 @@ module netgate-ospf {
 				    }
 				    description
 					"Delay for all LSA types, in ms.";
+				    ngcliext:node-fmt "$< $% @@$n";
 				}
 			    }
 
 			    container spf {
 				description
 				    "SPF timers.";
+
+				ngcliext:parent-fmt "$< $%";
 
 				leaf delay {
 				    type uint32 {
@@ -1459,6 +1690,7 @@ module netgate-ospf {
 				    description
 					"Delay from first received change until
 					 SPF calculation, in ms.";
+				    ngcliext:node-fmt "$< $% @@$n";
 				}
 
 				leaf initial-hold {
@@ -1468,6 +1700,7 @@ module netgate-ospf {
 				    description
 					"Initial hold time between consecutive
 					 SPF calculation, in ms.";
+				    ngcliext:node-fmt "$< $% @@$n";
 				}
 
 				leaf maximum-hold {
@@ -1476,6 +1709,7 @@ module netgate-ospf {
 				    }
 				    description
 					"Maximum hold time, in ms.";
+				    ngcliext:node-fmt "$< $% @@$n";
 				}
 			    }
 			}
@@ -1494,6 +1728,9 @@ module netgate-ospf {
 			list area {
 			    key area-id;
 
+			    ngcliext:node-fmt "^$% @{area-id}$n";
+			    ngcliext:pre-children-op "push";
+
 			    leaf area-id {
 				type ospf-area-id;
 				description
@@ -1509,10 +1746,14 @@ module netgate-ospf {
 				presence
 				    "If present, authentication is enabled.";
 
+				ngcliext:node-fmt "^$%${message-digest}$n";
+
 				leaf message-digest {
 				    type boolean;
 				    description
 					"Use message-digest authentication.";
+				    ngcliext:child-op "bool";
+				    ngcliext:child-fmt "| $%";
 				}
 			    }
 
@@ -1522,6 +1763,7 @@ module netgate-ospf {
 				}
 				description
 				    "Stub's advertised default summary cost.";
+				ngcliext:node-fmt "^$% @@$n";
 			    }
 
 			    leaf export-list {
@@ -1531,6 +1773,7 @@ module netgate-ospf {
 				     LSA networks announced to other areas
 				     originated from intra-area paths from
 				     this area.  This router must be an ABR.";
+				ngcliext:node-fmt "^$% @@$n";
 			    }
 
 			    leaf import-list {
@@ -1539,6 +1782,7 @@ module netgate-ospf {
 				    "The access-list filter for networks
 				     imported into this area from other areas
 				     as Type-3 Summary LSAs.";
+				ngcliext:node-fmt "^$% @@$n";
 			    }
 
 			    leaf filter-list-in {
@@ -1547,6 +1791,7 @@ module netgate-ospf {
 				    "The prefix-list filter for Type-3 Summary
 				     LSA networks imported from other areas.
 				     Applicable to an ABR only.";
+				ngcliext:node-fmt "^filter-list in prefix-list @@$n";
 			    }
 
 			    leaf filter-list-out {
@@ -1555,17 +1800,24 @@ module netgate-ospf {
 				    "The prefix-list filter for Type-3 Summary
 				     LSA networks exported to other areas.
 				     Applicable to an ABR only.";
+				ngcliext:node-fmt "^filter-list out prefix-list @@$n";
 			    }
 
 			    container nssa {
 				presence
 				    "If present, this area is a NSSA.";
 
+				ngcliext:parent-fmt "^$%";
+				ngcliext:node-op "test-set:@{no-summary}@{translate}";
+				ngcliext:node-fmt "$<$n";
+
 				leaf no-summary {
 				    type boolean;
 				    description
 					"If true, do not inject
 					 inter-area routes into this NSSA.";
+				    ngcliext:node-op "bool";
+				    ngcliext:node-fmt "|$< $%$n";
 				}
 
 				leaf translate {
@@ -1579,6 +1831,7 @@ module netgate-ospf {
 					 translation election, the default,
 					 and 'never' indicates it will never
 					 do translations.";
+				    ngcliext:node-fmt "$< $% @@$n";
 				}
 			    }
 
@@ -1588,8 +1841,12 @@ module netgate-ospf {
 				     speified area into one Type-3
 				     Summary LSA announced to other areas.";
 
+				ngcliext:parent-fmt "^range";
+
 				list range {
 				    key "prefix";
+
+				    ngcliext:parent-fmt "$< @{prefix}";
 
 				    leaf prefix {
 					type inet:ipv4-prefix;
@@ -1602,11 +1859,17 @@ module netgate-ospf {
 					    "If present, hold range
 					     data for the prefix.";
 
+					ngcliext:parent-fmt "$<";
+					ngcliext:node-op "test-set:@{not-advertise}@{cost}@{substitute}";
+					ngcliext:node-fmt "$<$n|";
+
 					leaf not-advertise {
 					    type boolean;
 					    description
 						"If true, do not advertise
 						this prefix.";
+					    ngcliext:node-op "bool";
+					    ngcliext:node-fmt "|$< $%$n";
 					}
 
 					leaf cost {
@@ -1615,6 +1878,7 @@ module netgate-ospf {
 					    }
 					    description
 						"Cost metric for this range.";
+					    ngcliext:node-fmt "$< $% @@$n";
 					}
 
 					leaf substitute {
@@ -1622,6 +1886,7 @@ module netgate-ospf {
 					    description
 						"Announce the area range
 						 as another prefix.";
+					    ngcliext:node-fmt "$< $% @@$n";
 					}
 				    }
 				}
@@ -1633,17 +1898,22 @@ module netgate-ospf {
 				    "When the router is an ABR, its shortcut
 				     mode may be set to one of 'default',
 				     'enable', or 'disable'.";
+				ngcliext:node-fmt "^$% @@$n";
 			    }
 
 			    container stub {
 				presence
 				    "If present, this area will be a stub.";
 
+				ngcliext:node-fmt "^$%${no-summary}$n";
+
 				leaf no-summary {
 				    type boolean;
 				    description
 					"If true, inter-area routes will not
 					 be injected into the stub.";
+				    ngcliext:child-op "bool";
+				    ngcliext:child-fmt "| $%";
 				}
 			    }
 
@@ -1653,6 +1923,9 @@ module netgate-ospf {
 
 				list vlink {
 				    key router-id;
+
+				    ngcliext:node-fmt "^virtual-link @{router-id}$n";
+				    ngcliext:pre-children-op "push";
 
 				    leaf router-id {
 					type yang:dotted-quad;
@@ -1670,6 +1943,7 @@ module netgate-ospf {
 					    type string {
 						length "1..8";
 					    }
+					    ngcliext:node-fmt "^$% @@$n";
 					}
 
 					leaf dead-interval {
@@ -1680,6 +1954,7 @@ module netgate-ospf {
 						"Interval time in seconds
 						 after which a neighbor is
 						 declared down.";
+					    ngcliext:node-fmt "^$% @@$n";
 					}
 
 					leaf hello-interval {
@@ -1689,6 +1964,7 @@ module netgate-ospf {
 					    description
 						"Interval time in seconds
 						 between HELLO packets.";
+					    ngcliext:node-fmt "^$% @@$n";
 					}
 
 					leaf retransmit-interval {
@@ -1699,6 +1975,7 @@ module netgate-ospf {
 						"Interval time in seconds
 						 between retransmitting lost
 						 link state advertisements.";
+					    ngcliext:node-fmt "^$% @@$n";
 					}
 
 					leaf transmit-delay {
@@ -1708,6 +1985,7 @@ module netgate-ospf {
 					    description
 						"Link state transmit delay in
 						 seconds.";
+					    ngcliext:node-fmt "^$% @@$n";
 					}
 
 					container message-digest-keys {
@@ -1717,6 +1995,8 @@ module netgate-ospf {
 
 					    list key-id {
 						key "id";
+
+						ngcliext:node-fmt "^message-digest-key key-id @{id} md5-key @{key}$n";
 
 						leaf id {
 						    type uint8 {

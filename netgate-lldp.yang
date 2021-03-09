@@ -5,6 +5,10 @@ module netgate-lldp {
     namespace "urn:netgate:xml:yang:netgate-lldp";
     prefix "nglldp";
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     organization "Netgate";
 
     contact "Web: <http://www.netgate.com>";
@@ -13,6 +17,11 @@ module netgate-lldp {
         "This YANG module provides a data model for the VPP LLDP Service.
 
 	 Copyright 2019-2020 Rubicon Communications, LLC.";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -30,10 +39,12 @@ module netgate-lldp {
     }
 
     container lldp-config {
+
 	leaf system-name {
 	    type string;
             description
 	        "LLDP system name";
+	    ngcliext:node-fmt "lldp $% @@$n";
         }
 
 	leaf tx-hold {
@@ -42,6 +53,7 @@ module netgate-lldp {
 	    }
 	    description
 	        "transmit hold time, range [1..100]";
+	    ngcliext:node-fmt "lldp $% @@$n";
 	}
 
 	leaf tx-interval {
@@ -50,6 +62,7 @@ module netgate-lldp {
 	    }
 	    description
 	        "transmit interval range [1..3600]";
+	    ngcliext:node-fmt "lldp $% @@$n";
         }
     }
 }

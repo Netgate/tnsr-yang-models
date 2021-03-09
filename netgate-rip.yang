@@ -9,6 +9,10 @@ module netgate-rip {
 	prefix "inet";
     }
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     import netgate-common {
 	prefix "ngcom";
     }
@@ -27,6 +31,11 @@ module netgate-rip {
 
 	 Copyright 2019-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -52,13 +61,13 @@ module netgate-rip {
 	    type string {
 		pattern 'default';
 	    }
-	    type string;	/* FIXME: limit to IF names */
+	    type string;
 	}
     }
 
     typedef rip-if-or-none {
 	type union {
-	    type string;	/* FIXME: limit to IF names */
+	    type string;
 	    type string {
 		pattern '\*';
 	    }
@@ -67,7 +76,7 @@ module netgate-rip {
 
     typedef rip-if-or-default {
 	type union {
-	    type string;	/* FIXME: limit to IF names */
+	    type string;
 	    type string {
 		pattern 'default';
 	    }
@@ -77,7 +86,7 @@ module netgate-rip {
     typedef rip-network {
 	type union {
 	    type inet:ipv4-prefix;
-	    type string;	/* FIXME: limit to IF names */
+	    type string;
 	}
     }
 
@@ -212,6 +221,7 @@ module netgate-rip {
 	    type rip-packet-send-recv;
 	    description
 		"Debug packets sent or received.  Missing is both.";
+	    ngcliext:node-fmt " @@";
 	}
     }
 
@@ -241,6 +251,9 @@ module netgate-rip {
 
 	container rip {
 
+	    ngcliext:node-fmt "route dynamic rip$n";
+	    ngcliext:pre-children-op "push";
+
 	    container global-options {
 		description
 		    "These are options that apply to the RIP Server or
@@ -250,15 +263,22 @@ module netgate-rip {
 		    description
 			"RIP debug configurations.";
 
+		    ngcliext:parent-fmt "^$%";
+
 		    leaf events {
 			type boolean;
 			description
 			    "If true, debug RIP events..";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
 		    }
 
 		    container packet {
 			presence
 			    "If present, debug RIP packets.";
+
+			ngcliext:node-fmt "$< $%";
+			ngcliext:post-node-fmt "$n";
 
 			uses rip-packet-send-recv;
 		    }
@@ -267,6 +287,8 @@ module netgate-rip {
 			type boolean;
 			description
 			    "If true, debug RIP Zebra messages.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< zebra$n";
 		    }
 		}
 
@@ -275,6 +297,8 @@ module netgate-rip {
 		    default false;
 		    description
 			"If true, the RIP Daemon is enabled.";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|$%$n";
 		}
 	    }
 
@@ -284,6 +308,9 @@ module netgate-rip {
 
 		list interface {
 		    key if-name;
+
+		    ngcliext:node-fmt "^interface @{if-name}$n";
+		    ngcliext:pre-children-op "push";
 
 		    leaf if-name {
 			type string;
@@ -295,15 +322,20 @@ module netgate-rip {
 			description
 			    "RIP authentication configuration.";
 
+			ngcliext:parent-fmt "^$%";
+
 			leaf key-chain {
 			    type rip-key-chain-name;
 			    description
 				"The name of a key chain.";
+			    ngcliext:node-fmt "$< $% @@$n";
 			}
 
 			container mode {
 			    description
 				"Authentication mode.";
+
+			    ngcliext:node-fmt "$< $% @{auth-mode}${auth-length}$n";
 
 			    leaf auth-mode {
 				type rip-auth-mode;
@@ -316,6 +348,7 @@ module netgate-rip {
 				description
 				    "If present, one of the strings
 				     'old-ripd' or 'rfc'.";
+				ngcliext:child-fmt " $% @@";
 			    }
 			}
 
@@ -325,6 +358,7 @@ module netgate-rip {
 			    }
 			    description
 				"An authentication string, 1..16 chars.";
+			    ngcliext:node-fmt "$< string @@$n";
 			}
 		    }
 
@@ -332,10 +366,13 @@ module netgate-rip {
 			description
 			    "RIP recieve configuration.";
 
+			ngcliext:parent-fmt "^$%";
+
 			leaf version {
 			    type rip-version-12b;
 			    description
 				"One of the versions 1, 2, or both.";
+			    ngcliext:node-fmt "$< $% @@$n";
 			}
 		    }
 
@@ -343,10 +380,13 @@ module netgate-rip {
 			description
 			    "RIP send configuration.";
 
+			ngcliext:parent-fmt "^$%";
+
 			leaf version {
 			    type rip-version-12b;
 			    description
 				"One of the versions 1, 2, or both.";
+			    ngcliext:node-fmt "$< $% @@$n";
 			}
 		    }
 
@@ -354,10 +394,14 @@ module netgate-rip {
 			presence
 			    "If present, perform split-horizon.";
 
+			ngcliext:node-fmt "^$%${poisoned-reverse}$n";
+
 			leaf poisoned-reverse {
 			    type boolean;
 			    description
 				"If true, use poisoned-reverse.";
+			    ngcliext:child-op "bool";
+			    ngcliext:child-fmt "| $%";
 			}
 		    }
 
@@ -365,6 +409,8 @@ module netgate-rip {
 			type boolean;
 			description
 			    "Send IP v2 broadcast update.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|^$%$n";
 		    }
 		}
 	    }
@@ -375,6 +421,9 @@ module netgate-rip {
 
 		list chain {
 		    key name;
+
+		    ngcliext:node-fmt "^key-chain @{name}$n";
+		    ngcliext:pre-children-op "push";
 
 		    leaf name {
 			type rip-key-chain-name;
@@ -389,6 +438,8 @@ module netgate-rip {
 			list key {
 			    key key-id;
 
+			    ngcliext:node-fmt "^key @{key-id}${key-string}$n";
+
 			    leaf key-id {
 				type uint32 {
 				    range "0..2147483647";
@@ -401,6 +452,7 @@ module netgate-rip {
 				type rip-key-string;
 				description
 				    "The key string.";
+				ngcliext:child-fmt " string @@";
 			    }
 			}
 		    }
@@ -413,6 +465,9 @@ module netgate-rip {
 
 		list router {
 		    key vrf-id;
+
+		    ngcliext:node-fmt "^server vrf @{vrf-id}$n";
+		    ngcliext:pre-children-op "push";
 
 		    description
 			"The router contains all information for one
@@ -430,16 +485,22 @@ module netgate-rip {
 			type boolean;
 			description
 			    "Allow equal cost multi-path.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
 		    }
 
 		    container default-information {
 			description
 			    "Control distribution of default route.";
 
+			ngcliext:parent-fmt "^$%";
+
 			leaf originate {
 			    type boolean;
 			    description
 				"A default route will be distributed.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$< $%$n";
 			}
 		    }
 
@@ -447,12 +508,15 @@ module netgate-rip {
 			description
 			    "RIP administrative distances for routes.";
 
+			ngcliext:parent-fmt "^distance";
+
 			leaf default {
 			    type uint8 {
 				range "1..255";
 			    }
 			    description
 				"Default administrative distance.";
+			    ngcliext:node-fmt "$< $% @@$n";
 			}
 
 			container source-prefixes {
@@ -460,8 +524,12 @@ module netgate-rip {
 				"Use specific distances for the given
 				 source prefixes";
 
+			    ngcliext:parent-fmt "$<";
+
 			    list prefix {
 				key ip4-prefix;
+
+				ngcliext:node-fmt "$< @{ip4-prefix}${administrative}${filter}$n";
 
 				leaf ip4-prefix {
 				    type inet:ipv4-prefix;
@@ -476,12 +544,14 @@ module netgate-rip {
 				    mandatory true;
 				    description
 					"RIP administrative distance.";
+				    ngcliext:child-fmt " distance @@";
 				}
 
 				leaf filter {
 				    type string;
 				    description
 					"Use access-list as matching filter.";
+				    ngcliext:child-fmt " access-list @@";
 				}
 			    }
 			}
@@ -493,6 +563,8 @@ module netgate-rip {
 
 			list interface {
 			    key if-name;
+
+			    ngcliext:parent-fmt "^distribution-list interface @{if-name}";
 
 			    leaf if-name {
 				type rip-if-or-none;
@@ -506,16 +578,20 @@ module netgate-rip {
 				    "Use the given access-list to
 				     filter routes.";
 
+				ngcliext:parent-fmt "$< access-list";
+
 				leaf in {
 				    type string;
 				    description
 					"Filter incoming routes.";
+				    ngcliext:node-fmt "$< $% @@$n";
 				}
 
 				leaf out {
 				    type string;
 				    description
 					"Filter outgoing routes.";
+				    ngcliext:node-fmt "$< $% @@$n";
 				}
 			    }
 
@@ -524,16 +600,20 @@ module netgate-rip {
 				    "Use the fiven prefix-list to
 				     filter routes.";
 
+				ngcliext:parent-fmt "$< prefix-list";
+
 				leaf in {
 				    type string;
 				    description
 					"Filter incoming routes.";
+				    ngcliext:node-fmt "$< $% @@$n";
 				}
 
 				leaf out {
 				    type string;
 				    description
 					"Filter outgoing routes.";
+				    ngcliext:node-fmt "$< $% @@$n";
 				}
 			    }
 			}
@@ -543,10 +623,13 @@ module netgate-rip {
 			description
 			    "RIP neighbors.";
 
+			ngcliext:parent-fmt "^neighbor";
+
 			leaf-list ip4-address {
 			    type inet:ipv4-address-no-zone;
 			    description
 				"The IPv4 address of a neighbor.";
+			    ngcliext:node-fmt "$< @@$n";
 			}
 		    }
 
@@ -555,14 +638,19 @@ module netgate-rip {
 			    "The list of interfaces and addresses on which
 			     RIP is enabled.";
 
+			ngcliext:parent-fmt "^network";
+
 			container interfaces {
 			    description
 				"Interfaces on which RIP is enabled.";
+
+			    ngcliext:parent-fmt "$< interface";
 
 			    leaf-list if-name {
 				type string;
 				description
 				    "An interface on which RIP is enabled.";
+				ngcliext:node-fmt "$< @@$n";
 			    }
 			}
 
@@ -570,10 +658,13 @@ module netgate-rip {
 			    description
 				"Prefixes on which RIP is enabled.";
 
+			    ngcliext:parent-fmt "$< prefix";
+
 			    leaf-list ip4-prefix {
 				type inet:ipv4-prefix;
 				description
 				    "An IPv4 prefix on which RIP is enabled.";
+				ngcliext:node-fmt "$< @@$n";
 			    }
 			}
 		    }
@@ -582,8 +673,12 @@ module netgate-rip {
 			description
 			    "Modify RIP metric via access-list filtering.";
 
+			ngcliext:parent-fmt "^offset-list";
+
 			list interface {
 			    key if-name;
+
+			    ngcliext:parent-fmt "$< @{if-name}";
 
 			    leaf if-name {
 				type rip-if-or-none;
@@ -596,10 +691,13 @@ module netgate-rip {
 				description
 				    "Match and adjust incoming routes.";
 
+				ngcliext:node-fmt "$< $% ${access-list-name} ${metric}$n";
+
 				leaf access-list-name {
 				    type string;
 				    description
 					"Filter incoming routes.";
+				    ngcliext:child-fmt "@@";
 				}
 
 				leaf metric {
@@ -608,6 +706,7 @@ module netgate-rip {
 				    }
 				    description
 					"Metric value, 1..16.";
+				    ngcliext:child-fmt "metric @@";
 				}
 			    }
 
@@ -615,10 +714,13 @@ module netgate-rip {
 				description
 				    "Match and adjust outgoing routes.";
 
+				ngcliext:node-fmt "$< $% ${access-list-name} ${metric}$n";
+
 				leaf access-list-name {
 				    type string;
 				    description
 					"Filter incoming routes.";
+				    ngcliext:child-fmt "@@";
 				}
 
 				leaf metric {
@@ -627,6 +729,7 @@ module netgate-rip {
 				    }
 				    description
 					"Metric value, 1..16.";
+				    ngcliext:child-fmt "metric @@";
 				}
 			    }
 			}
@@ -636,11 +739,14 @@ module netgate-rip {
 			description
 			    "Interfaces on which to suppress routing updates.";
 
+			ngcliext:parent-fmt "^passive-interface";
+
 			leaf-list if-name {
 			    type rip-if-or-default;
 			    description
 				"An interface on which routing updates are
 				 suppressed.";
+			    ngcliext:node-fmt "$< @@$n";
 			}
 		    }
 
@@ -651,6 +757,8 @@ module netgate-rip {
 
 			list redistribution {
 			    key source;
+
+			    ngcliext:parent-fmt "^redistribute @{source}";
 
 			    leaf source {
 				type rip-redistribution;
@@ -664,12 +772,17 @@ module netgate-rip {
 				    "If present, routes from this source will
 				     be distributed into RIP.";
 
+				ngcliext:parent-fmt "$<";
+				ngcliext:node-op "test-set:@{metric}@{route-map}";
+				ngcliext:node-fmt "$<$n|${metric}${route-map}";
+
 				leaf metric {
 				    type uint8 {
 					range "0..16";
 				    }
 				    description
 					"The metric for redistributed routes.";
+				    ngcliext:child-fmt "$< metric @@$n";
 				}
 
 				leaf route-map {
@@ -677,6 +790,7 @@ module netgate-rip {
 				    description
 					"Route-map used to filter routes into
 					 RIP.";
+				    ngcliext:child-fmt "$< $% @@$n";
 				}
 			    }
 			}
@@ -686,32 +800,41 @@ module netgate-rip {
 			description
 			    "Static routes.";
 
+			ngcliext:parent-fmt "^route";
+
 			leaf-list prefix {
 			    type inet:ipv4-prefix;
 			    description
 				"A static route IPv4 prefix.";
+			    ngcliext:node-fmt "$< prefix @@$n";
 			}
 		    }
 
-		    container router-map-filters {
+		    container route-map-filters {
 
 			list interface {
 			    key if-name; 
+
+			    ngcliext:node-fmt "^route-map-filter ${if-name}";
 
 			    leaf if-name {
 				type string;
 				description
 				    "The name of an interface.";
+				ngcliext:node-fmt "interface @@";
 			    }
 
 			    container in {
 				description
 				    "Filter information for incoming routes.";
 
+				ngcliext:parent-fmt "$< $%";
+
 				leaf route-map-name {
 				    type string;
 				    description
 					"The name of a route-map filter.";
+				    ngcliext:node-fmt "$< route-map @@$n";
 				}
 			    }
 
@@ -719,10 +842,13 @@ module netgate-rip {
 				description
 				    "Filter information for outgoing routes.";
 
+				ngcliext:parent-fmt "$< $%";
+
 				leaf route-map-name {
 				    type string;
 				    description
 					"The name of a route-map filter.";
+				    ngcliext:node-fmt "$< route-map @@$n";
 				}
 			    }
 			}
@@ -732,9 +858,13 @@ module netgate-rip {
 			description
 			    "Routing timers.";
 
+			ngcliext:parent-fmt "^timer";
+
 			container basic {
 			    description
 				"Basic routing protocol timers.";
+
+			    ngcliext:parent-fmt "$<";
 
 			    leaf table-update {
 				type uint32 {
@@ -744,6 +874,7 @@ module netgate-rip {
 				description
 				    "Routing table update timer, in seconds,
 				     default 30";
+				ngcliext:node-fmt "$< $% @@$n";
 			    }
 
 			    leaf timeout {
@@ -754,6 +885,7 @@ module netgate-rip {
 				description
 				    "Routing information timeout timer,
 				    in seconds, default 180";
+				ngcliext:node-fmt "$< $% @@$n";
 			    }
 
 			    leaf garbage-collection {
@@ -764,6 +896,7 @@ module netgate-rip {
 				description
 				    "Garbage collecting timer, in seconds,
 				    default 120";
+				ngcliext:node-fmt "$< $% @@$n";
 			    }
 			}
 		    }
@@ -774,6 +907,7 @@ module netgate-rip {
 			    "The RIP version for both transmit and receive.
 			     May be overridden per-interface.  Valid values
 			     are 1 or 2, with 2 strongly recommended.";
+			ngcliext:node-fmt "^ $% @@$n";
 		    }
 		}
 	    }
@@ -1238,7 +1372,7 @@ module netgate-rip {
 			}
 		    }
 
-		    container router-map-filters {
+		    container route-map-filters {
 
 			list interface {
 			    key if-name; 

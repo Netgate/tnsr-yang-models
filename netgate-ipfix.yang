@@ -9,6 +9,10 @@ module netgate-ipfix {
 	prefix "ipfix";
     }
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     import netgate-common {
 	prefix "ngcom";
     }
@@ -23,6 +27,11 @@ module netgate-ipfix {
 
 	 Copyright 2019-2020 Rubicon Communications, LLC.";
 
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
+
     revision 2020-10-15 {
 	description
 	    "TNSR Release 20.10.";
@@ -36,13 +45,20 @@ module netgate-ipfix {
 	    type ngcom:rt-identifier-63;
 	    description
 		"VRF to use to resolve collector address.";
+	    ngcliext:node-fmt "^vrf @@$n";
 	}
 
 	leaf checksum {
 	    type boolean;
 	    description
 		"UDP checksum calculation enable flag.";
+	    ngcliext:node-fmt "^checksum @@$n";
 	}
+    }
+
+    augment "/ipfix:ipfix" {
+	ngcliext:node-fmt "ipfix-exporter$n";
+	ngcliext:pre-children-op "push";
     }
 
     augment "/ipfix:ipfix/ipfix:exportingProcess/ipfix:destination/" +
@@ -51,5 +67,35 @@ module netgate-ipfix {
 	    "Add extended parameters to the UDP exporter parameters.";
 
 	uses udpExporterParametersExtended;
+    }
+
+    augment "/ipfix:ipfix/ipfix:exportingProcess/ipfix:destination" +
+	    "/ipfix:DestinationParameters/ipfix:udpExporter" +
+	    "/ipfix:destinationIPAddress" {
+	ngcliext:node-fmt "^collector @@ port %{destinationPort}$n";
+    }
+
+    augment "/ipfix:ipfix/ipfix:exportingProcess/ipfix:destination" +
+	    "/ipfix:DestinationParameters/ipfix:udpExporter" +
+	    "/ipfix:destinationPort" {
+	ngcliext:sibling-fmt "@@";
+    }
+
+    augment "/ipfix:ipfix/ipfix:exportingProcess/ipfix:destination" +
+	    "/ipfix:DestinationParameters/ipfix:udpExporter" +
+	    "/ipfix:maxPacketSize" {
+	ngcliext:node-fmt "^pmtu @@$n";
+    }
+
+    augment "/ipfix:ipfix/ipfix:exportingProcess/ipfix:destination" +
+	    "/ipfix:DestinationParameters/ipfix:udpExporter" +
+	    "/ipfix:sourceIPAddress" {
+	ngcliext:node-fmt "^source @@$n";
+    }
+
+    augment "/ipfix:ipfix/ipfix:exportingProcess/ipfix:destination" +
+	    "/ipfix:DestinationParameters/ipfix:udpExporter" +
+	    "/ipfix:templateRefreshTimeout" {
+	ngcliext:node-fmt "^template-interval @@$n";
     }
 }

@@ -9,6 +9,10 @@ module netgate-vrrp {
 	prefix "inet";
     }
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     import netgate-interface {
 	prefix "ngif";
     }
@@ -24,6 +28,11 @@ module netgate-vrrp {
 
 	 Copyright 2019-2020 Rubicon Communications, LLC.
 	";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -123,6 +132,9 @@ module netgate-vrrp {
 	    description
 		"Enables a higher-priority VRRP backup router to preempt a
 		 lower-priority VRRP master.";
+
+	    ngcliext:node-fmt "^$% @{enabled}$n";
+
 	    leaf enabled {
 		type boolean;
 		default "true";
@@ -139,6 +151,7 @@ module netgate-vrrp {
 	    description
 		"Configures the VRRP election priority for the backup
 		 virtual router.";
+	    ngcliext:node-fmt "^$% @@$n";
 	}
 
 	leaf accept-mode {
@@ -155,6 +168,7 @@ module netgate-vrrp {
 		 Note: IPv6 Neighbor Solicitations and Neighbor
 		 Advertisements MUST NOT be dropped when accept-mode
 		 is 'false'.";
+	    ngcliext:node-fmt "^$% @@$n";
 	}
     } // vrrp-common-attributes
 
@@ -173,6 +187,7 @@ module netgate-vrrp {
 	    description
 		"Configures the interval that VRRPv3 advertisements
 		 are sent from the specified interface.";
+	    ngcliext:node-fmt "^v3-advertisement-interval @@$n";
 	}
 
 	container track {
@@ -194,6 +209,9 @@ module netgate-vrrp {
 		    key "interface";
 		    description
 			"Interface to track.";
+
+		    ngcliext:parent-fmt "^track-interface @{interface}";
+
 		    leaf interface {
 			type ngif:interface-ref;
 			must "/ngif:interfaces-config/"
@@ -222,6 +240,7 @@ module netgate-vrrp {
 			description
 			    "Specifies how much to decrement the priority of the
 			     VRRP instance if the interface goes down.";
+			ngcliext:node-fmt "$< $% @@$n";
 		    }
 		} // interface
 	    } // interfaces
@@ -241,14 +260,16 @@ module netgate-vrrp {
 		     of the IPv4 addresses configured on the interface
 		     corresponding to the virtual router.";
 
-		    leaf ipv4-address {
-			type inet:ipv4-address;
-			description
-			    "An IPv4 address associated with a virtual router.";
-			reference
-			    "RFC 5798: Virtual Router Redundancy Protocol (VRRP)
-			     Version 3 for IPv4 and IPv6.  Section 1.2";
-		    }
+		ngcliext:node-fmt "^virtual-address @{ipv4-address}$n";
+
+		leaf ipv4-address {
+		    type inet:ipv4-address;
+		    description
+			"An IPv4 address associated with a virtual router.";
+		    reference
+			"RFC 5798: Virtual Router Redundancy Protocol (VRRP)
+			 Version 3 for IPv4 and IPv6.  Section 1.2";
+		}
 	    } // virtual-ipv4-address
 	} // virtual-ipv4-addresses
     } // vrrp-ipv4-attributes
@@ -268,6 +289,7 @@ module netgate-vrrp {
 	    description
 		"Configures the interval that VRRPv3 advertisements
 		 are sent from the specified interface.";
+	    ngcliext:node-fmt "^v3-advertisement-interval @@$n";
 	}
 
 	container track {
@@ -285,10 +307,13 @@ module netgate-vrrp {
 		     of the VRRP router decrements.  When an unavailable
 		     interface becomes available again, the priority of the
 		     VRRP router is incremented by the same amount.";
+
 		list interface {
 		    key "interface";
 		    description
 			"Interface to track.";
+
+		    ngcliext:parent-fmt "^track-interface @{interface}";
 
 		    leaf interface {
 			type ngif:interface-ref;
@@ -319,6 +344,7 @@ module netgate-vrrp {
 			description
 			    "Specifies how much to decrement the priority of the
 			     VRRP instance if the interface goes down.";
+			ngcliext:node-fmt "$< $% @@$n";
 		    }
 		} // interface
 	    } // interfaces
@@ -335,6 +361,8 @@ module netgate-vrrp {
 		    "Two IPv6 addresses are allowed.  The first address must
 		     be a link-local address.  The second address can be a
 		     link-local or global address.";
+
+		ngcliext:node-fmt "^virtual-address @{ipv6-address}$n";
 
 		leaf ipv6-address {
 		    type inet:ipv6-address;
@@ -403,6 +431,9 @@ module netgate-vrrp {
 		    "Defines a virtual router, identified by a VRID, within the
 		     IPv4 address space.";
 
+		ngcliext:node-fmt "^ip vrrp-virtual-router @{vrid}$n";
+		ngcliext:pre-children-op "push";
+
 		uses vrrp-ipv4-attributes;
 	    }
 	}
@@ -421,6 +452,9 @@ module netgate-vrrp {
 		description
 		    "Defines a virtual router, identified by a VRID, within the
 		     IPv6 address space.";
+
+		ngcliext:node-fmt "^ipv6 vrrp-virtual-router @{vrid}$n";
+		ngcliext:pre-children-op "push";
 
 		uses vrrp-ipv6-attributes;
 	    }

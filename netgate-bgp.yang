@@ -17,6 +17,10 @@ module netgate-bgp {
 	prefix "frr";
     }
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     import netgate-common {
 	prefix "ngcom";
     }
@@ -35,6 +39,11 @@ module netgate-bgp {
 
 	 Copyright 2019-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -235,6 +244,9 @@ module netgate-bgp {
 	    description
 		"Aggregated IP address and optional prefix";
 
+	    ngcliext:node-fmt "^aggregate-address @{ip-address}";
+	    ngcliext:post-node-fmt "$n";
+
 	    leaf ip-address {
 		type inet:ipv4-prefix;
 		description
@@ -247,16 +259,22 @@ module netgate-bgp {
 		    "If present, the IPv4 prefix has
 		     configured aggregation data.";
 
+		ngcliext:children-order "as-set summary-only";
+
 		leaf as-set {
 		    type boolean;
 		    description
 			"Resulting routes include AS set.";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "| $%";
 		}
 
 		leaf summary-only {
 		    type boolean;
 		    description
 			"Aggregated routes will not be announced.";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "| $%";
 		}
 	    }
 	}
@@ -270,6 +288,9 @@ module netgate-bgp {
 	    key "ip-address";
 	    description
 		"Aggregated IP address and optional prefix";
+
+	    ngcliext:node-fmt "^aggregate-address @{ip-address}";
+	    ngcliext:post-node-fmt "$n";
 
 	    leaf ip-address {
 		type inet:ipv6-prefix;
@@ -287,6 +308,8 @@ module netgate-bgp {
 		    type boolean;
 		    description
 			"Aggregated routes will not be announced.";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "| $%";
 		}
 	    }
 	}
@@ -295,6 +318,8 @@ module netgate-bgp {
     grouping bgp-ipv4-distance-admin {
 	description
 	    "Administrative distance specification.";
+
+	ngcliext:node-fmt "^distance administrative @{distance}${ip-src-prefix}${access-list-name}$n";
 
 	leaf distance {
 	    type uint8;
@@ -306,18 +331,22 @@ module netgate-bgp {
 	    type inet:ipv4-prefix;
 	    description
 		"The source IPv4 address and prefix.";
+	    ngcliext:child-fmt " prefix @@";
 	}
 
 	leaf access-list-name {
 	    type string;
 	    description
 		"An optional Access List name.";
+	    ngcliext:child-fmt " access-list @@";
 	}
     }
 
     grouping bgp-ipv6-distance-admin {
 	description
 	    "Administrative distance specification.";
+
+	ngcliext:node-fmt "^distance administrative @{distance}${ip-src-prefix}${access-list-name}$n";
 
 	leaf distance {
 	    type uint8;
@@ -329,12 +358,14 @@ module netgate-bgp {
 	    type inet:ipv6-prefix;
 	    description
 		"The source IPv6 address and prefix.";
+	    ngcliext:child-fmt " prefix @@";
 	}
 
 	leaf access-list-name {
 	    type string;
 	    description
 		"An optional Access List name.";
+	    ngcliext:child-fmt " access-list @@";
 	}
     }
 
@@ -342,22 +373,27 @@ module netgate-bgp {
 	description
 	    "BGP distance specification.";
 
+	ngcliext:node-fmt "^distance ${external} ${internal} ${local}$n";
+
 	leaf external {
 	    type uint8;
 	    description
 		"The distance for external routes.";
+	    ngcliext:child-fmt "$% @@";
 	}
 
 	leaf internal {
 	    type uint8;
 	    description
 		"The distance for internal routes.";
+	    ngcliext:child-fmt "$% @@";
 	}
 
 	leaf local {
 	    type uint8;
 	    description
 		"The distance for local routes.";
+	    ngcliext:child-fmt "$% @@";
 	}
     }
 
@@ -366,12 +402,15 @@ module netgate-bgp {
 	    "If packets should be forwarded over multiple paths, these
 	     parameters specify the maximum number of paths.";
 
+	ngcliext:parent-fmt "^maximum-paths";
+
 	leaf non-ibgp-paths {
 	    type uint8 {
 		range "1..255";
 	    }
 	    description
 		"Number of non-iBGP paths.";
+	    ngcliext:node-fmt "$< @@$n";
 	}
 
 	leaf ibgp-paths {
@@ -380,6 +419,7 @@ module netgate-bgp {
 	    }
 	    description
 		"Number of iBGP paths.";
+	    ngcliext:node-fmt "$< ibgp @@%{equal-cluster-length}$n";
 	}
 
 	leaf equal-cluster-length {
@@ -390,6 +430,8 @@ module netgate-bgp {
 	    }
 	    description
 		"If true, cluster lengths should match for iBGP paths.";
+	    ngcliext:sibling-op "bool";
+	    ngcliext:sibling-fmt "| $%";
 	}
     }
 
@@ -403,6 +445,9 @@ module netgate-bgp {
 		"List of neighbors within an address-family clause,
 		 indexed by peer.";
 
+	    ngcliext:node-fmt "^neighbor @{peer}$n";
+	    ngcliext:pre-children-op "push";
+
 	    leaf peer {
 		type string;
 		mandatory true;
@@ -415,12 +460,16 @@ module netgate-bgp {
 		type boolean;
 		description
 		    "Enable the Address Family for this Neighbor.";
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "|^$%$n";
 	    }
 
 	    leaf addpath-tx-all-paths {
 		type boolean;
 		description
 		    "Use addpath to advertise all paths to a neighbor.";
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "|^$%$n";
 	    }
 
 	    leaf addpath-tx-bestpath-per-as {
@@ -428,12 +477,18 @@ module netgate-bgp {
 		description
 		    "Use addpath to advertise the bestpath per each
 		     neighboring AS.";
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "|^$%$n";
 	    }
 
 	    container allowas-in {
 		presence
 		    "Enables the allowas-in clause.  One of
 		     'occurences' and 'origin' may also be present.";
+
+		ngcliext:node-op "test-set:@{occurences}@{origin}";
+		ngcliext:node-fmt "^allowas-in$n|";
+
 
 		description
 		    "Accept an AS-path with my AS present in it.";
@@ -443,6 +498,7 @@ module netgate-bgp {
 		    description
 			"A number in the range [1..10] giving the
 			 number of occurences allowed.";
+		    ngcliext:node-fmt "^allowas-in @@$n";
 		}
 
 		leaf origin {
@@ -450,6 +506,8 @@ module netgate-bgp {
 		    description
 			"If true, only accept my AS in the AS--path if
 			 the route originated in my AS.";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|^allowas-in $%$n";
 		}
 	    }
 
@@ -458,6 +516,8 @@ module netgate-bgp {
 		description
 		    "Override ASNs in outbound updates if as-path
 		     equals remote-as.";
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "|^$%$n";
 	    }
 
 	    container attribute-unchanged {
@@ -466,6 +526,8 @@ module netgate-bgp {
 		     this container indicates a bare command that
 		     causes all attributes to be passed unchanged to
 		     this peer.";
+
+		ngcliext:node-fmt "^$%${attr}$n";
 
 		description
 		    "BGP attributes that are propagated unchanged to
@@ -476,6 +538,7 @@ module netgate-bgp {
 		    description
 			"Possible attributes are: 'as-path', 'med', or
 			 'next-hop'.";
+		    ngcliext:child-fmt " @@";
 		}
 	    }
 
@@ -488,6 +551,7 @@ module netgate-bgp {
 		    type bgp-orf-prefix-list;
 		    description
 			"One of the values 'send', 'receive', or 'both'.";
+		    ngcliext:node-fmt "^capability orf prefix-list @@$n";
 		}
 	    }
 
@@ -497,12 +561,15 @@ module netgate-bgp {
 		     set and default routes will be announced to this
 		     peer.  It also has an optional route-map.";
 
+		ngcliext:node-fmt "^$%${route-map}$n";
+
 		leaf route-map {
 		    type string;
 		    description
 			"A route map to specify criteria to originate
 			 default.";
-		}
+		    ngcliext:child-fmt " route-map @@";
+		    }
 	    }
 
 	    leaf distribute-list-in {
@@ -510,6 +577,7 @@ module netgate-bgp {
 		description
 		    "The name of an 'in' distribution access list used
 		     to filter incoming updates.";
+		ngcliext:node-fmt "^distribute-list @@ in$n";
 	    }
 
 	    leaf distribute-list-out {
@@ -517,6 +585,7 @@ module netgate-bgp {
 		description
 		    "The name of an 'out' distribution access list
 		     used to filter outgoing updates.";
+		ngcliext:node-fmt "^distribute-list @@ out$n";
 	    }
 
 	    leaf filter-list-in {
@@ -524,6 +593,7 @@ module netgate-bgp {
 		description
 		    "The name of an 'in' AS-path access-list name used
 		     to filter incoming routes.";
+		ngcliext:node-fmt "^filter-list @@ in$n";
 	    }
 
 	    leaf filter-list-out {
@@ -531,7 +601,7 @@ module netgate-bgp {
 		description
 		    "The name of an 'in' AS-path access-list name used
 		     to filter outgoing routes.";
-
+		ngcliext:node-fmt "^filter-list @@ out$n";
 	    }
 
 	    container maximum-prefix {
@@ -541,11 +611,14 @@ module netgate-bgp {
 		     threshold, and actions to take.  If the limit is
 		     absent, none of these values will be in effect.";
 
+		ngcliext:parent-fmt "^$%";
+
 		leaf limit {
 		    type uint32;
 		    description
 			"Maximum number of prefixes to accept from
 			 this peer.";
+		    ngcliext:node-fmt "$< $% @@$n";
 		}
 
 		leaf warning-threshold {
@@ -553,6 +626,7 @@ module netgate-bgp {
 		    description
 			"Threshold percentage at which a marning
 			 message is generate.";
+		    ngcliext:node-fmt "$< threshold @@$n";
 		}
 
 		leaf warning-only {
@@ -560,6 +634,8 @@ module netgate-bgp {
 		    description
 			"Only issue warning messages when the limit is
 			 exceeded.";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|$< $%$n";
 		}
 
 		leaf restart-interval {
@@ -567,6 +643,7 @@ module netgate-bgp {
 		    description
 			"After limit is exceeded, restart BGP
 			 connection.  Restart interval in minutes.";
+		    ngcliext:node-fmt "$< restart @@$n";
 		}
 	    }
 
@@ -575,6 +652,8 @@ module netgate-bgp {
 		description
 		    "If true, disable the next hop calculation for
 		     this neighbor.";
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "|^$%$n";
 	    }
 
 	    leaf next-hop-self-force {
@@ -582,6 +661,8 @@ module netgate-bgp {
 		description
 		    "If true, set the next hop to self for reflected
 		     routes.";
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "|^next-hop-self force$n";
 	    }
 
 	    leaf prefix-list-in {
@@ -589,6 +670,7 @@ module netgate-bgp {
 		description
 		    "If present, this is the name of the 'in' prefix
 		     list used to filter incoming updates.";
+		ngcliext:node-fmt "^prefix-list @@ in$n";
 	    }
 
 	    leaf prefix-list-out {
@@ -596,6 +678,7 @@ module netgate-bgp {
 		description
 		    "If present, this is the name of the 'out' prefix
 		     list used to filter outgoing updates.";
+		ngcliext:node-fmt "^prefix-list @@ out$n";
 	    }
 
 	    container remove-private-as {
@@ -604,10 +687,16 @@ module netgate-bgp {
 		     indicate private ASNs in outbound updates should
 		     be removed.";
 
+		ngcliext:node-op "test-set:@{all}@{replace-as}";
+		ngcliext:node-fmt "^$%$n|";
+		ngcliext:parent-fmt "^$%";
+
 		leaf all {
 		    type boolean;
 		    description
 			"Apply to all AS numbers.";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|$< all$n";
 		}
 
 		leaf replace-as {
@@ -615,6 +704,8 @@ module netgate-bgp {
 		    description
 			"Replace private ASNs with our ASN in outbound
 			 updates.";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|$< replace-AS$n";
 		}
 	    }
 
@@ -623,6 +714,7 @@ module netgate-bgp {
 		description
 		    "The name of a route-map to apply to incoming
 		     routes.";
+		ngcliext:node-fmt "^route-map @@ in$n";
 	    }
 
 	    leaf route-map-out {
@@ -630,6 +722,7 @@ module netgate-bgp {
 		description
 		    "The name of a route-map to apply to outbound
 		     routes.";
+		ngcliext:node-fmt "^route-map @@ out$n";
 	    }
 
 	    leaf route-reflector-client {
@@ -637,6 +730,8 @@ module netgate-bgp {
 		description
 		    "Configure this neighbor as a Route Reflector
 		     client.";
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "|^$%$n";
 	    }
 
 	    leaf route-server-client {
@@ -644,9 +739,14 @@ module netgate-bgp {
 		description
 		    "Configure this neighbor as a Route Server
 		     client.";
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "|^$%$n";
 	    }
 
 	    container send-community {
+
+		ngcliext:parent-fmt "^$%";
+
 		description
 		    "Send 'standard', 'large' or 'extended' community
 		     attributes.  The default is all.";
@@ -656,6 +756,8 @@ module netgate-bgp {
 		    default true;
 		    description
 			"Send standard community attributes.";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|$< $%$n";
 		}
 
 		leaf large {
@@ -663,6 +765,8 @@ module netgate-bgp {
 		    default true;
 		    description
 			"Send large community attributes.";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|$< $%$n";
 		}
 
 		leaf extended {
@@ -670,6 +774,8 @@ module netgate-bgp {
 		    default true;
 		    description
 			"Send extended community attributes.";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|$< $%$n";
 		}
 	    }
 
@@ -678,6 +784,8 @@ module netgate-bgp {
 		description
 		    "Allow inbound soft reconfiguration for this
 		     neighbor.";
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "|^soft-reconfiguration inbound$n";
 	    }
 
 	    leaf unsuppress-route-map {
@@ -685,6 +793,7 @@ module netgate-bgp {
 		description
 		    "The name of a route map to use to selectively
 		     unspress otherwise suppressed routes.";
+		ngcliext:node-fmt "^unsuppress-map @@$n";
 	    }
 
 	    leaf weight {
@@ -692,6 +801,7 @@ module netgate-bgp {
 		description
 		    "Set default weight for routes from this
 		     neighbor.";
+		ngcliext:node-fmt "^$% @@$n";
 	    }
 	}
     }
@@ -707,6 +817,8 @@ module netgate-bgp {
 	    description
 		"The list of announced networks.";
 
+	    ngcliext:parent-fmt "^$% @{ip-prefix}";
+
 	    leaf ip-prefix {
 		type inet:ipv4-prefix;
 		description
@@ -718,17 +830,24 @@ module netgate-bgp {
 		    "If present, this network announcement is present
 		     and configured.";
 
+		ngcliext:parent-fmt "$<";
+		ngcliext:node-op "test-set:@{route-map-name}@{backdoor}";
+		ngcliext:node-fmt "$<$n|${route-map-name}${backdoor}";
+
 		leaf route-map-name {
 		    type string;
 		    description
 			"An optional route map name used to modify
 			 attributes.";
+		    ngcliext:child-fmt "$< route-map @@$n";
 		}
 
 		leaf backdoor {
 		    type boolean;
 		    description
 			"If true, this is a BGP backdoor route.";
+		    ngcliext:child-op "bool";
+		    ngcliext:child-fmt "|$< backdoor$n";
 		}
 	    }
 	}
@@ -745,6 +864,8 @@ module netgate-bgp {
 	    description
 		"The list of announced networks.";
 
+	    ngcliext:parent-fmt "^$% @{ip-prefix}";
+
 	    leaf ip-prefix {
 		type inet:ipv6-prefix;
 		description
@@ -756,11 +877,16 @@ module netgate-bgp {
 		    "If present, this network announcement is present
 		     and configured.";
 
+		ngcliext:parent-fmt "$<";
+		ngcliext:node-op "test-set:@{route-map-name}";
+		ngcliext:node-fmt "$<$n|${route-map-name}";
+
 		leaf route-map-name {
 		    type string;
 		    description
 			"An optional route map name used to modify
 			 attributes.";
+		    ngcliext:node-fmt "$< route-map @@$n";
 		}
 	    }
 	}
@@ -770,15 +896,21 @@ module netgate-bgp {
 	description
 	    "Route redistribution directives.";
 
+	ngcliext:parent-fmt "^redistribute";
+
 	container named-sources {
 	    description
 		"Named, fixed source of routes that are redistributed
 		 to BGP.";
 
+	    ngcliext:parent-fmt "$<";
+
 	    list route-source {
 		key "source";
 		description
 		    "List of route sources that can be redistributed";
+
+		ngcliext:parent-fmt "$< @{source}";
 
 		leaf source {
 		    type bgp-source;
@@ -792,11 +924,16 @@ module netgate-bgp {
 			"If present, this redistribution is present
 			 and configured.";
 
+		    ngcliext:parent-fmt "$<";
+		    ngcliext:node-op "test-set:@{metric}@{route-map}";
+		    ngcliext:node-fmt "$<$n|${metric}${route-map}";
+
 		    leaf metric {
 			type uint32;
 			description
 			    "Metric for redistributed
 			     routes.";
+			ngcliext:child-fmt "$< metric @@$n";
 		    }
 
 		    leaf route-map {
@@ -804,6 +941,7 @@ module netgate-bgp {
 			description
 			    "Route map for
 			     redistributed routes";
+			ngcliext:child-fmt "$< $% @@$n";
 		    }
 		}
 	    }
@@ -813,10 +951,14 @@ module netgate-bgp {
 	    description
 		"Route redistributions to kernel tables.";
 
+	    ngcliext:parent-fmt "$<";
+
 	    list table {
 		key "id";
 		description
 		    "Non-main kernel tables.";
+
+		ngcliext:parent-fmt "$< table @{id}";
 
 		leaf id {
 		    type uint16 {
@@ -831,11 +973,16 @@ module netgate-bgp {
 			"If present, this redistribution is present
 			 and configured.";
 
+		    ngcliext:parent-fmt "$<";
+		    ngcliext:node-op "test-set:@{metric}@{route-map}";
+		    ngcliext:node-fmt "$<$n|${metric}${route-map}";
+
 		    leaf metric {
 			type uint32;
 			description
 			    "Metric for redistributed
 			     routes.";
+			 ngcliext:child-fmt "$< $% @@$n";
 		    }
 
 		    leaf route-map {
@@ -843,6 +990,7 @@ module netgate-bgp {
 			description
 			    "Route map for
 			     redistributed routes";
+			 ngcliext:child-fmt "$< $% @@$n";
 		    }
 		}
 	    }
@@ -928,35 +1076,51 @@ module netgate-bgp {
 
 	container bgp {
 
+	    ngcliext:node-fmt "route dynamic bgp$n";
+	    ngcliext:pre-children-op "push";
+
 	    container global-options {
 		description
 		    "These are options that apply to the BGP Server or
 		     to all BGP Router configurations.";
 
+		ngcliext:context "bgp-config";
+		ngcliext:parent-fmt "^option";
+
 		container debug {
 		    description
 			"BGP debug options.";
+
+		    ngcliext:parent-fmt "$< $%";
 
 		    leaf allow-martians {
 			type boolean;
 			description
 			    "If true, allow martian next hops.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
 		    }
 
 		    container as4 {
 			description
 			    "AS4 debug action.";
 			
+			ngcliext:parent-fmt "$< $%";
+
 			leaf all {
 			    type boolean;
 			    description
 				"If true, debug AS4 actions.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$<$n";
 			}
 
 			leaf segment {
 			    type boolean;
 			    description
 				"If true, debug AS4 AS-path segment handling.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$< $%$n";
 			}
 		    }
 
@@ -964,10 +1128,13 @@ module netgate-bgp {
 			description
 			    "bestpath debug action.";
 
+			ngcliext:parent-fmt "$< $%";
+
 			leaf ipv6-prefix {
 			    type inet:ipv6-prefix;
 			    description
 				"Debug bestpath of this IPv6 prefix.";
+			    ngcliext:node-fmt "$< @@$n";
 			}
 		    }
 
@@ -975,16 +1142,21 @@ module netgate-bgp {
 			description
 			    "Debug BGP neighbor keepalive.";
 
+			ngcliext:parent-fmt "$< $%";
+
 			leaf all {
 			    type boolean;
 			    description
 				"Enable BGP neighbor keepalive debug.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$<$n";
 			}
 
 			leaf peer {
 			    type string;
 			    description
 				"Debug specific BGP neighbor.";
+			    ngcliext:node-fmt "$< @@$n";
 			}
 		    }
 
@@ -992,16 +1164,21 @@ module netgate-bgp {
 			description
 			    "Debug BGP neighbor events.";
 			
+			ngcliext:parent-fmt "$< $%";
+
 			leaf all {
 			    type boolean;
 			    description
 				"Enable BGP neighbor events debug.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$<$n";
 			}
 
 			leaf peer {
 			    type string;
 			    description
 				"Debug specific BGP neighbor.";
+			    ngcliext:node-fmt "$< @@$n";
 			}
 		    }
 
@@ -1009,40 +1186,51 @@ module netgate-bgp {
 			type boolean;
 			description
 			    "If true, enable next hop tracking events.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$< $%$n";
 		    }
 
 		    leaf update-groups {
 			type boolean;
 			description
 			    "If true, update-groups.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$< $%$n";
 		    }
 
 		    container updates {
 			description
 			    "Debug BGP neighbor events.";
 
+			ngcliext:parent-fmt "$< $%";
+
 			leaf all {
 			    type boolean;
 			    description
 				"Debug BGP updates.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$<$n";
 			}
 
 			leaf in-peer {
 			    type string;
 			    description
 				"Debug specific BGP neighbor in-updates.";
+			    ngcliext:node-fmt "$< in @@$n";
 			}
 
 			leaf out-peer {
 			    type string;
 			    description
 				"Debug specific BGP neighbor out-updates.";
+			    ngcliext:node-fmt "$< in @@$n";
 			}
 
 			leaf prefix {
 			    type inet:ip-prefix;
 			    description
 				"Debug specific BGP IPV4 or IPv6 prefix.";
+			    ngcliext:node-fmt "$< in @@$n";
 			}
 		    }
 
@@ -1050,16 +1238,21 @@ module netgate-bgp {
 			description
 			    "Debug BGP Zebra messages.";
 
+			ngcliext:parent-fmt "$< $%";
+
 			leaf all {
 			    type boolean;
 			    description
 				"Debug BGP Zebra messages.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$<$n";
 			}
 
 			leaf prefix {
 			    type inet:ip-prefix;
 			    description
 				"Debug specific BGP IPV4 or IPv6 prefix.";
+			    ngcliext:node-fmt "$< $% @@$n";
 			}
 		    }
 		}
@@ -1069,6 +1262,8 @@ module netgate-bgp {
 		    default false;
 		    description
 			"If true, the BGP Daemon is enabled.";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "^disable$n|^enable$n";
 		}
 
 		leaf route-map-delay-timer {
@@ -1078,6 +1273,7 @@ module netgate-bgp {
 		    description
 			"The delay time in seconds before processing
 			 route-map changes.";
+		    ngcliext:node-fmt "^route-map delay-timer @@$n";
 		}
 	    }
 
@@ -1085,10 +1281,15 @@ module netgate-bgp {
 		description
 		    "Table of BGP Router instances index by ASN.";
 
+		ngcliext:context "bgp-config";
+
 		list router {
 		    key "vrf-id";
 		    description
 			"Each router is identified using its VRF ID.";
+
+		    ngcliext:node-fmt "^server vrf @{vrf-id}$n";
+		    ngcliext:pre-children-op "push";
 
 		    leaf vrf-id {
 			type bgp-vrf-id;
@@ -1103,27 +1304,311 @@ module netgate-bgp {
 			mandatory true;
 			description
 			    "The BGP Router AS number.";
+			ngcliext:node-fmt "^as-number @@$n";
+		    }
+
+		    container neighbors {
+			description
+			    "Table of BGP Neighbors.";
+
+			list neighbor {
+			    key "peer";
+			    description
+				"List of neighbors indexed by peer.";
+
+			    ngcliext:node-fmt "^$% @{peer}$n";
+			    ngcliext:pre-children-op "push";
+
+			    leaf peer {
+				type string;
+				mandatory true;
+				description
+				    "The IPv4 or IPv6 address of the
+				     neighboring BGP peer, or the name of
+				     a peer group.";
+			    }
+
+			    leaf advertisement-interval {
+				type uint16;
+				description
+				    "The minimum time in seconds
+				     between sending BGP routing
+				     updates to this peer.";
+				ngcliext:node-fmt "^$% @@$n";
+			    }
+
+			    leaf bfd {
+				type boolean;
+				description
+				    "Bidirectional Forwarding Detection (BFD)
+				     is enabled for this peer.";
+				ngcliext:node-op "bool";
+				ngcliext:node-fmt "|^$% enabled @@$n";
+			    }
+
+			    container capability-advertise {
+				description
+				    "This is the set of capabilities that
+				     are advertised to this neighbor.";
+
+				ngcliext:parent-fmt "^capability";
+
+				leaf dynamic {
+				    type boolean;
+				    description
+					"If true, advertise dynamic capability
+					 to this neighbor.";
+				    ngcliext:node-op "bool";
+				    ngcliext:node-fmt "|$< $%$n";
+				}
+
+				leaf extended-nexthop {
+				    type boolean;
+				    description
+					"If true, advertise extended
+					 next-hop capability to this
+					 neighbor.";
+				    ngcliext:node-op "bool";
+				    ngcliext:node-fmt "|$< $%$n";
+				}
+			    }
+
+			    leaf capability-negotiate {
+				type boolean;
+				default true;
+				description
+				    "Should neighbor capabilities be
+				    negotiated?.";
+				ngcliext:node-op "bool";
+				ngcliext:node-fmt "^dont-capability-negotiate$n|";
+			    }
+
+			    leaf description {
+				type string;
+				description
+				    "A user description of the neighbor.";
+				ngcliext:node-fmt "^$% @@$n";
+			    }
+
+			    leaf disable-connected-check {
+				type boolean;
+				description
+				    "If true, disable one-hop away EBGP
+				     peer using loopback address.";
+			    }
+
+			    container ebgp-multihop {
+				presence
+				    "Allow eBGP neighbors not on directly
+				     connected netowrks.";
+				description
+				    "Control multi-hop neighbors.";
+
+				ngcliext:node-fmt "^$%${max-hop-count}$n";
+
+				leaf max-hop-count {
+				    type uint8;
+				    description
+					"Allow neighbors to be
+					 multi-hop distant.  Mutually
+					 exclusive with 'ttl
+					 security'.";
+				    ngcliext:child-fmt " hop-maximum @@";
+				}
+			    }
+
+			    leaf enforce-first-as {
+				type boolean;
+				description
+				    "Enforce the first AS for eBGP routes.";
+				ngcliext:node-op "bool";
+				ngcliext:node-fmt "|^$%$n";
+			    }
+
+			    /* bgp neighbor peer local-as-number, -prepend, and -replace-as should be containerized */
+			    leaf local-as-number {
+				type uint32 {
+				    range "1..4294967295";
+				}
+				description
+				    "If present, this value is an alternate
+				     AS-number for this BGP instance.
+				     Valid for only eBGP peers.";
+				ngcliext:node-fmt "^local-as @@%{local-as-no-prepend}$n";
+			    }
+
+			    leaf local-as-no-prepend {
+				type boolean;
+				description
+				    "If true, don't prepend the local-as
+				     to the received AS_PATH.
+				     Valid for only eBGP peers.";
+				ngcliext:sibling-op "bool";
+				ngcliext:sibling-fmt "| no-prepend%{local-as-replace-as}";
+			    }
+
+			    leaf local-as-replace-as {
+				type boolean;
+				description
+				    "If true, then only the supplied local-as
+				     is prepended to the AS_PATH when
+				     transmitting local-route updates.
+				     Valid for only eBGP peers.";
+				ngcliext:sibling-op "bool";
+				ngcliext:sibling-fmt "| replace-as";
+			    }
+
+			    leaf override-capability {
+				type boolean;
+				description
+				    "A neighbor attribute.";
+				ngcliext:node-op "bool";
+				ngcliext:node-fmt "|^$%$n";
+			    }
+
+			    leaf passive {
+				type boolean;
+				description
+				    "If true, don't send open messages to
+				     this neighbor.";
+				ngcliext:node-op "bool";
+				ngcliext:node-fmt "|^$%$n";
+			    }
+
+			    leaf password {
+				type string {
+				    length "1..63";
+				}
+				description
+				    "The neighbor password.";
+				ngcliext:node-fmt "^$% @@$n";
+			    }
+
+			    leaf peer-group-name {
+				type string;
+				description
+				    "If present, this is the name of a peer
+				     group template from which attributes are
+				     obtained for this neighbor.";
+				ngcliext:node-fmt "^peer-group @@$n";
+			    }
+
+			    leaf port {
+				type uint16;
+				description
+				    "IP Port.";
+				ngcliext:node-fmt "^$% @@$n";
+			    }
+
+			    leaf remote-asn {
+				type uint32;
+				description
+				    "The AS-number of the neighbor.";
+			    }
+
+			    leaf enable {
+				type boolean;
+				description
+				    "If true, the neighbor interface
+				    is enabled.";
+				ngcliext:node-op "bool";
+				ngcliext:node-fmt "|^$%$n";
+			    }
+
+			    leaf solo {
+				type boolean;
+				description
+				    "If true, the neighbor is part of its
+				     own update group.";
+				ngcliext:node-op "bool";
+				ngcliext:node-fmt "|^$%$n";
+			    }
+
+			    leaf strict-capability-match {
+				type boolean;
+				description
+				    "Capabilites should be matched strictly.";
+				ngcliext:node-op "bool";
+				ngcliext:node-fmt "|^$%$n";
+			    }
+
+			    container timers {
+				description
+				    "Various FSM timers per neighbor.";
+
+				ngcliext:parent-fmt "^$%";
+
+				leaf connect {
+				    type uint16;
+				    description
+					"BGP Connection timer.";
+				    ngcliext:node-fmt "$< connect @@$n";
+				}
+
+				leaf keep-alive {
+				    type uint16;
+				    description
+					"Keepalive interval in
+					 seconds. Default is 1/3 of the
+					 hold-time value.";
+				    ngcliext:node-fmt "$< $% @@%{hold-time}$n";
+				}
+
+				leaf hold-time {
+				    type uint16;
+				    description
+					"Hold-time in seconds. Default 90
+					 seconds, maybe.";
+				    ngcliext:sibling-fmt " $% @@";
+				}
+			    }
+
+			    leaf ttl-security-hops {
+				type uint8 {
+				    range "1..254";
+				}
+				description
+				    "Limit neighbors to being exactly <n-hops>
+				     distant.	Mutually exclusive with the
+				     'ebgp-multihop' option.";
+				ngcliext:node-fmt "^ttl-security hops @@$n";
+			    }
+
+			    leaf update-source {
+				type string;
+				description
+				    "The source from which updates will come.
+				     It is either an if-name or ipv4-address.";
+				ngcliext:node-fmt "^$% @@$n";
+			    }
+			}
 		    }
 
 		    leaf always-compare-med {
 			type boolean;
 			description
 			    "Always compare the Multi-exit-discriminator.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
 		    }
 
 		    leaf bestpath-as-path-multipath-relax {
 			type boolean;
 			description
-			    "Best path decisions should consider paths of
+			    "Best path decisions shoul<d consider paths of
 			     equal AS-path length candidates for multipath
 			     computation.  Allow load sharing on routes with
 			     different AS-paths of the same length.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^bestpath as-path multipath-relax$n";
 		    }
 
 		    leaf bestpath-as-path-multipath-relax-as-set {
 			type boolean;
 			description
 			    "If true, generate an AS-set.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^bestpath as-path multipath-relax as-set$n";
 		    }
 
 		    leaf bestpath-as-path-confed {
@@ -1131,6 +1616,8 @@ module netgate-bgp {
 			description
 			    "Best path decisions should be based on the length
 			     of confederation path sets.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^bestpath as-path confed$n";
 		    }
 
 		    leaf bestpath-as-path-ignore {
@@ -1138,6 +1625,8 @@ module netgate-bgp {
 			description
 			    "Best path decisions should ignore AS-path
 			    lengths.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^bestpath as-path ignore$n";
 		    }
 
 		    leaf bestpath-compare-routerid {
@@ -1145,14 +1634,21 @@ module netgate-bgp {
 			description
 			    "Break otherwise equal route ties using
 			    router id.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^bestpath compare-routerid$n";
 		    }
 
 		    container bestpath-med {
+
+			ngcliext:parent-fmt "^bestpath med";
+
 			leaf confed {
 			    type boolean;
 			    description
 				"Compare MED attribute among confederation
 				 paths.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$< $%$n";
 			}
 
 			leaf missing-as-worst {
@@ -1160,6 +1656,8 @@ module netgate-bgp {
 			    description
 				"Treat a missing MED attribute as the
 				 least preferred value.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$< $%$n";
 			}
 		    }
 
@@ -1167,6 +1665,8 @@ module netgate-bgp {
 			type boolean;
 			description
 			    "Allow client-to-client route reflection.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|^client-to-client reflection$n";
 		    }
 
 		    leaf cluster-id {
@@ -1178,15 +1678,20 @@ module netgate-bgp {
 			    "The route-reflector cluster id expressed as
 			     either an IPv4 address or an unsigned 32-bit
 			     integer.";
+			ngcliext:node-fmt "^$% @@$n";
 		    }
 
 		    leaf coalesce-time {
 			type uint32;
 			description
 			    "Subgroup coalesce timer in ms.";
+			ngcliext:node-fmt "^$% @@$n";
 		    }
 
 		    container confederation {
+
+			ngcliext:parent-fmt "^$%";
+
 			description
 			    "Confederation Parameters.";
 
@@ -1194,13 +1699,18 @@ module netgate-bgp {
 			    type uint32;
 			    description
 				"The confederation identifier; an AS number.";
+			    ngcliext:node-fmt "$< $% @@$n";
 			}
 
 			container peers {
+
+			    ngcliext:parent-fmt "$<";
+
 			    leaf-list peer {
 				type uint32;
 				description
 				    "A list of AS numbers for each peer.";
+				ngcliext:node-fmt "$< $% @@$n";
 			    }
 			}
 		    }
@@ -1208,6 +1718,10 @@ module netgate-bgp {
 		    container dampening {
 			description
 			    "Route flap dampening parameters.";
+
+			ngcliext:node-fmt "^dampening";
+			ngcliext:post-node-fmt "$n";
+			ngcliext:children-order "penalty-half-life route-reuse";
 
 			presence
 			    "If present, the route-flag dampening is
@@ -1219,6 +1733,7 @@ module netgate-bgp {
 			    }
 			    description
 				"The penalty half-life value [1-45].";
+			    ngcliext:node-fmt " penalty @@";
 			}
 
 			leaf route-reuse {
@@ -1227,6 +1742,7 @@ module netgate-bgp {
 			    }
 			    description
 				"The route reuse start value.";
+			    ngcliext:node-fmt " reuse @@ %{route-suppression} %{route-suppression-maximum}";
 			}
 
 			leaf route-suppression {
@@ -1235,12 +1751,14 @@ module netgate-bgp {
 			    }
 			    description
 				"The route suppression start value.";
+			    ngcliext:sibling-fmt "suppress @@";
 			}
 
 			leaf route-suppression-maximum {
 			    type uint8;
 			    description
 				"The route suppression maximum value.";
+			    ngcliext:sibling-fmt "maximum @@";
 			}
 		    }
 
@@ -1250,6 +1768,8 @@ module netgate-bgp {
 			    "Always produce deterministic route-selection by
 			     picking the best MED path advertised from the
 			     neighboring AS.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
 		    }
 
 		    leaf disable-ebgp-connected-route-check {
@@ -1257,6 +1777,8 @@ module netgate-bgp {
 			description
 			    "Disable checking if nexthop is connected an
 			     eBGP session";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
 		    }
 
 		    leaf listen-limit {
@@ -1266,6 +1788,8 @@ module netgate-bgp {
 			description
 			    "The maximum number of dynamic neighbors that
 			     can be created.";
+			ngcliext:node-fmt "^listen limit @@$n";
+			ngcliext:node-fmt "^listen limit @@$n";
 		    }
 
 		    leaf listen-range {
@@ -1273,6 +1797,7 @@ module netgate-bgp {
 			description
 			    "An IPv4 or IPv6 prefix range on which listening
 			     for dynamic neighbors will take place.";
+			ngcliext:node-fmt "^listen range @@%{listen-peer-group-name}$n";
 		    }
 
 		    leaf listen-peer-group-name {
@@ -1280,28 +1805,41 @@ module netgate-bgp {
 			description
 			    "The peer group name for dynamically created
 			     neighbors.";
+			ngcliext:sibling-fmt " peer-group @@";
 		    }
 
 		    container max-med {
+
+		        ngcliext:parent-fmt "^$%";
+
 			container administrative {
 			    presence
 				"If present without a specific value,
 				 administratively advertise routes with
 				 maximum MED for an indefinite period.";
 
+			    ngcliext:node-fmt "$< $%";
+			    ngcliext:post-node-fmt "$n";
+
 			    leaf med-value {
 				type uint32;
 				description
 				    "The maximum MED value to use.";
+				ngcliext:node-fmt " @@";
 			    }
 			}
 
 			container on-startup {
+
+			    ngcliext:parent-fmt "$< $%";
+			    ngcliext:children-order "time-period";
+
 			    leaf time-period {
 				type uint32;
 				description
 				    "The time period, in seconds, for
 				    max-med.";
+				ngcliext:node-fmt "$< @@%{med-value}$n";
 			    }
 
 			    leaf med-value {
@@ -1310,6 +1848,7 @@ module netgate-bgp {
 				    "The max MED value is effective on
 				     startup, and has this time period
 				     in seconds.";
+				ngcliext:sibling-fmt " @@";
 			    }
 			}
 		    }
@@ -1319,6 +1858,8 @@ module netgate-bgp {
 			description
 			    "If true, check if BGP network route exists
 			     in IGP.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^network import-check$n";
 		    }
 
 		    leaf route-reflector-allow-outbound-policy {
@@ -1326,6 +1867,8 @@ module netgate-bgp {
 			description
 			    "If true, also allow attribure modifications to
 			     the route-map-out policy.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^route-reflector allow-outbound-policy$n";
 		    }
 
 		    leaf router-id {
@@ -1335,17 +1878,22 @@ module netgate-bgp {
 			     unsigned value in dotted-quad format but
 			     is usually the IP address of the router.
 			     RFC4271 Section 4.2";
+			ngcliext:node-fmt "^$% @@$n";
 		    }
 
 		    container timers {
 			description
 			    "Various FSM timers.";
 
+			ngcliext:parent-fmt "^$%";
+			ngcliext:children-order "keep-alive";
+
 			leaf keep-alive {
 			    type uint16;
 			    description
 				"Keepalive interval in seconds. Default is 1/3
 				 of the hold-time value.";
+			    ngcliext:node-fmt "$< $% @@%{hold-time}$n";
 			}
 
 			leaf hold-time {
@@ -1353,6 +1901,7 @@ module netgate-bgp {
 			    description
 				"Hold-time in seconds. Default 90
 				seconds, maybe.";
+			    ngcliext:sibling-fmt " $% @@";
 			}
 		    }
 
@@ -1363,6 +1912,7 @@ module netgate-bgp {
 			description
 			    "Force initial delay, [0..3600] seconds, for
 			     best-path and updates.  Default 120 seconds.";
+			ngcliext:node-fmt "^update-delay @@%{update-delay-peer-wait}$n";
 		    }
 
 		    leaf update-delay-peer-wait {
@@ -1383,6 +1933,7 @@ module netgate-bgp {
 			    "Time to wait for a peer to establish connection.
 			     Must not be greater than initial, maximum delay.
 			     Default 120 seconds.";
+			ngcliext:sibling-fmt " peer-wait @@";
 		    }
 
 		    leaf write-quanta {
@@ -1390,32 +1941,28 @@ module netgate-bgp {
 			description
 			    "The number of packets to write to peer sockets
 			     per update.  Default 10 packets.";
+			ngcliext:node-fmt "^$% @@$n";
 		    }
 
 		    container address-families {
 			description
 			    "Address-family specific information.";
 
+			ngcliext:parent-fmt "^address-family";
+
 			container ipv4 {
 			    description
 				"Address family IPv4 configuration.";
 
-			    container flowspec {
-				description
-				    "Address family IPv4-flowspec
-				     configuration.";
-			    }
-
-			    container labeled-unicast {
-				description
-				    "Address family IPv4-labeled-unicast
-				     configuration.";
-			    }
+			    ngcliext:parent-fmt "$< $%";
 
 			    container multicast {
 				description
 				    "Address family IPv4-multicast
 				     configuration.";
+
+				ngcliext:node-fmt "$< $%$n";
+				ngcliext:pre-children-op "push";
 
 				container aggregations {
 				    description
@@ -1457,6 +2004,7 @@ module netgate-bgp {
 				    description
 					"A route-map to use as a BGP
 					 to RIB router download filter.";
+				    ngcliext:node-fmt "^$% @@$n";
 				}
 			    }
 
@@ -1464,6 +2012,9 @@ module netgate-bgp {
 				description
 				    "Address family IPv4-unicast
 				     configuration.";
+
+				ngcliext:node-fmt "$< $%$n";
+				ngcliext:pre-children-op "push";
 
 				container aggregations {
 				    description
@@ -1519,13 +2070,8 @@ module netgate-bgp {
 				    description
 					"A route-map to use as a BGP
 					 to RIB router download filter.";
+				    ngcliext:node-fmt "^$% @@$n";
 				}
-			    }
-
-			    container vpn {
-				description
-				    "Address family IPv4-vpn
-				     configuration.";
 			    }
 			}
 
@@ -1533,28 +2079,21 @@ module netgate-bgp {
 			    description
 				"Address family IPv6 configuration.";
 
-			    container flowspec {
-				description
-				    "Address family IPv6-flowspec
-				     configuration.";
-			    }
-
-			    container labeled-unicast {
-				description
-				    "Address family IPv6-labeled-unicast
-				     configuration.";
-			    }
+			    ngcliext:node-fmt "$< $%";
 
 			    container multicast {
 				description
 				    "Address family IPv6-multicast
 				     configuration.";
 
+				ngcliext:node-fmt "$< $%$n";
+				ngcliext:pre-children-op "push";
+
 				container distance-admin {
 				    description
 					"Adminstrative distances.";
 
-				    uses bgp-ipv4-distance-admin;
+				    uses bgp-ipv6-distance-admin;
 				}
 
 				container distance-bgp {
@@ -1584,6 +2123,9 @@ module netgate-bgp {
 				    "Address family IPv6-unicast
 				     configuration.";
 
+				ngcliext:node-fmt "$< $%$n";
+				ngcliext:pre-children-op "push";
+
 				container aggregations {
 				    description
 					"Address aggregation.";
@@ -1595,7 +2137,7 @@ module netgate-bgp {
 				    description
 					"Adminstrative distances.";
 
-				    uses bgp-ipv4-distance-admin;
+				    uses bgp-ipv6-distance-admin;
 				}
 
 				container distance-bgp {
@@ -1638,244 +2180,8 @@ module netgate-bgp {
 				    description
 					"A route-map to use as a BGP
 					 to RIB router download filter.";
+				    ngcliext:node-fmt "^$% @@$n";
 				}
-			    }
-
-			    container vpn {
-				description
-				    "Address family IPv6-vpn
-				     configuration.";
-			    }
-			}
-		    }
-
-		    container neighbors {
-			description
-			    "Table of BGP Neighbors.";
-
-			list neighbor {
-			    key "peer";
-			    description
-				"List of neighbors indexed by peer.";
-
-			    leaf peer {
-				type string;
-				mandatory true;
-				description
-				    "The IPv4 or IPv6 address of the
-				     neighboring BGP peer, or the name of
-				     a peer group.";
-			    }
-
-			    leaf advertisement-interval {
-				type uint16;
-				description
-				    "The minimum time in seconds
-				     between sending BGP routing
-				     updates to this peer.";
-			    }
-
-			    leaf bfd {
-				type boolean;
-				description
-				    "Bidirectional Forwarding Detection (BFD)
-				     is enabled for this peer.";
-			    }
-
-			    container capability-advertise {
-				description
-				    "This is the set of capabilities that
-				     are advertised to this neighbor.";
-
-				leaf dynamic {
-				    type boolean;
-				    description
-					"If true, advertise dynamic capability
-					 to this neighbor.";
-				}
-
-				leaf extended-nexthop {
-				    type boolean;
-				    description
-					"If true, advertise extended
-					 next-hop capability to this
-					 neighbor.";
-				}
-			    }
-
-			    leaf capability-negotiate {
-				type boolean;
-				default true;
-				description
-				    "Should neighbor capabilities be
-				    negotiated?.";
-			    }
-
-			    leaf description {
-				type string;
-				description
-				    "A user description of the neighbor.";
-			    }
-
-			    leaf disable-connected-check {
-				type boolean;
-				description
-				    "If true, disable one-hop away EBGP
-				     peer using loopback address.";
-			    }
-
-			    container ebgp-multihop {
-				presence
-				    "Allow eBGP neighbors not on directly
-				     connected netowrks.";
-				description
-				    "Control multi-hop neighbors.";
-
-				leaf max-hop-count {
-				    type uint8;
-				    description
-					"Allow neighbors to be
-					 multi-hop distant.  Mutually
-					 exclusive with 'ttl
-					 security'.";
-				}
-			    }
-
-			    leaf enforce-first-as {
-				type boolean;
-				description
-				    "Enforce the first AS for eBGP routes.";
-			    }
-
-			    leaf local-as-number {
-				type uint32 {
-				    range "1..4294967295";
-				}
-				description
-				    "If present, this value is an alternate
-				     AS-number for this BGP instance.
-				     Valid for only eBGP peers.";
-			    }
-
-			    leaf local-as-no-prepend {
-				type boolean;
-				description
-				    "If true, don't prepend the local-as
-				     to the received AS_PATH.
-				     Valid for only eBGP peers.";
-			    }
-
-			    leaf local-as-replace-as {
-				type boolean;
-				description
-				    "If true, then only the supplied local-as
-				     is prepended to the AS_PATH when
-				     transmitting local-route updates.
-				     Valid for only eBGP peers.";
-			    }
-
-			    leaf override-capability {
-				type boolean;
-				description
-				    "A neighbor attribute.";
-			    }
-
-			    leaf passive {
-				type boolean;
-				description
-				    "If true, don't send open messages to
-				     this neighbor.";
-			    }
-
-			    leaf password {
-				type string {
-				    length "1..63";
-				}
-				description
-				    "The neighbor password.";
-			    }
-
-			    leaf peer-group-name {
-				type string;
-				description
-				    "If present, this is the name of a peer
-				     group template from which attributes are
-				     obtained for this neighbor.";
-			    }
-
-			    leaf port {
-				type uint16;
-				description
-				    "IP Port.";
-			    }
-
-			    leaf remote-asn {
-				type uint32;
-				description
-				    "The AS-number of the neighbor.";
-			    }
-
-			    leaf enable {
-				type boolean;
-				description
-				    "If true, the neighbor interface
-				    is enabled.";
-			    }
-
-			    leaf solo {
-				type boolean;
-				description
-				    "If true, the neighbor is part of its
-				     own update group.";
-			    }
-
-			    leaf strict-capability-match {
-				type boolean;
-				description
-				    "Capabilites should be matched strictly.";
-			    }
-
-			    container timers {
-				description
-				    "Various FSM timers per neighbor.";
-
-				leaf connect {
-				    type uint16;
-				    description
-					"BGP Connection timer.";
-				}
-
-				leaf keep-alive {
-				    type uint16;
-				    description
-					"Keepalive interval in
-					 seconds. Default is 1/3 of the
-					 hold-time value.";
-				}
-
-				leaf hold-time {
-				    type uint16;
-				    description
-					"Hold-time in seconds. Default 90
-					 seconds, maybe.";
-				}
-			    }
-
-			    leaf ttl-security-hops {
-				type uint8 {
-				    range "1..254";
-				}
-				description
-				    "Limit neighbors to being exactly <n-hops>
-				     distant.	Mutually exclusive with the
-				     'ebgp-multihop' option.";
-			    }
-
-			    leaf update-source {
-				type string;
-				description
-				    "The source from which updates will come.
-				     It is either an if-name or ipv4-address.";
 			    }
 			}
 		    }
@@ -1887,10 +2193,17 @@ module netgate-bgp {
 		    "Table of AS Paths, indexed by name.  Each entry
 		     contains a single regular expression pattern.";
 
+		ngcliext:node-fmt "route dynamic bgp$n";
+		ngcliext:pre-children-op "push";
+		ngcliext:context "as-path-config";
+
 		list as-path {
 		    key "name";
 		    description
 			"AS Path name.";
+
+		    ngcliext:node-fmt "^as-path @{name}$n";
+		    ngcliext:pre-children-op "push";
 
 		    leaf name {
 			type string;
@@ -1911,6 +2224,8 @@ module netgate-bgp {
 			    description
 				"The set of ordered policiy and patterns pairs
 				 for an AS-path.";
+
+			    ngcliext:node-fmt "^rule @{sequence} @{policy} @{regex}$n";
 
 			    leaf sequence {
 				type uint32;
@@ -1939,10 +2254,17 @@ module netgate-bgp {
 		    "Table of Community Lists, indexed by name.	 Each entry
 		     contains a set of rules ordered by sequence number.";
 
+		ngcliext:node-fmt "route dynamic bgp$n";
+		ngcliext:pre-children-op "push";
+		ngcliext:context "community-lists-config";
+
 		list community {
 		    key "name";
 		    description
 			"Community List entries indexed by name.";
+
+		    ngcliext:node-fmt "^community-list @{name}${value-size}$n";
+		    ngcliext:pre-children-op "push";
 
 		    leaf name {
 			type string;
@@ -1958,6 +2280,7 @@ module netgate-bgp {
 			type string;
 			description
 			    "A user description of the community list.";
+			ngcliext:node-fmt "^$% @@$n";
 		    }
 
 		    leaf value-type {
@@ -1980,6 +2303,7 @@ module netgate-bgp {
 			     and matches 8 octets per community from RFC 5668.
 			     When 'large', rules allow 12-octet values
 			     from RFC 8092.";
+			ngcliext:child-fmt " @@";
 		    }
 
 		    container rules {
@@ -1991,6 +2315,8 @@ module netgate-bgp {
 			    key "sequence";
 			    description
 				"A set of Community List Rules.";
+
+			    ngcliext:node-fmt "^sequence @{sequence} @{action} @{community}$n";
 
 			    leaf sequence {
 				type uint32;
@@ -2491,18 +2817,6 @@ module netgate-bgp {
 			    description
 				"Address family IPv4 configuration.";
 
-			    container flowspec {
-				description
-				    "Address family IPv4-flowspec
-				     configuration.";
-			    }
-
-			    container labeled-unicast {
-				description
-				    "Address family IPv4-labeled-unicast
-				     configuration.";
-			    }
-
 			    container multicast {
 				description
 				    "Address family IPv4-multicast
@@ -2612,29 +2926,11 @@ module netgate-bgp {
 					 to RIB router download filter.";
 				}
 			    }
-
-			    container vpn {
-				description
-				    "Address family IPv4-vpn
-				     configuration.";
-			    }
 			}
 
 			container ipv6 {
 			    description
 				"Address family IPv6 configuration.";
-
-			    container flowspec {
-				description
-				    "Address family IPv6-flowspec
-				     configuration.";
-			    }
-
-			    container labeled-unicast {
-				description
-				    "Address family IPv6-labeled-unicast
-				     configuration.";
-			    }
 
 			    container multicast {
 				description
@@ -2645,7 +2941,7 @@ module netgate-bgp {
 				    description
 					"Adminstrative distances.";
 
-				    uses bgp-ipv4-distance-admin;
+				    uses bgp-ipv6-distance-admin;
 				}
 
 				container distance-bgp {
@@ -2686,7 +2982,7 @@ module netgate-bgp {
 				    description
 					"Adminstrative distances.";
 
-				    uses bgp-ipv4-distance-admin;
+				    uses bgp-ipv6-distance-admin;
 				}
 
 				container distance-bgp {
@@ -2730,12 +3026,6 @@ module netgate-bgp {
 					"A route-map to use as a BGP
 					 to RIB router download filter.";
 				}
-			    }
-
-			    container vpn {
-				description
-				    "Address family IPv6-vpn
-				     configuration.";
 			    }
 			}
 		    }

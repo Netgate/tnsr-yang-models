@@ -1,0 +1,155 @@
+module netgate-cli-extensions {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-cli-extensions";
+    prefix "ngcliext";
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+        "These extensions define attriburtes that may be placed on
+	 nodes within Netgate YANG files as meta-data to help describe
+	 how to convert the data model back into CLI commands.
+
+         Copyright 2020 Rubicon Communications, LLC.";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02";
+    }
+
+
+    extension context {
+	description
+	    "The processing 'stage', or 'context' during which this node
+	     should be applied.  Effectivey, this allows multiple passes
+	     over the data model and XML tree selectively applying some
+	     in each different context.  A missing context means it will
+	     apply to any stage context.";
+	argument context;
+    }
+
+    extension pre-node-op {
+	description
+	    "The pre-node operation prior to the handling of a node.";
+	argument pre-node-op;
+    }
+    extension pre-node-fmt {
+	description
+	    "The pre-node format prior to the handling of a node.";
+	argument pre-node-fmt;
+    }
+
+    extension node-op {
+	description
+	    "The node operation while processing a node.";
+	argument node-op;
+    }
+    extension node-fmt {
+	description
+	    "The interpolatable format used when generating the command for
+	     a node.";
+	argument node-fmt;
+    }
+
+    extension child-op {
+	description
+	    "A possible child operation while processing a node.";
+	argument child-op;
+    }
+    extension child-fmt {
+	description
+	    "A possible interpolatable child format used when generating
+	     the command for a node.";
+	argument child-fmt;
+    }
+
+    extension sibling-op {
+	description
+	    "A possible sibling operation while processing a node.";
+	argument sibling-op;
+    }
+    extension sibling-fmt {
+	description
+	    "A possible interpolatable sibling format used when generating
+	     the command for a node.";
+	argument sibling-fmt;
+    }
+
+    extension parent-op {
+	description
+	    "A possible parent operation while processing a node.";
+	argument parent-op;
+    }
+    extension parent-fmt {
+	description
+	    "A possible interpolatable parent format used when generating
+	     the command for a node.";
+	argument parent-fmt;
+    }
+
+    extension post-node-op {
+	description
+	    "The post-node operation after the handling of a node.";
+	argument post-node-op;
+    }
+    extension post-node-fmt {
+	description
+	    "The post-node format after the handling of a node.";
+	argument post-node-fmt;
+    }
+
+
+    extension pre-children-op {
+	description
+	    "The operation prior to the handling of all children of the node.";
+	argument pre-children-op;
+    }
+    extension pre-children-fmt {
+	description
+	    "The format prior the handling of all children of the node.";
+	argument pre-children-fmt;
+    }
+
+    extension pre-child-op {
+	description
+	    "The operation prior to the handling of each child of the node.";
+	argument pre-child-op;
+    }
+    extension pre-child-fmt {
+	description
+	    "The format prior the handling of each child of the node.";
+	argument pre-child-fmt;
+    }
+
+    extension children-order {
+	description
+	    "The complete order in which children should be processed.";
+	argument children-order;
+    }
+
+    extension post-child-op {
+	description
+	    "The operation after the handling of each child of the node.";
+	argument post-child-op;
+    }
+    extension post-child-fmt {
+	description
+	    "The format after the handling of each child of the node.";
+	argument post-child-fmt;
+    }
+
+    extension post-children-op {
+	description
+	    "The operation after to the handling of all children of the node.";
+	argument post-children-op;
+    }
+    extension post-children-fmt {
+	description
+	    "The format after the handling of all children of the node.";
+	argument post-children-fmt;
+    }
+}

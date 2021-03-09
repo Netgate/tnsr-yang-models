@@ -13,6 +13,10 @@ module netgate-interface {
 	prefix "yang";
     }
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     import netgate-common {
 	prefix "ngcom";
     }
@@ -30,6 +34,11 @@ module netgate-interface {
 
 	 Copyright 2017-2020 Rubicon Communications, LLC.
 	";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-10-01 {
 	description
@@ -372,8 +381,13 @@ module netgate-interface {
 	list interface {
 	    key "name";
 
+	    ngcliext:context "intf-interfaces";
+
 	    description
 		"The list of configured interfaces on the device.";
+
+	    ngcliext:pre-children-op  "push";
+	    ngcliext:node-fmt "interface @{name}$n";
 
 	    leaf name {
 		type string;
@@ -387,6 +401,7 @@ module netgate-interface {
 		}
 		description
 		    "A textual description of the interface.";
+		ngcliext:node-fmt "^$% @@$n";
 	    }
 
 	    leaf enabled {
@@ -394,6 +409,8 @@ module netgate-interface {
 		description
 		    "This leaf contains the configured, desired state of
 		     the interface.";
+		ngcliext:node-fmt "^disable$n|^enable$n";
+		ngcliext:node-op  "bool";
 	    }
 
 	    leaf mtu {
@@ -404,12 +421,14 @@ module netgate-interface {
 		description
 		    "The size, in octets, of the largest packet that the
 		     interface will send and receive.";
+		ngcliext:node-fmt "^$% @@$n";
 	    }
 
 	    leaf nat-interface {
 		type ngnat:nat-side;
 		description
 		    "NAT role.";
+		ngcliext:node-fmt "^ip nat @@$n";
 	    }
 
 	    leaf mac-address {
@@ -417,6 +436,7 @@ module netgate-interface {
 		description
 		    "The Media Access Control (MAC) address of the
 		    interface.";
+		ngcliext:node-fmt "^$% @@$n";
 	    }
 
 	    leaf host-tap-name {
@@ -430,6 +450,7 @@ module netgate-interface {
 		type ngcom:rt-identifier-15;
 		description
 		    "The name of the VRF this interface is bound to.";
+		ngcliext:node-fmt "^$% @@$n";
 	    }
 
 	    container ipv4 {
@@ -444,6 +465,7 @@ module netgate-interface {
 			type inet:ipv4-prefix;
 			description
 			    "An IPv4 address on the interface.";
+			ngcliext:node-fmt "^ip address @@$n";
 		    }
 		}
 
@@ -458,12 +480,16 @@ module netgate-interface {
 			type boolean;
 			description
 			    "IPv4 reassembly enabled for interface";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "^|^ip reassembly enable$n";
 		    }
+
 		    leaf reassembly-type {
 			type ip-reassembly-type;
 			default full;
 			description
 			    "Type of ip-reassembly on interface";
+			ngcliext:node-fmt "^ip reassembly type @@$n";
 		    }
 		}
 
@@ -475,6 +501,7 @@ module netgate-interface {
 		    description
 			"The size, in octets, of the largest IPv4 packet that
 			 the interface will send and receive.";
+		    ngcliext:node-fmt "^ip $% @@$n";
 		}
 	    }
 
@@ -490,6 +517,7 @@ module netgate-interface {
 			type inet:ipv6-prefix;
 			description
 			    "An IPv6 address on the interface.";
+			ngcliext:node-fmt "^ipv6 address @@$n";
 		    }
 		}
 
@@ -504,12 +532,15 @@ module netgate-interface {
 			type boolean;
 			description
 			    "IPv6 reassembly enabled for interface";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "^|^ipv6 reassembly enable$n";
 		    }
 		    leaf reassembly-type {
 			type ip-reassembly-type;
 			default full;
 			description
 			    "Type of ip-reassembly on interface";
+			ngcliext:node-fmt "^ipv6 reassembly type @@$n";
 		    }
 		}
 
@@ -521,6 +552,7 @@ module netgate-interface {
 		    description
 			"The size, in octets, of the largest IPv6 packet that
 			 the interface will send and receive.";
+		    ngcliext:node-fmt "^ipv6 $% @@$n";
 		}
 	    }
 
@@ -537,18 +569,22 @@ module netgate-interface {
 		    type uint32;
 		    description
 			"Bridge Domain Id.";
+		    ngcliext:node-fmt "^bridge domain @@%{bvi}%{shg}$n";
 		}
 
 		leaf bvi {
 		    type boolean;
 		    description
 			"Set up the interface as a BVI.";
+		    ngcliext:sibling-op "bool";
+		    ngcliext:sibling-fmt "| $%";
 		}
 
 		leaf shg {
 		    type uint8;
 		    description
 			"Split Horizon Group.";
+		    ngcliext:sibling-fmt " $% @@";
 		}
 	    }
 
@@ -559,6 +595,9 @@ module netgate-interface {
 		description
 		    "If the interface is configured using a DHCP client,
 		     that configuration is contained here.";
+
+		ngcliext:node-fmt "^dhcp client ipv4";
+		ngcliext:post-node-fmt "$n";
 
 		leaf enable {
 		    type boolean;
@@ -574,6 +613,7 @@ module netgate-interface {
 		    }
 		    description
 			"An optional hostname to use.";
+		    ngcliext:node-fmt " $% @@";
 		}
 	    }
 
@@ -598,6 +638,8 @@ module netgate-interface {
 			description
 			    "Each ACL rule-set can appear at most once within
 			     the input list.";
+
+			ngcliext:node-fmt "^access-list input acl @{acl-name} sequence @{sequence}$n";
 
 			leaf acl-name {
 			    type string;
@@ -627,6 +669,8 @@ module netgate-interface {
 			    "Each ACL rule-set can appear at most once within
 			     the output list.";
 
+			ngcliext:node-fmt "^access-list output acl @{acl-name} sequence @{sequence}$n";
+
 			leaf acl-name {
 			    type string;
 			    description
@@ -651,6 +695,8 @@ module netgate-interface {
 			 IP.  If that ACL is present, it is always on
 			 the ingress packets.";
 
+		    ngcliext:node-fmt "^access-list macip @{macip-name}$n";
+
 		    leaf macip-name {
 			type string;
 			description
@@ -664,34 +710,42 @@ module netgate-interface {
 		type boolean;
 		description
 		    "enable detailed counter keeping in VPP";
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "|^detailed-stats enable$n";
 	    }
 
 	    container lldp {
-		 presence
-		     "Indicates this interface has LLDP configured";
+		presence
+		    "Indicates this interface has LLDP configured";
 
-		 leaf port-name {
-		     type string;
-		     description
-			 "Port name used in LLDP packet.";
-		 }
+		leaf port-name {
+		    type string;
+		    description
+			"Port name used in LLDP packet.";
+		    ngcliext:node-fmt "^lldp port-name @@$n";
+		}
 
-		 container management {
-		     leaf ipv4-address {
-			 type inet:ipv4-address-no-zone;
-			 description
-			     "IPv4 management address.";
-		     }
-		     leaf ipv6-address {
-			 type inet:ipv6-address-no-zone;
-			 description
-			     "IPv6 management address.";
-		     }
-		     leaf oid {
-			 type string;
-			 description
-			     "Management object ID.";
-		     }
+		container management {
+		    leaf ipv4-address {
+			type inet:ipv4-address-no-zone;
+			description
+			    "IPv4 management address.";
+			ngcliext:node-fmt "^lldp management ipv4 @@$n";
+		    }
+
+		    leaf ipv6-address {
+			type inet:ipv6-address-no-zone;
+			description
+			    "IPv6 management address.";
+			ngcliext:node-fmt "^lldp management ipv6 @@$n";
+		    }
+
+		    leaf oid {
+			type string;
+			description
+			    "Management object ID.";
+			ngcliext:node-fmt "^lldp management oid @@$n";
+		    }
 		 }
 	    }
 
@@ -707,6 +761,7 @@ module netgate-interface {
 		    type uint32;
 		    description
 			"Bond unique identifier.";
+		    ngcliext:node-fmt "^bond @@%{long-timeout}%{passive}$n";
 		}
 
 		leaf passive {
@@ -716,6 +771,8 @@ module netgate-interface {
 			"The slave interface does not
 			 initiate the LACP protocol,
 			 remote must be active speaker.";
+		    ngcliext:sibling-op "bool";
+		    ngcliext:sibling-fmt "| $%";
 		}
 
 		leaf long-timeout {
@@ -724,6 +781,8 @@ module netgate-interface {
 		    description
 			"90 seconds VS default 3 seconds
 			 neighbor timeout.";
+		    ngcliext:sibling-op "bool";
+		    ngcliext:sibling-fmt "| $%";
 		}
 	    }
 
@@ -739,6 +798,8 @@ module netgate-interface {
 		    description
 			"If true, MAP-E encapsulation or MAP-T
 			 translations are enabled on this interface.";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|^map enable$n";
 		}
 
 		leaf is-translation {
@@ -748,6 +809,8 @@ module netgate-interface {
 			 translations.	If false, this interface is
 			 performing encapsuations.  Valid only when
 			 also enabled.";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|^map translate$n";
 		}
 	    }
 
@@ -762,25 +825,31 @@ module netgate-interface {
 			 'disable', 'pop-1', 'pop-2', 'push-1', 'push-2',
 			 'translate-1-1', 'translate-1-2',
 			 'translate-2-1', 'translate-2-2'.";
+		    ngcliext:node-fmt "^vlan tag-rewrite @@%{push-dot1q}%{tag1}%{tag2}$n";
 		}
 
 		leaf push-dot1q {
 		    type boolean;
+		    default false;
 		    description
 			"If true the first pushed tag is of type dot1q,
 			 otherwise it will be of type dot1ad.";
+		    ngcliext:sibling-op "bool";
+		    ngcliext:sibling-fmt " dot1ad| dot1q";
 		}
 
 		leaf tag1 {
 		    type uint32;
 		    description
 			"The first pushed tag value.";
+		    ngcliext:sibling-fmt " @@";
 		}
 
 		leaf tag2 {
 		    type uint32;
 		    description
 			"The second pushed tag value.";
+		    ngcliext:sibling-fmt " @@";
 		}
 	    }
 	}
@@ -789,10 +858,15 @@ module netgate-interface {
 	    description
 		"Bridge mapping table.";
 
+	    ngcliext:context "intf-bridge";
+
 	    list bridge-entry {
 		key "bdi";
 		description
 		    "Bridge Domain Id.";
+
+		ngcliext:node-fmt "interface bridge domain @{bdi}$n";
+		ngcliext:pre-children-op  "push";
 
 		leaf bdi {
 		    type uint32 {
@@ -810,42 +884,54 @@ module netgate-interface {
 		    }
 		    description
 			"A textual description of the bridge.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf flood {
 		    type boolean;
 		    description
 			"Broadcast/multicast flooding in the bd";
+		    ngcliext:node-op  "bool";
+		    ngcliext:node-fmt "^no $%$n|^$%$n";
 		}
 
 		leaf uu-flood {
 		    type boolean;
 		    description
 			"Unknown unicast flood in the bd";
+		    ngcliext:node-op  "bool";
+		    ngcliext:node-fmt "|^$%$n";
 		}
 
 		leaf forward {
 		    type boolean;
 		    description
 			"Forwarding on all interfaces in the bd";
+		    ngcliext:node-op  "bool";
+		    ngcliext:node-fmt "|^$%$n";
 		}
 
 		leaf learn {
 		    type boolean;
 		    description
 			"Learning on all interfaces in the bd";
+		    ngcliext:node-op  "bool";
+		    ngcliext:node-fmt "|^$%$n";
 		}
 
 		leaf arp-term {
 		    type boolean;
 		    description
 			"ARP termination in the bd";
+		    ngcliext:node-op  "bool";
+		    ngcliext:node-fmt "|^arp term$n";
 		}
 
 		leaf mac-age {
 		    type uint8;
 		    description
 			"MAC aging time in min, 0 for disabled.";
+		    ngcliext:node-fmt "$% @@$n";
 		}
 
 		container bridge-arp-table {
@@ -856,6 +942,8 @@ module netgate-interface {
 			key "ip-address";
 			description
 			    "Bridge ARP entry table.";
+
+			ngcliext:node-fmt "^arp entry ip @{ip-address} mac-address @{mac-address}$n";
 
 			leaf ip-address {
 			    type inet:ip-address-no-zone;
@@ -877,11 +965,16 @@ module netgate-interface {
 	    description
 		"Loopback name table.";
 
+	    ngcliext:context "intf-loopback";
+
 	    list loopback {
 		key "name";
 		unique "instance";
 		description
 		    "Loopback name.";
+
+		ngcliext:node-fmt "interface loopback @{name}$n";
+		ngcliext:pre-children-op  "push";
 
 		leaf name {
 		    type loopback-name-63;
@@ -899,18 +992,21 @@ module netgate-interface {
 			 where the <X> is the instance number.
 			 The instance number must be unique
 			 across all Loopback interfaces.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf mac-address {
 		    type yang:mac-address;
 		    description
 			"The MAC address for the interface.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf description {
 		    type string;
 		    description
 			"A user description of the Loopback.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 	    }
 	}
@@ -919,11 +1015,15 @@ module netgate-interface {
 	    description
 		"Host memif socket table.";
 
+	    ngcliext:context "intf-memif-socket";
+
 	    list socket {
 		key "id";
 		description
 		    "A unique 32-bit integer identifying this socket
 		     filename.";
+
+		ngcliext:node-fmt "interface memif socket @{id} filename @{filename}$n";
 
 		leaf id {
 		    type uint32 {
@@ -933,6 +1033,7 @@ module netgate-interface {
 			"This is the user assigned id of the socket
 			 filename.";
 		}
+
 		leaf filename {
 		    type string;
 		    mandatory true;
@@ -950,10 +1051,15 @@ module netgate-interface {
 	    description
 		"Host memif interface configuration table.";
 
+	    ngcliext:context "intf-memif-table";
+
 	    list memif-entry {
 		key "socket-id memif-id";
 		description
 		    "A unique 32-bit integer identifying this interface.";
+
+		ngcliext:node-fmt "interface memif socket @{socket-id} interface @{memif-id}$n";
+		ngcliext:pre-children-op  "push";
 
 		leaf socket-id {
 		    type uint32;
@@ -973,18 +1079,21 @@ module netgate-interface {
 		    description
 			"The size of the buffer allocated for each
 			 ring entry.  Default 2048.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf mac-address {
 		    type yang:mac-address;
 		    description
 			"The MAC address for the interface.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf mode {
 		    type string;
 		    description
 			"Should be 'ethernet', 'IP' or 'punt/inject'.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf ring-size {
@@ -996,6 +1105,7 @@ module netgate-interface {
 			 The number of entries must be a power of 2
 			 This number is that power of 2, between 8 and 32.
 			 The default is 10, for 1024 entries.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf secret {
@@ -1005,6 +1115,7 @@ module netgate-interface {
 		    description
 			"The secret is used to match and authenticate
 			 the other end of the connection.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		container client {
@@ -1012,16 +1123,20 @@ module netgate-interface {
 			"If present, the role of this memif is 'client'.
 			 If not present, the role is 'server'.";
 
+		    ngcliext:node-fmt "^role client%{rx-queues}%{tx-queues}$n";
+
 		    leaf rx-queues {
 			type uint8;
 			description
 			    "The number of slave rx queues.";
+			ngcliext:sibling-fmt " $% @@";
 		    }
 
 		    leaf tx-queues {
 			type uint8;
 			description
 			    "The number of slave tx queues.";
+			ngcliext:sibling-fmt " $% @@";
 		    }
 		}
 	    }
@@ -1031,10 +1146,15 @@ module netgate-interface {
 	    description
 		"An interface may have subinterfaces.";
 
+	    ngcliext:context "intf-subif";
+
 	    list subif-entry {
 		key "if-name subid";
 		description
 		    "Each subinterface entry represents a VLAN.";
+
+		ngcliext:node-fmt "interface subif @{if-name} @{subid}$n";
+		ngcliext:pre-children-op "push";
 
 		leaf if-name {
 		    type string;
@@ -1059,6 +1179,8 @@ module netgate-interface {
 			description
 			    "By default the outer tag is dot1q.	 If this
 			     value is true, it is instead dot1ad.";
+			ngcliext:sibling-op "bool";
+			ngcliext:sibling-fmt "|true";
 		    }
 
 		    leaf exact-match {
@@ -1066,6 +1188,8 @@ module netgate-interface {
 			description
 			    "By default matching is non-exact.	If this
 			     value is true, matching is exact.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
 		    }
 
 		    leaf default-subif {
@@ -1074,6 +1198,8 @@ module netgate-interface {
 			    "The default subinterface is associated with a
 			     packet that did not match any other configured
 			     subinterface on this interface.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
 		    }
 
 		    leaf outer-vlan-id {
@@ -1081,6 +1207,8 @@ module netgate-interface {
 			description
 			    "The outer vlan tag id.  It can be an integer
 			     between 1 and 4095 inclusive, or the word 'any'.";
+			ngcliext:node-op "test-set:%{dot1ad}";
+			ngcliext:node-fmt "^outer-dot1q @@$n|^outer-dot1ad @@$n";
 		    }
 
 		    leaf inner-vlan-id {
@@ -1088,6 +1216,7 @@ module netgate-interface {
 			description
 			    "The inner vlan tag id.  It can be an integer
 			     between 1 and 4095 inclusive, or the word 'any'.";
+			ngcliext:node-fmt "^inner-dot1q @@$n";
 		    }
 		}
 	    }
@@ -1097,10 +1226,15 @@ module netgate-interface {
 	    description
 		"Host Tap interface configuration table.";
 
+	    ngcliext:context "intf-tap";
+
 	    list tap {
 		key "host-name";
 		description
 		    "Unique identifing host tap name.";
+
+		ngcliext:node-fmt "^interface tap @{host-name}$n";
+		ngcliext:pre-children-op "push";
 
 		leaf host-name {
 		    type string;
@@ -1112,36 +1246,42 @@ module netgate-interface {
 		    type string;
 		    description
 			"The host bridge to which the tap will be attached.";
+		    ngcliext:node-fmt "^host bridge @@$n";
 		}
 
 		leaf host-ipv4-gateway {
 		    type inet:ipv4-address-no-zone;
 		    description
 			"The IPv4 gateway address on the interface.";
+		    ngcliext:node-fmt "^host ipv4 gateway @@$n";
 		}
 
 		leaf host-ipv4-prefix {
 		    type inet:ipv4-prefix;
 		    description
 			"The IPv4 prefix on the interface.";
+		    ngcliext:node-fmt "^host ipv4 prefix @@$n";
 		}
 
 		leaf host-ipv6-gateway {
 		    type inet:ipv6-address-no-zone;
 		    description
 			"The IPv6 gateway address on the interface.";
+		    ngcliext:node-fmt "^host ipv6 gateway @@$n";
 		}
 
 		leaf host-ipv6-prefix {
 		    type inet:ipv6-prefix;
 		    description
 			"The IPv6 prefix on the interface.";
+		    ngcliext:node-fmt "^host ipv6 prefix @@$n";
 		}
 
 		leaf host-mac-address {
 		    type yang:mac-address;
 		    description
 			"The MAC address of the host tap interface.";
+		    ngcliext:node-fmt "^host mac-address @@$n";
 		}
 
 		leaf host-namespace {
@@ -1149,18 +1289,21 @@ module netgate-interface {
 		    default dataplane;
 		    description
 			"The host namespace in which the tap will be made.";
+		    ngcliext:node-fmt "^host namespace @@$n";
 		}
 
 		leaf instance {
 		    type uint32;
 		    description
 			"The tap instance number.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf mac-address {
 		    type yang:mac-address;
 		    description
 			"The MAC address of the interface.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf rx-ring-size {
@@ -1171,6 +1314,7 @@ module netgate-interface {
 			"A power of 2 between 0 and 15 inclusive yielding
 			 a receive ring size 32 to 32768 entries.  The
 			 default is 8 (256 entries).";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf tx-ring-size {
@@ -1181,6 +1325,7 @@ module netgate-interface {
 			"A power of 2 between 0 and 15 inclusive yielding
 			 a transmit ring size 32 to 32768 entries.  The
 			 default is 8 (256 entries).";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 	    }
 	}
@@ -1189,10 +1334,15 @@ module netgate-interface {
 	    description
 		"Bond interface configuration table.";
 
+	    ngcliext:context "intf-bond";
+
 	    list bond {
 		key "instance";
 		description
 		    "Bond interface.";
+
+		ngcliext:node-fmt "^interface bond @{instance}$n";
+		ngcliext:pre-children-op "push";
 
 		leaf instance {
 		    type uint32;
@@ -1206,12 +1356,14 @@ module netgate-interface {
 		    mandatory true;
 		    description
 			"The mode for the interface.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf mac-address {
 		    type yang:mac-address;
 		    description
 			"The MAC address for the interface.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf load-balance {
@@ -1220,10 +1372,10 @@ module netgate-interface {
 		    description
 			"The load balance for the interface
 			 (valid for XOR and LACP modes).";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 	    }
 	}
-
     }
 
     container interfaces-state {

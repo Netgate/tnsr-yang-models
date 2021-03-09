@@ -13,6 +13,10 @@ module netgate-neighbor {
 	prefix "yang";
     }
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     import netgate-common {
 	prefix "ngcom";
     }
@@ -26,6 +30,11 @@ module netgate-neighbor {
 	 for neighbor data.
 
 	 Copyright 2017-2020 Rubicon Communications, LLC.";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -51,14 +60,20 @@ module netgate-neighbor {
 	description
 	    "Neighbor configuration data.";
 
+	ngcliext:parent-fmt "neighbor";
+
 	container neighbor-table {
 	    description
 		"Neighbor mapping table.";
+
+	    ngcliext:parent-fmt "$<";
 
 	    list interface {
 		key "if-name";
 		description
 		    "Neighbor table entry.";
+
+		ngcliext:parent-fmt "$< @{if-name}";
 
 		leaf if-name {
 		    type ngcom:if-identifier-63;
@@ -70,21 +85,31 @@ module netgate-neighbor {
 		    description
 			"Addresses for which there is a neighbor Entry.";
 
+		    ngcliext:parent-fmt "$<";
+
 		    list neighbor-entry {
 			key "ip-address";
 			description
 			    "Neighbor entry table.";
 
+			ngcliext:node-fmt "$< ";
+			ngcliext:children-order "ip-address
+			    mac-address
+			    is-no-adj-route-table-entry";
+			ngcliext:post-node-fmt "$n";
+
 			leaf ip-address {
 			    type inet:ip-address-no-zone;
 			    description
 				"The IP address whose MAC address is stated.";
+			    ngcliext:node-fmt "@@ ";
 			}
 
 			leaf mac-address {
 			    type yang:mac-address;
 			    description
 				"The MAC address of an neighbor entry.";
+			    ngcliext:node-fmt "@@";
 			}
 
 			leaf is-no-route-table-entry {
@@ -92,6 +117,8 @@ module netgate-neighbor {
 			     description
 				"True if this neighbor entry is shoud have no
 				 entry made in the adjacency route table.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|no-adj-route-table-entry";
 			}
 		    }
 		}

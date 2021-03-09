@@ -8,6 +8,11 @@ module netgate-snmp {
     import ietf-inet-types {
 	prefix "inet";
     }
+
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     import netgate-common {
 	prefix "ngcom";
     }
@@ -17,9 +22,14 @@ module netgate-snmp {
     contact "Web: <http://www.netgate.com>";
 
     description
-	"This YANG module provides a data model for the VPP LLDP Service.
+	"This YANG module provides a data model for SNMP Services.
 
 	 Copyright 2019-2020 Rubicon Communications, LLC.";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -76,11 +86,11 @@ module netgate-snmp {
     }
 
     typedef snmp-source {
-	    type union {
-		    type enumeration { enum "default"; }
-		    type inet:ipv6-prefix;
-		    type inet:ipv4-prefix;
-	    }
+	type union {
+	    type enumeration { enum "default"; }
+	    type inet:ipv6-prefix;
+	    type inet:ipv4-prefix;
+	}
     }
 
     rpc snmp-control {
@@ -131,55 +141,74 @@ module netgate-snmp {
     }
 
     container snmp-config {
+
+	ngcliext:parent-fmt "snmp";
+
 	leaf snmp-enable {
 	    type boolean;
 	    default "false";
 	    description
-		"enable the snmp daemons.";
+		"Enable the SNMP daemons.";
+	    ngcliext:node-op "bool";
+	    ngcliext:node-fmt "$< host disable$n|$< host enable$n";
 	}
 
 	container dataplane {
 	    description
 		"Dataplane-specific parameters of SNMP server.";
 
+	    ngcliext:parent-fmt "$< dataplane";
+
 	    leaf enable {
 		type boolean;
 		description
 		    "If true, SNMP server is enabled for dataplane
 		    interfaces.";
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "$< disable$n|$< enable$n";
 	    }
 	}
 
 	container snmp-access-control {
 
+	    ngcliext:parent-fmt "$<";
+
 	    list community-map {
 		key "community-name";
 
 		description
-		    "maps community name from SNMP request to security name";
+		    "Map community name from SNMP request to security name.";
+
+		ngcliext:parent-fmt "$< community community-name @{community-name}";
 
 		leaf community-name {
 		    type string;
-		    description "community name";
+		    description
+			"Community name.";
 		}
 
 		list map-entry {
 		    key "context source";
 
+		    ngcliext:node-fmt "$< source @{source} security-name @{security-name}$n";
+
 		    leaf context {
 			type string;
-			description "SNMPv3 context";
+			description
+			    "SNMPv3 context.";
 		    }
 
 		    leaf source {
 			type snmp-source;
-			description "host name or IP address for source host";
+			description
+			    "Host name or IP address for source host.";
 		    }
 
 		    leaf security-name {
 			type string;
 			mandatory true;
-			description "security name";
+			description
+			    "Security name.";
 		    }
 		}
 	    }
@@ -187,7 +216,10 @@ module netgate-snmp {
 	    list group {
 		key "group-name";
 
-		description "maps security name to group";
+		description
+		    "Map security name to group.";
+
+		ngcliext:parent-fmt "$< group group-name @{group-name}";
 
 		leaf group-name {
 		    type string;
@@ -195,6 +227,8 @@ module netgate-snmp {
 
 		list group-entry {
 		    key "security-name security-model";
+
+		    ngcliext:node-fmt "$< security-name @{security-name} security-model @{security-model}$n";
 
 		    leaf security-name {
 			type string;
@@ -209,7 +243,10 @@ module netgate-snmp {
 	    list view {
 		key "view-name";
 
-		description "defines a subset of the OID tree";
+		description
+		    "Defines a subset of the OID tree.";
+
+		ngcliext:parent-fmt "$< view view-name @{view-name}";
 
 		leaf view-name {
 		    type string;
@@ -218,15 +255,19 @@ module netgate-snmp {
 		list view-entry {
 		    key "type oid";
 
+		    ngcliext:node-fmt "$< view-type @{type} oid @{oid}$n";
+
 		    leaf type {
 			type snmp-view-type;
-			description "exclude|include";
+			description
+			    "One of 'exclude' or 'include'.";
 		    }
 
 		    leaf oid {
 			type string;
 			mandatory true;
-			description "SNMP OID";
+			description
+			    "SNMP OID.";
 		    }
 
 		    leaf mask {
@@ -239,7 +280,9 @@ module netgate-snmp {
 		key "group-name";
 
 		description
-		    "maps from group to views";
+		    "Map from group to views.";
+
+		ngcliext:parent-fmt "$< access group-name @{group-name}";
 
 		leaf group-name {
 		    type string;
@@ -247,6 +290,8 @@ module netgate-snmp {
 
 		list access-entry {
 		    key "context prefix security-model security-level";
+
+		    ngcliext:node-fmt "$< prefix @{prefix} model @{security-model} level @{security-level} read @{read} write @{write}$n";
 
 		    leaf context {
 			type string;
@@ -267,13 +312,15 @@ module netgate-snmp {
 		    leaf read {
 			type string;
 			mandatory true;
-			description "view to use for read ops";
+			description
+			    "View to use for read ops.";
 		    }
 
 		    leaf write {
 			type string;
 			mandatory true;
-			description "view to use for write ops";
+			description
+			    "View to use for write ops.";
 		    }
 		}
 	    }

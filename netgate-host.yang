@@ -13,6 +13,10 @@ module netgate-host {
 	prefix "yang";
     }
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     import netgate-common {
 	prefix "ngcom";
     }
@@ -26,6 +30,11 @@ module netgate-host {
 
 	 Copyright 2019-2020 Rubicon Communications, LLC.
 	";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -280,22 +289,27 @@ module netgate-host {
 		    description
 			"The list of configured host ACLs.";
 
+		    ngcliext:node-fmt "host acl @{acl-name}$n";
+		    ngcliext:pre-children-op "push";
+
 		    leaf acl-name {
-			    type ngcom:identifier-63;
-			    description
-				"The name of the host ACL.";
+			type ngcom:identifier-63;
+			description
+			    "The name of the host ACL.";
 		    }
 
 		    leaf acl-seq {
-			    type uint32;
-			    description
-				"The sequence number of the host ACL.";
+			type uint32;
+			description
+			    "The sequence number of the host ACL.";
+			ngcliext:node-fmt "^sequence @@$n";
 		    }
 
 		    leaf description {
-			    type ngcom:description-63;
-			    description
-				"The description of the host ACL.";
+			type ngcom:description-63;
+			description
+			    "The description of the host ACL.";
+			ngcliext:node-fmt "^$% @@$n";
 		    }
 
 		    list acl-rule {
@@ -303,6 +317,9 @@ module netgate-host {
 
 			description
 			    "The list of the host ACL rules.";
+
+			ngcliext:node-fmt "^rule @{rule-seq}$n";
+			ngcliext:pre-children-op "push";
 
 			leaf rule-seq {
 			    type uint32;
@@ -314,32 +331,40 @@ module netgate-host {
 			    type ngcom:description-63;
 			    description
 				"The description of the rule.";
+			    ngcliext:node-fmt "^$% @@$n";
 			}
 
 			container packet-match {
 			    description
 				"The matching packets of the rule.";
 
+			    ngcliext:parent-fmt "^match";
+
 			    leaf input-if {
 				type ngcom:identifier-31;
 				description
 				    "The input interface name.";
+				ngcliext:node-fmt "$< input-interface @@$n";
 			    }
 
 			    container link {
 				description
 				    "Ethernet traffic match.";
 
+				ngcliext:parent-fmt "$< mac";
+
 				leaf source {
 				    type yang:mac-address;
 				    description
 					"The source MAC address.";
+				    ngcliext:node-fmt "$< $% @@$n";
 				}
 
 				leaf destination {
 				    type yang:mac-address;
 				    description
 					"The destination MAC address.";
+				    ngcliext:node-fmt "$< $% @@$n";
 				}
 			    }
 
@@ -347,50 +372,63 @@ module netgate-host {
 				description
 				    "IP traffic match.";
 
+				ngcliext:parent-fmt "$< ip";
+
 				leaf version {
 				    type uint8 {
 					range "4 | 6";
 				    }
 				    description
 					"IP version.";
+				    ngcliext:node-fmt "$< $% @@$n";
 				}
 
 				leaf protocol {
 				    type host-acl-protocol;
 				    description
 					"The IP protocol.";
+				    ngcliext:node-fmt "$< $% @@$n";
 				}
 
 				leaf source {
 				    type inet:ip-prefix;
 				    description
 					"The source IP prefix.";
+				    ngcliext:node-fmt "$< address $% @@$n";
 				}
 
 				leaf destination {
 				    type inet:ip-prefix;
 				    description
 					"The destination IP prefix.";
+				    ngcliext:node-fmt "$< address $% @@$n";
 				}
 
 				container transport {
 				    description
 					"Transport options.";
 
+				    ngcliext:parent-fmt "$<";
+
 				    container source-port {
 					description
 					    "The source port range.";
+
+					ngcliext:parent-fmt "$< port source";
 
 					leaf first {
 					    type inet:port-number;
 					    description
 						"The first port number.";
+					    ngcliext:node-op "test-set:%{last}";
+					    ngcliext:node-fmt "$< @@$n|$< range start @@ end %{last}$n";
 					}
 
 					leaf last {
 					    type inet:port-number;
 					    description
 						"The last port number.";
+					    ngcliext:sibling-fmt "@@";
 					}
 				    }
 
@@ -398,16 +436,23 @@ module netgate-host {
 					description
 					    "The destination port range.";
 
+					ngcliext:parent-fmt "$< port source";
+
 					leaf first {
 					    type inet:port-number;
 					    description
 						"The first port number.";
+					    ngcliext:sibling-fmt "@@";
+					    ngcliext:node-op "bool";
+					    ngcliext:node-fmt "|$< @@$n";
 					}
 
 					leaf last {
 					    type inet:port-number;
 					    description
 						"The last port number.";
+					    ngcliext:node-op "bool";
+					    ngcliext:node-fmt "|$< range start %{first} end @@$n";
 					}
 				    }
 
@@ -415,57 +460,69 @@ module netgate-host {
 					description
 					    "TCP options.";
 
+					ngcliext:parent-fmt "$< tcp";
+
 					container flags {
 					    description
 						"TCP flags.";
+
+					    ngcliext:parent-fmt "$< flag";
 
 					    leaf cwr {
 						type boolean;
 						description
 						    "Congestion
 						     Window Reduced.";
+						ngcliext:node-fmt "$< $%$n";
 					    }
 
 					    leaf ece {
 						type boolean;
 						description
 						    "ECN-Echo.";
+						ngcliext:node-fmt "$< $%$n";
 					    }
 
 					    leaf urg {
 						type boolean;
 						description
 						    "Urgent.";
+						ngcliext:node-fmt "$< $%$n";
 					    }
 
 					    leaf ack {
 						type boolean;
 						description
 						    "Acknowledgment.";
+						ngcliext:node-fmt "$< $%$n";
 					    }
 
 					    leaf psh {
 						type boolean;
 						description
 						    "Push.";
+						ngcliext:node-fmt "$< $%$n";
 					    }
 
 					    leaf rst {
 						type boolean;
 						description
 						    "Reset.";
+						ngcliext:node-fmt "$< $%$n";
 					    }
 
 					    leaf syn {
 						type boolean;
 						description
 						    "Synchronize.";
+						ngcliext:node-fmt "$< $%$n";
 					    }
 
 					    leaf fin {
 						type boolean;
 						description
 						    "Finished.";
+						ngcliext:node-fmt "$< $%$n";
 					    }
 					}
 				    }
@@ -474,12 +531,15 @@ module netgate-host {
 					description
 					    "ICMP options.";
 
+					ngcliext:parent-fmt "$< icmp";
+
 					choice type {
 					    case ipv4 {
 						leaf icmp-type {
 						    type host-acl-icmp-type;
 						    description
 							"ICMP type.";
+						    ngcliext:node-fmt "$< @@%{code}$n";
 						}
 					    }
 
@@ -488,6 +548,7 @@ module netgate-host {
 						    type host-acl-icmpv6-type;
 						    description
 							"ICMPv6 type.";
+						    ngcliext:node-fmt "$< @@%{code}$n";
 						}
 					    }
 					}
@@ -496,6 +557,7 @@ module netgate-host {
 					    type uint8;
 					    description
 						"ICMP code.";
+					    ngcliext:sibling-fmt " code @@";
 					}
 				    }
 				}
@@ -507,6 +569,7 @@ module netgate-host {
 			    mandatory true;
 			    description
 				"The action of the rule.";
+			    ngcliext:node-fmt "^$% @@$n";
 			}
 		    }
 		}

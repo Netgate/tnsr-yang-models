@@ -9,12 +9,12 @@ module netgate-system {
 	prefix "inet";
     }
 
-    import ietf-netconf-acm {
-	prefix "nacm";
-    }
-
     import ietf-yang-types {
 	prefix "yang";
+    }
+
+    import netgate-cli-extensions {
+	prefix "ngcliext";
     }
 
     import netgate-common {
@@ -31,6 +31,11 @@ module netgate-system {
 
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -57,9 +62,6 @@ module netgate-system {
 	    "Initial revision.";
     }
 
-    /*
-     * Typedefs
-     */
 
     typedef system-device-type-t {
 	type enumeration {
@@ -79,10 +81,6 @@ module netgate-system {
     }
 
 
-    /*
-     * feature declarations
-     */
-
     feature dns-udp-tcp-port {
         description
           "Indicates that the device supports the configuration of
@@ -92,10 +90,6 @@ module netgate-system {
            any port other than the default port.";
     }
 
-
-    /*
-     * Groupings
-     */
 
     grouping pci-address-grouping {
 	description
@@ -135,9 +129,6 @@ module netgate-system {
 
     }
 
-    /*
-     * RPCs
-     */
 
     rpc system-devices-list {
         description
@@ -172,7 +163,6 @@ module netgate-system {
 	        }
 	    }
 	}
-
     }
 
     rpc system-reboot {
@@ -314,11 +304,6 @@ module netgate-system {
 		description
 		    "Probe response wait time.";
 	    }
-	    leaf timeout {
-		type uint32;
-		description
-		    "Timeout for response";
-	    }
 	    leaf namespace {
 		type ngcom:network-namespace;
 		description
@@ -357,6 +342,8 @@ module netgate-system {
 	description
 	    "System group configuration.";
 
+	ngcliext:parent-fmt "$%";
+
 	leaf description {
 	    type string;
 	    description
@@ -365,7 +352,7 @@ module netgate-system {
 		 system's hardware type, software operating-system, and
 		 networking software. It is mandatory that this only contain
 		 printable ASCII characters.";
-
+	    ngcliext:node-fmt "$< $% @@$n";
 	}
 
 	leaf contact {
@@ -381,6 +368,7 @@ module netgate-system {
 	       "RFC 3418: Management Information Base (MIB) for the
 		Simple Network Management Protocol (SNMP)
 		SNMPv2-MIB.sysContact";
+	    ngcliext:node-fmt "$< $% @@$n";
 	}
 
 	leaf name {
@@ -388,6 +376,7 @@ module netgate-system {
 	    description
 		"The name of the host. This name can be a single domain
 		 label or the fully qualified domain name of the host.";
+	    ngcliext:node-fmt "$< $% @@$n";
 	}
 
 	leaf location {
@@ -405,6 +394,7 @@ module netgate-system {
 		"RFC 3418: Management Information Base (MIB) for the
 		 Simple Network Management Protocol (SNMP)
 		 SNMPv2-MIB.sysLocation";
+	    ngcliext:node-fmt "$< $% @@$n";
 	}
 
 	list dns-resolver {
@@ -413,6 +403,9 @@ module netgate-system {
 		"Configuration of the DNS resolver.";
 	    reference
 		"RFC 7317: A YANG Data Model for System Management";
+
+	    ngcliext:node-fmt "$< $% @{namespace}$n";
+	    ngcliext:pre-children-op "push";
 
 	    leaf namespace {
 		type ngcom:network-namespace;
@@ -426,11 +419,15 @@ module netgate-system {
 		description
 		    "An ordered list of domains to search when resolving
 		     a host name.";
+		ngcliext:node-fmt "^$% @@$n";
 	    }
 
 	    list server {
 		key name;
 		ordered-by user;
+
+		ngcliext:node-fmt "^$% @{name}$n";
+
 		description
 		    "List of the DNS servers that the resolver should query.
 
@@ -467,8 +464,8 @@ module netgate-system {
 			    reference
 				"RFC 1035: Domain Names - Implementation and
 				 Specification
-				 RFC 5966: DNS Transport over TCP - Implementation
-				 Requirements";
+				 RFC 5966: DNS Transport over TCP - 
+				 Implementation Requirements";
 
 			    leaf address {
 				type inet:ip-address;
@@ -481,7 +478,8 @@ module netgate-system {
 				type inet:port-number;
 				default 53;
 				description
-				    "The UDP and TCP port number of the DNS server.";
+				    "The UDP and TCP port number of the
+				     DNS server.";
 			    }
 			}
 		    }
@@ -490,10 +488,14 @@ module netgate-system {
 	}
 
 	container auth {
+
 	    list user {
 		key "user-name";
 		description
 		    "allowed users of the system";
+
+		ngcliext:node-fmt "auth user @{user-name}$n";
+		ngcliext:pre-children-op "push";
 
 		leaf user-name {
 		    type string {
@@ -508,13 +510,16 @@ module netgate-system {
 			length 6..256;
 		    }
 		    description
-			"the hash of the users password";
+			"The hash of the users password.";
+		    ngcliext:node-fmt "^password @@$n";
 		}
 
 		list user-keys {
 		    key "key-name";
 		    description
 			"list of users pubic keys";
+
+		    ngcliext:node-fmt "^$% @{key-name}$n";
 
 		    leaf key-name {
 			type string;

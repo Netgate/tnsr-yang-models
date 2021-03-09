@@ -1,0 +1,824 @@
+
+
+module netgate-packet-fields {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-packet-fields";
+    prefix "ngpf";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import ietf-yang-types {
+	prefix "yang";
+    }
+
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data-model
+	 for datagram packet fields.
+
+	 Copyright 2020 Rubicon Communications, LLC.";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
+
+    typedef ethertype-name {
+	type enumeration {
+	    enum xns-idp {
+		value 1536;	/* 0x600 */
+		description
+		    "xns-idp Ethertype";
+	    }
+	    enum ip4 {
+		value 2048;	/* 0x800 */
+		description
+		    "ip4 Ethertype";
+	    }
+	    enum arp {
+		value 2054;	/* 0x806 */
+		description
+		    "arp Ethertype";
+	    }
+	    enum vines-ip {
+		value 2989;	/* 0x0BAD */
+		description
+		    "vines-ip Ethertype";
+	    }
+	    enum vines-loopback {
+		value 2990;	/* 0x0BAE */
+		description
+		    "vines-loopback Ethertype";
+	    }
+	    enum vines-echo {
+		value 2991;	/* 0x0BAF */
+		description
+		    "vines-echo Ethertype";
+	    }
+	    enum train {
+		value 6532;	/* 0x1984 */
+		description
+		    "train Ethertype";
+	    }
+	    enum cdp {
+		value 8192;	/* 0x2000 */
+		description
+		    "cdp Ethertype";
+	    }
+	    enum cgmp {
+		value 8193;	/* 0x2001 */
+		description	
+		    "cgmp Ethertype";
+	    }
+	    enum srp-control {
+		value 8199;	/* 0x2007 */
+		description
+		    "srp-control Ethertype";
+	    }
+	    enum centrino-promisc {
+		value 9298;	/* 0x2452 */
+		description
+		    "centrino-promisc Ethertype";
+	    }
+	    enum decnet {
+		value 24576;	/* 0x6000 */
+		description
+		    "decnet Ethertype";
+	    }
+	    enum decnet-dump-load {
+		value 24577;	/* 0x6001 */
+		description
+		    "decnet-dump-load Ethertype";
+	    }
+	    enum decnet-remote-console {
+		value 24578;	/* 0x6002 */
+		description
+		    "decnet-remote-console Ethertype";
+	    }
+	    enum decnet-route {
+		value 24579;	/* 0x6003 */
+		description
+		    "decnet-route Ethertype";
+	    }
+	    enum dec-lat {
+		value 24580;	/* 0x6004 */
+		description
+		    "dec-lat Ethertype";
+	    }
+	    enum dec-diagnostic {
+		value 24581;	/* 0x6005 */
+		description
+		    "dec-diagnostic Ethertype";
+	    }
+	    enum dec-customer {
+		value 24582;	/* 0x6006 */
+		description
+		    "dec-customer Ethertype";
+	    }
+	    enum dec-sca {
+		value 24583;	/* 0x6007 */
+		description
+		    "dec-sca Ethertype";
+	    }
+	    enum transparent-bridging {
+		value 25944;	/* 0x6558 */
+		description
+		    "transparent-bridging Ethertype";
+	    }
+	    enum raw-frame-relay {
+		value 25945;	/* 0x6559 */
+		description
+		    "raw-frame-relay Ethertype";
+	    }
+	    enum reverse-arp {
+		value 32821;	/* 0x8035 */
+		description
+		    "reverse-arp Ethertype";
+	    }
+	    enum dec-lan-bridge {
+		value 32824;	/* 0x8038 */
+		description
+		    "dec-lan-bridge Ethertype";
+	    }
+	    enum dec-ethernet-encryption {
+		value 32829;	/* 0x803D */
+		description
+		    "dec-ethernet-encryption Ethertype";
+	    }
+	    enum dec-lan-traffic-monitor {
+		value 32831;	/* 0x803F */
+		description
+		    "dec-lan-traffic-monitor Ethertype";
+	    }
+	    enum dec-last {
+		value 32833;	/* 0x8041 */
+		description
+		    "dec-last Ethertype";
+	    }
+	    enum appletalk {
+		value 32923;	/* 0x809B */
+		description
+		    "appletalk Ethertype";
+	    }
+	    enum ibm-sna {
+		value 32981;	/* 0x80D5 */
+		description
+		    "ibm-sna Ethertype";
+	    }
+	    enum appletalk-aarp {
+		value 33011;	/* 0x80F3 */
+		description
+		    "appletalk-aarp Ethertype";
+	    }
+	    enum wellfleet-compression {
+		value 33023;	/* 0x80FF */
+		description
+		    "wellfleet-compression Ethertype";
+	    }
+	    enum vlan {
+		value 330234;	/* 0x8100 */
+		description
+		    "vlan Ethertype";
+	    }
+	    enum ipx {
+		value 33079;	/* 0x8137 */
+		description
+		    "ipx Ethertype";
+	    }
+	    enum snmp {
+		value 33100;	/* 0x814C */
+		description
+		    "snmp Ethertype";
+	    }
+	    enum cabletron-ismp {
+		value 33277;	/* 0x81FD */
+		description
+		    "cabletron-ismp Ethertype";
+	    }
+	    enum cabletron-ismp-tbflood {
+		value 33279;	/* 0x81FF */
+		description
+		    "cabletron-ismp-tbflood Ethertype";
+	    }
+	    enum ip6 {
+		value 34525;	/* 0x86DD */
+		description
+		    "ip6 Ethertype";
+	    }
+	    enum atomic {
+		value 34527;	/* 0x86DF */
+		description
+		    "atomic Ethertype";
+	    }
+	    enum tcp-ip-compression {
+		value 34667;	/* 0x876B */
+		description
+		    "tcp-ip-compression Ethertype";
+	    }
+	    enum ip-autonomous-systems {
+		value 34668;	/* 0x876C */
+		description
+		    "ip-autonomous-systems Ethertype";
+	    }
+	    enum secure-data {
+		value 34669;	/* 0x876D */
+		description
+		    "secure-data Ethertype";
+	    }
+	    enum mac-control {
+		value 34824;	/* 0x8808 */
+		description
+		    "mac-control Ethertype";
+	    }
+	    enum slow-protocols {
+		value 34825;	/* 0x8809 */
+		description
+		    "slow-protocols Ethertype";
+	    }
+	    enum ppp {
+		value 34827;	/* 0x880B */
+		description
+		    "ppp Ethertype";
+	    }
+	    enum mpls {
+		value 34887;	/* 0x8847 */
+		description
+		    "mpls Ethertype";
+	    }
+	    enum mpls-upstream-assigned {
+		value 34888;	/* 0x8848 */
+		description
+		    "mpls-upstream-assigned Ethertype";
+	    }
+	    enum pppoe-discovery {
+		value 34915;	/* 0x8863 */
+		description
+		    "pppoe-discovery Ethertype";
+	    }
+	    enum pppoe-session {
+		value 34916;	/* 0x8864 */
+		description
+		    "pppoe-session Ethertype";
+	    }
+	    enum intel-ans {
+		value 34925;	/* 0x886D */
+		description
+		    "intel-ans Ethertype";
+	    }
+	    enum microsoft-nlb-heartbeat {
+		value 34927;	/* 0x886F */
+		description
+		    "microsoft-nlb-heartbeat Ethertype";
+	    }
+	    enum cdma-2000 {
+		value 34945;	/* 0x8881 */
+		description
+		    "cdma-2000 Ethertype";
+	    }
+	    enum 802-1x-authentication {
+		value 34958;	/* 0x888e */
+		description
+		    "802-1x-authentication Ethertype";
+	    }
+	    enum profinet {
+		value 34962;	/* 0x8892 */
+		description
+		    "profinet Ethertype";
+	    }
+	    enum hyperscsi {
+		value 34970;	/* 0x889a */
+		description
+		    "hyperscsi Ethertype";
+	    }
+	    enum aoe {
+		value 34978;	/* 0x88a2 */
+		description
+		    "aoe Ethertype";
+	    }
+	    enum dot1ad {
+		value 34984;	/* 0x88a8 */
+		description
+		    "dot1ad Ethertype";
+	    }
+	    enum brdwalk {
+		value 34990;	/* 0x88AE */
+		description
+		    "brdwalk Ethertype";
+	    }
+	    enum 802-oui-extended {
+		value 34999;	/* 0x88B7 */
+		description
+		    "802-oui-extended Ethertype";
+	    }
+	    enum 802-11i-pre-authentication {
+		value 35015;	/* 0x88c7 */
+		description
+		    "802-11i-pre-authentication Ethertype";
+	    }
+	    enum 802-1-lldp {
+		value 35020;	/* 0x88cc */
+		description
+		    "802-1-lldp Ethertype";
+	    }
+	    enum dot1ah {
+		value 35047;	/* 0x88e7 */
+		description
+		    "dot1ah Ethertype";
+	    }
+	    enum nsh {
+		value 35151;	/* 0x894f */
+		description
+		    "nsh Ethertype";
+	    }
+	    enum loopback {
+		value 35864;	/* 0x9000 */
+		description
+		    "loopback Ethertype";
+	    }
+	    enum rtnet-mac {
+		value 36897;	/* 0x9021 */
+		description
+		    "rtnet-mac Ethertype";
+	    }
+	    enum rtnet-config {
+		value 36898;	/* 0x9022 */
+		description
+		    "rtnet-config Ethertype";
+	    }
+	    enum vlan-9100 {
+		value 37120;	/* 0x9100 */
+		description
+		    "vlan-9100 Ethertype";
+	    }
+	    enum vlan-9200 {
+		value 37376;	/* 0x9200 */
+		description
+		    "vlan-9200 Ethertype";
+	    }
+	    enum pglan {
+		value 39321;	/* 0x9999 */
+		description
+		    "pglan Ethertype";
+	    }
+	    enum srp-isis {
+		value 65278;	/* 0xFEFE */
+		description
+		    "srp-isis Ethertype";
+	    }
+	    enum reserved {
+		value 65535;	/* 0xFFFF */
+		description
+		    "reserved Ethertype";
+	    }
+	}
+    }
+
+    typedef ethertype {
+	type union {
+	    type ethertype-name;
+	    type uint16 {
+		range "1536..65535";
+	    }
+	}
+    }
+
+    grouping l2-ethernet {
+	leaf destination-mask {
+	    type yang:mac-address;
+	    description
+		"Destination MAC address mask";
+	    ngcliext:node-fmt "^destination mask @@$n";
+	}
+
+	leaf destination-mac-address {
+	    type yang:mac-address;
+	    description
+		"Destination MAC address";
+	    ngcliext:node-fmt "^destination mac  @@$n";
+	}
+
+	leaf source-mask {
+	    type yang:mac-address;
+	    description
+		"Source MAC address mask";
+	    ngcliext:node-fmt "^source mask @@$n";	
+	}
+
+	leaf source-mac-address {
+	    type yang:mac-address;
+	    description
+		"Source MAC address";
+	    ngcliext:node-fmt "^source mac  @@$n";	
+	}
+
+	leaf ethertype {
+	    type ethertype;
+	    description
+		"An IETF Ethertype name or a value in the
+		 range 0x600 - 0xffff.";
+	    ngcliext:node-fmt "^$% @@$n";	
+	}
+	
+	container vlan-dot1q {
+	    presence
+		"If present, the packet allows octets for dot1q
+		 VLAN tag information.";
+
+	    ngcliext:parent-fmt "^vlan-dot1q";
+	    ngcliext:node-op "test-set:@{tag}@{pcp}";
+	    ngcliext:node-fmt "^$%$n";
+
+	    leaf tag {
+		type uint16;
+		description
+		    "The dot1q VLAN tag value.";
+		ngcliext:node-fmt "$< $% @@$n";
+	    }
+
+    	    leaf pcp {
+		type uint16 {
+		    range "0..7";
+		}
+		description
+		    "The dot1q VLAN Priority Code Point (class of service).";
+		ngcliext:node-fmt "$< $% @@$n";
+	    }
+
+	    container vlan-dot1ad {
+		presence
+		    "If present, the packet allows octets for dot1ad
+		     outer VLAN tag and dot1q inner VLAN tag information.";
+
+		ngcliext:parent-fmt "$< $%";
+		ngcliext:node-op "test-set:@{tag}@{pcp}";
+		ngcliext:node-fmt "^$< $%$n";
+
+		leaf tag {
+		    type uint16;
+		    description
+			"The dot1ad outer VLAN tag value.";
+		    ngcliext:node-fmt "$< $% @@$n";
+		}
+
+		leaf pcp {
+		    type uint16 {
+			range "0..7";
+		    }
+		    description
+			"The dot1ad outer VLAN Priority Code Point
+			 (class of service).";
+		    ngcliext:node-fmt "$< $% @@$n";
+		}
+	    }
+	    
+	}
+    }
+
+    grouping l3-ip4 {
+	description
+	    "This group describes the fields of an IPv4 packet.";
+
+	leaf version {
+	    type uint8 {
+		range "0..15";
+	    }
+	    description
+		"For IPv4, this field should be 4.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf ihl {
+	    type uint8 {
+		range "5..15";
+	    }
+	    description
+		"The internet header length (ihl) states the size of the
+		 IPv4 header in 32-byte quantities.  Minimum value is 5.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf dscp {
+	    type uint8 {
+		range "0..63";
+	    }
+	    description
+		"Formerly called the ToS field, this is the differentiated
+		 services (DiffServ) code.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf ecn {
+	    type uint8 {
+		range "0..3";
+	    }
+	    description
+		"The Explicit Congestion Notification value.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf length {
+	    type uint16 {
+		range "20..65535";
+	    }
+	    description
+		"The total length field states the size of the entire
+		 packet in bytes.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf identification {
+	    type uint16;
+	    description
+		"The identifcation field was used experimentally for
+		 fragmentation grouping.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf flags {
+	    type bits {
+		bit dont-fragment {
+		    position 1;
+		    description
+			"If the dont-fragment flag is set, and
+			 fragmentation is required to route the packet,
+			 then the packet is dropped.";
+		}
+		bit more-fragments {
+		    position 2;
+		    description
+			"For fragmented packets, all fragments except
+			 the last have the more-fragments flag set.";
+		}
+	    }
+	    description
+		"Flags used in the handling of fragments.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf fragmentation-offset {
+	    type uint16 {
+		range "0..8191";
+	    }
+	    description
+		"The fragmentation-offset specifies the offset of
+		 a particular fragment relative to the beginning of
+		 the original unfragmented IP datagram.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf ttl {
+	    type uint16;
+	    description
+		"In practice, the TTL field specifies the number of router
+		 hops a packet can traverse before it is dropped.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf protocol {
+	    type uint8;
+	    description
+		"This field specifies the protocol used in the data
+		portion of the IP datagram.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf checksum {
+	    type uint16;
+	    description
+		"The checksum field is used for error-checking the packet.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf source-ip-prefix {
+	    type inet:ipv4-prefix;
+	    description
+		"The source IPv4 address and prefix mask length.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf destination-ip-prefix {
+	    type inet:ipv4-prefix;
+	    description
+		"The destination IPv4 address and prefix mask length.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+    }
+
+    grouping l3-ip6 {
+	description
+	    "This group describes the fields of an IPv6 packet.";
+
+	leaf version {
+	    type uint8 {
+		range "0..15";
+	    }
+	    description
+		"For IPv6, this field should be 6.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf traffic-class {
+	    type uint8;
+	    description
+		"The combined differentiated services field in the high
+		 6 bits and the Explicit Congestion Notification (ECN)
+		 in the low 2 bits.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf flow-label {
+	    type uint32 {
+		range "0..1048575";
+	    }
+	    description
+		"The 20-bit flow identifier value.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf payload-length {
+	    type uint16;
+	    description
+		"The length of the payload in octets.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf next-header {
+	    type uint8;
+	    description
+		"The protocol type of the next header.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf hop-limit {
+	    type uint8;
+	    description
+		"The maximum forwarding count before a packet is dropped.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf source-prefix {
+	    type inet:ipv6-prefix;
+	    description
+		"The source IPv6 address and prefix mask length.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf destination-prefix {
+	    type inet:ipv6-prefix;
+	    description
+		"The destination IPv6 address and prefix mask length.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+    }
+
+    grouping l4-udp {
+	description
+	    "This data describrs the fields of a L4 UDP packet.";
+
+	leaf source-port {
+	    type uint16;
+	    description
+		"The source port.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf destination-port {
+	    type uint16;
+	    description
+		"The destination port.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf length {
+	    type uint16;
+	    description
+		"The length of the packet in bytes.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf checksum {
+	    type uint16;
+	    description
+		"The checksum of the packet.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+    }
+
+    grouping l4-tcp {
+	description
+	    "This data describrs the fields of a L4 UDP packet.";
+
+	leaf source-port {
+	    type uint16;
+	    description
+		"The source port.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf destination-port {
+	    type uint16;
+	    description
+		"The destination port.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf window {
+	    type uint16;
+	    description
+		"The receive window size.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf sequence-number {
+	    type uint16;
+	    description
+		"Sequence number within the session.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf acknowledgement-number {
+	    type uint16;
+	    description
+		"Acknowledgement number within the session.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf data-offset {
+	    type uint8 {
+		range "5..15";
+	    }
+	    description
+		"The size of the TCP header in 32-bit words.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+
+	leaf flags {
+	    type bits {
+		bit fin {
+		    position 0;
+		    description
+			"This is the last packet from sender.";
+		}
+		bit syn {
+		    position 1;
+		    description
+			"Synchronize sequence numbers.";
+		}
+		bit rst {
+		    position 2;
+		    description
+			"Rest the connection.";
+		}
+		bit psh {
+		    position 3;
+		    description
+			"Request to push buffered data to receiver.";
+		}
+		bit ack {
+		    position 4;
+		    description
+			"Indicates that the acknowledgement number is valid.";
+		}
+		bit urg {
+		    position 5;
+		    description
+			"Indicates tha thte Urgent pointer field is valid.";
+		}
+		bit ece {
+		    position 6;
+		    description
+			"ECN echo.";
+		}
+		bit cwr {
+		    position 7;
+		    description
+			"Congestion window reduced.";
+		}
+		bit ns {
+		    position 8;
+		    description
+			"ECN none for concealment protection.";
+		}
+	    }
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+	
+	leaf checksum {
+	    type uint16;
+	    description
+		"The checksum of the packet.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+    }
+}

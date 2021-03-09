@@ -9,6 +9,10 @@ module netgate-frr {
 	prefix "inet";
     }
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     import netgate-common {
 	prefix "ngcom";
     }
@@ -39,6 +43,11 @@ module netgate-frr {
 
 	 Copyright 2017-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -110,6 +119,7 @@ module netgate-frr {
 	    description
 		"Debug packets sent or received.
 		Missing is both.";
+	    ngcliext:node-fmt " @@";
 	}
     }
 
@@ -124,12 +134,15 @@ module netgate-frr {
 	    description
 		"Debug packets sent or received.
 		Missing is both.";
+	    ngcliext:node-fmt " @@%{detail}";
 	}
 
 	leaf detail {
 	    type boolean;
 	    description
 		"Debug packets in detail.";
+	    ngcliext:sibling-op "bool";
+	    ngcliext:sibling-fmt "| detail";
 	}
     }
 
@@ -202,6 +215,9 @@ module netgate-frr {
 		description
 		    "Access List name.";
 
+		ngcliext:node-fmt "route dynamic access-list @{name}$n";
+		ngcliext:pre-children-op "push";
+
 		leaf name {
 		    type string;
 		    mandatory true;
@@ -215,6 +231,7 @@ module netgate-frr {
 		    type string;
 		    description
 			"A user description of the Access List.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		container rules {
@@ -225,6 +242,8 @@ module netgate-frr {
 			key "sequence";
 			description
 			    "A set of Access List Rules.";
+
+			ngcliext:node-fmt "^sequence @{sequence} @{action} @{ip-prefix}$n";
 
 			leaf sequence {
 			    type uint32;
@@ -259,6 +278,9 @@ module netgate-frr {
 		description
 		    "Prefix List name.";
 
+		ngcliext:node-fmt "route dynamic prefix-list @{name}$n";
+		ngcliext:pre-children-op "push";
+
 		leaf name {
 		    type string;
 		    mandatory true;
@@ -272,6 +294,7 @@ module netgate-frr {
 		    type string;
 		    description
 			"A user description of the prefix list.";
+		    ngcliext:node-fmt "^description @@$n";
 		}
 
 		container rules {
@@ -282,6 +305,9 @@ module netgate-frr {
 			key "sequence";
 			description
 			    "A set of Prefix List Rules.";
+
+			ngcliext:node-fmt "^sequence @{sequence} @{action} @{prefix}";
+			ngcliext:post-node-fmt "$n";
 
 			leaf sequence {
 			    type uint32;
@@ -306,12 +332,14 @@ module netgate-frr {
 			    type uint8;
 			    description
 				"An upper bound on the prefix length.";
+			    ngcliext:node-fmt " le @@";
 			}
 
 			leaf ge-len {
 			    type uint8;
 			    description
 				"A lower bound on the prefix length.";
+			    ngcliext:node-fmt " ge @@";
 			}
 		    }
 		}
@@ -328,6 +356,9 @@ module netgate-frr {
 		description
 		    "Route Map entries indexed by name.";
 
+		ngcliext:node-fmt "route dynamic route-map @{name}$n";
+		ngcliext:pre-children-op "push";
+
 		leaf name {
 		    type string;
 		    mandatory true;
@@ -342,6 +373,7 @@ module netgate-frr {
 		    type string;
 		    description
 			"A user description of the Route Map.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		container rules {
@@ -352,6 +384,9 @@ module netgate-frr {
 			key "sequence";
 			description
 			    "The Route Map rule ordering sequence number.";
+
+			ngcliext:node-fmt "^sequence @{sequence}$n";
+			ngcliext:pre-children-op "push";
 
 			leaf sequence {
 			    type uint32 {
@@ -364,14 +399,17 @@ module netgate-frr {
 
 			leaf policy {
 			    type frr:route-map-policy;
+			    mandatory true;
 			    description
 				"One of the actions 'deny', 'permit'.";
+			    ngcliext:node-fmt "^$% @@$n";
 			}
 
 			leaf description {
 			    type string;
 			    description
 				"A user description of the Route Map.";
+			    ngcliext:node-fmt "^$% @@$n";
 			}
 
 			container match {
@@ -380,20 +418,26 @@ module netgate-frr {
 				 different criteria.  More than one of
 				 these may apply.";
 
+			    ngcliext:parent-fmt "^$%";
+
 			    leaf as-path-name {
 				type string;
 				description
 				    "The name of an as-path entry.";
+				ngcliext:node-fmt "$< as-path @@$n";
 			    }
 
 			    container community {
 				description
 				    "Match community list.";
 
+				ngcliext:parent-fmt "$< $%";
+
 				leaf comm-list-name {
 				    type string;
 				    description
 					"The name of a community list.";
+				    ngcliext:node-fmt "$< @@%{exact-match}$n";
 				}
 
 				leaf exact-match {
@@ -402,6 +446,8 @@ module netgate-frr {
 					"If matching a community list,
 					 it may be specified as an
 					 exact match.";
+				    ngcliext:sibling-op "bool";
+				    ngcliext:sibling-fmt "| $%";
 				}
 			    }
 
@@ -409,11 +455,14 @@ module netgate-frr {
 				description
 				    "Match extended community list.";
 
+				ngcliext:parent-fmt "$< $%";
+
 				leaf extcomm-list-name {
 				    type string;
 				    description
 					"The name of an extended
 					 community list.";
+				    ngcliext:node-fmt "$< @@$n";
 				}
 			    }
 
@@ -426,6 +475,7 @@ module netgate-frr {
 				description
 				    "Match based on the name of an
 				     interface.";
+				ngcliext:node-fmt "$< interface @@$n";
 			    }
 
 			    leaf ip-address-access-list {
@@ -433,6 +483,7 @@ module netgate-frr {
 				description
 				    "Match based on the name of an
 				     Access List.";
+				ngcliext:node-fmt "$< ip address access-list @@$n";
 			    }
 
 			    leaf ip-address-prefix-list {
@@ -445,6 +496,7 @@ module netgate-frr {
 				description
 				    "Match based on the name of a
 				    Prefix List.";
+				ngcliext:node-fmt "$< ip address prefix-list @@$n";
 			    }
 
 			    leaf ip-next-hop-access-list {
@@ -452,12 +504,14 @@ module netgate-frr {
 				description
 				    "Match based on the name of an
 				     Access List.";
+				ngcliext:node-fmt "$< ip next-hop access-list @@$n";
 			    }
 
 			    leaf ip-next-hop-ipv4-address {
 				type inet:ipv4-address-no-zone;
 				description
 				    "Match an IPv4 address.";
+				ngcliext:node-fmt "$< ip next-hop @@$n";
 			    }
 
 			    leaf ip-next-hop-prefix-list {
@@ -469,6 +523,7 @@ module netgate-frr {
 				description
 				    "Match the prefixes specified by
 				     the name of a Prefix List.";
+				ngcliext:node-fmt "$< ip next-hop prefix-list @@$n";
 			    }
 
 			    leaf ipv6-address-access-list {
@@ -476,6 +531,7 @@ module netgate-frr {
 				description
 				    "Match according to the name of an
 				     Access List.";
+				ngcliext:node-fmt "$< ipv6 address access-list @@$n";
 			    }
 
 			    leaf ipv6-address-prefix-list {
@@ -483,17 +539,21 @@ module netgate-frr {
 				description
 				    "Match according to the name of a
 				     Prefix List.";
+				ngcliext:node-fmt "$< ipv6 address prefix-list @@$n";
 			    }
 
 			    container large-community {
 				description
 				    "Match large community list.";
 
+				ngcliext:parent-fmt "$< $%";
+
 				leaf large-comm-list-name {
 				    type string;
 				    description
 					"The name of a large
 					 community list.";
+				    ngcliext:node-fmt "$< @@$n";
 				}
 			    }
 
@@ -501,16 +561,20 @@ module netgate-frr {
 				type uint32;
 				description
 				    "The local preference value is matched.";
+				ngcliext:node-fmt "$< $% @@$n";
 			    }
 
 			    container metric {
 				description
 				    "Settings for metric matching.";
 
+				ngcliext:parent-fmt "$< $%";
+
 				leaf value {
 				    type uint32;
 				    description
 					"The metric value to be matched.";
+				    ngcliext:node-fmt "$< @@$n";
 				}
 			    }
 
@@ -518,6 +582,7 @@ module netgate-frr {
 				type frr:route-map-origin;
 				description
 				    "One of 'egp', 'igp',  or 'incomplete'.";
+				ngcliext:node-fmt "$< origin @@$n";
 			    }
 
 			    leaf peer-ip-address {
@@ -529,12 +594,14 @@ module netgate-frr {
 				}
 				description
 				    "The peer IP address is matched.";
+				ngcliext:node-fmt "$< peer @@$n";
 			    }
 
 			    leaf probability {
 				type uint32;
 				description
 				    "Match a percentage of routes.";
+				ngcliext:node-fmt "$< $% @@$n";
 			    }
 
 			    leaf source-protocol {
@@ -543,12 +610,14 @@ module netgate-frr {
 				    "Match the route source protocol.
 				     One of 'bgp', 'connected', 'kernel',
 				     'ospf', 'ospf6', 'system'.";
+				ngcliext:node-fmt "$< $% @@$n";
 			    }
 
 			    leaf tag {
 				type uint32;
 				description
 				    "Match the router tag value.";
+				ngcliext:node-fmt "$< $% @@$n";
 			    }
 			}
 
@@ -558,9 +627,13 @@ module netgate-frr {
 				 actions are specified.	 More than one
 				 of these may apply.";
 
+			    ngcliext:parent-fmt "^$%";
+
 			    container aggregator {
 				description
 				    "Attributes about an aggregator.";
+
+				ngcliext:node-fmt "$< $% as @{asn} ip address @{ip-address}%$n";
 
 				leaf asn {
 				    type uint32;
@@ -579,16 +652,20 @@ module netgate-frr {
 				description
 				    "Group as-path related attributes.";
 
+				ngcliext:parent-fmt "$< $%";
+
 				leaf exclude {
 				    type string;
 				    description
 					"Exclude this set of AS numbers.";
+				    ngcliext:node-fmt "$< $% @@$n";
 				}
 
 				leaf prepend {
 				    type string;
 				    description
 					"Prepend this set of AS numbers.";
+				    ngcliext:node-fmt "$< $% @@$n";
 				}
 
 				leaf last-as {
@@ -596,6 +673,7 @@ module netgate-frr {
 				    description
 					"Prepend the leftmost ASN to the
 					 AS_PATH.";
+				    ngcliext:node-fmt "$< $% @@$n";
 				}
 			    }
 
@@ -603,17 +681,23 @@ module netgate-frr {
 				type boolean;
 				description
 				    "BGP atomic-aggregate attribute.";
+				ngcliext:node-op "bool";
+				ngcliext:node-fmt "|$< $%$n";
 			    }
 
 			    container community {
 				description
 				    "Configuration to set community.";
 
+				ngcliext:parent-fmt "$< $%";
+
 				leaf none {
 				    type boolean;
 				    description
 					"Remove the community values from
 					 the update.";
+				    ngcliext:node-op "bool";
+				    ngcliext:node-fmt "|$< $%$n";
 				}
 
 				leaf value {
@@ -621,6 +705,7 @@ module netgate-frr {
 				    description
 					"The existing BGP community values are
 					 replaced with this community value.";
+				    ngcliext:node-fmt "$< $q@@$q%{additive}$n";
 				}
 
 				leaf additive {
@@ -630,12 +715,16 @@ module netgate-frr {
 					 community values, this community
 					 value is appended to the existing
 					 set.";
+				    ngcliext:sibling-op "bool";
+				    ngcliext:sibling-fmt "| $%";
 				}
 			    }
 
 			    container community-list {
 				description
 				    "Configuration for community-lists.";
+
+				ngcliext:parent-fmt "$< comm-list";
 
 				leaf delete {
 				    type leafref {
@@ -647,12 +736,15 @@ module netgate-frr {
 					"The community values from the given
 					 Community List are removed from the
 					 BGP update.";
+				    ngcliext:node-fmt "$< @@ $%$n";
 				}
 			    }
 
 			    container extcommunity-list {
 				description
 				    "Configuration for extcommunity-lists.";
+
+				ngcliext:parent-fmt "$< comm-list";
 
 				leaf rt {
 				    type leafref {
@@ -663,6 +755,7 @@ module netgate-frr {
 				    description
 					"The Router Target is set to this
 					 extended community value.";
+				    ngcliext:node-fmt "$< $% @@$n";
 				}
 
 				leaf soo {
@@ -674,6 +767,7 @@ module netgate-frr {
 				    description
 					"The Site of Origin is set to this
 					 extended community value.";
+				    ngcliext:node-fmt "$< $% @@$n";
 				}
 			    }
 
@@ -681,21 +775,27 @@ module netgate-frr {
 				type inet:ipv6-address;
 				description
 				    "IPv6 forwarding address.";
+				ngcliext:node-fmt "$< $% @@$n";
 			    }
 
 			    container ip {
 				description
 				    "IP attributes to be set.";
 
+				ngcliext:parent-fmt "$< $%";
+
 				container next-hop {
 				    description
 					"IP next-hop attributes to be set.";
+
+				    ngcliext:parent-fmt "$< $%";
 
 				    leaf ipv4-address {
 					type inet:ipv4-address-no-zone;
 					description
 					    "The next-hop is set to this
 					     IPv4 address.";
+					ngcliext:node-fmt "$< @@$n";
 				    }
 
 				    leaf use-peer-address {
@@ -703,6 +803,8 @@ module netgate-frr {
 					description
 					    "If true, the BGP peer address
 					     is use as the next hop.";
+					ngcliext:node-op "bool";
+					ngcliext:node-fmt "|$< peer-address$n";
 				    }
 
 				    leaf unchanged {
@@ -710,6 +812,8 @@ module netgate-frr {
 					description
 					    "If true, the existing next hop
 					     address is not modified.";
+					ngcliext:node-op "bool";
+					ngcliext:node-fmt "|$< $%$n";
 				    }
 				}
 			    }
@@ -718,20 +822,27 @@ module netgate-frr {
 				description
 				    "IPv4 attributes to be set.";
 
+				ngcliext:parent-fmt "$< $%";
+
 				container vpn {
 				    description
 					"IPv4 VPN settings.";
+
+				    ngcliext:parent-fmt "$< $%";
 
 				    container next-hop {
 					description
 					    "IPv4 VPN next-hop attributes
 					     to be set.";
 
+					ngcliext:parent-fmt "$< $%";
+
 					leaf ipv4-address {
 					    type inet:ipv4-address-no-zone;
 					    description
 						"The next-hop is set to
 						 this IPv4 address.";
+					    ngcliext:node-fmt "$< @@$n";
 					}
 
 					leaf ipv6-address {
@@ -739,6 +850,7 @@ module netgate-frr {
 					    description
 						"The next-hop is set to
 						 this IPv6 address.";
+					    ngcliext:node-fmt "$< @@$n";
 					}
 				    }
 				}
@@ -748,10 +860,14 @@ module netgate-frr {
 				description
 				    "IPv6 attributes to be set.";
 
+				ngcliext:parent-fmt "$< $%";
+
 				container next-hop {
 				    description
 					"IPv6 next-hop attributes to
 					 be set.";
+
+				    ngcliext:parent-fmt "$< $%";
 
 				    leaf global-ipv6-address {
 					type inet:ipv6-address;
@@ -759,6 +875,7 @@ module netgate-frr {
 					    "The next-hop global
 					     address is set to this
 					     IPv6 address.";
+					ngcliext:node-fmt "$< global @@$n";
 				    }
 
 				    leaf local-ipv6-address {
@@ -767,6 +884,7 @@ module netgate-frr {
 					    "The next-hop local
 					     address is set to this
 					     IPv6 address.";
+					ngcliext:node-fmt "$< local @@$n";
 				    }
 
 				    leaf use-peer-address {
@@ -774,6 +892,8 @@ module netgate-frr {
 					description
 					    "If true, the BGP peer address
 					     is use as the next hop.";
+					ngcliext:node-op "bool";
+					ngcliext:node-fmt "|$< peer-address$n";
 				    }
 
 				    leaf prefer-global {
@@ -782,6 +902,8 @@ module netgate-frr {
 					    "If true, prefer the global
 					     over the link-local if both
 					     exist.";
+					ngcliext:node-op "bool";
+					ngcliext:node-fmt "|$< $%$n";
 				    }
 				}
 
@@ -789,16 +911,21 @@ module netgate-frr {
 				    description
 					"IPv6 VPN settings.";
 
+				    ngcliext:parent-fmt "$< $%";
+
 				    container next-hop {
 					description
 					    "IPv6 VPN next-hop attributes
 					     to be set.";
+
+					ngcliext:parent-fmt "$< $%";
 
 					leaf ipv4-address {
 					    type inet:ipv4-address-no-zone;
 					    description
 						"The next-hop is set to
 						 this IPv4 address.";
+					    ngcliext:node-fmt "$< @@$n";
 					}
 
 					leaf ipv6-address {
@@ -806,6 +933,7 @@ module netgate-frr {
 					    description
 						"The next-hop is set to
 						 this IPv6 address.";
+					    ngcliext:node-fmt "$< @@$n";
 					}
 				    }
 				}
@@ -815,16 +943,21 @@ module netgate-frr {
 				description
 				    "Information about large communities.";
 
+				ngcliext:parent-fmt "$< $%";
+
 				leaf none {
 				    type boolean;
 				    description
 					"Large community list.";
+				    ngcliext:node-op "bool";
+				    ngcliext:node-fmt "|$< $%$n";
 				}
 
 				leaf value {
 				    type string;
 				    description
 					"List of large communities.";
+				    ngcliext:node-fmt "$< $q@@$q%{additive}$n";
 				}
 
 				leaf additive {
@@ -834,12 +967,16 @@ module netgate-frr {
 					 community values, this community
 					 value is appended to the existing
 					 set.";
+				    ngcliext:sibling-op "bool";
+				    ngcliext:sibling-fmt "| $%";
 				}
 			    }
 
 			    container large-comm-list {
 				description
 				    "Configuration for large-comm-lists.";
+
+				ngcliext:parent-fmt "$< $%";
 
 				leaf delete {
 				    type leafref {
@@ -851,6 +988,7 @@ module netgate-frr {
 					"The community values from the given
 					 Large Communities List are
 					 removed from the BGP update.";
+				    ngcliext:node-fmt "$< @@ $%$n";
 				}
 			    }
 
@@ -859,11 +997,14 @@ module netgate-frr {
 				description
 				    "Set the local preference attribute to
 				     this value.";
+				ngcliext:node-fmt "$< $% @@$n";
 			    }
 
 			    container metric {
 				description
 				    "Attributes for setting the metric.";
+
+				ngcliext:parent-fmt "$< $%";
 
 				leaf value {
 				    type string {
@@ -872,6 +1013,7 @@ module netgate-frr {
 				    description
 					"Set the metric attribute to
 					 this value.";
+				    ngcliext:node-fmt "$< @@$n";
 				}
 			    }
 
@@ -879,16 +1021,20 @@ module netgate-frr {
 				type frr:route-map-origin;
 				description
 				    "One of 'egp', 'igp',  or 'incomplete'.";
+				ngcliext:node-fmt "$< $% @@$n";
 			    }
 
 			    container originator {
 				description
 				    "Originator ID information.";
 
+				ngcliext:parent-fmt "$< originator-id";
+
 				leaf ip-address {
 				    type inet:ipv4-address-no-zone;
 				    description
 					"The IPv4 address of the originator.";
+				    ngcliext:node-fmt "$< @@$n";
 				}
 			    }
 
@@ -897,18 +1043,21 @@ module netgate-frr {
 				description
 				    "Set the src IP address to this
 				     IPv4 or IPv6 address.";
+				ngcliext:node-fmt "$< src @@$n";
 			    }
 
 			    leaf tag {
 				type uint32;
 				description
 				    "Set the tag attribute to this value.";
+				ngcliext:node-fmt "$< $% @@$n";
 			    }
 
 			    leaf weight {
 				type uint32;
 				description
 				    "Set the weight attribute to this value.";
+				ngcliext:node-fmt "$< $% @@$n";
 			    }
 			}
 
@@ -918,6 +1067,8 @@ module netgate-frr {
 				 traditional function call, expecting a
 				 permit/deny response.";
 
+			    ngcliext:parent-fmt "^$%";
+
 			    leaf rt-map-name {
 				type leafref {
 				    path "/ngrt:route-config/ngrt:dynamic"
@@ -925,6 +1076,7 @@ module netgate-frr {
 				}
 				description
 				    "Call the named Route Map entry.";
+				ngcliext:node-fmt "$< @@$n";
 			    }
 			}
 
@@ -933,11 +1085,15 @@ module netgate-frr {
 				"As a final step in a Route Map, exit
 				 conditions may be specified.";
 
+			    ngcliext:parent-fmt "^on-match";
+
 			    leaf on-match-next {
 				type boolean;
 				description
 				    "Exit by coninuting to the next
 				     Route Map.";
+				ngcliext:node-op "bool";
+				ngcliext:node-fmt "|$< next$n";
 			    }
 
 			    leaf on-match-goto {
@@ -946,6 +1102,7 @@ module netgate-frr {
 				    "Jump to the next sequence number equal-to
 				     or greater than this specified sequence
 				     number within this same Route Map.";
+				ngcliext:node-fmt "$< goto @@$n";
 			    }
 			}
 		    }
@@ -955,6 +1112,9 @@ module netgate-frr {
 
 	container manager {
 
+	    ngcliext:node-fmt "route dynamic $%$n";
+	    ngcliext:pre-children-op "push";
+
 	    container global-options {
 		description
 		    "These are options that apply to the Zebra daemon.";
@@ -963,10 +1123,14 @@ module netgate-frr {
 		    description
 			"Zebra debug options.";
 
+		    ngcliext:parent-fmt "^$%";
+
 		    leaf events {
 			type boolean;
 			description
 			    "If true, debug Zebra events.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
 		    }
 
 		    leaf fpm {
@@ -974,12 +1138,16 @@ module netgate-frr {
 			description
 			    "If true, debug Zebra Forwarding Plane Manager
 			     events.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
 		    }
 
 		    leaf nht {
 			type boolean;
 			description
 			    "If true, enable Zebra next hop tracking.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
 		    }
 
 		    container kernel {
@@ -987,12 +1155,17 @@ module netgate-frr {
 			    "If present, enable debugging between zebra
 			     and the kernel.";
 
+			ngcliext:parent-fmt "$< $%";
+			ngcliext:post-node-fmt "$n";
+
 			container msgdump {
 			    presence
 				"If present dump raw netlink messages to
 				 the kernel.  Without a modifier send or
 				 receive flag, both sent and received
 				 messages are printed.";
+
+			    ngcliext:node-fmt "$< $%";
 
 			    uses zebra-packet-send-recv;
 			}
@@ -1002,6 +1175,9 @@ module netgate-frr {
 			presence
 			    "If present, enable Zebra packet debugging.";
 
+			ngcliext:node-fmt "$< $%";
+			ngcliext:post-node-fmt "$n";
+
 			uses zebra-packet-send-recv-detail;
 		    }
 
@@ -1009,10 +1185,15 @@ module netgate-frr {
 			presence
 			    "If present, enable Zebra RIB event debugging.";
 
+			ngcliext:node-fmt "$< $%";
+			ngcliext:post-node-fmt "$n";
+
 			leaf detail {
 			    type boolean;
 			    description
 				"If true, debug packets in detail.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "| $%";
 			}
 		    }
 		}
@@ -1021,9 +1202,14 @@ module netgate-frr {
 		    description
 			"Zebra logging options.";
 
+		    ngcliext:parent-fmt "^log";
+
 		    container file {
 			description
 			    "Information used to log to a disk file.";
+
+			ngcliext:node-fmt "$< $% @{filename}";
+			ngcliext:post-node-fmt "$n";
 
 			leaf filename {
 			    type string;
@@ -1037,6 +1223,7 @@ module netgate-frr {
 				"One of the log-level names: alerts, critical,
 				 debugging, emergencies, errors, informational,
 				 notifications, or warnings.";
+			    ngcliext:node-fmt " @@";
 			}
 		    }
 
@@ -1047,12 +1234,16 @@ module netgate-frr {
 			description
 			    "Information used to log to syslog.";
 
+			ngcliext:node-fmt "$< $%";
+			ngcliext:post-node-fmt "$n";
+
 			leaf level {
 			    type frr:zebra-level;
 			    description
 				"One of the log-level names: alerts, critical,
 				 debugging, emergencies, errors, informational,
 				 notifications, or warnings.";
+			    ngcliext:node-fmt " @@";
 			}
 		    }
 		}

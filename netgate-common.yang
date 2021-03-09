@@ -15,6 +15,11 @@ module netgate-common {
 
     Copyright 2017-2020 Rubicon Communications, LLC. All rights reserved.";
 
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02";
+    }
+
     revision 2020-11-01 {
 	description
 	    "TNSR Release 20.10.1";
@@ -120,7 +125,6 @@ module netgate-common {
 	}
     }
 
-    /* FIXME: Some other YANG source should provide this binding. */
     typedef host-if-name {
 	type linux-if-name;
     }
@@ -241,5 +245,21 @@ module netgate-common {
 	description
 	    "Enumeration of available network namespaces.";
     }
-}
 
+    typedef database-name {
+	type enumeration {
+            enum running {
+                description
+                    "The active database configuration";
+            }
+            enum candidate {
+                description
+                    "The candidate database configuration";
+            }
+            enum startup {
+                description
+                    "The startup database configuration";
+            }
+	}
+    }
+}

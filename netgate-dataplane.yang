@@ -5,8 +5,12 @@ module netgate-dataplane {
     namespace "urn:netgate:xml:yang:netgate-dataplane";
     prefix "ngdataplane";
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     import netgate-common {
-        prefix "ngcom";
+	prefix "ngcom";
     }
 
     organization "Netgate";
@@ -14,18 +18,23 @@ module netgate-dataplane {
     contact "Web: <http://www.netgate.com>";
 
     description
-        "This module defines startup configuration settings for VPP.
+	"This module defines startup configuration settings for VPP.
 
-         This includes items related to how VPP itself is run, such
+	 This includes items related to how VPP itself is run, such
 	 as memory allocations, which devices to manage, which drivers
 	 to use.
 
-         This does not include dataplane configurations such as the IP
-         address assigned to an interface or IP routes. 
-         to the underlying data-model elements for the Netgate router.
+	 This does not include dataplane configurations such as the IP
+	 address assigned to an interface or IP routes. 
+	 to the underlying data-model elements for the Netgate router.
 
-         Copyright 2018-2020 Rubicon Communications, LLC.
-        ";
+	 Copyright 2018-2020 Rubicon Communications, LLC.
+	";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-11-01 {
 	description
@@ -68,111 +77,85 @@ module netgate-dataplane {
     }
 
     revision 2018-01-03 {
-        description
-            "Initial revision.";
+	description
+	    "Initial revision.";
     }
 
     rpc dataplane-control {
-        input {
-            leaf operation {
-                type ngcom:service-operation;
-                mandatory true;
-                description
-                    "The operation to perform";
-            }
-        }
-        output {
-            leaf stdout {
-                type string;
-            }
-        }
-    }
-
-    rpc dataplane-coredump {
-        input {
-            leaf operation {
-                type ngcom:service-op-enable-disable;
-                mandatory true;
-                description
-		    "One of the strings 'enable' or 'disable'.";
-            }
-        }
-        output {
-            leaf stdout {
-                type string;
-            }
-        }
-    }
-
-    typedef uio-driver-t {
-        type enumeration {
-            enum igb_uio {
-                description
-                    "UIO igb driver";
-            }
-            enum uio_pci_generic {
-                description
-                    "Generic UIO driver";
-            }
-            enum vfio-pci {
-                description
-                    "VFIO driver";
-            }
-        }
-    }
-
-    typedef iova-mode-t {
-        type enumeration {
-            enum pa {
-                description
-                    "IOVA as physical addresses mode";
+	input {
+	    leaf operation {
+		type ngcom:service-operation;
+		mandatory true;
+		description
+		    "The operation to perform";
 	    }
-	    enum va {
-                description
-                    "IOVA as virtual adresses mode";
+	}
+	output {
+	    leaf stdout {
+		type string;
 	    }
 	}
     }
 
-    typedef vdev-type-t {
-        type enumeration {
-            enum aesni_mb {
-                description
-                    "AESNI multibuffer cryptodev";
-            }
-            enum aesni_gcm {
-                description
-                    "AESNI GCM cryptodev";
-            }
-        }
+    rpc dataplane-coredump {
+	input {
+	    leaf operation {
+		type ngcom:service-op-enable-disable;
+		mandatory true;
+		description
+		    "One of the strings 'enable' or 'disable'.";
+	    }
+	}
+	output {
+	    leaf stdout {
+		type string;
+	    }
+	}
+    }
+
+    typedef uio-driver-t {
+	type enumeration {
+	    enum igb_uio {
+		description
+		    "UIO igb driver";
+	    }
+	    enum uio_pci_generic {
+		description
+		    "Generic UIO driver";
+	    }
+	    enum vfio-pci {
+		description
+		    "VFIO driver";
+	    }
+	}
+    }
+
+    typedef iova-mode-t {
+	type enumeration {
+	    enum pa {
+		description
+		    "IOVA as physical addresses mode";
+	    }
+	    enum va {
+		description
+		    "IOVA as virtual adresses mode";
+	    }
+	}
     }
 
     typedef device-type-t {
-        type enumeration {
-            enum network {
-                description
-                    "Network interface";
-            }
-            enum crypto {
-                description
-                    "Cryptographic accelerator";
-            }
-            enum crypto-vf {
-                description
-                    "VF of cryptographic accelerator";
-            }
-        }
-    }
-
-    typedef nat-mode-t {
 	type enumeration {
-	    enum simple {
+	    enum network {
 		description
-		    "simple nat";
+		    "Network interface";
 	    }
-	    enum endpoint-dependent {
+	    enum crypto {
 		description
-		    "endpoint dependent mode";
+		    "Cryptographic accelerator";
+	    }
+	    enum crypto-vf {
+		description
+		    "VF of cryptographic accelerator";
 	    }
 	}
     }
@@ -292,27 +275,36 @@ module netgate-dataplane {
 	    type string {
 		pattern '[0-9a-fA-F]{1,4}:[0-9a-fA-F]{1,2}:[0-9a-fA-F]{1,2}[\.][0-9a-fA-F]';
 	    }
+	    type string {
+		pattern '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}';
+	    }
 	}
     }
 
     container dataplane-config {
-        description
-            "dataplane startup configurations";
+	description
+	    "dataplane startup configurations";
 
-        container cpu {
-            description
-                "cpu stanza";
+	ngcliext:parent-fmt "dataplane";
 
-            leaf workers {
-                type uint16;
-                description
-                    "Number of worker threads";
-            }
+	container cpu {
+	    description
+		"cpu stanza";
+
+	    ngcliext:parent-fmt "$< $%";
+
+	    leaf workers {
+		type uint16;
+		description
+		    "Number of worker threads";
+		ngcliext:node-fmt "$< $% @@$n";
+	    }
 
 	    leaf main-core {
 		type uint32;
 		description
 		    "Assign main thread to a specific core.";
+		ngcliext:node-fmt "$< $% @@$n";
 	    }
 
 	    leaf skip-cores {
@@ -321,6 +313,7 @@ module netgate-dataplane {
 		}
 		description
 		    "Sets number of CPU core(s) to be skipped.";
+		ngcliext:node-fmt "$< $% @@$n";
 	    }
 
 	    choice core-workers {
@@ -332,16 +325,21 @@ module netgate-dataplane {
 			description
 			    "Place worker threads according to the
 			     bitmap hex-mask.";
+			ngcliext:node-fmt "$< $% @@$n";
 		    }
 		}
 
 		case corelist {
 		    container corelist-workers {
+
+		        ngcliext:parent-fmt "$< $%";
+
 			leaf-list corelist-worker {
 			    type uint32;
 			    description
 				"Place worker threads according to the
 				 list of cores.";
+			    ngcliext:node-fmt "$< @@$n";
 			}
 		    }
 		}
@@ -351,6 +349,7 @@ module netgate-dataplane {
 		type dataplane-scheduler-policy;
 		description
 		    "Scheduling algorithm.";
+		ngcliext:node-fmt "$< $% @@$n";
 	    }
 
 	    leaf scheduler-priority {
@@ -360,43 +359,57 @@ module netgate-dataplane {
 		description
 		    "Scheduling priority. Only valid if the 'scheduler-policy'
 		     is set to 'fifo' or 'rr'.";
+		ngcliext:node-fmt "$< $% @@$n";
 	    }
-        }
+	}
 
-		container ethernet {
-			description
-				"ethernet common configuration";
+	container ethernet {
+	    description
+		"Ethernet common configuration";
 
-			leaf default-mtu {
-				type uint32;
-				description
-					"default ethernet MTU";
-			}
-		}
+	    ngcliext:parent-fmt "$< $%";
 
-        container dpdk {
-            description
-                "dpdk stanza";
+	    leaf default-mtu {
+		type uint32;
+		default 1500;
+		description
+		    "Default ethernet MTU";
+		ngcliext:node-fmt "$< $% @@$n";
+	    }
+	}
+
+	container dpdk {
+	    description
+		"dpdk stanza";
+
+	    ngcliext:parent-fmt "$< $%";
 
 	    container blacklists {
+
+		ngcliext:parent-fmt "$<";
+
 		leaf-list blacklist {
 		    type blacklist-t;
 		    description
 			"Blacklist devices by PCI vendor and device ID";
+		    ngcliext:node-fmt "$< $% @@$n";
 		}
 	    }
 
-            list dev {
-                key "id";
-                unique "name";
-                description
-                    "Configs for a NIC or crypto device";
+	    list dev {
+		key "id";
+		unique "name";
+		description
+		    "Configs for a NIC or crypto device";
 
-                leaf id {
-                    type string;
-                    description
-                        "The PCI ID for a device or 'default'.";
-                }
+		ngcliext:parent-fmt "$<";
+
+		leaf id {
+		    type string;
+		    description
+			"The PCI ID for a device or 'default'.";
+		    ngcliext:sibling-fmt "@@";
+		}
 
 		leaf default {
 		    type boolean;
@@ -408,64 +421,75 @@ module netgate-dataplane {
 		    type string;
 		    description
 			"TCP segmentation offload. on/off";
+		    ngcliext:node-fmt "$< dev %{id} %{device-type} $% @@$n";
 		}
 
-                leaf device-type {
-                    type device-type-t;
-                    description
-                        "The type of the device.";
-                }
+		leaf device-type {
+		    type device-type-t;
+		    description
+			"The type of the device.";
+    		    ngcliext:sibling-fmt "@@";
+		}
 
-                leaf present {
-                    type boolean;
-                    description
-                        "Device enabled, no attributes necessarily set";
-                }
+		leaf present {
+		    type boolean;
+		    description
+			"Device enabled, no attributes necessarily set";
+		    ngcliext:node-fmt "$< dev %{id} %{device-type}$n";
+		}
 
-                leaf name {
-                    type ngcom:if-identifier-31;
-                    description
-                        "Given name for a dpdk device.";
-                    must '../id != "default"' {
-                        error-message "Setting a default network name is not supported";
-                    }
-                }
+		leaf name {
+		    type ngcom:if-identifier-31;
+		    description
+			"Given name for a dpdk device.";
+		    must '../id != "default"' {
+			error-message
+			    "Setting a default network name is not supported";
+		    }
+		    ngcliext:node-fmt "$< dev %{id} %{device-type} $% @@$n";
+		}
 
-                leaf num-rx-desc {
-                    type uint16;
-                    description
-                        "Number of receive descriptors.";
-                }
+		leaf num-rx-desc {
+		    type uint16;
+		    description
+			"Number of receive descriptors.";
+		    ngcliext:node-fmt "$< dev %{id} %{device-type} $% @@$n";
+		}
 
-                leaf num-tx-desc {
-                    type uint16;
-                    description
-                        "Number of transmit descriptors.";
-                }
+		leaf num-tx-desc {
+		    type uint16;
+		    description
+			"Number of transmit descriptors.";
+		    ngcliext:node-fmt "$< dev %{id} %{device-type} $% @@$n";
+		}
 
-                leaf num-rx-queues {
-                    type uint16;
-                    description
-                        "Number of receive queues.";
-                }
+		leaf num-rx-queues {
+		    type uint16;
+		    description
+			"Number of receive queues.";
+		    ngcliext:node-fmt "$< dev %{id} %{device-type} $% @@$n";
+		}
 
-                leaf num-tx-queues {
-                    type uint16;
-                    description
-                        "Number of transmit queues.";
-                }
+		leaf num-tx-queues {
+		    type uint16;
+		    description
+			"Number of transmit queues.";
+		    ngcliext:node-fmt "$< dev %{id} %{device-type} $% @@$n";
+		}
 
-                leaf vlan-strip-offload {
-                    type string;
-                    description
-                        "VLAN strip offload on/off";
-                }
-            }
+		leaf vlan-strip-offload {
+		    type string;
+		    description
+			"VLAN strip offload on/off";
+		    ngcliext:node-fmt "$< dev %{id} %{device-type} $% @@$n";
+		}
+	    }
 
 	    leaf dpdk-log-level {
 		type dpdk-log-level-type-t;
 		description
 		    "DPDK log level";
+		ngcliext:node-fmt "$< log-level @@$n";
 	    }
 
 	    leaf num-mem-channels {
@@ -474,96 +498,111 @@ module netgate-dataplane {
 		}
 		description
 		    "Number of memory channels. Default is 4";
-
+		ngcliext:node-fmt "$< $% @@$n";
 	    }
 
 	    leaf decimal-interface-names {
 		type boolean;
 		description
 		    "Use decimal values of the PCI address instead of hexadecimal for devices";
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "|$< $%$n";
 	    }
 
 	    leaf tcp-udp-checksum {
 		type boolean;
 		description
 		    "Enable hardware l4 checksums.";
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "|$< $%$n";
 	    }
 
 	    leaf no-multi-seg {
 		type boolean;
 		description
 		    "Disable mutli-segment buffers.";
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "|$< $%$n";
 	    }
 
 	    leaf no-tx-checksum-offload {
 		type boolean;
 		description
 		    "Disable transmit checksum offload.";
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "|$< $%$n";
 	    }
 
 	    leaf no-pci {
 		type boolean;
 		description
 		    "Disable PCI bus.";
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "|$< $%$n";
 	    }
 
-            leaf uio-driver {
-                type uio-driver-t;
-                description
-                    "Name of the uio driver";
-            }
-
-            leaf iova-mode {
-                type iova-mode-t;
-                description
-                    "IO virtual addresses mode";
+	    leaf uio-driver {
+		type uio-driver-t;
+		description
+		    "Name of the uio driver";
+		ngcliext:node-fmt "$< $% @@$n";
 	    }
 
-            list vdev {
-                key "vdev-type";
-                description
-                    "Configs for a software cryptodev";
-
-                leaf vdev-type {
-                    type vdev-type-t;
-                    description
-                        "The name of the vdev type.";
-                }
-            }
+	    leaf iova-mode {
+		type iova-mode-t;
+		description
+		    "IO virtual addresses mode";
+		ngcliext:node-fmt "$< $% @@$n";
+	    }
 
 	    leaf num-crypto-mbufs {
 		    type uint32 {
 			range "1..4294967295";
 		    }
 		    description
-		        "Number of crypto buffers.";
+			"Number of crypto buffers.";
+		ngcliext:node-fmt "$< $% @@$n";
 	    }
-        }
 
-        container memory {
-            description
-                "Main heap configuration";
+	    leaf telemetry {
+		type boolean;
+		description
+		    "On/off telemetry in DPDK.";
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "|$< $%$n";
+	    }
+	}
 
-            leaf main-heap-size {
-                type ngcom:memory-size-string;
-                description
-                    "Size of main heap. Should be a number. "+
-                    "Optionally followed by a specified of k, m, or g, "+
-                    "to indicate kilo, mega, or giga bytes. ";
-            }
+	container memory {
+	    description
+		"Main heap configuration";
+
+	    ngcliext:parent-fmt "$< $%";
+
+	    leaf main-heap-size {
+		type ngcom:memory-size-string;
+		description
+		    "Size of main heap. Should be a number. "+
+		    "Optionally followed by a specified of k, m, or g, "+
+		    "to indicate kilo, mega, or giga bytes. ";
+		ngcliext:node-fmt "$< $% @@$n";
+	    }
 
 	    leaf main-heap-page-size {
-                type ngcom:memory-page-size;
-                description
-                    "Size of page in main heap. Should be a number. "+
-                    "Optionally followed by a specified of k, m, or g, "+
-                    "to indicate kilo, mega, or giga bytes. ";
+		type ngcom:memory-page-size;
+		description
+		    "Size of page in main heap. Should be a number. "+
+		    "Optionally followed by a specified of k, m, or g, "+
+		    "to indicate kilo, mega, or giga bytes. ";
+		ngcliext:node-fmt "$< $% @@$n";
 	    }
-        }
+	}
 
 	container buffers {
 	    description
 		"VPP pre-allocated buffers configuration";
+
+	    ngcliext:parent-fmt "$< $%";
 
 	    leaf buffers-per-numa {
 		type uint32 {
@@ -571,6 +610,8 @@ module netgate-dataplane {
 		}
 		description
 		    "Pre-allocated buffers count";
+		default 32768;
+		ngcliext:node-fmt "$< $% @@$n";
 	    }
 
 	    leaf default-data-size {
@@ -579,112 +620,53 @@ module netgate-dataplane {
 		}
 		description
 		    "Amount of memory allocated per-buffer";
+		ngcliext:node-fmt "$< $% @@$n";
 	    }
 	}
 
-        container ip6 {
-            description
-                "IPv6 settings";
+	container ip6 {
+	    description
+		"IPv6 settings";
 
-            leaf hash-buckets {
-                type uint32;
-                description
-                    "Number of hash buckets for IPv6 lookup table.";
-            }
+	    ngcliext:parent-fmt "$< $%";
 
-            leaf heap-size {
-                type ngcom:memory-size-string;
-                description
-                    "Size of heap for IPv6 FIB. Should be a number. "+
-                    "Optionally followed by a specified of k, m, or g, "+
-                    "to indicate kilo, mega, or giga bytes. ";
-            }
-        }
+	    leaf hash-buckets {
+		type uint32;
+		description
+		    "Number of hash buckets for IPv6 lookup table.";
+		ngcliext:node-fmt "$< $% @@$n";
+	    }
+
+	    leaf heap-size {
+		type ngcom:memory-size-string;
+		description
+		    "Size of heap for IPv6 FIB. Should be a number. "+
+		    "Optionally followed by a specified of k, m, or g, "+
+		    "to indicate kilo, mega, or giga bytes. ";
+		ngcliext:node-fmt "$< $% @@$n";
+	    }
+	}
 
 	container dslite {
 	    description
-	        "NAT dslite settings";
+		"NAT dslite settings";
+
+	    ngcliext:parent-fmt "$< nat";
 
 	    leaf dslite-ce {
 		type boolean;
 		description
 		    "dslite ce";
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "|$< $%$n";
 	    }
-	}
-
-	container nat {
-	    description
-	        "global NAT settings";
-
-	    leaf nat-mode {
-		type nat-mode-t;
-		description
-		    "One of 'simple' or 'endpoint-dependent'";
-	    }
-
-	    leaf max-translations-per-user {
-		type uint32 {
-		    range "1..262144";
-		}
-		description
-		    "max translations per user";
-	    }
-
-	    leaf max-translations-per-thread {
-		type uint32 {
-		    range "1..4294967295";
-		}
-		description
-		    "max translations per thread";
-	    }
-
-	    leaf max-users-per-thread {
-		type uint32 {
-		    range "1..4294967295";
-		}
-		description
-		    "max users per thread";
-	    }
-
-	    container mode-options {
-
-		container simple {
-
-		    leaf static-mapping-only {
-			type boolean;
-			description
-			    "static mapping only";
-		    }
-
-		    leaf out2in-dpo {
-			type boolean;
-			description
-			    "out2in dpo";
-		    }
-		}
-	    }
-
-	    leaf translation-hash-memory {
-		type uint32 {
-		    range "1..4294967295";
-		}
-		    description
-			"memory size of session lookup hash tables";
-	    }
-
-	    leaf user-hash-memory {
-		type uint32 {
-		    range "1..4294967295";
-		}
-		    description
-			"memory size of NAT user lookup hash tabl";
-	    }
-
 	}
 
 	container statseg {
 	    description
-	        "Statistics segment settings";
+		"Statistics segment settings";
+
+	    ngcliext:parent-fmt "$< $%";
 
 	    leaf socket-name {
 		type string {
@@ -692,31 +674,40 @@ module netgate-dataplane {
 		}
 		description
 		    "Absolute filesystem path to stats segment unix socket";
+		ngcliext:node-fmt "$< $% @@$n";
 	    }
 
 	    leaf heap-size {
 		type ngcom:memory-size-string;
 		default 96M;
 		description
-                    "Size of heap for stats segment. Should be a number. "+
-                    "Optionally followed by a specified of k, m, or g, "+
-                    "to indicate kilo, mega, or giga bytes. ";
+		    "Size of heap for stats segment. Should be a number. "+
+		    "Optionally followed by a specified of k, m, or g, "+
+		    "to indicate kilo, mega, or giga bytes. ";
+		ngcliext:node-fmt "$< $% @@$n";
 	    }
 
 	    container per-node-counters {
+
+		ngcliext:parent-fmt "$< $%";
+
 		leaf enabled {
 		    type boolean;
 		    default false;
 		    description
 			"Whether to enable per-node counters in the stats
 			 segment";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|$< enable$n";
 		}
 	    }
 	}
 
 	container logging {
 	    description
-	        "Logging segment settings";
+		"Logging segment settings";
+
+	    ngcliext:parent-fmt "$< $%";
 
 	    leaf size {
 		type int32 {
@@ -724,6 +715,7 @@ module netgate-dataplane {
 		}
 		description
 		    "Number of log messages in fifo bufer.";
+		ngcliext:node-fmt "$< $% @@$n";
 	    }
 
 	    leaf unthrottle-time {
@@ -732,6 +724,7 @@ module netgate-dataplane {
 		}
 		description
 		    "Message unthrottling time (in seconds). ";
+		ngcliext:node-fmt "$< $% @@$n";
 	    }
 
 	    leaf default-log-level {
@@ -739,6 +732,7 @@ module netgate-dataplane {
 		description
 		    "Default log level to process message into the "+
 		    "internal message queue.";
+		ngcliext:node-fmt "$< $% @@$n";
 	    }
 
 	    leaf default-syslog-log-level {
@@ -747,6 +741,36 @@ module netgate-dataplane {
 		    "Defailt log level to process messages into the syslog. "+
 		    "Message will be preocessed to syslog if log level "+
 		    "is less then or equal to the message's log level.";
+		ngcliext:node-fmt "$< $% @@$n";
+	    }
+	}
+
+	container linux-cp {
+	    description
+		"Linux-cp (host stack connectivity) settings";
+
+	    ngcliext:parent-fmt "$< $%";
+
+	    leaf nl-rx-buffer-size {
+		type uint32;
+		description
+		    "Size of netlink socket receive buffer.";
+		ngcliext:node-fmt "$< $% @@$n";
+	    }
+
+	    leaf nl-batch-size {
+		type uint32;
+		description
+		    "Number of netlink messages to process at a time.";
+		ngcliext:node-fmt "$< $% @@$n";
+	    }
+
+	    leaf nl-batch-delay-ms {
+		type uint32;
+		description
+		    "Delay in ms between processing batches of netlink
+		     messages.";
+		ngcliext:node-fmt "$< $% @@$n";
 	    }
 	}
     }

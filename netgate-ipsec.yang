@@ -9,6 +9,10 @@ module netgate-ipsec {
 	prefix "inet";
     }
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     import netgate-common {
 	prefix "ngcom";
     }
@@ -23,6 +27,11 @@ module netgate-ipsec {
 
 	Copyright 2016-2020 Rubicon Communications, LLC.
 	";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -259,7 +268,8 @@ module netgate-ipsec {
 	    }
 	}
 	description
-	    "Subset of encryption algorithms supported for IPsec in dataplane.";
+	    "Subset of encryption algorithms supported for IPsec in
+	     dataplane.";
     }
 
     typedef ng-ike-integrity-algorithm-t {
@@ -678,11 +688,17 @@ module netgate-ipsec {
 
 
     container ipsec-config {
+
+	ngcliext:parent-fmt "ipsec";
+
 	list tunnel {
 	    key "instance";
 
 	    description
 		"IPsec tunnel configurations";
+
+	    ngcliext:node-fmt "$< tunnel @{instance}$n";
+	    ngcliext:pre-children-op "push";
 
 	    leaf instance {
 		type uint32;
@@ -695,6 +711,7 @@ module netgate-ipsec {
 		mandatory true;
 		description
 		    "IP address used locally to terminate tunnel.";
+		ngcliext:node-fmt "^local-address @@$n";
 	    }
 
 	    leaf remote-addr {
@@ -702,6 +719,7 @@ module netgate-ipsec {
 		mandatory true;
 		description
 		    "IP address or hostname of remote tunnel peer.";
+		ngcliext:node-fmt "^remote-address @@$n";
 	    }
 
 	    leaf remote-type {
@@ -721,20 +739,27 @@ module netgate-ipsec {
 		description
 		    "Tunnel cryptographic settings";
 
+		ngcliext:parent-fmt "^crypto";
+
 		leaf config-type {
 		    type ipsec-crypto-config-type-t;
 		    default "ike";
 		    description
 			"Crypto config/keying method";
+		    ngcliext:node-fmt "$< $% @@$n";
 		}
 
 		container ike {
+
+		    ngcliext:node-fmt "$< ike$n";
+		    ngcliext:pre-children-op "push";
 
 		    leaf version {
 			type uint8 {
 			    range "1..2";
 			}
 			default 2;
+			ngcliext:node-fmt "^$% @@$n";
 		    }
 
 		    leaf role {
@@ -749,18 +774,21 @@ module netgate-ipsec {
 			default 14400;
 			description
 			    "Lifetime of IKE SA in seconds.";
+			ngcliext:node-fmt "^$% @@$n";
 		    }
 
 		    leaf dpd-poll-interval {
 			type uint16;
 			description
 			    "Seconds between DPD peer status checks.";
+			ngcliext:node-fmt "^dpd-interval @@$n";
 		    }
 
 		    leaf key-renewal {
 			type key-renewal-t;
 			description
 			    "IKE SA key renewal method - rekey or reauth";
+			ngcliext:node-fmt "^$% @@$n";
 		    }
 
 		    leaf udp-encapsulation {
@@ -768,6 +796,8 @@ module netgate-ipsec {
 			default false;
 			description
 			    "Force UDP encapsulation.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
 		    }
 
 		    list proposals {
@@ -775,6 +805,9 @@ module netgate-ipsec {
 
 			description
 			    "Proposed parameters for IKE SA";
+
+			ngcliext:node-fmt "^proposal @{name}$n";
+			ngcliext:pre-children-op "push";
 
 			leaf "name" {
 			    type string;
@@ -787,6 +820,7 @@ module netgate-ipsec {
 			    mandatory true;
 			    description
 				"IKE encryption algorithm.";
+			    ngcliext:node-fmt "^encryption @@$n";
 			}
 
 			leaf integrity-algorithm {
@@ -794,6 +828,7 @@ module netgate-ipsec {
 			    mandatory true;
 			    description
 				"IKE integrity algorithm.";
+			    ngcliext:node-fmt "^integrity @@$n";
 			}
 
 			leaf dh-group {
@@ -801,12 +836,14 @@ module netgate-ipsec {
 			    mandatory true;
 			    description
 				"IKE Diffie-Hellman group.";
+			    ngcliext:node-fmt "^group @@$n";
 			}
 
 			leaf prf {
 			    type ng-pseudo-random-function-t;
 			    description
 				"IKE pseudo-random function.";
+			    ngcliext:node-fmt "^$% @@$n";
 			}
 		    }
 
@@ -815,6 +852,9 @@ module netgate-ipsec {
 
 			description
 			    "The ID data for one peer in the SA";
+
+			ngcliext:node-fmt "^$% @{peer}$n";
+			ngcliext:pre-children-op "push";
 
 			leaf peer {
 			    type peer-position-t;
@@ -828,12 +868,14 @@ module netgate-ipsec {
 			    mandatory true;
 			    description
 				"Type of ID used by the peer.";
+			    ngcliext:node-fmt "^$% @@$n";
 			}
 
 			leaf value {
 			    type string;
 			    description
 				"The ID of the peer.";
+			    ngcliext:node-fmt "^$% @@$n";
 			}
 		    }
 
@@ -843,6 +885,9 @@ module netgate-ipsec {
 			description
 			    "The auth data for an IKE peer";
 
+			ngcliext:node-fmt "^$% @{peer}$n";
+			ngcliext:pre-children-op "push";
+
 			leaf peer {
 			    type peer-position-t;
 			    description
@@ -851,6 +896,9 @@ module netgate-ipsec {
 
 			list round {
 			    key "number";
+
+			    ngcliext:node-fmt "^$% @{number}$n";
+			    ngcliext:pre-children-op "push";
 
 			    description
 				"An authentication round for one peer.";
@@ -869,12 +917,14 @@ module netgate-ipsec {
 				mandatory true;
 				description
 				    "The type of authentication used.";
+				ngcliext:node-fmt "^$% @@$n";
 			    }
 
 			    leaf psk {
 				type string;
 				description
 				    "Pre Shared Key";
+				ngcliext:node-fmt "^$% @@$n";
 			    }
 			}
 		    }
@@ -884,8 +934,11 @@ module netgate-ipsec {
 
 			description
 			    "Child (phase 2) SA.";
-			leaf name {
 
+			ngcliext:node-fmt "^child @{name}$n";
+			ngcliext:pre-children-op "push";
+
+			leaf name {
 			    type string;
 			    description
 				"Name of the child SA";
@@ -899,6 +952,7 @@ module netgate-ipsec {
 			    description
 				"The length of time in seconds until "+
 				"the child SA is no longer valid.";
+			    ngcliext:node-fmt "^$% @@$n";
 			}
 
 			leaf mode {
@@ -911,6 +965,10 @@ module netgate-ipsec {
 
 			list proposal {
 			    key "name";
+
+			    ngcliext:node-fmt "^$% @{name}$n";
+			    ngcliext:pre-children-op "push";
+
 			    leaf name {
 				type string;
 			    }
@@ -919,22 +977,28 @@ module netgate-ipsec {
 				type dataplane-esp-encryption-algorithm-t;
 				description
 				    "Child SA encryption algorithm";
+				ngcliext:node-fmt "^encryption @@$n";
 			    }
 
 			    leaf integrity-algorithm {
 				type dataplane-esp-integrity-algorithm-t;
 				description
 				    "Child SA integrity algorithm";
+				ngcliext:node-fmt "^integrity @@$n";
 			    }
+
 			    leaf dh-group {
 				type ng-diffie-hellman-group-t;
 				description
 				    "DH group for PFS";
+				ngcliext:node-fmt "^group @@$n";
 			    }
+
 			    leaf sequence-number {
 				type ipsec-seq-number-type-t;
 				description
 				    "Extended or regular sequence numbers";
+				ngcliext:node-fmt "^$% @@$n";
 			    }
 			}
 
@@ -953,6 +1017,7 @@ module netgate-ipsec {
 				"Currently, 64 packets is the only "+
 				"supported value. Setting anything here "+
 				"will enable a 64 packet replay window.";
+			    ngcliext:node-fmt "^$% @@$n";
 			}
 
 			/* traffic selectors not used for interface-based */
@@ -990,14 +1055,17 @@ module netgate-ipsec {
 			leaf algorithm {
 			    type dataplane-esp-encryption-algorithm-t;
 			}
+
 			leaf key {
 			    type string;
 			}
 		    }
+
 		    container integrity {
 			leaf algorithm {
 			    type dataplane-esp-integrity-algorithm-t;
 			}
+
 			leaf key {
 			    type string;
 			}

@@ -9,6 +9,10 @@ module netgate-vxlan {
 	prefix "inet";
     }
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     import netgate-common {
 	prefix "ngcom";
     }
@@ -22,6 +26,11 @@ module netgate-vxlan {
 	 for VXLAN data.
 
 	 Copyright 2018-2020 Rubicon Communications, LLC. ";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-10-15 {
 	description
@@ -66,6 +75,9 @@ module netgate-vxlan {
 		description
 		    "VXLAN tunnel name.";
 
+		ngcliext:node-fmt "vxlan @{name}$n";
+		ngcliext:pre-children-op "push";
+
 		leaf name {
 		    type ngcom:if-identifier-63;
 		    description
@@ -77,6 +89,7 @@ module netgate-vxlan {
 		    type ngcom:rt-identifier-63;
 		    description
 			"The name of an encapsulation route table.";
+		    ngcliext:node-fmt "^encapsulation @@$n";
 		}
 
 		leaf decap-next-node {
@@ -93,6 +106,7 @@ module netgate-vxlan {
 			 where the <X> is the instance number.  The
 			 instance number must be unique across all
 			 VXLAN entries.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf mcast-if-name {
@@ -101,6 +115,7 @@ module netgate-vxlan {
 			"The interface to use, along with a multicast
 			 destination IP address, if a multicast
 			 destination is desired.";
+		    ngcliext:node-fmt "^multicast-interface @@$n";
 		}
 
 		leaf vni {
@@ -109,18 +124,21 @@ module netgate-vxlan {
 		    }
 		    description
 			"VNI value, u24.";
+		    ngcliext:node-fmt "^vni @@$n";
 		}
 
 		leaf src-ip-address {
 		     type inet:ip-address-no-zone;
 		     description
 			"The source IP address.";
+		    ngcliext:node-fmt "^source @@$n";
 		}
 
 		leaf dst-ip-address {
 		     type inet:ip-address-no-zone;
 		     description
 			"The destination IP address.";
+		    ngcliext:node-fmt "^destination @@$n";
 		}
 	    }
 	}

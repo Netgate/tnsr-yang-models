@@ -5,6 +5,14 @@ module netgate-vpp-prometheus {
     namespace "urn:netgate:xml:yang:netgate-vpp-prometheus";
     prefix "ngvpppro";
 
+    import netgate-cli-extensions {
+        prefix "ngcliext";
+    }
+
+    import netgate-common {
+        prefix "ngcom";
+    }
+
     organization "Netgate";
 
     contact "Web: <http://www.netgate.com>";
@@ -14,14 +22,16 @@ module netgate-vpp-prometheus {
          Copyright 2018-2020 Rubicon Communications, LLC.
         ";
 
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
+
     revision 2020-09-15 {
         description
             "Initial revision.";
     }
 
-    import netgate-common {
-        prefix "ngcom";
-    }
 
     rpc prometheus-control {
         input {
@@ -45,23 +55,32 @@ module netgate-vpp-prometheus {
         }
     }
 
+
     container prometheus-exporter {
 	description
 	    "configuration of the prometheus exporter";
+
+	ngcliext:parent-fmt "prometheus";
 
 	container host-space {
 	    presence
 	        "indicates the host namespace exporter
                  is enabled.";
 
+	    ngcliext:node-fmt "$< host enable$n";
+	    ngcliext:parent-fmt "$< host";
+
 	    container filters {
 	        description
 		    "list of data items to export";
 	    
+		ngcliext:parent-fmt "$<";
+
 	        leaf-list filter {
 		    type string;
 		    description
 		        "regular expression for data to export";
+		    ngcliext:node-fmt "$< $% @@$n";
 	        }
 	    }
 	}
@@ -71,14 +90,20 @@ module netgate-vpp-prometheus {
 	        "indicates the dataplane namespace exporter
                  is enabled.";
 
+	    ngcliext:node-fmt "$< dataplane enable$n";
+	    ngcliext:parent-fmt "$< dataplane";
+
 	    container filters {
 	        description
 		    "list of data items to export";
 	    
+		ngcliext:parent-fmt "$<";
+
 	        leaf-list filter {
 		    type string;
 		    description
 		        "regular expression for data to export";
+		    ngcliext:node-fmt "$< $% @@$n";
 	        }
 	    }
 	}

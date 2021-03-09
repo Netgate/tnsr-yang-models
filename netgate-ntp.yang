@@ -9,6 +9,10 @@ module netgate-ntp {
 	prefix "inet";
     }
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     import netgate-common {
 	prefix "ngcom";
     }
@@ -22,6 +26,11 @@ module netgate-ntp {
 
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -316,275 +325,352 @@ module netgate-ntp {
 	    "Network Time Protocol daemon configuration for time
 	     keeping and services.";
 
-	leaf namespace {
-	    type ngcom:network-namespace;
+	container system {
 	    description
-		"Network namespace to be used by NTP daemon.";
-	}
+		"The NTP system parameters not managed by the daemon.";
 
-	container parameters {
-	    description
-		"A collection of various NTP daemon parameters.";
+	    ngcliext:parent-fmt "ntp";
+
+	    leaf namespace {
+		type ngcom:network-namespace;
+		description
+		    "Network namespace to be used by NTP daemon.";
+		ngcliext:node-fmt "$< $% @@$n";
+	    }
 
 	    leaf enable {
 		type boolean;
 		description
 		    "If true, the NTP daemon is enabled.";
-	    }
-
-	    leaf driftfile {
-		type string;
-		description
-		    "Full path name of the drift file.  If not specified,
-		     /var/lib/ntp/drift.";
-	    }
-
-	    leaf statsdir {
-		type string;
-		description
-		    "Full path name of the statistics directory.  If not
-		     specified, /var/log/ntpstats";
-	    }
-
-	    container disabled-flags {
-		description
-		    "Force monitor flags to disabled.";
-
-		leaf monitor {
-		    type boolean;
-		    description
-			"If true, disable monitor.";
-		}
-	    }
-
-	    container enabled-flags {
-		description
-		    "Force monitor flags to enabled.";
-
-		leaf monitor {
-		    type boolean;
-		    description
-			"If true, enable monitor.";
-		}
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "|$< $%$n";
 	    }
 	}
 
-	container interfaces {
+	container daemon {
 	    description
-		"Interface binding specifications.";
+		"NTP daemon configuration parameters.";
 
-	    list interface {
-		key "sequence";
+	    ngcliext:node-fmt "ntp server$n";
+	    ngcliext:pre-children-op "push";
 
-		leaf sequence {
-		    type uint32;
-		    description
-			"The sequence numbers provide an ordering for the
-			 list of interface commands.";
-		}
+	    container parameters {
+		description
+		    "The NTP parameters managed by the NTP daemon.";
 
-		leaf action {
-		    type ntp-interface-action;
-		    description
-			"One of the action keywords listen, ignore
-			 or drop to perform on a single matching
-			 keyword, interface, or IP prefix.";
-		}
-
-		leaf match-all {
-		    type boolean;
-		    description
-			"Match all interfaces.";
-		}
-
-		leaf match-interface {
+		leaf driftfile {
 		    type string;
 		    description
-			"Match an interface name.";
+			"Full path name of the drift file.  If not specified,
+			 /var/lib/ntp/drift.";
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
-		leaf match-ip-prefix {
-		    type inet:ip-prefix;
+		leaf statsdir {
+		    type string;
 		    description
-			"Match an IP prefix.";
+			"Full path name of the statistics directory.  If not
+			 specified, /var/log/ntpstats";
+		    ngcliext:node-fmt "^$% @@$n";
+		}
+
+		container disabled-flags {
+		    description
+			"Force monitor flags to disabled.";
+
+		    ngcliext:parent-fmt "^disable";
+
+		    leaf monitor {
+			type boolean;
+			description
+			    "If true, disable monitor.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
+		    }
+		}
+
+		container enabled-flags {
+		    description
+			"Force monitor flags to enabled.";
+
+		    ngcliext:parent-fmt "^enable";
+
+		    leaf monitor {
+			type boolean;
+			description
+			    "If true, enable monitor.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
+		    }
 		}
 	    }
-	}
 
-	container logconfigs {
-	    description
-		"An ordered sequence of NTPD logconfig settings.";
+	    container interfaces {
+		description
+		    "Interface binding specifications.";
 
-	    list logconfig {
-		key "sequence";
 
-		leaf sequence {
+		list interface {
+		    key "sequence";
+
+		    ngcliext:node-fmt "^interface";
+		    ngcliext:children-order "sequence action match-all match-interface match-ip-prefix";
+
+		    leaf sequence {
+			type uint32;
+			description
+			    "The sequence numbers provide an ordering for the
+			     list of interface commands.";
+			ngcliext:node-fmt " sequence @@";
+		    }
+
+		    leaf action {
+			type ntp-interface-action;
+			description
+			    "One of the action keywords listen, ignore
+			     or drop to perform on a single matching
+			     keyword, interface, or IP prefix.";
+			ngcliext:node-fmt " @@";
+		    }
+
+		    leaf match-all {
+			type boolean;
+			description
+			    "Match all interfaces.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "| all$n";
+		    }
+
+		    leaf match-interface {
+			type string;
+			description
+			    "Match an interface name.";
+			ngcliext:node-fmt " interface @@$n";
+		    }
+
+		    leaf match-ip-prefix {
+			type inet:ip-prefix;
+			description
+			    "Match an IP prefix.";
+			ngcliext:node-fmt " prefix @@$n";
+		    }
+		}
+	    }
+
+	    container logconfigs {
+		description
+		    "An ordered sequence of NTPD logconfig settings.";
+
+		ngcliext:parent-fmt "^logconfig";
+
+		list logconfig {
+		    key "sequence";
+
+		    ngcliext:node-fmt "$< sequence @{sequence} @{action} @{class} @{type}$n";
+
+		    leaf sequence {
+			type uint32;
+			description
+			    "Logconfig options must be ordered.";
+		    }
+
+		    leaf action {
+			type ntp-log-action;
+			description
+			    "One of the actions 'set', 'add', or 'delete'.";
+		    }
+
+		    leaf class {
+			type ntp-log-class;
+			description
+			    "One of the logging classes 'clock', 'peer',
+			     'sys', 'sync', or 'all'.";
+		    }
+
+		    leaf type {
+			type ntp-log-type;
+			description
+			    "One of the logging types 'info', 'events',
+			     'statistics', 'status', or 'all'.";
+		    }
+		}
+	    }
+
+	    container restrictions {
+		list restriction {
+		    key "address";
+
+		    ngcliext:node-fmt "^restrict @{address}$n";
+		    ngcliext:pre-children-op "push";
+
+		    leaf address {
+			type ntp-restriction-address;
+			mandatory true;
+			description
+			    "Network to restrict.";
+		    }
+
+		    leaf present {
+			type boolean;
+			/* CONSIDER DEPRECATION */
+		    }
+
+		    leaf address-family {
+			type ngcom:ip-address-family;
+			description
+			    "IP address family of this restriction.";
+		    }
+
+		    leaf kod {
+			type boolean;
+			description
+			    "If true, enable Kiss o' Death packets.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
+		    }
+
+		    leaf limited {
+			type boolean;
+			description
+			    "If true, enable Kiss o' Death packets.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
+		    }
+
+		    leaf nomodify {
+			type boolean;
+			description
+			    "If true, deny run-time config by ntpq and ntpdc.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
+		    }
+
+		    leaf noquery {
+			type boolean;
+			description
+			    "If true, disable ntpq/ntpdc queries.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
+		    }
+
+		    leaf noserve {
+			type boolean;
+			description
+			    "If true, disable service/everything except
+			     ntpq and ntpdc queries.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
+		    }
+
+		    leaf nopeer {
+			type boolean;
+			description
+			    "If true, deny peer association packets.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
+		    }
+
+		    leaf notrap {
+			type boolean;
+			description
+			    "If true, deny mode 6 control message trap
+			     service.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
+		    }
+		}
+	    }
+
+	    container servers {
+		list server {
+		    key "host";
+
+		    ngcliext:node-fmt "^server @{host}$n";
+		    ngcliext:pre-children-op "push";
+
+		    leaf host {
+			type inet:host;
+			mandatory true;
+			description
+			    "NTP server IP address or FQDN.";
+		    }
+
+		    leaf iburst {
+			type boolean;
+			description
+			    "If true, send a burst of attempts to an
+			     unreachable server to speed up acquisition of
+			     time synchronization.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
+		    }
+
+		    leaf maxpoll {
+			type uint8 {
+			    range "7..17";
+			}
+			description    
+			    "Maximum poll interval expressed as a power of
+			     2 in seconds.";
+			ngcliext:node-fmt "^$% @@$n";
+		    }
+
+		    leaf noselect {
+			type boolean;
+			description
+			    "If true, disable time sync for this server,
+			     track stats only.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
+		    }
+
+		    leaf operational-mode {
+			type ntp-server-mode;
+			mandatory true;
+			description
+			    "One of 'server', or 'pool'.";
+			ngcliext:node-fmt "^$% @@$n";
+		    }
+
+		    leaf prefer {
+			type boolean;
+			description
+			    "If true, favor this server more than others.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
+		    }
+		}
+	    }
+
+	    container tinker {
+		description
+		    "Tinker options.";
+
+		ngcliext:parent-fmt "^tinker";
+
+		leaf panic {
 		    type uint32;
 		    description
-			"Logconfig options must be ordered.";
-		}
-
-		leaf action {
-		    type ntp-log-action;
-		    description
-			"One of the actions 'set', 'add', or 'delete'.";
-		}
-
-		leaf class {
-		    type ntp-log-class;
-		    description
-			"One of the logging classes 'clock', 'peer',
-			 'sys', 'sync', or 'all'.";
-		}
-
-		leaf type {
-		    type ntp-log-type;
-		    description
-			"One of the logging types 'info', 'events',
-			 'statistics', 'status', or 'all'.";
+			"Panic threshold in seconds.  0 disables.
+			 Default 1000.";
+		    ngcliext:node-fmt "$< $% @@$n";
 		}
 	    }
-	}
 
-	container restrictions {
-	    list restriction {
-		key "address";
+	    container tos {
+		description
+		    "TOS options.";
 
-		leaf address {
-		    type ntp-restriction-address;
-		    mandatory true;
-		    description
-			"Network to restrict.";
-		}
+		ngcliext:parent-fmt "^tos";
 
-		leaf present {
-		    type boolean;
-		    /* CONSIDER DEPRECATION */
-		}
-
-		leaf address-family {
-		    type ngcom:ip-address-family;
-		    description
-			"IP address family of this restriction.";
-		}
-
-		leaf kod {
-		    type boolean;
-		    description
-			"If true, enable Kiss o' Death packets.";
-		}
-
-		leaf limited {
-		    type boolean;
-		    description
-			"If true, enable Kiss o' Death packets.";
-		}
-
-		leaf nomodify {
-		    type boolean;
-		    description
-			"If true, deny run-time config by ntpq and ntpdc.";
-		}
-
-		leaf noquery {
-		    type boolean;
-		    description
-			"If true, disable ntpq/ntpdc queries.";
-		}
-
-		leaf noserve {
-		    type boolean;
-		    description
-			"If true, disable service/everything except
-			 ntpq and ntpdc queries.";
-		}
-
-		leaf nopeer {
-		    type boolean;
-		    description
-			"If true, deny peer association packets.";
-		}
-
-		leaf notrap {
-		    type boolean;
-		    description
-			"If true, deny mode 6 control message trap
-			 service.";
-		}
-	    }
-	}
-
-	container servers {
-	    list server {
-		key "host";
-
-		leaf host {
-		    type inet:host;
-		    mandatory true;
-		    description
-			"NTP server IP address or FQDN.";
-		}
-
-		leaf iburst {
-		    type boolean;
-		    description
-			"If true, send a burst of attempts to an
-			 unreachable server to speed up acquisition of
-			 time synchronization.";
-		}
-
-		leaf maxpoll {
+		leaf orphan {
 		    type uint8 {
-			range "7..17";
+			range "1..16";
 		    }
-		    description    
-			"Maximum poll interval expressed as a power of
-			 2 in seconds.";
-		}
-
-		leaf noselect {
-		    type boolean;
 		    description
-			"If true, disable time sync for this server,
-			 track stats only.";
+			"Orphan stratum in the range 1 through 16.";
+		    ngcliext:node-fmt "$< $% @@$n";
 		}
-
-		leaf operational-mode {
-		    type ntp-server-mode;
-		    mandatory true;
-		    description
-			"One of 'server', or 'pool'.";
-		}
-
-		leaf prefer {
-		    type boolean;
-		    description
-			"If true, favor this server more than others.";
-		}
-	    }
-	}
-
-	container tinker {
-	    description
-		"Tinker options.";
-
-	    leaf panic {
-		type uint32;
-		description
-		    "Panic threshold in seconds.  0 disables.  Default 1000.";
-	    }
-	}
-
-	container tos {
-	    description
-		"TOS options.";
-
-	    leaf orphan {
-		type uint8 {
-		    range "1..16";
-		}
-		description
-		    "Orphan stratum in the range 1 through 16.";
 	    }
 	}
     }

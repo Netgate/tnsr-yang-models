@@ -9,6 +9,10 @@ module netgate-gre {
 	prefix "inet";
     }
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     import netgate-common {
 	prefix "ngcom";
     }
@@ -23,6 +27,11 @@ module netgate-gre {
 
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -74,6 +83,9 @@ module netgate-gre {
 		description
 		    "GRE tunnel name.";
 
+		ngcliext:node-fmt "gre @{name}$n";
+		ngcliext:pre-children-op "push";
+
 		leaf name {
 		    type string;
 		    description
@@ -85,6 +97,7 @@ module netgate-gre {
 		     type inet:ip-address-no-zone;
 		     description
 			"The destination IP address.";
+		    ngcliext:node-fmt "^destination @@$n";
 		}
 
 		leaf erspan-session-id {
@@ -93,6 +106,7 @@ module netgate-gre {
 		    }
 		    description
 			"VNI value, u24.";
+		    ngcliext:sibling-fmt " $% @@";
 		}
 
 		leaf instance {
@@ -103,25 +117,28 @@ module netgate-gre {
 			 where the <X> is the instance number.
 			 The instance number must be unique across
 			 all GRE entries.";
-
+		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf encap-route-table {
 		    type ngcom:rt-identifier-63;
 		    description
 			"Encapsulation route table name.";
+		    ngcliext:node-fmt "^encapsulation route-table @@$n";
 		}
 
 		leaf src-ip-address {
 		     type inet:ip-address-no-zone;
 		     description
 			"The source IP address.";
+		    ngcliext:node-fmt "^source @@$n";
 		}
 
 		leaf tunnel-type {
 		    type gre-tunnel-type;
 		    description
 			"One of the strings 'l3', 'teb', or 'erspan'.";
+		    ngcliext:node-fmt "^$% @@%{erspan-session-id}$n";
 		}
 	    }
 	}

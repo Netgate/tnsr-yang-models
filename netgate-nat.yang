@@ -9,6 +9,10 @@ module netgate-nat {
 	prefix "inet";
     }
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     import netgate-common {
 	prefix "ngcom";
     }
@@ -22,6 +26,11 @@ module netgate-nat {
 	 for Network Address Translation data.
 
 	 Copyright 2017-2020 Rubicon Communications, LLC.";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-10-15 {
 	description
@@ -138,18 +147,83 @@ module netgate-nat {
 	description
 	    "Network Address Translation (NAT) data needed to support VPP.";
 
+	ngcliext:context "nat-everything-else";
+	ngcliext:parent-fmt "nat";
+
 	container global-options {
 	    description
 		"NAT global options";
+
+	    ngcliext:context "nat-global-options";
+	    ngcliext:parent-fmt "nat $%";
 
 	    container nat44 {
 		description
 		    "NAT44 options";
 
+		ngcliext:parent-fmt "$< $%";
+
+		leaf max-users-per-thread {
+		    type uint32 {
+			range "1..4294967295";
+		    }
+		    description
+			"Maximum number of users per thread.";
+		    ngcliext:node-fmt "$< $% @@$n";
+		}
+
+		leaf max-translations-per-thread {
+		    type uint32 {
+			range "1..4294967295";
+		    }
+		    description
+			"Maximum number of sessions per thread.";
+		    ngcliext:node-fmt "$< $% @@$n";
+		}
+
+		leaf max-translations-per-user {
+		    type uint32 {
+			range "1..4294967295";
+		    }
+		    description
+			"Maximum number of sessions per user.";
+		    ngcliext:node-fmt "$< $% @@$n";
+		}
+
+		leaf endpoint-dependent {
+		    type boolean;
+		    description
+			"If 'true', endpoint-dependent mode is enabled.";
+		    ngcliext:node-fmt "$< $% @@$n";
+		}
+
+		leaf static-mapping-only {
+		    type boolean;
+		    description
+			"If 'true', static mapping only is enabled.";
+		    ngcliext:node-fmt "$< $% @@$n";
+		}
+
+		leaf out2in-dpo {
+		    type boolean;
+		    description
+			"If 'true', out2in DPO is enabled.";
+		    ngcliext:node-fmt "$< $% @@$n";
+		}
+
 		leaf forwarding-enabled {
 		    type boolean;
 		    description
 			"NAT44 forwarding option. Used 'true' or 'false'.";
+		    ngcliext:node-fmt "$< forwarding @@$n";
+		}
+
+		leaf enabled {
+		    type boolean;
+		    default false;
+		    description
+			"If 'true', NAT44 is enabled.";
+		    ngcliext:node-fmt "$< $% @@$n";
 		}
 	    }
 
@@ -157,60 +231,120 @@ module netgate-nat {
 		description
 		    "NAT global timeouts";
 
+		ngcliext:parent-fmt "$< $%";
+
 		leaf udp {
 		    type uint32;
 		    description
 			"NAT UDP idle-timeout";
+		    ngcliext:node-fmt "$< $% @@$n";
 		}
+
 		leaf tcp_established {
 		    type uint32;
 		    description
 			"NAT TCP established connection idle-timeout";
+		    ngcliext:node-fmt "$< $% @@$n";
 		}
+
 		leaf tcp_transitory {
 		    type uint32;
 		    description
 			"NAT TCP transitory connection idle-timeout";
+		    ngcliext:node-fmt "$< $% @@$n";
 		}
+
 		leaf icmp {
 		    type uint32;
 		    description
 			"NAT ICMP idle-timeout";
+		    ngcliext:node-fmt "$< $% @@$n";
 		}
 	    }
 	}
 
-	container deterministic {
+	container dynamic {
 	    description
-		"Deterministic NAT information.";
+		"Dynamic mapping information.";
 
-	    leaf deterministic-enabled {
-		type boolean;
+	    ngcliext:parent-fmt "$< pool";
+
+	    container pool-table {
 		description
-		    "Deterministic NAT enabled";
-	    }
+		    "NAT address pool table.";
 
-	    container det-mapping-table {
-		description
-		    "Deterministic NAT mapping table.";
+		ngcliext:parent-fmt "$<";
 
-		list det-mapping-entry {
-		    key "inside-prefix outside-prefix";
+		list pool-entry {
+		    key "first-address";
 		    description
-			"Deterministic NAT Mapping Entry.";
+			"NAT address range entry.";
 
-		    leaf inside-prefix {
-			type inet:ipv4-prefix;
+		    ngcliext:node-fmt "$< address @{first-address}";
+		    ngcliext:children-order "last-address twice-nat route-table-name";
+		    ngcliext:post-node-fmt "$n";
+
+		    leaf first-address {
+			type inet:ipv4-address;
 			mandatory true;
 			description
-			    "The inside network.";
+			    "The first IPv4 address in the range.";
 		    }
 
-		    leaf outside-prefix {
-			type inet:ipv4-prefix;
+		    leaf last-address {
+			type inet:ipv4-address;
 			mandatory true;
 			description
-			    "The outside address range.";
+			    "The last IPv4 address in the range.";
+			ngcliext:node-fmt " - @@";
+		    }
+
+		    leaf route-table-name {
+			type ngcom:rt-identifier-63;
+			description
+			    "The route table name.";
+			ngcliext:node-fmt " route-table @@";
+		    }
+
+		    leaf twice-nat {
+			type boolean;
+			description
+			    "Twice-nat address range for external hosts.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "| $%";
+		    }
+		}
+	    }
+
+	    container pool-if-table {
+		description
+		    "NAT interface pool table.";
+
+		ngcliext:parent-fmt "$<";
+
+		list if-entry {
+		    key "if-name";
+		    description
+			"Dynamic pool interface entries.";
+
+		    ngcliext:node-fmt "$< interface @{if-name}";
+		    ngcliext:children-order "twice-nat";
+		    ngcliext:post-node-fmt "$n";
+
+		    leaf if-name {
+			type ngcom:if-identifier-63;
+			description
+			    "The name of an interface whose IPv4 addresses
+			     are added to the pool of addresses used in
+			     NAT mappings.";
+		    }
+
+		    leaf twice-nat {
+			type boolean;
+			description
+			    "Twice-nat address range for external hosts.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "| $%";
 		    }
 		}
 	    }
@@ -220,9 +354,13 @@ module netgate-nat {
 	    description
 		"Static mapping information.";
 
+	    ngcliext:parent-fmt "$< $%";
+
 	    container mapping-table {
 		description
 		    "NAT mapping table.";
+
+		ngcliext:parent-fmt "$<";
 
 		list mapping-entry {
 		    key "transport-protocol local-address local-port"
@@ -230,6 +368,14 @@ module netgate-nat {
 			+ " route-table-name";
 		    description
 			"NAT Mapping Entry.";
+
+		    ngcliext:node-fmt "$< mapping @{transport-protocol} local @{local-address} @{local-port} external @{external-address} @{external-port}";
+		    ngcliext:children-order "external-if-name
+		         external-port
+			 twice-nat
+			 out-to-in-only
+			 route-table-name";
+		    ngcliext:post-node-fmt "$n";
 
 		    leaf transport-protocol {
 			type nat-ipv4-protocol-any;
@@ -262,6 +408,7 @@ module netgate-nat {
 			type ngcom:if-identifier-63;
 			description
 			    "The external interface of the IPv4 packet.";
+			ngcliext:node-fmt " @@";
 		    }
 
 		    leaf external-port {
@@ -275,81 +422,23 @@ module netgate-nat {
 			description
 			    "NAT translate external address and port
 			     for 1:1 NAPT.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "| $%";
 		    }
 
 		    leaf out-to-in-only {
 			type boolean;
 			description
 			    "Match only out-to-in direction.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "| $%";
 		    }
 
 		    leaf route-table-name {
 			type ngcom:rt-identifier-63;
 			description
 			    "The name of a Route Table.";
-		    }
-		}
-	    }
-	}
-
-	container dynamic {
-	    description
-		"Dynamic mapping information.";
-
-	    container pool-table {
-		description
-		    "NAT address pool table.";
-
-		list pool-entry {
-		    key "first-address";
-		    description
-			"NAT address range entry.";
-
-		    leaf first-address {
-			type inet:ipv4-address;
-			mandatory true;
-			description
-			    "The first IPv4 address in the range.";
-		    }
-		    leaf last-address {
-			type inet:ipv4-address;
-			mandatory true;
-			description
-			    "The last IPv4 address in the range.";
-		    }
-		    leaf route-table-name {
-			type ngcom:rt-identifier-63;
-			description
-			    "The route table name.";
-		    }
-		    leaf twice-nat {
-			type boolean;
-			description
-			    "Twice-nat address range for external hosts.";
-		    }
-		}
-	    }
-
-	    container pool-if-table {
-		description
-		    "NAT interface pool table.";
-
-		list if-entry {
-		    key "if-name";
-		    description
-			"Dynamic pool interface entries.";
-
-		    leaf if-name {
-			type ngcom:if-identifier-63;
-			description
-			    "The name of an interface whose IPv4 addresses
-			     are added to the pool of addresses used in
-			     NAT mappings.";
-		    }
-		    leaf twice-nat {
-			type boolean;
-			description
-			    "Twice-nat address range for external hosts.";
+			ngcliext:node-fmt " route-table @@";
 		    }
 		}
 	    }
@@ -359,9 +448,13 @@ module netgate-nat {
 	    description
 		"IPFIX information.";
 
+	    ngcliext:parent-fmt "$< $%";
+
 	    container logging {
 		description
 		    "IPFIX logging information.";
+
+		ngcliext:parent-fmt "$< $%";
 
 		leaf domain {
 		    type uint32 {
@@ -370,6 +463,7 @@ module netgate-nat {
 		    default 1;
 		    description
 			"The logging domain id.";
+		    ngcliext:node-fmt "$< $% @@$n";
 		}
 
 		leaf src-port {
@@ -377,6 +471,7 @@ module netgate-nat {
 		    default 4739;
 		    description
 			"The logging source port id.";
+		    ngcliext:node-fmt "$< $% @@$n";
 		}
 
 		leaf enable {
@@ -384,6 +479,8 @@ module netgate-nat {
 		    description
 			"If logging is enabled for this domain and port,
 			this value will be true.";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|$< $%$n";
 		}
 	    }
 	}
@@ -391,6 +488,7 @@ module netgate-nat {
 	container nat64 {
 	    description
 		"NAT for IPv6/IPv4.";
+	    ngcliext:parent-fmt "$< $%";
 	}
 
     }
@@ -415,12 +513,6 @@ module netgate-nat {
 		type uint32;
 		description
 		    "Translation memory size.";
-	    }
-
-	    leaf deterministic {
-		type boolean;
-		description
-		    "If true, a deterministic translation is used.";
 	    }
 
 	    leaf endpoint-dependent {
@@ -514,58 +606,6 @@ module netgate-nat {
 		type uint32;
 		description
 		    "NAT ICMP idle-timeout";
-	    }
-	}
-
-	container deterministic {
-	    description
-		"Deterministic NAT information.";
-
-	    container det-mapping-table {
-		description
-		    "Deterministic NAT mapping table.";
-
-		list det-mapping-entry {
-		    key "inside-prefix outside-prefix";
-		    description
-			"Deterministic NAT Mapping Entry.";
-
-		    leaf inside-prefix {
-			type inet:ipv4-prefix;
-			mandatory true;
-			description
-			    "The inside network.";
-		    }
-
-		    leaf outside-prefix {
-			type inet:ipv4-prefix;
-			mandatory true;
-			description
-			    "The outside address range.";
-		    }
-
-		    leaf sharing-ratio {
-			type uint32;
-			mandatory true;
-			description
-			    "The outside to inside address sharing ratio.";
-		    }
-
-		    leaf ports-per-host {
-			type uint16;
-			mandatory true;
-			description
-			    "The number of ports available to a host.";
-		    }
-
-		    leaf ses-num {
-			type uint32;
-			mandatory true;
-			description
-			    "The number of sessions belonging to this
-			     mapping.";
-		    }
-		}
 	    }
 	}
 
@@ -876,18 +916,26 @@ module netgate-nat {
 	description
 	    "Dual-Stack Lite (DS-Lite) configuration.";
 
+	ngcliext:parent-fmt "dslite";
+
 	container dynamic {
 	    description
 		"Dynamic mapping information.";
+
+	    ngcliext:parent-fmt "$<";
 
 	    container pool-table {
 		description
 		    "DS-Lite address pool table.";
 
+		ngcliext:parent-fmt "$< pool";
+
 		list pool-entry {
 		    key "first-address";
 		    description
 			"DS-Lite address range entry.";
+
+		    ngcliext:node-fmt "$< address @{first-address} @{last-address}$n";
 
 		    leaf first-address {
 			type inet:ipv4-address;
@@ -895,6 +943,7 @@ module netgate-nat {
 			description
 			    "The first IPv4 address in the range.";
 		    }
+
 		    leaf last-address {
 			type inet:ipv4-address;
 			mandatory true;
@@ -909,14 +958,19 @@ module netgate-nat {
 	    description
 		"Address Family Transition Router (AFTR) configuration.";
 
+	    ngcliext:parent-fmt "$< aftr";
+
 	    container endpoint {
 		description
 		    "An IPv6 tunnel endpoint.";
+
+		ngcliext:parent-fmt "$< endpoint";
 
 		leaf ipv6-address {
 		    type inet:ipv6-address;
 		    description
 			"The IPv6 address of the tunnel endpoint.";
+		    ngcliext:node-fmt "$< @@$n";
 		}
 	    }
 	}
@@ -925,14 +979,19 @@ module netgate-nat {
 	    description
 		"Basic Bridging BroadBand (B4) configuration.";
 
+	    ngcliext:parent-fmt "$< b4";
+
 	    container endpoint {
 		description
 		    "An IPv6 tunnel endpoint.";
+
+		ngcliext:parent-fmt "$< endpoint";
 
 		leaf ipv6-address {
 		    type inet:ipv6-address;
 		    description
 			"The IPv6 address of the tunnel endpoint.";
+		    ngcliext:node-fmt "$< @@$n";
 		}
 	    }
 	}

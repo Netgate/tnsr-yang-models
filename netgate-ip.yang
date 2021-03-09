@@ -5,15 +5,25 @@ module netgate-ip {
     namespace "urn:netgate:xml:yang:netgate-ip";
     prefix "ngip";
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     organization "Netgate";
 
     contact "Web: <http://www.netgate.com>";
 
     description
-	"This YANG module provides global ip configuration such as ip-reassembly.
+	"This YANG module provides global ip configuration such
+	 as ip-reassembly.
 
 	 Copyright 2019-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2021-02-15 {
+	description
+	    "TNSR Release 21.02.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -35,12 +45,77 @@ module netgate-ip {
 	    "TNSR Release 19.08.";
     }
 
+    grouping reassembly-grouping {
+	container ipv4 {
+	    description
+		"Ip4-reassembly settings.";
+
+	    ngcliext:parent-fmt "$< ipv4";
+
+	    leaf timeout-ms {
+		type uint32;
+		description
+		    "Reassembly timeout in milliseconds.";
+		ngcliext:node-fmt "$< timeout @@$n";
+	    }
+
+	    leaf expire-walk-interval-ms {
+		type uint32;
+		description
+		    "Timeout trying to keep fragments.";
+		ngcliext:node-fmt "$< expire-walk-interval @@$n";
+	    }
+
+	    leaf max-reassemblies {
+		type uint32;
+		description
+		    "Maximum reassemblies count.";
+		ngcliext:node-fmt "$< $% @@$n";
+	    }
+	}
+
+	container ipv6 {
+	    description
+		"Ip6-reassembly settings.";
+
+	    ngcliext:parent-fmt "$< ipv6";
+
+	    leaf timeout-ms {
+		type uint32;
+		description
+		    "Reassembly timeout in milliseconds.";
+		ngcliext:node-fmt "$< timeout @@$n";
+	    }
+
+	    leaf expire-walk-interval-ms {
+		type uint32;
+		description
+		    "Timeout trying to keep fragments.";
+		ngcliext:node-fmt "$< expire-walk-interval @@$n";
+	    }
+
+	    leaf max-reassemblies {
+		type uint32;
+		description
+		    "Maximum reassemblies count.";
+		ngcliext:node-fmt "$< $% @@$n";
+	    }
+	}
+    }
+
     container ip-config {
+	ngcliext:parent-fmt "ip";
+
 	container reassembly {
+	    ngcliext:parent-fmt "$< $%";
+
 	    container full {
+		ngcliext:parent-fmt "$< $%";
 		uses reassembly-grouping;
 	    }
+
 	    container virtual {
+		ngcliext:parent-fmt "$< $% virtual";
 		uses reassembly-grouping;
 	    }
 	}
@@ -48,56 +123,15 @@ module netgate-ip {
 
     container ip-state {
         config false;
+
 	container reassembly {
 	    container full {
 		uses reassembly-grouping;
 	    }
+
 	    container virtual {
 		uses reassembly-grouping;
 	    }
 	}
     }
-
-    grouping reassembly-grouping {
-	    container ipv4 {
-		description
-		    "Ip4-reassembly settings.";
-		leaf timeout-ms {
-		    type uint32;
-		    description
-			"Reassembly timeout in milliseconds.";
-		}
-		leaf expire-walk-interval-ms {
-		    type uint32;
-		    description
-			"Timeout trying to keep fragments.";
-		}
-		leaf max-reassemblies {
-		    type uint32;
-		    description
-			"Maximum reassemblies count.";
-		}
-	    }
-
-	    container ipv6 {
-		description
-		    "Ip6-reassembly settings.";
-		leaf timeout-ms {
-		    type uint32;
-		    description
-			"Reassembly timeout in milliseconds.";
-		}
-		leaf expire-walk-interval-ms {
-		    type uint32;
-		    description
-			"Timeout trying to keep fragments.";
-		}
-		leaf max-reassemblies {
-		    type uint32;
-		    description
-			"Maximum reassemblies count.";
-		}
-	    }
-    }
-
 }
