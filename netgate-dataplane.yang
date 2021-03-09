@@ -27,6 +27,11 @@ module netgate-dataplane {
          Copyright 2018-2020 Rubicon Communications, LLC.
         ";
 
+    revision 2020-11-01 {
+	description
+	    "TNSR Release 20.10.1";
+    }
+
     revision 2020-10-15 {
 	description
 	    "TNSR Release 20.10.";
@@ -535,6 +540,27 @@ module netgate-dataplane {
 	    }
         }
 
+        container memory {
+            description
+                "Main heap configuration";
+
+            leaf main-heap-size {
+                type ngcom:memory-size-string;
+                description
+                    "Size of main heap. Should be a number. "+
+                    "Optionally followed by a specified of k, m, or g, "+
+                    "to indicate kilo, mega, or giga bytes. ";
+            }
+
+	    leaf main-heap-page-size {
+                type ngcom:memory-page-size;
+                description
+                    "Size of page in main heap. Should be a number. "+
+                    "Optionally followed by a specified of k, m, or g, "+
+                    "to indicate kilo, mega, or giga bytes. ";
+	    }
+        }
+
 	container buffers {
 	    description
 		"VPP pre-allocated buffers configuration";
@@ -556,20 +582,6 @@ module netgate-dataplane {
 	    }
 	}
 
-        container ip {
-
-            description
-                "IPv4 settings";
-
-            leaf heap-size {
-                type string;
-                description
-                    "Size of heap for IPv4 FIB. Should be a number. "+
-                    "Optionally followed by a specified of k, m, or g, "+
-                    "to indicate kilo, mega, or giga bytes. ";
-            }
-        }
-
         container ip6 {
             description
                 "IPv6 settings";
@@ -581,7 +593,7 @@ module netgate-dataplane {
             }
 
             leaf heap-size {
-                type string;
+                type ngcom:memory-size-string;
                 description
                     "Size of heap for IPv6 FIB. Should be a number. "+
                     "Optionally followed by a specified of k, m, or g, "+
@@ -683,9 +695,7 @@ module netgate-dataplane {
 	    }
 
 	    leaf heap-size {
-		type string {
-		    pattern '[0-9]+([kKmMgG])?';
-		}
+		type ngcom:memory-size-string;
 		default 96M;
 		description
                     "Size of heap for stats segment. Should be a number. "+

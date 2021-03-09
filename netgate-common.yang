@@ -15,6 +15,11 @@ module netgate-common {
 
     Copyright 2017-2020 Rubicon Communications, LLC. All rights reserved.";
 
+    revision 2020-11-01 {
+	description
+	    "TNSR Release 20.10.1";
+    }
+
     revision 2020-06-15 {
 	description
 	    "TNSR Release 20.06.";
@@ -127,6 +132,27 @@ module netgate-common {
 	}
     }
 
+    typedef memory-size-string {
+	type string {
+	    pattern '[1-9][0-9]*([kKmMgG])?';
+	}
+	description
+	    "Memory size type.";
+    }
+
+    typedef memory-page-size {
+	type enumeration {
+	    enum 4k;
+	    enum 2m;
+	    enum 1g;
+	    enum default {
+		description
+		    "default page size.";
+	    }
+	}
+	description
+	    "Enumeration of available page sizes.";
+    }
 
     typedef ip-address-family {
 	type enumeration {
