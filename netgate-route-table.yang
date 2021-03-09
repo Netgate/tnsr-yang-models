@@ -23,6 +23,16 @@ module netgate-route-table {
 
 	 Copyright 2017-2020 Rubicon Communications, LLC.";
 
+    revision 2020-07-15 {
+	description
+	    "TNSR Release 20.07.";
+    }
+
+    revision 2020-06-15 {
+	description
+	    "TNSR Release 20.06.";
+    }
+
     revision 2020-02-15 {
 	description
 	    "TNSR Release 20.02.";
@@ -37,6 +47,110 @@ module netgate-route-table {
 	description
 	    "Initial Revision.";
     }
+
+
+    rpc route-lookup {
+        input {
+            leaf table-name {
+		type ngcom:rt-identifier-63;
+		description
+		    "The name of a Route Table.";
+                mandatory true;
+            }
+
+            leaf prefix {
+		type inet:ip-prefix;
+		description
+		    "A prefix to lookup.";
+                mandatory true;
+            }
+
+            leaf exact {
+		type boolean;
+		description
+		    "If present and true, the lookup must match exactly.";
+            }
+        }
+
+        output {
+	    container route {
+		description
+		    "Route matching prefix lookup.";
+
+		leaf table-name {
+		    type string;
+		    description
+			"Name of the route table containing the route.";
+		}
+
+		leaf destination-prefix {
+		    type inet:ip-prefix;
+		    description
+			"IP destination prefix";
+		}
+
+		leaf priority {
+		    type uint8;
+		    description
+			"Administrative distance preference.";
+		}
+
+		container paths {
+
+		    list path {
+			key path-id;
+
+			leaf path-id {
+			    type uint32;
+			}
+
+			leaf if-name {
+			    type string;
+			    description
+				"Name of the interface.";
+			}
+
+			leaf ip-address {
+			    type inet:ip-address-no-zone;
+			    description
+				"The next hop IP address.";
+			}
+
+			leaf weight {
+			    type uint8;
+			    description
+				"Multipath route weight.";
+			}
+
+			leaf drop {
+			    type boolean;
+			    description
+				"Drop the packet.";
+			}
+
+			leaf local {
+			    type boolean;
+			    description
+				"Receive the packet locally.";
+			}
+
+			leaf null-send-unreach {
+			    type boolean;
+			    description
+				"Drop packet with an 'unreachable' reply.";
+			}
+
+			leaf null-send-prohibit {
+			    type boolean;
+			    description
+				"Drop packet with a 'prohibited' reply.";
+			}
+		    }
+		}
+	    }
+        }
+    }
+
 
     container route-table-config {
 	description
@@ -53,7 +167,7 @@ module netgate-route-table {
 		     Table names are unique across all address families.";
 
 		leaf name {
-		    type ngcom:rt-identifier-63;
+		    type ngcom:rt-identifier-15;
 		    description
 			"The name of a Route Table.";
 		}
@@ -69,6 +183,14 @@ module netgate-route-table {
 		    type string;
 		    description
 			"A description of the route table.";
+		}
+
+		leaf id {
+		    type uint32;
+		    description
+			"Numeric VRF table ID. " +
+			"The value 0 is used by default tables";
+		    default 0;
 		}
 
 		container ipv4-routes {
@@ -87,10 +209,18 @@ module netgate-route-table {
 			}
 
 			leaf description {
-			    type string;
+			    type ngcom:description-63;
 			    description
 				"A description of the route.";
 			}
+
+			leaf priority {
+			    type uint8;
+			    description
+				"Administrative distance
+				preference.";
+			}
+
 
 			container next-hop {
 			    description
@@ -134,16 +264,11 @@ module netgate-route-table {
 				}
 
 				leaf weight {
-				    type uint8;
+				    type uint8 {
+					range "1..255";
+				    }
 				    description
 					"Multipath route weight.";
-				}
-
-				leaf preference {
-				    type uint8;
-				    description
-					"Administrative distance
-					preference.";
 				}
 
 				leaf drop {
@@ -168,7 +293,7 @@ module netgate-route-table {
 				leaf null-send-prohibit {
 				    type boolean;
 				    description
-					"Drop packet with n
+					"Drop packet with a
 					 'prohibited' reply.";
 				}
 
@@ -209,6 +334,13 @@ module netgate-route-table {
 			    type string;
 			    description
 				"A description of the route.";
+			}
+
+			leaf priority {
+			    type uint8;
+			    description
+				"Administrative distance
+				preference.";
 			}
 
 			container next-hop {
@@ -253,16 +385,11 @@ module netgate-route-table {
 				}
 
 				leaf weight {
-				    type uint8;
+				    type uint8 {
+					range "1..255";
+				    }
 				    description
 					"Multipath route weight.";
-				}
-
-				leaf preference {
-				    type uint8;
-				    description
-					"Administrative distance
-					preference.";
 				}
 
 				leaf drop {
@@ -345,6 +472,14 @@ module netgate-route-table {
 			"A description of the route table.";
 		}
 
+		leaf id {
+		    type uint32;
+		    description
+			"Numeric VRF table ID" +
+			"The value 0 is used by default tables";
+		    default 0;
+		}
+
 		container ipv4-routes {
 		    description
 			"List of IPv4 routes by destination prefix.";
@@ -364,6 +499,13 @@ module netgate-route-table {
 			    type string;
 			    description
 				"A description of the route.";
+			}
+
+			leaf priority {
+			    type uint8;
+			    description
+				"Administrative distance
+				preference.";
 			}
 
 			container next-hop {
@@ -413,13 +555,6 @@ module netgate-route-table {
 					"Multipath route weight.";
 				}
 
-				leaf preference {
-				    type uint8;
-				    description
-					"Administrative distance
-					preference.";
-				}
-
 				leaf drop {
 				    type boolean;
 				    description
@@ -442,7 +577,7 @@ module netgate-route-table {
 				leaf null-send-prohibit {
 				    type boolean;
 				    description
-					"Drop packet with n
+					"Drop packet with a
 					 'prohibited' reply.";
 				}
 
@@ -483,6 +618,13 @@ module netgate-route-table {
 			    type string;
 			    description
 				"A description of the route.";
+			}
+
+			leaf priority {
+			    type uint8;
+			    description
+				"Administrative distance
+				preference.";
 			}
 
 			container next-hop {
@@ -530,13 +672,6 @@ module netgate-route-table {
 				    type uint8;
 				    description
 					"Multipath route weight.";
-				}
-
-				leaf preference {
-				    type uint8;
-				    description
-					"Administrative distance
-					preference.";
 				}
 
 				leaf drop {

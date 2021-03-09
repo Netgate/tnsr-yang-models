@@ -23,6 +23,11 @@ module netgate-ntp {
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	";
 
+    revision 2020-06-15 {
+	description
+	    "TNSR Release 20.06.";
+    }
+
     revision 2020-02-15 {
 	description
 	    "TNSR Release 20.02.";
@@ -311,6 +316,12 @@ module netgate-ntp {
 	    "Network Time Protocol daemon configuration for time
 	     keeping and services.";
 
+	leaf namespace {
+	    type ngcom:network-namespace;
+	    description
+		"Network namespace to be used by NTP daemon.";
+	}
+
 	container parameters {
 	    description
 		"A collection of various NTP daemon parameters.";
@@ -337,7 +348,7 @@ module netgate-ntp {
 
 	    container disabled-flags {
 		description
-		    "A set of flags explicitly disabled.";
+		    "Force monitor flags to disabled.";
 
 		leaf monitor {
 		    type boolean;
@@ -348,7 +359,7 @@ module netgate-ntp {
 
 	    container enabled-flags {
 		description
-		    "A set of flags explicitly enabled.";
+		    "Force monitor flags to enabled.";
 
 		leaf monitor {
 		    type boolean;
@@ -976,6 +987,12 @@ module netgate-ntp {
 		    "One of the strings 'start', 'stop', 'restart',
 		     or 'status'.";
 	    }
+
+	    leaf namespace {
+		type ngcom:network-namespace;
+		description
+		    "Network namespace.";
+	    }
 	}
 	output {
 	    leaf stdout {
@@ -991,6 +1008,12 @@ module netgate-ntp {
 		mandatory true;
 		description
 		    "One of the strings 'enable', or 'disable'.";
+	    }
+
+	    leaf namespace {
+		type ngcom:network-namespace;
+		description
+		    "Network namespace.";
 	    }
 	}
 	output {

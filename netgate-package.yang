@@ -15,6 +15,11 @@ module netgate-package {
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	";
 
+    revision 2020-06-15 {
+	description
+	    "TNSR Release 20.06.";
+    }
+
     revision 2020-02-15 {
 	description
 	    "TNSR Release 20.02.";
@@ -67,6 +72,37 @@ module netgate-package {
 	        type string;
 		description
 		    "results of package installation";
+	    }
+        }
+    }
+
+    // reinstall a package
+    rpc package-reinstall {
+        input {
+	    leaf glob {
+	        type string;
+		mandatory true;
+		description
+		    "a glob to specify which packages
+		     there is no default";
+            }
+	}
+	output {
+	    leaf result {
+	        type string;
+		description
+		    "results of package reinstallation";
+	    }
+        }
+    }
+
+    // clean dnf cache
+    rpc package-cache-cleanup {
+	output {
+	    leaf result {
+	        type string;
+		description
+		    "results of cache cleanup";
 	    }
         }
     }

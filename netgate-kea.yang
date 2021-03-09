@@ -26,6 +26,11 @@ module netgate-kea {
 
 	 Copyright 2019-2020 Rubicon Communications, LLC.";
 
+    revision 2020-06-15 {
+	description
+	    "TNSR Release 20.06.";
+    }
+
     revision 2020-02-15 {
 	description
 	    "TNSR Release 20.02.";
@@ -1444,75 +1449,79 @@ module netgate-kea {
 	    description
 		"DHCPv4 state.";
 
-	    list leases {
-		key ip-address;
+	    container leases {
 		description
 		    "List of Kea DHCPv4 leases.";
 
-		leaf ip-address {
-		    type inet:ipv4-address;
-		    mandatory true;
+		list lease {
+		    key ip-address;
 		    description
-			"Lease IP address.";
-		}
+			"Kea DHCPv4 lease.";
 
-		leaf hw-address {
-		    type yang:mac-address;
-		    mandatory true;
-		    description
-			"Lease MAC address.";
-		}
+		    leaf ip-address {
+			type inet:ipv4-address;
+			description
+			    "Lease IP address.";
+		    }
 
-		leaf valid-lifetime {
-		    type uint32;
-		    mandatory true;
-		    description
-			"The valid duration for an assigned lease in
-			seconds.";
-		}
+		    leaf hw-address {
+			type yang:mac-address;
+			mandatory true;
+			description
+			    "Lease MAC address.";
+		    }
 
-		leaf cltt {
-		    type uint32;
-		    mandatory true;
-		    description
-			"Lease client last transmission time";
-		}
+		    leaf valid-lifetime {
+			type uint32;
+			mandatory true;
+			description
+			    "The valid duration for an assigned lease in
+			    seconds.";
+		    }
 
-		leaf subnet-id {
-		    type uint32;
-		    mandatory true;
-		    description
-			"Lease subnet id.";
-		}
+		    leaf cltt {
+			type uint32;
+			mandatory true;
+			description
+			    "Lease client last transmission time";
+		    }
 
-		leaf client-id {
-		    type string;
-		    description
-			"Lease identifying client-id address.";
-		}
+		    leaf subnet-id {
+			type uint32;
+			mandatory true;
+			description
+			    "Lease subnet id.";
+		    }
 
-		leaf fqdn-fwd {
-		    type boolean;
-		    description
-			"Forward DNS update flag.";
-		}
+		    leaf client-id {
+			type string;
+			description
+			    "Lease identifying client-id address.";
+		    }
 
-		leaf fqdn-rev {
-		    type boolean;
-		    description
-			"Reverse DNS update flag.";
-		}
+		    leaf fqdn-fwd {
+			type boolean;
+			description
+			    "Forward DNS update flag.";
+		    }
 
-		leaf hostname {
-		    type string;
-		    description
-			"Client hostname.";
-		}
+		    leaf fqdn-rev {
+			type boolean;
+			description
+			    "Reverse DNS update flag.";
+		    }
 
-		leaf state {
-		    type kea-lease-state;
-		    description
-			"Lease state.";
+		    leaf hostname {
+			type string;
+			description
+			    "Client hostname.";
+		    }
+
+		    leaf state {
+			type kea-lease-state;
+			description
+			    "Lease state.";
+		    }
 		}
 	    }
 	}

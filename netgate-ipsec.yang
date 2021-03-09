@@ -24,6 +24,11 @@ module netgate-ipsec {
 	Copyright 2016-2020 Rubicon Communications, LLC.
 	";
 
+    revision 2020-06-15 {
+	description
+	    "TNSR Release 20.06.";
+    }
+
     revision 2020-02-15 {
 	description
 	    "TNSR Release 20.02.";
@@ -758,6 +763,13 @@ module netgate-ipsec {
 			    "IKE SA key renewal method - rekey or reauth";
 		    }
 
+		    leaf udp-encapsulation {
+			type boolean;
+			default false;
+			description
+			    "Force UDP encapsulation.";
+		    }
+
 		    list proposals {
 			key "name";
 
@@ -1042,10 +1054,22 @@ module netgate-ipsec {
 			"Local address";
 		}
 
+		leaf local-port {
+		    type uint16;
+		    description
+			"Local port";
+		}
+
 		leaf remote-addr {
 		    type inet:ip-address;
 		    description
 			"Remote address";
+		}
+
+		leaf remote-port {
+		    type uint16;
+		    description
+			"Remote port";
 		}
 
 		leaf version {
@@ -1270,6 +1294,12 @@ module netgate-ipsec {
 				type int32;
 				description
 				    "Seconds until expiration";
+			    }
+
+			    leaf udp-encapsulation {
+				type boolean;
+				description
+				    "UDP encapsulation enabled";
 			    }
 			}
 		    }

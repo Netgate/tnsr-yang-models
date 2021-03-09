@@ -21,6 +21,11 @@ module netgate-snmp {
 
 	 Copyright 2019-2020 Rubicon Communications, LLC.";
 
+    revision 2020-06-15 {
+	description
+	    "TNSR Release 20.06.";
+    }
+
     revision 2020-02-15 {
 	description
 	    "TNSR Release 20.02.";
@@ -78,7 +83,6 @@ module netgate-snmp {
 	    }
     }
 
-
     rpc snmp-control {
         input {
 	    leaf operation {
@@ -88,13 +92,42 @@ module netgate-snmp {
                     "One of the strings 'start', 'stop', 'restart',
                      or 'status'.";
 	    }
+
+	    leaf namespace {
+		type ngcom:network-namespace;
+		description
+		    "Network namespace.";
+	    }
+	}
+
+	output {
+	    leaf stdout {
+		type string;
+	    }
+	}
+    }
+
+    rpc snmp-coredump {
+        input {
+            leaf operation {
+                type ngcom:service-op-enable-disable;
+                mandatory true;
+                description
+		    "One of the strings 'enable' or 'disable'.";
+            }
+
+	    leaf namespace {
+		type ngcom:network-namespace;
+		description
+		    "Network namespace.";
+	    }
         }
 
-        output {
+	output {
 	    leaf stdout {
-	        type string;
-            }
-        }
+		type string;
+	    }
+	}
     }
 
     container snmp-config {
@@ -103,6 +136,18 @@ module netgate-snmp {
 	    default "false";
 	    description
 		"enable the snmp daemons.";
+	}
+
+	container dataplane {
+	    description
+		"Dataplane-specific parameters of SNMP server.";
+
+	    leaf enable {
+		type boolean;
+		description
+		    "If true, SNMP server is enabled for dataplane
+		    interfaces.";
+	    }
 	}
 
 	container snmp-access-control {

@@ -13,6 +13,14 @@ module netgate-system {
 	prefix "nacm";
     }
 
+    import ietf-yang-types {
+	prefix "yang";
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
     organization "Netgate";
 
     contact "Web: <http://www.netgate.com>";
@@ -23,6 +31,11 @@ module netgate-system {
 
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2020-06-15 {
+	description
+	    "TNSR Release 20.06.";
+    }
 
     revision 2020-02-15 {
 	description
@@ -42,6 +55,139 @@ module netgate-system {
     revision 2017-11-01 {
 	description
 	    "Initial revision.";
+    }
+
+    /*
+     * Typedefs
+     */
+
+    typedef system-device-type-t {
+	type enumeration {
+	    enum network {
+		description
+		    "Network device (NIC)";
+	    }
+	    enum crypto-vf {
+		description
+		    "Crypto acceleration device - Virtual Function";
+	    }
+	    enum crypto-pf {
+		description
+		    "Crypto acceleration device - Physical Function";
+	    }
+	}
+    }
+
+
+    /*
+     * feature declarations
+     */
+
+    feature dns-udp-tcp-port {
+        description
+          "Indicates that the device supports the configuration of
+           the UDP and TCP port for DNS servers.
+
+           This is a 'feature', since many implementations do not support
+           any port other than the default port.";
+    }
+
+
+    /*
+     * Groupings
+     */
+
+    grouping pci-address-grouping {
+	description
+	    "Group of PCI addresses attributes.";
+
+	leaf domain {
+	    type yang:hex-string {
+		length "4";
+	    }
+	    description
+		"PCI address domain.";
+	}
+
+	leaf bus {
+	    type yang:hex-string {
+		length "2";
+	    }
+	    description
+		"PCI address bus.";
+	}
+
+	leaf slot {
+	    type yang:hex-string {
+		length "2";
+	    }
+	    description
+		"PCI address slot.";
+	}
+
+	leaf function {
+	    type yang:hex-string {
+		length "2";
+	    }
+	    description
+		"PCI address function.";
+	}
+
+    }
+
+    /*
+     * RPCs
+     */
+
+    rpc system-devices-list {
+        description
+            "List of the usefull PCI devices in the system.";
+
+	output {
+            list devices {
+		container pci-address {
+		    uses pci-address-grouping;
+		    description
+                        "PCI address device/bus/slot/function.";
+		}
+	        leaf device-type {
+		    type system-device-type-t;
+		    description
+                        "PCI device type.";
+	        }
+	        leaf device-driver {
+		    type string;
+		    description
+                        "PCI device driver.";
+	        }
+	        leaf host-device-name {
+		    type string;
+		    description
+                        "PCI network device name.";
+	        }
+	        leaf host-device-state {
+		    type string;
+		    description
+		        "PCI network device state.";
+	        }
+	    }
+	}
+
+    }
+
+    rpc system-reboot {
+	input {
+	    leaf minutes {
+		type uint16;
+		description
+		    "Time in minutes to reboot.";
+	    }
+	    leaf cancel {
+		type boolean;
+		description
+		    "Cancel the reboot";
+	    }
+	}
     }
 
     rpc system-ping {
@@ -94,6 +240,11 @@ module netgate-system {
 		type uint32;
 		description
 		    "Absolute wait time.";
+	    }
+	    leaf namespace {
+		type ngcom:network-namespace;
+		description
+		    "Network namespace.";
 	    }
 	}
 	output {
@@ -158,6 +309,11 @@ module netgate-system {
 		type uint32;
 		description
 		    "Timeout for response";
+	    }
+	    leaf namespace {
+		type ngcom:network-namespace;
+		description
+		    "Network namespace.";
 	    }
 	}
 	output {
@@ -240,6 +396,88 @@ module netgate-system {
 		"RFC 3418: Management Information Base (MIB) for the
 		 Simple Network Management Protocol (SNMP)
 		 SNMPv2-MIB.sysLocation";
+	}
+
+	list dns-resolver {
+	    key namespace;
+	    description
+		"Configuration of the DNS resolver.";
+	    reference
+		"RFC 7317: A YANG Data Model for System Management";
+
+	    leaf namespace {
+		type ngcom:network-namespace;
+		description
+		    "Network namespace to be used.";
+	    }
+
+	    leaf-list search {
+		type inet:domain-name;
+		ordered-by user;
+		description
+		    "An ordered list of domains to search when resolving
+		     a host name.";
+	    }
+
+	    list server {
+		key name;
+		ordered-by user;
+		description
+		    "List of the DNS servers that the resolver should query.
+
+		     When the resolver is invoked by a calling application, it
+		     sends the query to the first name server in this list.  If
+		     no response has been received within 'timeout' seconds,
+		     the resolver continues with the next server in the list.
+		     If no response is received from any server, the resolver
+		     continues with the first server again.  When the resolver
+		     has traversed the list 'attempts' times without receiving
+		     any response, it gives up and returns an error to the
+		     calling application.
+
+		     Implementations MAY limit the number of entries in this
+		     list.";
+
+		leaf name {
+		    type string;
+		    description
+			"An arbitrary name for the DNS server.";
+		}
+
+		choice transport {
+		    mandatory true;
+		    description
+			"The transport-protocol-specific parameters for this
+			 server.";
+
+		    case udp-and-tcp {
+			container udp-and-tcp {
+			    description
+				"Contains UDP- and TCP-specific configuration
+				 parameters for DNS.";
+			    reference
+				"RFC 1035: Domain Names - Implementation and
+				 Specification
+				 RFC 5966: DNS Transport over TCP - Implementation
+				 Requirements";
+
+			    leaf address {
+				type inet:ip-address;
+				mandatory true;
+				description
+				    "The address of the DNS server.";
+			    }
+			    leaf port {
+				if-feature dns-udp-tcp-port;
+				type inet:port-number;
+				default 53;
+				description
+				    "The UDP and TCP port number of the DNS server.";
+			    }
+			}
+		    }
+		}
+	    }
 	}
 
 	container auth {

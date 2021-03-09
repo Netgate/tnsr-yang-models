@@ -13,6 +13,10 @@ module netgate-ospf {
 	prefix "yang";
     }
 
+    import netgate-common {
+	prefix "ngcom";
+    }
+
     import netgate-route {
 	prefix "ngrt";
     }
@@ -27,6 +31,11 @@ module netgate-ospf {
 
 	 Copyright 2019-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2020-06-15 {
+	description
+	    "TNSR Release 20.06.";
+    }
 
     revision 2020-02-15 {
 	description
@@ -43,21 +52,8 @@ module netgate-ospf {
 	    "TNSR Release 19.08.";
     }
 
-    typedef ospf-instance {
-	type union {
-	    type string {
-		pattern 'default';
-	    }
-
-	    /*
-	     * Later these may be added into the mix.
-	     * Presently, only the default instance is supported.
-	     *
-	     * type uint16 {
-	     *     range "1..65535";
-	     * }
-	     */
-	}
+    typedef ospf-vrf-id {
+	type ngcom:host-if-name;
     }
 
     typedef ospf-passive-if-name {
@@ -267,6 +263,11 @@ module netgate-ospf {
 
     typedef ospf-show-request {
 	type enumeration {
+	    enum config{
+		description
+		    "Show current running-config OSPF configurations.";
+	    }
+
 	    enum border-routers {
 		description
 		    "Show all the ABR's and ASBR's.";
@@ -390,6 +391,13 @@ module netgate-ospf {
 
     rpc ospf-show {
 	input {
+	    leaf vrf-id {
+		type ospf-vrf-id;
+		default "default";
+		description
+		    "Each router is identified using the name of
+		     a host interface, or the word 'default'.";
+	    }
 	    leaf request {
 		type ospf-show-request;
 		description
@@ -926,20 +934,18 @@ module netgate-ospf {
 		description
 		    "Table of OSPF Router instances .";
 
-		container router {
-		    description
-			"The router contains all information for one instance
-			 of the OSPF protocol as supported by FRR.";
+		list router {
+		    key vrf-id;
 
-		    leaf instance {
-			type ospf-instance;
-			default "default";
+		    description
+			"The router contains all information for one
+			 instance of the OSPF protocol as supported by FRR.";
+
+		    leaf vrf-id {
+			type ospf-vrf-id;
 			description
-			    "Each router is identified using an
-			     instance number between 1..65535, or the
-			     'default'.  Presently, only the 'default'
-			     instance is supported.  If this field is
-			     missing, 'default' is assumed.";
+			    "Each router is identified using the name of
+			     a host interface, or the word 'default'.";
 		    }
 
 		    container auto-cost {
@@ -2253,20 +2259,19 @@ module netgate-ospf {
 		description
 		    "Table of OSPF Router instances .";
 
-		container router {
+		list router {
+		    key vrf-id;
+
 		    description
 			"The router contains all information for one instance
 			 of the OSPF protocol as supported by FRR.";
 
-		    leaf instance {
-			type ospf-instance;
-			default "default";
+		    leaf vrf-id {
+			type ospf-vrf-id;
 			description
-			    "Each router is identified using an
-			     instance number between 1..65535, or the
-			     'default'.  Presently, only the 'default'
-			     instance is supported.  If this field is
-			     missing, 'default' is assumed.";
+			    "The router contains all information for
+			     one instance of the OSPF protocol as
+			     supported by FRR.";
 		    }
 
 		    container auto-cost {

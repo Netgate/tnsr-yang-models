@@ -17,6 +17,11 @@ module netgate-master {
         "Definitions of master data and operations.
 	 Copyright 2019-2020 Rubicon Communications, LLC. All rights reserved.";
 
+    revision 2020-06-15 {
+	description
+	    "TNSR Release 20.06.";
+    }
+
     revision 2020-02-15 {
 	description
 	    "TNSR Release 20.02.";

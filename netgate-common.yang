@@ -15,6 +15,11 @@ module netgate-common {
 
     Copyright 2017-2020 Rubicon Communications, LLC. All rights reserved.";
 
+    revision 2020-06-15 {
+	description
+	    "TNSR Release 20.06.";
+    }
+
     revision 2020-02-15 {
 	description
 	    "TNSR Release 20.02.";
@@ -96,6 +101,25 @@ module netgate-common {
     }
 
 
+    typedef rt-identifier-15 {
+	type string {
+	    length "1..15";
+	    pattern '[a-zA-Z_][a-zA-Z0-9_:-]*';
+	}
+    }
+
+    typedef linux-if-name {
+	type string {
+	    length "1..15";	/* IFNAMSIZ and a NUL. */
+	    pattern '[a-zA-Z_][a-zA-Z0-9_.-]*';
+	}
+    }
+
+    /* FIXME: Some other YANG source should provide this binding. */
+    typedef host-if-name {
+	type linux-if-name;
+    }
+
     typedef rt-identifier-63 {
 	type string {
 	    length "1..63";
@@ -175,6 +199,21 @@ module netgate-common {
                     "Disable option";
             }
 	}
+    }
+
+    typedef network-namespace {
+	type enumeration {
+            enum host {
+                description
+                    "Host network namespace";
+            }
+            enum dataplane {
+                description
+                    "Dataplane network namespace";
+            }
+	}
+	description
+	    "Enumeration of available network namespaces.";
     }
 }
 

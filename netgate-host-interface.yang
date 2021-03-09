@@ -23,6 +23,11 @@ module netgate-host-interface {
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	";
 
+    revision 2020-06-15 {
+	description
+	    "TNSR Release 20.06.";
+    }
+
     revision 2020-02-15 {
 	description
 	    "TNSR Release 20.02.";

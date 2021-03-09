@@ -14,6 +14,11 @@ module netgate-lldp {
 
 	 Copyright 2019-2020 Rubicon Communications, LLC.";
 
+    revision 2020-06-15 {
+	description
+	    "TNSR Release 20.06.";
+    }
+
     revision 2020-02-15 {
 	description
 	    "TNSR Release 20.02.";
@@ -32,15 +37,19 @@ module netgate-lldp {
         }
 
 	leaf tx-hold {
-	    type uint16;
+	    type uint16 {
+		range "1..100";
+	    }
 	    description
-	        "transmit hold time";
+	        "transmit hold time, range [1..100]";
 	}
 
 	leaf tx-interval {
-	    type uint16;
+	    type uint16 {
+		range "1..3600";
+	    }
 	    description
-	        "transmit interval";
+	        "transmit interval range [1..3600]";
         }
     }
 }

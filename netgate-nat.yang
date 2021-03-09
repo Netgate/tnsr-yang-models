@@ -24,6 +24,11 @@ module netgate-nat {
 	 Copyright 2017-2020 Rubicon Communications, LLC.";
 
 
+    revision 2020-06-15 {
+	description
+	    "TNSR Release 20.06.";
+    }
+
     revision 2020-02-15 {
 	description
 	    "TNSR Release 20.02.";
@@ -86,6 +91,44 @@ module netgate-nat {
 	    }
 	}
     }
+
+    typedef nat-ipv4-protocol-any {
+	type enumeration {
+	    enum icmp {
+		description
+		    "ICMP";
+	    }
+
+	    enum udp {
+		description
+		    "UDP";
+	    }
+
+	    enum tcp {
+		description
+		    "TCP";
+	    }
+	    enum any {
+		description
+		    "any wildcard";
+	    }
+	}
+	description
+	    "Wildcard protocol or 'any'.";
+    }
+
+    typedef nat-ipv4-port-any {
+	type union {
+	    type uint16;
+	    type string {
+	        pattern 'any';
+	    }
+
+	}
+	description
+	    "Wildcard any port";
+    }
+
 
     container "nat-config" {
 	description
@@ -178,16 +221,12 @@ module netgate-nat {
 		    description
 			"NAT Mapping Entry.";
 
-		    leaf present {
-			type boolean;
-		    }
-
 		    leaf transport-protocol {
-			type string;
+			type nat-ipv4-protocol-any;
 			mandatory true;
 			description
 			    "Upper-layer protocol associated with this mapping.
-			     Should be 'udp', 'tcp', or 'icmp'.";
+			     Should be 'any', 'udp', 'tcp', or 'icmp'.";
 		    }
 
 		    leaf local-address {
@@ -198,9 +237,9 @@ module netgate-nat {
 		    }
 
 		    leaf local-port {
-			type uint16;
+			type nat-ipv4-port-any;
 			description
-			    "The local port mapped.";
+			    "The local port mapped, or wildcard 'any'.";
 		    }
 
 		    leaf external-address {
@@ -216,9 +255,9 @@ module netgate-nat {
 		    }
 
 		    leaf external-port {
-			type uint16;
+			type nat-ipv4-port-any;
 			description
-			    "The external port mapped.";
+			    "The external port mapped, or wildcard 'any'.";
 		    }
 
 		    leaf twice-nat {
@@ -514,11 +553,11 @@ module netgate-nat {
 			"NAT Mapping Entry.";
 
 		    leaf transport-protocol {
-			type string;
+			type nat-ipv4-protocol-any;
 			mandatory true;
 			description
 			    "Upper-layer protocol associated with this mapping.
-			     Should be 'udp', 'tcp', or 'icmp'.";
+			     Should be 'any', 'udp', 'tcp', or 'icmp'.";
 		    }
 
 		    leaf local-address {
@@ -529,9 +568,9 @@ module netgate-nat {
 		    }
 
 		    leaf local-port {
-			type uint16;
+			type nat-ipv4-port-any;
 			description
-			    "The local port mapped.";
+			    "The local port mapped, or wildcard 'any'.";
 		    }
 
 		    leaf external-address {
@@ -547,9 +586,9 @@ module netgate-nat {
 		    }
 
 		    leaf external-port {
-			type uint16;
+			type nat-ipv4-port-any;
 			description
-			    "The external port mapped.";
+			    "The external port mapped, or wildcard 'any'.";
 		    }
 
 		    leaf twice-nat {

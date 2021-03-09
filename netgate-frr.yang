@@ -40,6 +40,11 @@ module netgate-frr {
 	 Copyright 2017-2020 Rubicon Communications, LLC.
 	 ";
 
+    revision 2020-06-15 {
+	description
+	    "TNSR Release 20.06.";
+    }
+
     revision 2020-02-15 {
 	description
 	    "TNSR Release 20.02.";
@@ -81,6 +86,15 @@ module netgate-frr {
 	    enum recv {
 		description
 		    "If specified, only received  packets are requested.";
+	    }
+	}
+    }
+
+    typedef zebra-show-request {
+	type enumeration {
+	    enum config{
+		description
+		    "Show current running-config Zebra configurations.";
 	    }
 	}
     }
@@ -161,6 +175,20 @@ module netgate-frr {
 	}
     }
 
+    rpc zebra-show {
+	input {
+	    leaf request {
+		type zebra-show-request;
+		description
+		    "A Zebra show request type.  Now only 'config' string.";
+	    }
+	}
+	output {
+	    leaf stdout {
+		type string;
+	    }
+	}
+    }
 
     augment "/ngrt:route-config/ngrt:dynamic" {
 

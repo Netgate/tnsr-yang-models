@@ -17,6 +17,10 @@ module netgate-bgp {
 	prefix "frr";
     }
 
+    import netgate-common {
+	prefix "ngcom";
+    }
+
     import netgate-route {
 	prefix "ngrt";
     }
@@ -31,6 +35,11 @@ module netgate-bgp {
 
 	 Copyright 2019-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2020-06-15 {
+	description
+	    "TNSR Release 20.06.";
+    }
 
     revision 2020-02-15 {
 	description
@@ -50,6 +59,10 @@ module netgate-bgp {
     revision 2019-05-30 {
 	description
 	    "TNSR Release 19.05.";
+    }
+
+    typedef bgp-vrf-id {
+	type ngcom:host-if-name;
     }
 
     typedef bgp-orf-prefix-list {
@@ -839,6 +852,13 @@ module netgate-bgp {
 
     rpc bgp-show {
 	input {
+	    leaf vrf-id {
+		type bgp-vrf-id;
+		default "default";
+		description
+		    "Each router is identified using the name of
+		     a host interface, or the word 'default'.";
+	    }
 	    leaf request {
 		type bgp-show-request;
 		description
@@ -879,6 +899,13 @@ module netgate-bgp {
 
     rpc bgp-clear {
 	input {
+	    leaf vrf-id {
+		type bgp-vrf-id;
+		default "default";
+		description
+		    "Each router is identified using the name of
+		     a host interface, or the word 'default'.";
+	    }
 	    leaf peer {
 		type string;
 		description
@@ -1059,16 +1086,23 @@ module netgate-bgp {
 		    "Table of BGP Router instances index by ASN.";
 
 		list router {
-		    key "asn";
+		    key "vrf-id";
 		    description
-			"Each router is identified using its AS-Number.";
+			"Each router is identified using its VRF ID.";
+
+		    leaf vrf-id {
+			type bgp-vrf-id;
+			description
+			    "The Virtual Routing and Forwrding ID,
+			     Each router is identified using the name of
+			     a host interface, or the word 'default'.";
+		    }
 
 		    leaf asn {
 			type uint32;
 			mandatory true;
 			description
-			    "The BGP Router instance is identified by this
-			     AS-Number.";
+			    "The BGP Router AS number.";
 		    }
 
 		    leaf always-compare-med {
@@ -1175,11 +1209,9 @@ module netgate-bgp {
 			description
 			    "Route flap dampening parameters.";
 
-			leaf enable {
-			    type boolean;
-			    description
-				"Enable route-flap dampening.";
-			}
+			presence
+			    "If present, the route-flag dampening is
+			     configured.";
 
 			leaf penalty-half-life {
 			    type uint8 {
@@ -1225,12 +1257,6 @@ module netgate-bgp {
 			description
 			    "Disable checking if nexthop is connected an
 			     eBGP session";
-		    }
-
-		    leaf enforce-first-as {
-			type boolean;
-			description
-			    "Enforce the first AS for eBGP routes.";
 		    }
 
 		    leaf listen-limit {
@@ -1715,6 +1741,12 @@ module netgate-bgp {
 				}
 			    }
 
+			    leaf enforce-first-as {
+				type boolean;
+				description
+				    "Enforce the first AS for eBGP routes.";
+			    }
+
 			    leaf local-as-number {
 				type uint32 {
 				    range "1..4294967295";
@@ -2150,19 +2182,27 @@ module netgate-bgp {
 
 	    container routers {
 		description
-		    "Table of BGP Router instances index by ASN.";
+		    "Table of BGP Router instances index by VRF ID.";
 
 		list router {
-		    key "asn";
+		    key "vrf-id";
+
 		    description
-			"Each router is identified using its AS-Number.";
+			"Each router is identified by a VRF ID.";
+
+		    leaf vrf-id {
+			type bgp-vrf-id;
+			description
+			    "The Virtual Routing and Forwrding ID,
+			     Each router is identified using the name of
+			     a host interface, or the word 'default'.";
+		    }
 
 		    leaf asn {
 			type uint32;
 			mandatory true;
 			description
-			    "The BGP Router instance is identified by this
-			     AS-Number.";
+			    "The BGP Router AS-Number.";
 		    }
 
 		    leaf always-compare-med {
@@ -2319,12 +2359,6 @@ module netgate-bgp {
 			description
 			    "Disable checking if nexthop is connected an
 			     eBGP session";
-		    }
-
-		    leaf enforce-first-as {
-			type boolean;
-			description
-			    "Enforce the first AS for eBGP routes.";
 		    }
 
 		    leaf listen-limit {
@@ -2798,6 +2832,12 @@ module netgate-bgp {
 				}
 			    }
 
+			    leaf enforce-first-as {
+				type boolean;
+				description
+				    "Enforce the first AS for eBGP routes.";
+			    }
+
 			    leaf local-as-number {
 				type uint32 {
 				    range "1..4294967295";
@@ -3074,4 +3114,3 @@ module netgate-bgp {
 	}
     }
 }
-

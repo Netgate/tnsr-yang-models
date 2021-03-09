@@ -31,6 +31,26 @@ module netgate-interface {
 	 Copyright 2017-2020 Rubicon Communications, LLC.
 	";
 
+    revision 2020-07-15 {
+	description
+	    "TNSR Release 20.07.";
+    }
+
+    revision 2020-06-15 {
+	description
+	    "TNSR Release 20.06.";
+    }
+
+    revision 2020-04-16 {
+	description
+	    "Reorganized ACLs applied to an interface in state data.
+	     Added sequence number, and used this for key";
+    }
+
+    revision 2020-02-26 {
+	description
+	    "Added IPv4 MTU and IPv6 MTU data nodes.";
+    }
 
     revision 2020-02-15 {
 	description
@@ -57,9 +77,6 @@ module netgate-interface {
 	    "Initial revision.";
     }
 
-    /*
-     * Typedefs
-     */
 
     typedef interface-ref {
 	type leafref {
@@ -68,6 +85,13 @@ module netgate-interface {
 	description
 	    "This type is used by data models that need to reference
 	     interfaces.";
+    }
+
+    typedef loopback-name-63 {
+	type string {
+	    pattern '[a-zA-Z_0-9][a-zA-Z0-9_/.-]*';
+	    length "1..63";
+	}
     }
 
     typedef intf-vlan-id {
@@ -353,7 +377,9 @@ module netgate-interface {
 	    }
 
 	    leaf description {
-		type string;
+		type string {
+		  length "1..63";
+		}
 		description
 		    "A textual description of the interface.";
 	    }
@@ -367,7 +393,7 @@ module netgate-interface {
 
 	    leaf mtu {
 		type uint16 {
-		    range "68..max";
+		    range "0 | 68..max";
 		}
 		units octets;
 		description
@@ -395,19 +421,17 @@ module netgate-interface {
 		     this field names that host tap interface.";
 	    }
 
+	    leaf vrf {
+		type ngcom:rt-identifier-15;
+		description
+		    "The name of the VRF this interface is bound to.";
+	    }
+
 	    container ipv4 {
 		presence
 		    "Enables IPv4'";
 		description
 		    "Parameters for the IPv4 address family.";
-
-		leaf route-table-name {
-		    type ngcom:rt-identifier-63;
-		    description
-			"If present, this is the name of the IPv4 Route Table
-			 to which this interface is bound.  If not present,
-			 the IF uses the Default Route Table.";
-		}
 
 		container address {
 		    leaf-list ip {
@@ -432,6 +456,16 @@ module netgate-interface {
 			    "Type of ip-reassembly on interface";
 		    }
 		}
+
+		leaf mtu {
+		    type uint16 {
+			range "0 | 68..max";
+		    }
+		    units "octets";
+		    description
+			"The size, in octets, of the largest IPv4 packet that
+			 the interface will send and receive.";
+		}
 	    }
 
 	    container ipv6 {
@@ -439,14 +473,6 @@ module netgate-interface {
 		    "Enables IPv6";
 		description
 		    "Parameters for the IPv6 address family.";
-
-		leaf route-table-name {
-		    type ngcom:rt-identifier-63;
-		    description
-			"If present, this is the name of the IPv6 Route Table
-			 to which this interface is bound.  If not present,
-			 the IF uses the Default Route Table.";
-		}
 
 		container address {
 		    leaf-list ip {
@@ -470,6 +496,16 @@ module netgate-interface {
 			description
 			    "Type of ip-reassembly on interface";
 		    }
+		}
+
+		leaf mtu {
+		    type uint32 {
+			range "1280..max";
+		    }
+		    units "octets";
+		    description
+			"The size, in octets, of the largest IPv6 packet that
+			 the interface will send and receive.";
 		}
 	    }
 
@@ -732,6 +768,14 @@ module netgate-interface {
 			 for this entry.";
 		}
 
+		leaf description {
+		    type string {
+			length "1..63";
+		    }
+		    description
+			"A textual description of the bridge.";
+		}
+
 		leaf flood {
 		    type boolean;
 		    description
@@ -799,11 +843,12 @@ module netgate-interface {
 
 	    list loopback {
 		key "name";
+		unique "instance";
 		description
 		    "Loopback name.";
 
 		leaf name {
-		    type string;
+		    type loopback-name-63;
 		    description
 			"The identifier.  A unique name
 			 for this Loopback entry.";
@@ -811,6 +856,7 @@ module netgate-interface {
 
 		leaf instance {
 		    type uint16;
+		    mandatory true;
 		    description
 			"Each Loopback creates an interface.  The
 			 interface will be named 'loopback<X>',
@@ -844,14 +890,16 @@ module netgate-interface {
 		     filename.";
 
 		leaf id {
-		    type uint32;
-		    mandatory true;
+		    type uint32 {
+			range "1..max";
+		    }
 		    description
 			"This is the user assigned id of the socket
 			 filename.";
 		}
 		leaf filename {
 		    type string;
+		    mandatory true;
 		    description
 			"The path to a socket file used for establishing
 			 memif connections.  A socket can be used for
@@ -867,13 +915,19 @@ module netgate-interface {
 		"Host memif interface configuration table.";
 
 	    list memif-entry {
-		key "memif-id";
+		key "socket-id memif-id";
 		description
 		    "A unique 32-bit integer identifying this interface.";
 
+		leaf socket-id {
+		    type uint32;
+		    description
+			"The socket-id of the socket filename to use
+			 in establishing a connection.";
+		}
+
 		leaf memif-id {
 		    type uint32;
-		    mandatory true;
 		    description
 			"This is the user assigned id of the memif interface.";
 		}
@@ -933,13 +987,6 @@ module netgate-interface {
 			description
 			    "The number of slave tx queues.";
 		    }
-		}
-
-		leaf socket-id {
-		    type uint32;
-		    description
-			"The socket-id of the socket filename to use
-			 in establishing a connection.";
 		}
 	    }
 	}
@@ -1062,7 +1109,8 @@ module netgate-interface {
 		}
 
 		leaf host-namespace {
-		    type string;
+		    type ngcom:network-namespace;
+		    default dataplane;
 		    description
 			"The host namespace in which the tap will be made.";
 		}
@@ -1201,9 +1249,7 @@ module netgate-interface {
 	    }
 
 	    leaf if-index {
-		type int32 {
-		    range "1..2147483647";
-		}
+		type int32;
 		description
 		    "The ifIndex value for the ifEntry represented by this
 		     interface.";
@@ -1246,6 +1292,16 @@ module netgate-interface {
 			    "An IPv4 address on the interface.";
 		    }
 		}
+
+		leaf mtu {
+		    type uint16 {
+			range "0 | 68..max";
+		    }
+		    units "octets";
+		    description
+			"The size, in octets, of the largest IPv4 packet that
+			 the interface will send and receive.";
+		}
 	    }
 
 	    container ipv6 {
@@ -1268,6 +1324,16 @@ module netgate-interface {
 			description
 			    "An IPv6 address on the interface.";
 		    }
+		}
+
+		leaf mtu {
+		    type uint32 {
+			range "0 | 1280..max";
+		    }
+		    units "octets";
+		    description
+			"The size, in octets, of the largest IPv6 packet that
+			 the interface will send and receive.";
 		}
 	    }
 
@@ -1476,10 +1542,16 @@ module netgate-interface {
 			packets.";
 
 		    list acl-list {
-			key "acl-name";
+			key "sequence";
 			description
 			    "Each ACL rule-set can appear at most once within
 			     the input list.";
+
+			leaf sequence {
+			    type uint32;
+			    description
+				"sequence number for ACL,";
+			}
 
 			leaf acl-name {
 			    type string;
@@ -1497,10 +1569,16 @@ module netgate-interface {
 			 packets.";
 
 		    list acl-list {
-			key "acl-name";
+			key "sequence";
 			description
 			    "Each ACL rule-set can appear at most once within
 			     the output list.";
+
+			leaf sequence {
+			    type uint32;
+			    description
+				"sequence number for ACL,";
+			}
 
 			leaf acl-name {
 			    type string;
@@ -1516,7 +1594,7 @@ module netgate-interface {
 		    description
 			"An interface may also have at most one ACL
 			 based upon a combination of MAC address and
-			 IP.  If that ACL is present, it is always on
+			 IP. If that ACL is present, it is always on
 			 the ingress packets.";
 
 		    leaf macip-name {
@@ -1606,6 +1684,14 @@ module netgate-interface {
 		    description
 			"The Bridge Domain Identifier.  A unique number
 			 for this entry.";
+		}
+
+		leaf description {
+		    type string {
+			length "1..63";
+		    }
+		    description
+			"A textual description of the bridge.";
 		}
 
 		leaf flood {
@@ -1710,7 +1796,7 @@ module netgate-interface {
 		    "Loopback name.";
 
 		leaf name {
-		    type string;
+		    type loopback-name-63;
 		    description
 			"The identifier.  A unique name
 			 for this Loopback entry.";
@@ -1752,13 +1838,13 @@ module netgate-interface {
 
 		leaf id {
 		    type uint32;
-		    mandatory true;
 		    description
 			"This is the user assigned id of the socket
 			 filename.";
 		}
 		leaf filename {
 		    type string;
+		    mandatory true;
 		    description
 			"The path to a socket file used for establishing
 			 memif connections.  A socket can be used for
@@ -1774,13 +1860,18 @@ module netgate-interface {
 		"Host memif interface state table.";
 
 	    list memif-entry {
-		key "memif-id";
+		key "socket-id memif-id";
 		description
 		    "A unique 32-bit integer identifying this interface.";
 
+		leaf socket-id {
+		    type uint32;
+		    description
+			"The id of a memif socket filename.";
+		}
+
 		leaf memif-id {
 		    type uint32;
-		    mandatory true;
 		    description
 			"This is the user assigned id of the memif
 			 interface.";
@@ -1843,12 +1934,6 @@ module netgate-interface {
 		    description
 			"Should be 'master', or 'slave'.";
 		}
-
-		leaf socket-id {
-		    type uint32;
-		    description
-			"The id of a memif socket filename.";
-		}
 	    }
 	}
 
@@ -1892,7 +1977,7 @@ module netgate-interface {
 		}
 
 		leaf host-namespace {
-		    type string;
+		    type ngcom:network-namespace;
 		    description
 			"The host namespace in which the tap will be made.";
 		}

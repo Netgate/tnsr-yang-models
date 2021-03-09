@@ -19,6 +19,11 @@ module netgate-http {
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	";
 
+    revision 2020-06-15 {
+	description
+	    "TNSR Release 20.06.";
+    }
+
     revision 2020-02-15 {
 	description
 	    "TNSR Release 20.02.";
@@ -73,6 +78,18 @@ module netgate-http {
 	    }
 	}
 
+	container dataplane {
+	    description
+		"Dataplane-specific parameters of HTTP server.";
+
+	    leaf enable {
+		type boolean;
+		description
+		    "If true, HTTP server is enabled for dataplane
+		    interfaces.";
+	    }
+	}
+
 	container authentication {
 	    description
 		"Authentication configuration.";
@@ -111,6 +128,12 @@ module netgate-http {
 		    "One of the strings 'start', 'stop', 'restart',
 		     or 'status'.";
 	    }
+
+	    leaf namespace {
+		type ngcom:network-namespace;
+		description
+		    "Network namespace.";
+	    }
 	}
 	output {
 	    leaf stdout {
@@ -126,6 +149,12 @@ module netgate-http {
 		mandatory true;
 		description
 		    "One of the strings 'enable', or 'disable'.";
+	    }
+
+	    leaf namespace {
+		type ngcom:network-namespace;
+		description
+		    "Network namespace.";
 	    }
 	}
 	output {

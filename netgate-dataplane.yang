@@ -27,6 +27,11 @@ module netgate-dataplane {
          Copyright 2018-2020 Rubicon Communications, LLC.
         ";
 
+    revision 2020-06-15 {
+	description
+	    "TNSR Release 20.06.";
+    }
+
     revision 2020-02-15 {
 	description
 	    "TNSR Release 20.02.";
@@ -195,6 +200,84 @@ module netgate-dataplane {
 	}
     }
 
+    typedef log-level-type-t {
+	type enumeration {
+	    enum emerg {
+		description
+		    "A panic conditions.";
+	    }
+	    enum alert {
+		description
+		    "Action must be taken immediately.";
+	    }
+	    enum crit {
+		description
+		    "Critical conditions.";
+	    }
+	    enum err {
+		description
+		    "Error conditions.";
+	    }
+	    enum warn {
+		description
+		    "Warning conditions.";
+	    }
+	    enum notice {
+		description
+		    "Normal but significant conitions.";
+	    }
+	    enum info {
+		description
+		    "Informational messages.";
+	    }
+	    enum debug {
+		description
+		    "Debug-level messages.";
+	    }
+	    enum disabled {
+		description
+		    "Logging will be disabled.";
+	    }
+	}
+    }
+
+    typedef dpdk-log-level-type-t {
+	type enumeration {
+	    enum emergency {
+		description
+		    "A panic conditions.";
+	    }
+	    enum alert {
+		description
+		    "Action must be taken immediately.";
+	    }
+	    enum critical {
+		description
+		    "Critical conditions.";
+	    }
+	    enum error {
+		description
+		    "Error conditions.";
+	    }
+	    enum warning {
+		description
+		    "Warning conditions.";
+	    }
+	    enum notice {
+		description
+		    "Normal but significant conitions.";
+	    }
+	    enum info {
+		description
+		    "Informational messages.";
+	    }
+	    enum debug {
+		description
+		    "Debug-level messages.";
+	    }
+	}
+    }
+
     container dataplane-config {
         description
             "dataplane startup configurations";
@@ -263,9 +346,30 @@ module netgate-dataplane {
 	    }
         }
 
+		container ethernet {
+			description
+				"ethernet common configuration";
+
+			leaf default-mtu {
+				type uint32;
+				description
+					"default ethernet MTU";
+			}
+		}
+
         container dpdk {
             description
                 "dpdk stanza";
+
+	    container blacklists {
+		leaf-list blacklist {
+		    type string {
+			pattern '[0-9a-fA-F]{1,4}:[0-9a-fA-F]{1,4}';
+		    }
+		    description
+			"Blacklist devices by PCI vendor and device ID";
+		}
+	    }
 
             list dev {
                 key "id";
@@ -278,6 +382,18 @@ module netgate-dataplane {
                     description
                         "The PCI ID for a device or 'default'.";
                 }
+
+		leaf default {
+		    type boolean;
+		    description
+			"Default settings for device";
+		}
+
+		leaf tso {
+		    type string;
+		    description
+			"TCP segmentation offload. on/off";
+		}
 
                 leaf device-type {
                     type device-type-t;
@@ -295,6 +411,9 @@ module netgate-dataplane {
                     type ngcom:if-identifier-31;
                     description
                         "Given name for a dpdk device.";
+                    must '../id != "default"' {
+                        error-message "Setting a default network name is not supported";
+                    }
                 }
 
                 leaf num-rx-desc {
@@ -327,6 +446,33 @@ module netgate-dataplane {
                         "VLAN strip offload on/off";
                 }
             }
+
+	    leaf dpdk-log-level {
+		type dpdk-log-level-type-t;
+		description
+		    "DPDK log level";
+	    }
+
+	    leaf num-mem-channels {
+		type uint16 {
+		    range "1..65535";
+		}
+		description
+		    "Number of memory channels. Default is 4";
+
+	    }
+
+	    leaf decimal-interface-names {
+		type boolean;
+		description
+		    "Use decimal values of the PCI address instead of hexadecimal for devices";
+	    }
+
+	    leaf tcp-udp-checksum {
+		type boolean;
+		description
+		    "Enable hardware l4 checksums.";
+	    }
 
 	    leaf no-multi-seg {
 		type boolean;
@@ -433,6 +579,17 @@ module netgate-dataplane {
             }
         }
 
+	container dslite {
+	    description
+	        "NAT dslite settings";
+
+	    leaf dslite-ce {
+		type boolean;
+		description
+		    "dslite ce";
+	    }
+	}
+
 	container nat {
 	    description
 	        "global NAT settings";
@@ -442,12 +599,6 @@ module netgate-dataplane {
 		description
 		    "One of 'simple', 'deterministic' or
 		    'endpoint-dependent'";
-	    }
-
-	    leaf dslite-ce {
-		type boolean;
-		description
-		    "dslite ce";
 	    }
 
 	    leaf max-translations-per-user {
@@ -541,6 +692,42 @@ module netgate-dataplane {
 			"Whether to enable per-node counters in the stats
 			 segment";
 		}
+	    }
+	}
+
+	container logging {
+	    description
+	        "Logging segment settings";
+
+	    leaf size {
+		type int32 {
+		    range "512..16777216";
+		}
+		description
+		    "Number of log messages in fifo bufer.";
+	    }
+
+	    leaf unthrottle-time {
+		type int32 {
+		    range "0..max";
+		}
+		description
+		    "Message unthrottling time (in seconds). ";
+	    }
+
+	    leaf default-log-level {
+		type log-level-type-t;
+		description
+		    "Default log level to process message into the "+
+		    "internal message queue.";
+	    }
+
+	    leaf default-syslog-log-level {
+		type log-level-type-t;
+		description
+		    "Defailt log level to process messages into the syslog. "+
+		    "Message will be preocessed to syslog if log level "+
+		    "is less then or equal to the message's log level.";
 	    }
 	}
     }

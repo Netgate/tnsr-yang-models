@@ -1,0 +1,41 @@
+module netgate-vpp-prometheus {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-vpp-prometheus";
+    prefix "ngvpppro";
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+        "Provide RPCs to control VPP Prometheus Exporter
+         Copyright 2018-2020 Rubicon Communications, LLC.
+        ";
+
+    revision 2020-07-30 {
+        description
+            "Initial revision.";
+    }
+
+    import netgate-common {
+        prefix "ngcom";
+    }
+
+    rpc prometheus-control {
+        input {
+            leaf operation {
+                type ngcom:service-operation;
+                mandatory true;
+                description
+                    "The operation to perform";
+            }
+        }
+        output {
+            leaf stdout {
+                type string;
+            }
+        }
+    }
+}

@@ -1,0 +1,76 @@
+module netgate-ssh-server {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-ssh-server";
+    prefix "ngsshs";
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a data model for the SSH server.
+
+	 Copyright 2020 Rubicon Communications, LLC.";
+
+    revision 2020-06-15 {
+	description
+	    "TNSR Release 20.06.";
+    }
+
+    revision 2020-04-08 {
+	description
+	    "Initial release.";
+    }
+
+    rpc ssh-server-control {
+	description
+	    "Control of SSH server for dataplane interfaces.";
+
+        input {
+	    leaf operation {
+	        type ngcom:service-operation;
+	        mandatory true;
+	        description
+                    "One of the strings 'start', 'stop', 'restart',
+                     or 'status'.";
+	    }
+
+	    leaf namespace {
+		type ngcom:network-namespace;
+		description
+		    "Network namespace.";
+	    }
+        }
+
+        output {
+	    leaf stdout {
+	        type string;
+	        description
+                    "Command output.";
+            }
+        }
+    }
+
+    container ssh-server-config {
+        description
+            "Configuration for the SSH server.";
+
+	container dataplane {
+	    description
+		"Dataplane-specific parameters of SSH server.";
+
+	    leaf enable {
+		type boolean;
+		description
+		    "If true, SSH server is enabled for dataplane
+		    interfaces.";
+	    }
+	}
+    }
+}

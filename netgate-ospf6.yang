@@ -13,6 +13,10 @@ module netgate-ospf6 {
 	prefix "yang";
     }
 
+    import netgate-common {
+	prefix "ngcom";
+    }
+
     import netgate-route {
 	prefix "ngrt";
     }
@@ -28,6 +32,11 @@ module netgate-ospf6 {
 	 Copyright 2019-2020 Rubicon Communications, LLC.
 	 ";
 
+    revision 2020-06-15 {
+	description
+	    "TNSR Release 20.06.";
+    }
+
     revision 2020-02-15 {
 	description
 	    "TNSR Release 20.02.";
@@ -36,6 +45,10 @@ module netgate-ospf6 {
     revision 2019-12-15 {
 	description
 	    "TNSR Release 19.12.";
+    }
+
+    typedef ospf6-vrf-id {
+	type ngcom:host-if-name;
     }
 
     typedef ospf6-area-id {
@@ -116,6 +129,11 @@ module netgate-ospf6 {
 
     typedef ospf6-show-request {
 	type enumeration {
+	    enum config{
+		description
+		    "Show current running-config OSPF6 configurations.";
+	    }
+
 	    enum area {
 		description
 		    "Show area information.";
@@ -216,6 +234,13 @@ module netgate-ospf6 {
 
     rpc ospf6-show {
 	input {
+	    leaf vrf-id {
+		type ospf6-vrf-id;
+		default "default";
+		description
+		    "Each router is identified using the name of
+		     a host interface, or the word 'default'.";
+	    }
 	    leaf request {
 		type ospf6-show-request;
 		description
@@ -643,10 +668,19 @@ module netgate-ospf6 {
 		description
 		    "Table of OSPF6 Router instances .";
 
-		container router {
+		list router {
+		    key vrf-id;
+
 		    description
 			"The router contains all information for one instance
 			 of the OSPF6 protocol as supported by FRR.";
+
+		    leaf vrf-id {
+			type ospf6-vrf-id;
+			description
+			    "Each router is identified using the name of
+			     a host interface, or the word 'default'.";
+		    }
 
 		    container areas {
 			description
@@ -1326,10 +1360,19 @@ module netgate-ospf6 {
 		description
 		    "Table of OSPF6 Router instances .";
 
-		container router {
+		list router {
+		    key vrf-id;
+
 		    description
 			"The router contains all information for one instance
 			 of the OSPF6 protocol as supported by FRR.";
+
+		    leaf vrf-id {
+			type ospf6-vrf-id;
+			description
+			    "Each router is identified using the name of
+			     a host interface, or the word 'default'.";
+		    }
 
 		    container areas {
 			description
