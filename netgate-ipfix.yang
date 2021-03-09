@@ -1,0 +1,55 @@
+module netgate-ipfix {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-ipfix";
+    prefix "ngipfix";
+
+    import ietf-ipfix-psamp {
+	prefix "ipfix";
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data-model
+	 for IP Flow Information Export.
+
+	 Copyright 2019-2020 Rubicon Communications, LLC.";
+
+    revision 2020-10-15 {
+	description
+	    "TNSR Release 20.10.";
+    }
+
+    grouping udpExporterParametersExtended {
+	description
+	    "Extended parameters of a UDP export destination.";
+
+	leaf vrf {
+	    type ngcom:rt-identifier-63;
+	    description
+		"VRF to use to resolve collector address.";
+	}
+
+	leaf checksum {
+	    type boolean;
+	    description
+		"UDP checksum calculation enable flag.";
+	}
+    }
+
+    augment "/ipfix:ipfix/ipfix:exportingProcess/ipfix:destination/" +
+	"ipfix:DestinationParameters/ipfix:udpExporter" {
+	description
+	    "Add extended parameters to the UDP exporter parameters.";
+
+	uses udpExporterParametersExtended;
+    }
+}

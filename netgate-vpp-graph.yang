@@ -1,0 +1,79 @@
+module netgate-vpp-graph {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-vpp-graph";
+    prefix "ngvg";
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides information about the VPP packet
+	 processing graph structure.
+
+	 Copyright 2020 Rubicon Communications, LLC.
+	";
+
+    revision 2020-05-02 {
+	description
+	    "Initial VPP graph RPC definitions.";
+    }
+
+
+    typedef graph-node-name {
+	type string {
+	    length "1..31";
+	}
+    }
+
+    typedef graph-node-flags {
+	type uint16;
+	description
+	    "Use 0x1000 for GRAPH_NODE_FLAG_INPUT.";
+    }
+
+
+    rpc graph-node-get {
+	description
+	    "If index is present, return node with given index.
+	     If index is absent and name is present, return named node.
+	     If both index and name are absent, and flags is present,
+	     return flagged nodes.
+	     Otherwise with no selection criteria given, return all nodes.";
+
+	input {
+	    leaf index {
+		type uint32;
+	    }
+
+	    leaf name {
+		type graph-node-name;
+	    }
+
+	    leaf flags {
+		type graph-node-flags;
+	    }
+	}
+	output {
+	    container nodes {
+		list node {
+		    key index;
+
+		    leaf index {
+			type uint32;
+		    }
+
+		    leaf name {
+			type graph-node-name;
+		    }
+
+		    leaf flags {
+			type graph-node-flags;
+		    }
+		}
+	    }
+	}
+    }
+}

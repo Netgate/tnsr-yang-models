@@ -1,0 +1,154 @@
+module netgate-trace {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-trace";
+    prefix "ngtrace";
+
+    import netgate-vpp-graph {
+	prefix "ngvg";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides packet tracing operations.
+
+	 Copyright 2020 Rubicon Communications, LLC.
+	";
+
+    revision 2020-05-20 {
+	description
+	    "Initial trace RPC definitions.";
+    }
+
+    typedef trace-filter-type {
+	type enumeration {
+	    enum include {
+		description
+		    "Include packets";
+	    }
+	    enum exclude {
+		description
+		    "Exclude packets";
+	    }
+	}
+    }
+
+
+    rpc trace-filter-set {
+	input {
+	    container filter {
+		presence
+		    "A filter that will cause packets that pass through
+		     the named graph node to be included or excluded.
+		     If the filter is missing from the RPC call, any
+		     existing filters are cleared.";
+
+		leaf type {
+		    type trace-filter-type;
+		    mandatory true;
+		    description
+			"One of the filtering options 'include',
+			 or 'exclude'.";
+		}
+
+		leaf node-name {
+		    type ngvg:graph-node-name;
+		    mandatory true;
+		    description
+			"The name of a graph input node whose packets are
+			 to be traced.";
+		}
+
+		leaf max-packets {
+		    type uint32;
+		    description
+			"The maximum number of packets to capture on this
+			 graph input node.  Default 50.";
+		}
+	    }
+	}
+    }
+
+    rpc trace-filter-clear {
+    }
+
+    rpc trace-packets-capture {
+	input {
+	    leaf node-name {
+		type ngvg:graph-node-name;
+		description
+		    "The name of a graph input node whose packets are
+		     to be traced.";
+	    }
+
+	    leaf max-packets {
+		type uint32;
+		default 50;
+		description
+		    "The maximum number of packets to capture on this
+		     graph input node. Default 50.";
+	    }
+
+	    leaf verbose {
+		type boolean;
+		description
+		    "If true, record extra information on each packet.";
+	    }
+
+	    leaf pre-clear {
+		type boolean;
+		description
+		    "If true, the trace buffers will be cleared prior to
+		     beginning packet capture.";
+	    }
+	}
+    }
+
+    rpc trace-packets-get {
+	input {
+	    leaf max-packets {
+		type uint32;
+		default 50;
+		description
+		    "The maximum number of packets to retrieve.
+		     Default 50.";
+	    }
+	}
+
+	output {
+	    container packets {
+		description
+		    "The list of packet trace logs.";
+
+		list packet {
+		    key "number";
+
+		    leaf number {
+			type uint32;
+			description
+			    "The time-ordered packet sequence number.";
+		    }
+
+		    leaf thread_id {
+			type uint32;
+			description
+			    "The ID of the thread that handled this packet.";
+		    }
+
+		    leaf log {
+			type string;
+			description
+			    "The trace log of a packet's handling.";
+		    }
+		}
+	    }
+	}
+    }
+
+    rpc trace-packets-clear {
+    }
+}

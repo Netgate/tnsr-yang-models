@@ -31,6 +31,11 @@ module netgate-interface {
 	 Copyright 2017-2020 Rubicon Communications, LLC.
 	";
 
+    revision 2020-10-01 {
+	description
+	    "TNSR Release 20.10.";
+    }
+
     revision 2020-07-15 {
 	description
 	    "TNSR Release 20.07.";
@@ -342,22 +347,22 @@ module netgate-interface {
     }
 
     rpc clear-interface-counters {
-        input {
+	input {
 	    leaf interface {
-	        type string;
+		type string;
 		description
-		    "Should be a valid interface name.  No name implies
+		    "Should be a valid interface name.	No name implies
 		     clear all interfaces.";
 	    }
 	}
     }
-    
+
     rpc packet-counters {
-        output {
-            leaf stdout {
-                type string;
-            }
-        }
+	output {
+	    leaf stdout {
+		type string;
+	    }
+	}
     }
 
     container interfaces-config {
@@ -428,11 +433,12 @@ module netgate-interface {
 	    }
 
 	    container ipv4 {
-		presence
-		    "Enables IPv4'";
 		description
 		    "Parameters for the IPv4 address family.";
 
+		presence
+		    "make container work the way code expects";
+		
 		container address {
 		    leaf-list ip {
 			type inet:ipv4-prefix;
@@ -443,7 +449,11 @@ module netgate-interface {
 
 		container reassembly {
 		    description
-		        "ip-reassembly feature control.";
+			"ip-reassembly feature control.";
+
+		    presence
+			"make container work the way code expects";
+		    
 		    leaf enabled {
 			type boolean;
 			description
@@ -469,11 +479,12 @@ module netgate-interface {
 	    }
 
 	    container ipv6 {
-		presence
-		    "Enables IPv6";
 		description
 		    "Parameters for the IPv6 address family.";
 
+		presence
+		    "make container work the way code expects";
+		
 		container address {
 		    leaf-list ip {
 			type inet:ipv6-prefix;
@@ -484,7 +495,11 @@ module netgate-interface {
 
 		container reassembly {
 		    description
-		        "ip-reassembly feature control.";
+			"ip-reassembly feature control.";
+
+		    presence
+			"make container work the way the code expects";
+		    
 		    leaf enabled {
 			type boolean;
 			description
@@ -510,6 +525,9 @@ module netgate-interface {
 	    }
 
 	    container bridge {
+		presence
+		    "indicates this interface is part of a bridge";
+
 		description
 		    "If the interface is being used as a bridge, this
 		     node contains the corresponding Bridge Domain Id,
@@ -535,6 +553,9 @@ module netgate-interface {
 	    }
 
 	    container dhcp-client {
+		presence
+		    "indicates that this interface has a DHCP client";
+
 		description
 		    "If the interface is configured using a DHCP client,
 		     that configuration is contained here.";
@@ -557,6 +578,9 @@ module netgate-interface {
 	    }
 
 	    container access-list {
+		presence
+		    "Indicates that this interface has ACLs";
+
 		description
 		    "If the interface has any Access Control Lists,
 		     they are listed here in two groups: those that apply
@@ -643,6 +667,9 @@ module netgate-interface {
 	    }
 
 	    container lldp {
+		 presence
+		     "Indicates this interface has LLDP configured";
+
 		 leaf port-name {
 		     type string;
 		     description
@@ -669,6 +696,9 @@ module netgate-interface {
 	    }
 
 	    container bond {
+		presence
+		    "indicates this interface is a slave of a bonded interface";
+
 		description
 		    "If the interface is being used as a slave, this node
 		     contains the corresponding bond ID and slave options.";
@@ -698,6 +728,9 @@ module netgate-interface {
 	    }
 
 	    container map {
+		presence
+		    "this interface perform MAP translations";
+
 		description
 		    "Per-interface parameters for MAP-E and MAP-T.";
 
@@ -712,13 +745,16 @@ module netgate-interface {
 		    type boolean;
 		    description
 			"If true, this interface is performing MAP-T
-			 translations.  If false, this interface is
+			 translations.	If false, this interface is
 			 performing encapsuations.  Valid only when
 			 also enabled.";
 		}
 	    }
 
 	    container vlan-tag-rewrite {
+		presence
+		    "this interface rewrite VLAN tags";
+
 		leaf operation {
 		    type intf-tag-rewrite-op;
 		    description
@@ -764,7 +800,7 @@ module netgate-interface {
 		    }
 		    mandatory true;
 		    description
-			"The Bridge Domain Identifier.  A unique number
+			"The Bridge Domain Identifier.	A unique number
 			 for this entry.";
 		}
 
@@ -903,9 +939,9 @@ module netgate-interface {
 		    description
 			"The path to a socket file used for establishing
 			 memif connections.  A socket can be used for
-			 either master or slave interfaces, but not both.
-			 A socket can have more than one master using it,
-			 or it can have more than one slave using it.";
+			 either server or client interfaces, but not both.
+			 A socket can have more than one server using it,
+			 or it can have more than one client using it.";
 		}
 	    }
 	}
@@ -971,10 +1007,10 @@ module netgate-interface {
 			 the other end of the connection.";
 		}
 
-		container slave {
+		container client {
 		    presence
-			"If present, the role of this memif is 'slave'.
-			 If not present, the role is 'master'.";
+			"If present, the role of this memif is 'client'.
+			 If not present, the role is 'server'.";
 
 		    leaf rx-queues {
 			type uint8;
@@ -1021,14 +1057,14 @@ module netgate-interface {
 		    leaf dot1ad {
 			type boolean;
 			description
-			    "By default the outer tag is dot1q.  If this
+			    "By default the outer tag is dot1q.	 If this
 			     value is true, it is instead dot1ad.";
 		    }
 
 		    leaf exact-match {
 			type boolean;
 			description
-			    "By default matching is non-exact.  If this
+			    "By default matching is non-exact.	If this
 			     value is true, matching is exact.";
 		    }
 
@@ -1338,192 +1374,192 @@ module netgate-interface {
 	    }
 
 	    container counters {
-	        description
+		description
 		    "Per-interface counters from VPP.";
 
 		leaf collect-time {
 		    type uint64;
 		    description
-		        "time counters cleared in seconds since
+			"time counters cleared in seconds since
 			 midnight 1/1/1970 UTC";
 		}
 
 		leaf reset-time {
 		    type uint64;
 		    description
-		        "time counters reset in seconds since
+			"time counters reset in seconds since
 			 midnight 1/1/1970 UTC";
 		}
 
 		leaf detailed-counters {
 		    type boolean;
 		    description
-		        "true if detailed counters are enabled";
+			"true if detailed counters are enabled";
 		}
 
 		leaf rx-bytes {
 		    type uint64;
 		    description
-		        "The number of octets received on this interface.";
+			"The number of octets received on this interface.";
 		}
 
 		leaf rx-packets {
 		    type uint64;
 		    description
-		        "The number of packets received on this interface.";
+			"The number of packets received on this interface.";
 		}
 
 		leaf rx-unicast-bytes {
 		    type uint64;
 		    description
-		        "The number of unicast octets received on this
-		         interface.";
+			"The number of unicast octets received on this
+			 interface.";
 		}
 
 		leaf rx-unicast-packets {
 		    type uint64;
 		    description
-		        "The number of unicast packets received on
-		         this interface.";
+			"The number of unicast packets received on
+			 this interface.";
 		}
 
 		leaf rx-multicast-bytes {
 		    type uint64;
 		    description
-		        "The number of multicast octets received on
-		         this interface.";
+			"The number of multicast octets received on
+			 this interface.";
 		}
 
 		leaf rx-multicast-packets {
 		    type uint64;
 		    description
-		        "The number of multicast packets received on
-		         this interface.";
+			"The number of multicast packets received on
+			 this interface.";
 		}
 
 		leaf rx-broadcast-bytes {
 		    type uint64;
 		    description
-		        "The number of broadcast octets received on
-		         this interface.";
+			"The number of broadcast octets received on
+			 this interface.";
 		}
 
-	        leaf rx-broadcast-packets {
+		leaf rx-broadcast-packets {
 		    type uint64;
 		    description
-		        "The number of unicast packets received on
-		         this interface.";
+			"The number of unicast packets received on
+			 this interface.";
 		}
 
 		leaf rx-ip4 {
 		    type uint64;
 		    description
-		        "The number of IPv4 packets received on this
-		         interface.";
+			"The number of IPv4 packets received on this
+			 interface.";
 		}
 
 		leaf rx-ip6 {
 		    type uint64;
 		    description
-		        "The number of IPv6 packets received on this
-		         interface.";
+			"The number of IPv6 packets received on this
+			 interface.";
 		}
 
 		leaf rx-mpls {
 		    type uint64;
 		    description
-		        "The number of MPLS packets received on this
-		         interface.";
+			"The number of MPLS packets received on this
+			 interface.";
 		}
 
 		leaf tx-bytes {
 		    type uint64;
 		    description
-		        "The number of octets transmitted on this interface.";
+			"The number of octets transmitted on this interface.";
 		}
 
 		leaf tx-packets {
 		    type uint64;
 		    description
-		        "The number of packets transmitted on this interface.";
+			"The number of packets transmitted on this interface.";
 		}
 
 		leaf tx-unicast-bytes {
 		    type uint64;
 		    description
-		        "The number of unicast octets transmitted on
-		         this interface.";
+			"The number of unicast octets transmitted on
+			 this interface.";
 		}
 
 		leaf tx-unicast-packets {
 		    type uint64;
 		    description
-		        "The number of unicast packets transmitted on
-		         this interface.";
+			"The number of unicast packets transmitted on
+			 this interface.";
 		}
 
 		leaf tx-multicast-bytes {
 		    type uint64;
 		    description
-		        "The number of multicast octets transmitted on
-		         this interface.";
+			"The number of multicast octets transmitted on
+			 this interface.";
 		}
 
 		leaf tx-multicast-packets {
 		    type uint64;
 		    description
-		        "The number of multicast packets transmitted
-		         on this interface.";
+			"The number of multicast packets transmitted
+			 on this interface.";
 		}
 
 		leaf tx-broadcast-bytes {
 		    type uint64;
 		    description
-		        "The number of broadcast octets transmitted on
-		         this interface.";
+			"The number of broadcast octets transmitted on
+			 this interface.";
 		}
 
 		leaf tx-broadcast-packets {
 		    type uint64;
 		    description
-		        "The number of broadcast packets transmitted
-		         on this interface.";
+			"The number of broadcast packets transmitted
+			 on this interface.";
 		}
 
 		leaf rx-error {
 		    type uint64;
 		    description
-		        "The number of receive errors on this interface.";
+			"The number of receive errors on this interface.";
 		}
 
 		leaf tx-error {
 		    type uint64;
 		    description
-		        "The number of transmit errors on this interface.";
+			"The number of transmit errors on this interface.";
 		}
 
 		leaf drop {
 		    type uint64;
 		    description
-		        "The number of packet drops on this interface.";
+			"The number of packet drops on this interface.";
 		}
 
 		leaf punt {
 		    type uint64;
 		    description
-		        "The number of punts on this interface.";
+			"The number of punts on this interface.";
 		}
 
 		leaf rx-miss {
 		    type uint64;
 		    description
-		        "The number of receiver misses on this interface.";
+			"The number of receiver misses on this interface.";
 		}
 
 		leaf rx-no-buffer {
 		    type uint64;
 		    description
-		        "The number of packets dropped due to no receive
+			"The number of packets dropped due to no receive
 			 buffers on this interface.";
 		}
 	    }
@@ -1682,7 +1718,7 @@ module netgate-interface {
 		    }
 		    mandatory true;
 		    description
-			"The Bridge Domain Identifier.  A unique number
+			"The Bridge Domain Identifier.	A unique number
 			 for this entry.";
 		}
 
@@ -1848,9 +1884,9 @@ module netgate-interface {
 		    description
 			"The path to a socket file used for establishing
 			 memif connections.  A socket can be used for
-			 either master or slave interfaces, but not both.
-			 A socket can have more than one master using it,
-			 or it can have more than one slave using it.";
+			 either server or client interfaces, but not both.
+			 A socket can have more than one server using it,
+			 or it can have more than one client using it.";
 		}
 	    }
 	}
@@ -1932,7 +1968,7 @@ module netgate-interface {
 		leaf role {
 		    type string;
 		    description
-			"Should be 'master', or 'slave'.";
+			"Should be 'server', or 'client'.";
 		}
 	    }
 	}
@@ -2145,7 +2181,7 @@ module netgate-interface {
 		    description
 			"The name of the bond interface.";
 		}
-		
+
 		container actor {
 		    description
 			"The actor parameters.";

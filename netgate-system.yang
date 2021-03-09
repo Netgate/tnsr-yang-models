@@ -216,6 +216,15 @@ module netgate-system {
 		description
 		    "Number of ECHO requests";
 	    }
+	    leaf interval {
+		type decimal64 {
+		    fraction-digits 6;
+		    range "0.000001..6000";
+		}
+		description
+		    "interval between pings
+                     in seconds";
+	    }
 	    leaf ipv4-only {
 		type boolean;
 		description

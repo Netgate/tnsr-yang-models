@@ -14,7 +14,7 @@ module netgate-vpp-prometheus {
          Copyright 2018-2020 Rubicon Communications, LLC.
         ";
 
-    revision 2020-07-30 {
+    revision 2020-09-15 {
         description
             "Initial revision.";
     }
@@ -25,6 +25,12 @@ module netgate-vpp-prometheus {
 
     rpc prometheus-control {
         input {
+            leaf namespace {
+                type ngcom:network-namespace;
+		mandatory true;
+                description
+                    "operating namespace";
+            }
             leaf operation {
                 type ngcom:service-operation;
                 mandatory true;
@@ -37,5 +43,44 @@ module netgate-vpp-prometheus {
                 type string;
             }
         }
+    }
+
+    container prometheus-exporter {
+	description
+	    "configuration of the prometheus exporter";
+
+	container host-space {
+	    presence
+	        "indicates the host namespace exporter
+                 is enabled.";
+
+	    container filters {
+	        description
+		    "list of data items to export";
+	    
+	        leaf-list filter {
+		    type string;
+		    description
+		        "regular expression for data to export";
+	        }
+	    }
+	}
+
+	container dataplane-space {
+	    presence
+	        "indicates the dataplane namespace exporter
+                 is enabled.";
+
+	    container filters {
+	        description
+		    "list of data items to export";
+	    
+	        leaf-list filter {
+		    type string;
+		    description
+		        "regular expression for data to export";
+	        }
+	    }
+	}
     }
 }

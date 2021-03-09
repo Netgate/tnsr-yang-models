@@ -23,6 +23,10 @@ module netgate-nat {
 
 	 Copyright 2017-2020 Rubicon Communications, LLC.";
 
+    revision 2020-10-15 {
+	description
+	    "TNSR Release 20.10.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -179,6 +183,12 @@ module netgate-nat {
 	container deterministic {
 	    description
 		"Deterministic NAT information.";
+
+	    leaf deterministic-enabled {
+		type boolean;
+		description
+		    "Deterministic NAT enabled";
+	    }
 
 	    container det-mapping-table {
 		description
@@ -353,29 +363,27 @@ module netgate-nat {
 		description
 		    "IPFIX logging information.";
 
-		list logging-entry {
-		    key "domain src-port";
+		leaf domain {
+		    type uint32 {
+			range "1..max";
+		    }
+		    default 1;
 		    description
-			"IPFIX logging entry.";
+			"The logging domain id.";
+		}
 
-		    leaf domain {
-			type uint32;
-			description
-			    "The logging domain id.";
-		    }
+		leaf src-port {
+		    type uint16;
+		    default 4739;
+		    description
+			"The logging source port id.";
+		}
 
-		    leaf src-port {
-			type uint16;
-			description
-			    "The logging source port id.";
-		    }
-
-		    leaf enable {
-			type boolean;
-			description
-			    "If logging is enabled for this domain and port,
-			     this value will be true.";
-		    }
+		leaf enable {
+		    type boolean;
+		    description
+			"If logging is enabled for this domain and port,
+			this value will be true.";
 		}
 	    }
 	}
@@ -415,6 +423,12 @@ module netgate-nat {
 		    "If true, a deterministic translation is used.";
 	    }
 
+	    leaf endpoint-dependent {
+		type boolean;
+		description
+		    "Endpoint-dependent mode enabled.";
+	    }
+
 	    leaf user-buckets {
 		type uint32;
 		description
@@ -431,6 +445,18 @@ module netgate-nat {
 		type uint32;
 		description
 		    "Macimum translations per user";
+	    }
+
+	    leaf max-translations-per-thread {
+		type uint32;
+		description
+		    "Maximum translations per thread.";
+	    }
+
+	    leaf max-users-per-thread {
+		type uint32;
+		description
+		    "Maximum users per thread.";
 	    }
 
 	    leaf outside-route-table-name {
@@ -461,6 +487,12 @@ module netgate-nat {
 		type boolean;
 		description
 		    "NAT44 Forwarding enabled";
+	    }
+
+	    leaf out2in-dpo {
+		type boolean;
+		description
+		    "out2in DPO enabled.";
 	    }
 
 	    leaf timeout-udp {

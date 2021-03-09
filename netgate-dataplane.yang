@@ -27,6 +27,11 @@ module netgate-dataplane {
          Copyright 2018-2020 Rubicon Communications, LLC.
         ";
 
+    revision 2020-10-15 {
+	description
+	    "TNSR Release 20.10.";
+    }
+
     revision 2020-06-15 {
 	description
 	    "TNSR Release 20.06.";
@@ -160,10 +165,6 @@ module netgate-dataplane {
 		description
 		    "simple nat";
 	    }
-	    enum deterministic {
-		description
-		    "deterministic";
-	    }
 	    enum endpoint-dependent {
 		description
 		    "endpoint dependent mode";
@@ -278,6 +279,17 @@ module netgate-dataplane {
 	}
     }
 
+    typedef blacklist-t {
+	type union {
+	    type string {
+		pattern '[0-9a-fA-F]{1,4}:[0-9a-fA-F]{1,4}';
+	    }
+	    type string {
+		pattern '[0-9a-fA-F]{1,4}:[0-9a-fA-F]{1,2}:[0-9a-fA-F]{1,2}[\.][0-9a-fA-F]';
+	    }
+	}
+    }
+
     container dataplane-config {
         description
             "dataplane startup configurations";
@@ -363,9 +375,7 @@ module netgate-dataplane {
 
 	    container blacklists {
 		leaf-list blacklist {
-		    type string {
-			pattern '[0-9a-fA-F]{1,4}:[0-9a-fA-F]{1,4}';
-		    }
+		    type blacklist-t;
 		    description
 			"Blacklist devices by PCI vendor and device ID";
 		}
@@ -597,8 +607,7 @@ module netgate-dataplane {
 	    leaf nat-mode {
 		type nat-mode-t;
 		description
-		    "One of 'simple', 'deterministic' or
-		    'endpoint-dependent'";
+		    "One of 'simple' or 'endpoint-dependent'";
 	    }
 
 	    leaf max-translations-per-user {
@@ -607,6 +616,22 @@ module netgate-dataplane {
 		}
 		description
 		    "max translations per user";
+	    }
+
+	    leaf max-translations-per-thread {
+		type uint32 {
+		    range "1..4294967295";
+		}
+		description
+		    "max translations per thread";
+	    }
+
+	    leaf max-users-per-thread {
+		type uint32 {
+		    range "1..4294967295";
+		}
+		description
+		    "max users per thread";
 	    }
 
 	    container mode-options {
@@ -627,28 +652,12 @@ module netgate-dataplane {
 		}
 	    }
 
-	    leaf translation-hash-buckets {
-		type uint16 {
-		    range "1..65535";
-		    }
-		    description
-			"number of buckets in session lookup hash tables";
-	    }
-
 	    leaf translation-hash-memory {
 		type uint32 {
 		    range "1..4294967295";
 		}
 		    description
 			"memory size of session lookup hash tables";
-	    }
-
-	    leaf user-hash-buckets {
-		type uint16 {
-		    range "1..65535";
-		    }
-		    description
-			"number of buckets in NAT user lookup hash table";
 	    }
 
 	    leaf user-hash-memory {
