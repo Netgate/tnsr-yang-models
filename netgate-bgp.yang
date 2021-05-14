@@ -1762,6 +1762,23 @@ module netgate-bgp {
 			}
 		    }
 
+		    container defaults {
+			description
+			    "Default configuration parameters.";
+
+			leaf ipv4-unicast-enabled {
+			    type boolean;
+			    default true;
+			    description
+				"Propogate IPv4 unicast routes.  If true,
+				 routes are propagated.  If false, IPv4
+				 unicast routes propagation is disabled.
+				 Default true.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "^no $%$n|";
+			}
+		    }
+
 		    leaf deterministic-med {
 			type boolean;
 			description
