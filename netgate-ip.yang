@@ -20,6 +20,11 @@ module netgate-ip {
 	 Copyright 2019-2020 Rubicon Communications, LLC.
 	 ";
 
+    revision 2021-06-15 {
+	description
+	    "TNSR Release 21.07.";
+    }
+
     revision 2021-02-15 {
 	description
 	    "TNSR Release 21.02.";
@@ -53,23 +58,38 @@ module netgate-ip {
 	    ngcliext:parent-fmt "$< ipv4";
 
 	    leaf timeout-ms {
-		type uint32;
+		type uint32 {
+		    range "1..2000";
+		}
 		description
 		    "Reassembly timeout in milliseconds.";
 		ngcliext:node-fmt "$< timeout @@$n";
 	    }
 
 	    leaf expire-walk-interval-ms {
-		type uint32;
+		type uint32 {
+		    range "1..60000";
+		}
 		description
 		    "Timeout trying to keep fragments.";
 		ngcliext:node-fmt "$< expire-walk-interval @@$n";
 	    }
 
 	    leaf max-reassemblies {
-		type uint32;
+		type uint32 {
+		    range "1..1024";
+		}
 		description
 		    "Maximum reassemblies count.";
+		ngcliext:node-fmt "$< $% @@$n";
+	    }
+
+	    leaf max-reassembly-length {
+		type uint32 {
+		    range "1..64";
+		}
+		description
+		    "Maximum reassembly length.";
 		ngcliext:node-fmt "$< $% @@$n";
 	    }
 	}
@@ -81,23 +101,38 @@ module netgate-ip {
 	    ngcliext:parent-fmt "$< ipv6";
 
 	    leaf timeout-ms {
-		type uint32;
+		type uint32 {
+		    range "1..2000";
+		}
 		description
 		    "Reassembly timeout in milliseconds.";
 		ngcliext:node-fmt "$< timeout @@$n";
 	    }
 
 	    leaf expire-walk-interval-ms {
-		type uint32;
+		type uint32 {
+		    range "1..60000";
+		}
 		description
 		    "Timeout trying to keep fragments.";
 		ngcliext:node-fmt "$< expire-walk-interval @@$n";
 	    }
 
 	    leaf max-reassemblies {
-		type uint32;
+		type uint32 {
+		    range "1..1024";
+		}
 		description
 		    "Maximum reassemblies count.";
+		ngcliext:node-fmt "$< $% @@$n";
+	    }
+
+	    leaf max-reassembly-length {
+		type uint32 {
+		    range "1..64";
+		}
+		description
+		    "Maximum reassembly length.";
 		ngcliext:node-fmt "$< $% @@$n";
 	    }
 	}
@@ -115,7 +150,7 @@ module netgate-ip {
 	    }
 
 	    container virtual {
-		ngcliext:parent-fmt "$< $% virtual";
+		ngcliext:parent-fmt "$< $%";
 		uses reassembly-grouping;
 	    }
 	}

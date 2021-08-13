@@ -32,6 +32,11 @@ module netgate-rip {
 	 Copyright 2019-2020 Rubicon Communications, LLC.
 	 ";
 
+    revision 2021-06-15 {
+	description
+	    "TNSR Release 21.07.";
+    }
+
     revision 2021-02-15 {
 	description
 	    "TNSR Release 21.02.";
@@ -302,6 +307,50 @@ module netgate-rip {
 		}
 	    }
 
+	    container key-chains {
+		description
+		    "Key chains.";
+
+		list chain {
+		    key name;
+
+		    ngcliext:node-fmt "^key-chain @{name}$n";
+		    ngcliext:pre-children-op "push";
+
+		    leaf name {
+			type rip-key-chain-name;
+			description
+			    "Key chain name.";
+		    }
+
+		    container keys {
+			description
+			    "The set of keys.";
+
+			list key {
+			    key key-id;
+
+			    ngcliext:node-fmt "^key @{key-id}${key-string}$n";
+
+			    leaf key-id {
+				type uint32 {
+				    range "0..2147483647";
+				}
+				description
+				    "The ID for this key.";
+			    }
+
+			    leaf key-string {
+				type rip-key-string;
+				description
+				    "The key string.";
+				ngcliext:child-fmt " string @@";
+			    }
+			}
+		    }
+		}
+	    }
+
 	    container interfaces {
 		description
 		    "Interface configuration for RIP.";
@@ -411,50 +460,6 @@ module netgate-rip {
 			    "Send IP v2 broadcast update.";
 			    ngcliext:node-op "bool";
 			    ngcliext:node-fmt "|^$%$n";
-		    }
-		}
-	    }
-
-	    container key-chains {
-		description
-		    "Key chains.";
-
-		list chain {
-		    key name;
-
-		    ngcliext:node-fmt "^key-chain @{name}$n";
-		    ngcliext:pre-children-op "push";
-
-		    leaf name {
-			type rip-key-chain-name;
-			description
-			    "Key chain name.";
-		    }
-
-		    container keys {
-			description
-			    "The set of keys.";
-
-			list key {
-			    key key-id;
-
-			    ngcliext:node-fmt "^key @{key-id}${key-string}$n";
-
-			    leaf key-id {
-				type uint32 {
-				    range "0..2147483647";
-				}
-				description
-				    "The ID for this key.";
-			    }
-
-			    leaf key-string {
-				type rip-key-string;
-				description
-				    "The key string.";
-				ngcliext:child-fmt " string @@";
-			    }
-			}
 		    }
 		}
 	    }

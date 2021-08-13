@@ -27,6 +27,11 @@ module netgate-vxlan {
 
 	 Copyright 2018-2020 Rubicon Communications, LLC. ";
 
+    revision 2021-06-15 {
+	description
+	    "TNSR Release 21.07.";
+    }
+
     revision 2021-02-15 {
 	description
 	    "TNSR Release 21.02.";
@@ -89,7 +94,7 @@ module netgate-vxlan {
 		    type ngcom:rt-identifier-63;
 		    description
 			"The name of an encapsulation route table.";
-		    ngcliext:node-fmt "^encapsulation @@$n";
+		    ngcliext:node-fmt "^encapsulation route-table @@$n";
 		}
 
 		leaf decap-next-node {

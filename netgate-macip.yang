@@ -32,6 +32,11 @@ module netgate-macip {
 	 Copyright 2019-2020 Rubicon Communications, LLC.
 	 ";
 
+    revision 2021-06-15 {
+	description
+	    "TNSR Release 21.07.";
+    }
+
     revision 2021-02-15 {
 	description
 	    "TNSR Release 21.02.";
@@ -164,7 +169,7 @@ module netgate-macip {
 			    type inet:ip-prefix;
 			    description
 				"IP prefix.";
-			    ngcliext:node-fmt "^$% @@$n";
+			    ngcliext:node-fmt "^address @@$n";
 			}
 		    }
 		}

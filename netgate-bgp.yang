@@ -40,6 +40,11 @@ module netgate-bgp {
 	 Copyright 2019-2020 Rubicon Communications, LLC.
 	 ";
 
+    revision 2021-06-15 {
+	description
+	    "TNSR Release 21.07.";
+    }
+
     revision 2021-02-15 {
 	description
 	    "TNSR Release 21.02.";
@@ -527,18 +532,18 @@ module netgate-bgp {
 		     causes all attributes to be passed unchanged to
 		     this peer.";
 
-		ngcliext:node-fmt "^$%${attr}$n";
-
 		description
 		    "BGP attributes that are propagated unchanged to
 		     this neighbor.";
+
+		ngcliext:parent-fmt "^$%";
 
 		leaf-list attr {
 		    type string;
 		    description
 			"Possible attributes are: 'as-path', 'med', or
 			 'next-hop'.";
-		    ngcliext:child-fmt " @@";
+		    ngcliext:node-fmt "$< @@$n";
 		}
 	    }
 
@@ -1395,6 +1400,8 @@ module netgate-bgp {
 				description
 				    "If true, disable one-hop away EBGP
 				     peer using loopback address.";
+				ngcliext:node-op "bool";
+				ngcliext:node-fmt "|^$%$n";
 			    }
 
 			    container ebgp-multihop {
@@ -1504,6 +1511,7 @@ module netgate-bgp {
 				type uint32;
 				description
 				    "The AS-number of the neighbor.";
+				ngcliext:node-fmt "^remote-as @@$n";
 			    }
 
 			    leaf enable {
@@ -1798,6 +1806,17 @@ module netgate-bgp {
 			ngcliext:node-fmt "|^$%$n";
 		    }
 
+		    leaf ebgp-requires-policy {
+			type boolean;
+			default true;
+			description
+			    "If true, BGP speakers following RFC8212 do not use
+			     or send routes on eBGP sessions, unless
+			     specifically configured to do so.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "^no $%$n|";
+		    }
+
 		    leaf listen-limit {
 			type uint16 {
 			    range "1..5000";
@@ -1872,11 +1891,12 @@ module netgate-bgp {
 
 		    leaf network-import-check {
 			type boolean;
+			default true;
 			description
 			    "If true, check if BGP network route exists
 			     in IGP.";
 			ngcliext:node-op "bool";
-			ngcliext:node-fmt "|^network import-check$n";
+			ngcliext:node-fmt "^no network import-check$n|";
 		    }
 
 		    leaf route-reflector-allow-outbound-policy {
@@ -2096,7 +2116,7 @@ module netgate-bgp {
 			    description
 				"Address family IPv6 configuration.";
 
-			    ngcliext:node-fmt "$< $%";
+			    ngcliext:parent-fmt "$< $%";
 
 			    container multicast {
 				description
@@ -2307,6 +2327,7 @@ module netgate-bgp {
 			     If 'standard' the rules are normal numbers.
 			     If 'expanded', the rules are regular
 			     expressions.";
+			ngcliext:sibling-fmt " @@ ";
 		    }
 
 		    leaf value-size {
@@ -2320,7 +2341,7 @@ module netgate-bgp {
 			     and matches 8 octets per community from RFC 5668.
 			     When 'large', rules allow 12-octet values
 			     from RFC 8092.";
-			ngcliext:child-fmt " @@";
+			ngcliext:child-fmt "%{value-type}@@";
 		    }
 
 		    container rules {

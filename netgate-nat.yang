@@ -27,6 +27,11 @@ module netgate-nat {
 
 	 Copyright 2017-2020 Rubicon Communications, LLC.";
 
+    revision 2021-06-15 {
+	description
+	    "TNSR Release 21.07.";
+    }
+
     revision 2021-02-15 {
 	description
 	    "TNSR Release 21.02.";
@@ -369,7 +374,7 @@ module netgate-nat {
 		    description
 			"NAT Mapping Entry.";
 
-		    ngcliext:node-fmt "$< mapping @{transport-protocol} local @{local-address} @{local-port} external @{external-address} @{external-port}";
+		    ngcliext:node-fmt "$< mapping @{transport-protocol} local @{local-address} @{local-port} external @{external-address}";
 		    ngcliext:children-order "external-if-name
 		         external-port
 			 twice-nat
@@ -415,6 +420,7 @@ module netgate-nat {
 			type nat-ipv4-port-any;
 			description
 			    "The external port mapped, or wildcard 'any'.";
+			ngcliext:node-fmt " @@";
 		    }
 
 		    leaf twice-nat {
@@ -906,154 +912,6 @@ module netgate-nat {
 			description
 			    "Post-NAT external host port (Twice-NAT only).";
 		    }
-		}
-	    }
-	}
-    }
-
-
-    container "dslite-config" {
-	description
-	    "Dual-Stack Lite (DS-Lite) configuration.";
-
-	ngcliext:parent-fmt "dslite";
-
-	container dynamic {
-	    description
-		"Dynamic mapping information.";
-
-	    ngcliext:parent-fmt "$<";
-
-	    container pool-table {
-		description
-		    "DS-Lite address pool table.";
-
-		ngcliext:parent-fmt "$< pool";
-
-		list pool-entry {
-		    key "first-address";
-		    description
-			"DS-Lite address range entry.";
-
-		    ngcliext:node-fmt "$< address @{first-address} @{last-address}$n";
-
-		    leaf first-address {
-			type inet:ipv4-address;
-			mandatory true;
-			description
-			    "The first IPv4 address in the range.";
-		    }
-
-		    leaf last-address {
-			type inet:ipv4-address;
-			mandatory true;
-			description
-			    "The last IPv4 address in the range.";
-		    }
-		}
-	    }
-	}
-
-	container aftr {
-	    description
-		"Address Family Transition Router (AFTR) configuration.";
-
-	    ngcliext:parent-fmt "$< aftr";
-
-	    container endpoint {
-		description
-		    "An IPv6 tunnel endpoint.";
-
-		ngcliext:parent-fmt "$< endpoint";
-
-		leaf ipv6-address {
-		    type inet:ipv6-address;
-		    description
-			"The IPv6 address of the tunnel endpoint.";
-		    ngcliext:node-fmt "$< @@$n";
-		}
-	    }
-	}
-
-	container b4 {
-	    description
-		"Basic Bridging BroadBand (B4) configuration.";
-
-	    ngcliext:parent-fmt "$< b4";
-
-	    container endpoint {
-		description
-		    "An IPv6 tunnel endpoint.";
-
-		ngcliext:parent-fmt "$< endpoint";
-
-		leaf ipv6-address {
-		    type inet:ipv6-address;
-		    description
-			"The IPv6 address of the tunnel endpoint.";
-		    ngcliext:node-fmt "$< @@$n";
-		}
-	    }
-	}
-    }
-
-    container "dslite-state" {
-	config "false";
-
-	description
-	    "Dual-Stack Lite (DS-Lite) state.";
-
-	container dynamic {
-	    description
-		"Dynamic mapping information.";
-
-	    container pool-table {
-		description
-		    "DS-Lite address pool table.";
-
-		list pool-entry {
-		    key "address";
-		    description
-			"DS-Lite address range entry.";
-
-		    leaf address {
-			type inet:ipv4-address;
-			mandatory true;
-			description
-			    "An IPv4 address in the address pool.";
-		    }
-		}
-	    }
-	}
-
-	container aftr {
-	    description
-		"Address Family Transition Router (AFTR) configuration.";
-
-	    container endpoint {
-		description
-		    "An IPv6 tunnel endpoint.";
-
-		leaf ipv6-address {
-		    type inet:ipv6-address;
-		    description
-			"The IPv6 address of the tunnel endpoint.";
-		}
-	    }
-	}
-
-	container b4 {
-	    description
-		"Basic Bridging BroadBand (B4) configuration.";
-
-	    container endpoint {
-		description
-		    "An IPv6 tunnel endpoint.";
-
-		leaf ipv6-address {
-		    type inet:ipv6-address;
-		    description
-			"The IPv6 address of the tunnel endpoint.";
 		}
 	    }
 	}

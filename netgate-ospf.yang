@@ -36,6 +36,11 @@ module netgate-ospf {
 	 Copyright 2019-2020 Rubicon Communications, LLC.
 	 ";
 
+    revision 2021-06-15 {
+	description
+	    "TNSR Release 21.07.";
+    }
+
     revision 2021-02-15 {
 	description
 	    "TNSR Release 21.02.";
@@ -518,6 +523,8 @@ module netgate-ospf {
 			    type boolean;
 			    description
 				"LSA install/delete information";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$< $%$n";
 			}
 
 			leaf refresh {
@@ -1253,7 +1260,7 @@ module netgate-ospf {
 			    "Distribution lists to filter networks for
 			     outgoing routing updates.";
 
-			ngcliext:parent-fmt "^$%";
+			ngcliext:parent-fmt "^distribution-list";
 
 			list out {
 			    key "route-out";

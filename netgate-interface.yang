@@ -35,6 +35,11 @@ module netgate-interface {
 	 Copyright 2017-2020 Rubicon Communications, LLC.
 	";
 
+    revision 2021-06-15 {
+	description
+	    "TNSR Release 21.07.";
+    }
+
     revision 2021-02-15 {
 	description
 	    "TNSR Release 21.02.";
@@ -355,6 +360,24 @@ module netgate-interface {
 	}
     }
 
+    typedef mss-clamp-direction {
+	type enumeration {
+	    enum Tx {
+		description
+		    "The MSS clamp value applies to transmitted packets.";
+	    }
+	    enum Rx {
+		description
+		    "The MSS clamp value applies to received packets.";
+	    }
+	    enum TxRx {
+		description
+		    "The MSS clamp value applies to both transmitted and
+		     received packets.";
+	    }
+	}
+    }
+
     rpc clear-interface-counters {
 	input {
 	    leaf interface {
@@ -381,7 +404,7 @@ module netgate-interface {
 	list interface {
 	    key "name";
 
-	    ngcliext:context "intf-interfaces";
+	    ngcliext:context "intf-interfaces,intf-vrrp";
 
 	    description
 		"The list of configured interfaces on the device.";
@@ -401,6 +424,7 @@ module netgate-interface {
 		}
 		description
 		    "A textual description of the interface.";
+		ngcliext:context "intf-interfaces";
 		ngcliext:node-fmt "^$% @@$n";
 	    }
 
@@ -409,6 +433,7 @@ module netgate-interface {
 		description
 		    "This leaf contains the configured, desired state of
 		     the interface.";
+		ngcliext:context "intf-interfaces";
 		ngcliext:node-fmt "^disable$n|^enable$n";
 		ngcliext:node-op  "bool";
 	    }
@@ -421,6 +446,7 @@ module netgate-interface {
 		description
 		    "The size, in octets, of the largest packet that the
 		     interface will send and receive.";
+		ngcliext:context "intf-interfaces";
 		ngcliext:node-fmt "^$% @@$n";
 	    }
 
@@ -428,6 +454,7 @@ module netgate-interface {
 		type ngnat:nat-side;
 		description
 		    "NAT role.";
+		ngcliext:context "intf-interfaces";
 		ngcliext:node-fmt "^ip nat @@$n";
 	    }
 
@@ -436,6 +463,7 @@ module netgate-interface {
 		description
 		    "The Media Access Control (MAC) address of the
 		    interface.";
+		ngcliext:context "intf-interfaces";
 		ngcliext:node-fmt "^$% @@$n";
 	    }
 
@@ -450,6 +478,7 @@ module netgate-interface {
 		type ngcom:rt-identifier-15;
 		description
 		    "The name of the VRF this interface is bound to.";
+		ngcliext:context "intf-interfaces";
 		ngcliext:node-fmt "^$% @@$n";
 	    }
 
@@ -457,21 +486,28 @@ module netgate-interface {
 		description
 		    "Parameters for the IPv4 address family.";
 
+		ngcliext:parent-fmt "^ip";
+
 		presence
 		    "make container work the way code expects";
 		
 		container address {
+		    ngcliext:context "intf-interfaces";
+		    ngcliext:parent-fmt "$< address";
+
 		    leaf-list ip {
 			type inet:ipv4-prefix;
 			description
 			    "An IPv4 address on the interface.";
-			ngcliext:node-fmt "^ip address @@$n";
+			ngcliext:node-fmt "$< @@$n";
 		    }
 		}
 
 		container reassembly {
 		    description
 			"ip-reassembly feature control.";
+		    ngcliext:context "intf-interfaces";
+		    ngcliext:parent-fmt "$< reassembly";
 
 		    presence
 			"make container work the way code expects";
@@ -481,7 +517,7 @@ module netgate-interface {
 			description
 			    "IPv4 reassembly enabled for interface";
 			ngcliext:node-op "bool";
-			ngcliext:node-fmt "^|^ip reassembly enable$n";
+			ngcliext:node-fmt "|$< enable$n";
 		    }
 
 		    leaf reassembly-type {
@@ -489,7 +525,7 @@ module netgate-interface {
 			default full;
 			description
 			    "Type of ip-reassembly on interface";
-			ngcliext:node-fmt "^ip reassembly type @@$n";
+			ngcliext:node-fmt "$< type @@$n";
 		    }
 		}
 
@@ -501,7 +537,44 @@ module netgate-interface {
 		    description
 			"The size, in octets, of the largest IPv4 packet that
 			 the interface will send and receive.";
-		    ngcliext:node-fmt "^ip $% @@$n";
+		    ngcliext:context "intf-interfaces";
+		    ngcliext:node-fmt "$< $% @@$n";
+		}
+
+		container tcp {
+		    description
+			"IPv4 TCP configuration values.";
+		    ngcliext:context "intf-interfaces";
+		    ngcliext:parent-fmt "$< tcp";
+
+		    container mss {
+			description
+			    "IPv4 TCP Maximum Segment Size values.";
+			ngcliext:node-fmt "$< $% @{value} @{directions}$n";
+
+			leaf value {
+			    type uint16;
+			    units "octets";
+			    must '../directions != ""' {
+				error-message
+				    "Both 'directions' and 'value' must
+				     be set.";
+			    }
+			    description
+				"The IPv4 TCP maximum segment size.";
+			}
+
+			leaf directions {
+			    type mss-clamp-direction;
+			    must '../value != ""' {
+				error-message
+				    "Both 'direction' and 'value' must
+				     be set.";
+			    }
+			    description
+				"The directions to which the MSS applies.";
+			}
+		    }
 		}
 	    }
 
@@ -509,21 +582,28 @@ module netgate-interface {
 		description
 		    "Parameters for the IPv6 address family.";
 
+		ngcliext:parent-fmt "^ipv6";
+
 		presence
 		    "make container work the way code expects";
 		
 		container address {
+		    ngcliext:context "intf-interfaces";
+		    ngcliext:parent-fmt "$< address";
+
 		    leaf-list ip {
 			type inet:ipv6-prefix;
 			description
 			    "An IPv6 address on the interface.";
-			ngcliext:node-fmt "^ipv6 address @@$n";
+			ngcliext:node-fmt "$< @@$n";
 		    }
 		}
 
 		container reassembly {
 		    description
 			"ip-reassembly feature control.";
+		    ngcliext:context "intf-interfaces";
+		    ngcliext:parent-fmt "$< reassembly";
 
 		    presence
 			"make container work the way the code expects";
@@ -533,14 +613,14 @@ module netgate-interface {
 			description
 			    "IPv6 reassembly enabled for interface";
 			ngcliext:node-op "bool";
-			ngcliext:node-fmt "^|^ipv6 reassembly enable$n";
+			ngcliext:node-fmt "|$< enable$n";
 		    }
 		    leaf reassembly-type {
 			type ip-reassembly-type;
 			default full;
 			description
 			    "Type of ip-reassembly on interface";
-			ngcliext:node-fmt "^ipv6 reassembly type @@$n";
+			ngcliext:node-fmt "$< type @@$n";
 		    }
 		}
 
@@ -552,7 +632,44 @@ module netgate-interface {
 		    description
 			"The size, in octets, of the largest IPv6 packet that
 			 the interface will send and receive.";
-		    ngcliext:node-fmt "^ipv6 $% @@$n";
+		    ngcliext:context "intf-interfaces";
+		    ngcliext:node-fmt "$< $% @@$n";
+		}
+
+		container tcp {
+		    description
+			"IPv6 TCP configuration values.";
+		    ngcliext:context "intf-interfaces";
+		    ngcliext:parent-fmt "$< tcp";
+
+		    container mss {
+			description
+			    "IPv6 TCP Maximum Segment Size values.";
+			ngcliext:node-fmt "$< $% @{value} @{directions}$n";
+
+			leaf value {
+			    type uint16;
+			    units "octets";
+			    must '../directions != ""' {
+				error-message
+				    "Both 'directions' and 'value' must
+				     be set.";
+			    }
+			    description
+				"The IPv4 TCP maximum segment size.";
+			}
+
+			leaf directions {
+			    type mss-clamp-direction;
+			    must '../value != ""' {
+				error-message
+				    "Both 'direction' and 'value' must
+				     be set.";
+			    }
+			    description
+				"The directions to which the MSS applies.";
+			}
+		    }
 		}
 	    }
 
@@ -564,6 +681,8 @@ module netgate-interface {
 		    "If the interface is being used as a bridge, this
 		     node contains the corresponding Bridge Domain Id,
 		     Split Horizon, and/or Bridge Virtual Id information.";
+
+		ngcliext:context "intf-interfaces";
 
 		leaf bdi {
 		    type uint32;
@@ -596,6 +715,7 @@ module netgate-interface {
 		    "If the interface is configured using a DHCP client,
 		     that configuration is contained here.";
 
+		ngcliext:context "intf-interfaces";
 		ngcliext:node-fmt "^dhcp client ipv4";
 		ngcliext:post-node-fmt "$n";
 
@@ -627,6 +747,8 @@ module netgate-interface {
 		     to packet ingress and those that apply to egresss.
 		     The two sets of ACLs are sorted independenty and
 		     applied in ascending sequence-number order.";
+
+		ngcliext:context "intf-interfaces";
 
 		container input {
 		    description
@@ -710,6 +832,7 @@ module netgate-interface {
 		type boolean;
 		description
 		    "enable detailed counter keeping in VPP";
+		ngcliext:context "intf-interfaces";
 		ngcliext:node-op "bool";
 		ngcliext:node-fmt "|^detailed-stats enable$n";
 	    }
@@ -717,6 +840,8 @@ module netgate-interface {
 	    container lldp {
 		presence
 		    "Indicates this interface has LLDP configured";
+
+		ngcliext:context "intf-interfaces";
 
 		leaf port-name {
 		    type string;
@@ -757,6 +882,8 @@ module netgate-interface {
 		    "If the interface is being used as a slave, this node
 		     contains the corresponding bond ID and slave options.";
 
+		ngcliext:context "intf-interfaces";
+
 		leaf instance {
 		    type uint32;
 		    description
@@ -793,6 +920,8 @@ module netgate-interface {
 		description
 		    "Per-interface parameters for MAP-E and MAP-T.";
 
+		ngcliext:context "intf-interfaces";
+
 		leaf enabled {
 		    type boolean;
 		    description
@@ -817,6 +946,8 @@ module netgate-interface {
 	    container vlan-tag-rewrite {
 		presence
 		    "this interface rewrite VLAN tags";
+
+		ngcliext:context "intf-interfaces";
 
 		leaf operation {
 		    type intf-tag-rewrite-op;
@@ -1490,6 +1621,29 @@ module netgate-interface {
 			"The size, in octets, of the largest IPv4 packet that
 			 the interface will send and receive.";
 		}
+
+		container tcp {
+		    description
+			"IPv4 TCP values.";
+
+		    container mss {
+			description
+			    "IPv4 TCP Maximum Segment Size values.";
+
+			leaf value {
+			    type uint16;
+			    units "octets";
+			    description
+				"The IPv4 TCP maximum segment size.";
+			}
+
+			leaf directions {
+			    type mss-clamp-direction;
+			    description
+				"The directions to which the MSS applies.";
+			}
+		    }
+		}
 	    }
 
 	    container ipv6 {
@@ -1522,6 +1676,29 @@ module netgate-interface {
 		    description
 			"The size, in octets, of the largest IPv6 packet that
 			 the interface will send and receive.";
+		}
+
+		container tcp {
+		    description
+			"IPv6 TCP values.";
+
+		    container mss {
+			description
+			    "IPv6 TCP Maximum Segment Size values.";
+
+			leaf value {
+			    type uint16;
+			    units "octets";
+			    description
+				"The IPv6 TCP maximum segment size.";
+			}
+
+			leaf directions {
+			    type mss-clamp-direction;
+			    description
+				"The directions to which the MSS applies.";
+			}
+		    }
 		}
 	    }
 

@@ -30,6 +30,11 @@ module netgate-kea {
 
 	 Copyright 2019-2020 Rubicon Communications, LLC.";
 
+    revision 2021-06-15 {
+	description
+	    "TNSR Release 21.07.";
+    }
+
     revision 2021-02-15 {
 	description
 	    "TNSR Release 21.02.";
@@ -1361,13 +1366,14 @@ module netgate-kea {
 
 		    leaf lfc-interval {
 			type uint32;
-			default 0;
+			default 3600;
 			description
 			    "The lfc-interval specifies the interval in
 			     seconds at which the server will perform a
 			     lease file cleanup to remove the unused,
 			     historical information from the lease file.
-			     The default, 0, disables the LFC operation.";
+			     The default is one hour (3600). Zero disables
+			     the LFC operation.";
 			ngcliext:node-fmt "$< $% @@$n";
 		    }
 		}

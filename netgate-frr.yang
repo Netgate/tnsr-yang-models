@@ -25,10 +25,6 @@ module netgate-frr {
 	prefix "frr";
     }
 
-    import netgate-interface {
-	prefix "ngif";
-    }
-
     import netgate-route {
 	prefix "ngrt";
     }
@@ -43,6 +39,11 @@ module netgate-frr {
 
 	 Copyright 2017-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2021-06-15 {
+	description
+	    "TNSR Release 21.07.";
+    }
 
     revision 2021-02-15 {
 	description
@@ -467,11 +468,7 @@ module netgate-frr {
 			    }
 
 			    leaf if-name {
-				type leafref {
-				    path "/ngif:interfaces-config"
-					+ "/ngif:interface"
-					+ "/ngif:name";
-				}
+				type string;
 				description
 				    "Match based on the name of an
 				     interface.";

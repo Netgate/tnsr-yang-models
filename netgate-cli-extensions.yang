@@ -16,6 +16,11 @@ module netgate-cli-extensions {
 
          Copyright 2020 Rubicon Communications, LLC.";
 
+    revision 2021-06-15 {
+	description
+	    "TNSR Release 21.07.";
+    }
+
     revision 2021-02-15 {
 	description
 	    "TNSR Release 21.02";
@@ -129,6 +134,13 @@ module netgate-cli-extensions {
 	description
 	    "The complete order in which children should be processed.";
 	argument children-order;
+    }
+
+    extension children-top-sort {
+	description
+	    "The name of a specialized topological sort order function
+	     in which children should be processed.";
+	argument children-top-sort;
     }
 
     extension post-child-op {

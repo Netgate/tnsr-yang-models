@@ -31,6 +31,11 @@ module netgate-dataplane {
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	";
 
+    revision 2021-06-15 {
+	description
+	    "TNSR Release 21.07.";
+    }
+
     revision 2021-02-15 {
 	description
 	    "TNSR Release 21.02.";
@@ -402,13 +407,13 @@ module netgate-dataplane {
 		description
 		    "Configs for a NIC or crypto device";
 
-		ngcliext:parent-fmt "$<";
+		ngcliext:parent-fmt "$< ${id} ${device-type}";
 
 		leaf id {
 		    type string;
 		    description
 			"The PCI ID for a device or 'default'.";
-		    ngcliext:sibling-fmt "@@";
+		    ngcliext:child-fmt "dev @@";
 		}
 
 		leaf default {
@@ -417,25 +422,19 @@ module netgate-dataplane {
 			"Default settings for device";
 		}
 
-		leaf tso {
-		    type string;
-		    description
-			"TCP segmentation offload. on/off";
-		    ngcliext:node-fmt "$< dev %{id} %{device-type} $% @@$n";
-		}
-
 		leaf device-type {
 		    type device-type-t;
 		    description
 			"The type of the device.";
-    		    ngcliext:sibling-fmt "@@";
+    		    ngcliext:child-fmt "@@";
+		    ngcliext:node-op "test-set:%{name}%{num-rx-desc}%{num-tx-desc}%{num-rx-queues}%{num-tx-queues}%{tso}%{vlan-strip-offload}";
+		    ngcliext:node-fmt "$<$n|";
 		}
 
 		leaf present {
 		    type boolean;
 		    description
 			"Device enabled, no attributes necessarily set";
-		    ngcliext:node-fmt "$< dev %{id} %{device-type}$n";
 		}
 
 		leaf name {
@@ -446,42 +445,56 @@ module netgate-dataplane {
 			error-message
 			    "Setting a default network name is not supported";
 		    }
-		    ngcliext:node-fmt "$< dev %{id} %{device-type} $% @@$n";
+		    ngcliext:node-fmt "$< $% @@$n";
+		    ngcliext:sibling-fmt "@@";
 		}
 
 		leaf num-rx-desc {
 		    type uint16;
 		    description
 			"Number of receive descriptors.";
-		    ngcliext:node-fmt "$< dev %{id} %{device-type} $% @@$n";
+		    ngcliext:node-fmt "$< $% @@$n";
+		    ngcliext:sibling-fmt "@@";
 		}
 
 		leaf num-tx-desc {
 		    type uint16;
 		    description
 			"Number of transmit descriptors.";
-		    ngcliext:node-fmt "$< dev %{id} %{device-type} $% @@$n";
+		    ngcliext:node-fmt "$< $% @@$n";
+		    ngcliext:sibling-fmt "@@";
 		}
 
 		leaf num-rx-queues {
 		    type uint16;
 		    description
 			"Number of receive queues.";
-		    ngcliext:node-fmt "$< dev %{id} %{device-type} $% @@$n";
+		    ngcliext:node-fmt "$< $% @@$n";
+		    ngcliext:sibling-fmt "@@";
 		}
 
 		leaf num-tx-queues {
 		    type uint16;
 		    description
 			"Number of transmit queues.";
-		    ngcliext:node-fmt "$< dev %{id} %{device-type} $% @@$n";
+		    ngcliext:node-fmt "$< $% @@$n";
+		    ngcliext:sibling-fmt "@@";
+		}
+
+		leaf tso {
+		    type string;
+		    description
+			"TCP segmentation offload. on/off";
+		    ngcliext:node-fmt "$< $% @@$n";
+		    ngcliext:sibling-fmt "@@";
 		}
 
 		leaf vlan-strip-offload {
 		    type string;
 		    description
 			"VLAN strip offload on/off";
-		    ngcliext:node-fmt "$< dev %{id} %{device-type} $% @@$n";
+		    ngcliext:node-fmt "$< $% @@$n";
+		    ngcliext:sibling-fmt "@@";
 		}
 	    }
 
@@ -644,21 +657,6 @@ module netgate-dataplane {
 		    "Optionally followed by a specified of k, m, or g, "+
 		    "to indicate kilo, mega, or giga bytes. ";
 		ngcliext:node-fmt "$< $% @@$n";
-	    }
-	}
-
-	container dslite {
-	    description
-		"NAT dslite settings";
-
-	    ngcliext:parent-fmt "$< nat";
-
-	    leaf dslite-ce {
-		type boolean;
-		description
-		    "dslite ce";
-		ngcliext:node-op "bool";
-		ngcliext:node-fmt "|$< $%$n";
 	    }
 	}
 

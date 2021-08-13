@@ -18,6 +18,11 @@ module netgate-master {
 	 Copyright 2019-2020 Rubicon Communications, LLC.
 	 All rights reserved.";
 
+    revision 2021-06-15 {
+	description
+	    "TNSR Release 21.07.";
+    }
+
     revision 2021-02-15 {
 	description
 	    "TNSR Release 21.02.";
@@ -159,4 +164,91 @@ module netgate-master {
 	    }
 	}
     }
+
+	rpc conf-history-get-log {
+		input {
+			leaf commit-header {
+			type string {
+				length "1..128";
+			}
+			}
+		}
+		output {
+			container logs {
+			list log {
+				leaf oid {
+				type string;
+				}
+			}
+			}
+		}
+	}
+
+	rpc conf-history-save-version {
+		input {
+			leaf version-name {
+			type string {
+				length "1..63";
+			}
+			}
+		}
+	}
+
+	rpc conf-history-load-version {
+		input {
+			leaf version-name {
+			type string {
+				length "1..63";
+			}
+			}
+		}
+	}
+
+	rpc conf-history-drop-versions {
+		input {
+			leaf version-name {
+			type string {
+				length "1..63";
+			}
+			}
+		}
+	}
+
+	rpc conf-history-get-versions {
+		output {
+			container versions {
+			list version {
+				leaf version-name {
+				type string;
+				}
+			}
+			}
+		}
+	}
+
+	rpc conf-history-enable {
+		input {
+			leaf enable {
+			type boolean;
+			mandatory true;
+			}
+
+			leaf skip-transactions {
+			type uint32;
+			}
+		}
+	}
+
+	container "master-state" {
+	config "false";
+		container version-history-config {
+			leaf conf-history-enabled {
+			type boolean;
+			}
+
+			leaf conf-history-skip-transactions {
+			type uint32;
+			}
+		}
+	}
 }

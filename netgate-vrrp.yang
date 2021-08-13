@@ -29,6 +29,11 @@ module netgate-vrrp {
 	 Copyright 2019-2020 Rubicon Communications, LLC.
 	";
 
+    revision 2021-06-15 {
+	description
+	    "TNSR Release 21.07.";
+    }
+
     revision 2021-02-15 {
 	description
 	    "TNSR Release 21.02.";
@@ -425,13 +430,16 @@ module netgate-vrrp {
 	    description
 		"Configures VRRP version 3 for IPv4.";
 
+	    ngcliext:context "intf-vrrp";
+	    ngcliext:parent-fmt "$<";
+
 	    list vrrp-instance {
 		key "vrid";
 		description
 		    "Defines a virtual router, identified by a VRID, within the
 		     IPv4 address space.";
 
-		ngcliext:node-fmt "^ip vrrp-virtual-router @{vrid}$n";
+		ngcliext:node-fmt "$< vrrp-virtual-router @{vrid}$n";
 		ngcliext:pre-children-op "push";
 
 		uses vrrp-ipv4-attributes;
@@ -447,13 +455,16 @@ module netgate-vrrp {
 	    description
 		"Configures VRRP version 3 for IPv6.";
 
+	    ngcliext:context "intf-vrrp";
+	    ngcliext:parent-fmt "$<";
+
 	    list vrrp-instance {
 		key "vrid";
 		description
 		    "Defines a virtual router, identified by a VRID, within the
 		     IPv6 address space.";
 
-		ngcliext:node-fmt "^ipv6 vrrp-virtual-router @{vrid}$n";
+		ngcliext:node-fmt "$< vrrp-virtual-router @{vrid}$n";
 		ngcliext:pre-children-op "push";
 
 		uses vrrp-ipv6-attributes;

@@ -27,6 +27,11 @@ module netgate-route-table {
 
 	 Copyright 2017-2020 Rubicon Communications, LLC.";
 
+    revision 2021-06-15 {
+	description
+	    "TNSR Release 21.07.";
+    }
+
     revision 2021-02-15 {
 	description
 	    "TNSR Release 21.02.";
@@ -57,6 +62,37 @@ module netgate-route-table {
 	    "Initial Revision.";
     }
 
+    typedef route-class {
+	type enumeration {
+	    enum special-default {
+		description
+		    "Special routes automatically added in any route table
+		     by default.";
+	    }
+	    enum special-neighbor {
+		description
+		    "Special routes automatically added for any discovered
+		     neighbor.";
+	    }
+	    enum special-connected {
+		description
+		    "Special routes automatically added after an IP address
+		     is assigned to an interface.";
+	    }
+	    enum connected {
+		description
+		    "Connected routes.";
+	    }
+	    enum static {
+		description
+		    "Static routes.";
+	    }
+	    enum dynamic {
+		description
+		    "Dynamic routes.";
+	    }
+	}
+    }
 
     rpc route-lookup {
 	input {
@@ -343,8 +379,8 @@ module netgate-route-table {
 				    description
 					"Resolve host";
 				    ngcliext:context "static-routes";
-				    ngcliext:node-op "bool";
-				    ngcliext:node-fmt "|resolve-via-host$n";
+				    ngcliext:sibling-op "bool";
+				    ngcliext:sibling-fmt "| resolve-via-host";
 				}
 
 				leaf resolve-attached {
@@ -352,8 +388,8 @@ module netgate-route-table {
 				    description
 					"Resolve attached";
 				    ngcliext:context "static-routes";
-				    ngcliext:node-op "bool";
-				    ngcliext:node-fmt "|resolve-via-attached$n";
+				    ngcliext:sibling-op "bool";
+				    ngcliext:sibling-fmt "| resolve-via-attached";
 				}
 			    }
 			}
@@ -501,8 +537,8 @@ module netgate-route-table {
 				    description
 					"Resolve host";
 				    ngcliext:context "static-routes";
-				    ngcliext:node-op "bool";
-				    ngcliext:node-fmt "|resolve-via-host$n";
+				    ngcliext:sibling-op "bool";
+				    ngcliext:sibling-fmt "| resolve-via-host";
 				}
 
 				leaf resolve-attached {
@@ -510,8 +546,8 @@ module netgate-route-table {
 				    description
 					"Resolve attached";
 				    ngcliext:context "static-routes";
-				    ngcliext:node-op "bool";
-				    ngcliext:node-fmt "|resolve-via-attached$n";
+				    ngcliext:sibling-op "bool";
+				    ngcliext:sibling-fmt "| resolve-via-attached";
 				}
 			    }
 			}
@@ -583,6 +619,12 @@ module netgate-route-table {
 			    description
 				"Administrative distance
 				preference.";
+			}
+
+			leaf class {
+			    type route-class;
+			    description
+				"Route class.";
 			}
 
 			container next-hop {
@@ -702,6 +744,12 @@ module netgate-route-table {
 			    description
 				"Administrative distance
 				preference.";
+			}
+
+			leaf class {
+			    type route-class;
+			    description
+				"Route class.";
 			}
 
 			container next-hop {

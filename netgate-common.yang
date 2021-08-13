@@ -15,6 +15,11 @@ module netgate-common {
 
     Copyright 2017-2020 Rubicon Communications, LLC. All rights reserved.";
 
+    revision 2021-06-15 {
+	description
+	    "TNSR Release 21.07.";
+    }
+
     revision 2021-02-15 {
 	description
 	    "TNSR Release 21.02";
@@ -231,6 +236,14 @@ module netgate-common {
 	}
     }
 
+    feature netgate-has-netns {
+	description
+	    "Enabling this feature asserts that the system supports
+	     different network namespaces, notably 'host' and 'dataplane'
+	     namespaces.  Withoug this feature, host and dataplane are
+	     same and represented by 'host'.";
+    }
+
     typedef network-namespace {
 	type enumeration {
             enum host {
@@ -238,6 +251,7 @@ module netgate-common {
                     "Host network namespace";
             }
             enum dataplane {
+		if-feature netgate-has-netns;
                 description
                     "Dataplane network namespace";
             }

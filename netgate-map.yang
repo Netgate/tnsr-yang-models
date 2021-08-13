@@ -32,6 +32,11 @@ module netgate-map {
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	 ";
 
+    revision 2021-06-15 {
+	description
+	    "TNSR Release 21.07.";
+    }
+
     revision 2021-02-15 {
 	description
 	    "TNSR Release 21.02.";
@@ -82,7 +87,7 @@ module netgate-map {
 			description
 			    "If needed, inner packets should be fragmented.";
 			ngcliext:node-op "bool";
-			ngcliext:node-fmt "|$< $%$n";
+			ngcliext:node-fmt "$< outer$n|$< inner$n";
 		    }
 
 		    leaf ignore-df {
@@ -117,7 +122,7 @@ module netgate-map {
 			description
 			    "If true, generate ICMP6 unreachable messages.";
 			ngcliext:node-op "bool";
-			ngcliext:node-fmt "|^icmp6 $% enable$n";
+			ngcliext:node-fmt "|^icmp6 unreachable-msgs enable$n";
 		    }
 		}
 
@@ -218,7 +223,7 @@ module netgate-map {
 		description
 		    "MAP table.";
 
-		ngcliext:node-fmt "$<";
+		ngcliext:parent-fmt "$<";
 
 		list domain {
 		    key "name";
@@ -308,7 +313,7 @@ module netgate-map {
 			    description
 				"Port Set Identifier";
 
-			    ngcliext:node-fmt "^$% @{psid} ipv6-destination @{ip6-destination}$n";
+			    ngcliext:node-fmt "^$% port-set @{psid} ipv6-destination @{ip6-destination}$n";
 
 			    leaf psid {
 				type uint32;

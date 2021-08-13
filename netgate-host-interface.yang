@@ -27,6 +27,11 @@ module netgate-host-interface {
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	";
 
+    revision 2021-06-15 {
+	description
+	    "TNSR Release 21.07.";
+    }
+
     revision 2021-02-15 {
 	description
 	    "TNSR Release 21.02.";
@@ -84,7 +89,7 @@ module netgate-host-interface {
 		    "This leaf contains the configured, desired state of
 		     the interface.";
 		ngcliext:node-op "bool";
-		ngcliext:node-fmt "|^enabled$n";
+		ngcliext:node-fmt "|^enable$n";
 	    }
 
 	    leaf mtu {
