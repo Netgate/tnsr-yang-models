@@ -40,6 +40,16 @@ module netgate-frr {
 	 Copyright 2017-2020 Rubicon Communications, LLC.
 	 ";
 
+    revision 2022-02-15 {
+	description
+	    "TNSR Release 22.02.";
+    }
+
+    revision 2021-11-15 {
+	description
+	    "TNSR Release 21.11.";
+    }
+
     revision 2021-06-15 {
 	description
 	    "TNSR Release 21.07.";
@@ -85,6 +95,20 @@ module netgate-frr {
 	    "Initial revision.";
     }
 
+
+    typedef ospf6-metric-type {
+	type enumeration {
+	    enum type-1 {
+		description
+		    "OSPF6 metric-type type-1.";
+	    }
+
+	    enum type-2 {
+		description
+		    "OSPF6 metric-type type-2.";
+	    }
+	}
+    }
 
     typedef zebra-packet-send-recv {
 	type enumeration {
@@ -229,7 +253,7 @@ module netgate-frr {
 		}
 
 		leaf remark {
-		    type string;
+		    type ngcom:description-63;
 		    description
 			"A user description of the Access List.";
 		    ngcliext:node-fmt "^$% @@$n";
@@ -292,7 +316,7 @@ module netgate-frr {
 		}
 
 		leaf description {
-		    type string;
+		    type ngcom:description-63;
 		    description
 			"A user description of the prefix list.";
 		    ngcliext:node-fmt "^description @@$n";
@@ -318,12 +342,14 @@ module netgate-frr {
 			}
 
 			leaf action {
+			    mandatory true;
 			    type frr:prefix-list-action;
 			    description
 				"One of the actions 'deny', 'permit'.";
 			}
 
 			leaf prefix {
+			    mandatory true;
 			    type inet:ip-prefix;
 			    description
 				"The IPv4 or IPv6 address and prefix.";
@@ -371,7 +397,7 @@ module netgate-frr {
 		}
 
 		leaf description {
-		    type string;
+		    type ngcom:description-63;
 		    description
 			"A user description of the Route Map.";
 		    ngcliext:node-fmt "^$% @@$n";
@@ -407,7 +433,7 @@ module netgate-frr {
 			}
 
 			leaf description {
-			    type string;
+			    type ngcom:description-63;
 			    description
 				"A user description of the Route Map.";
 			    ngcliext:node-fmt "^$% @@$n";
@@ -487,8 +513,8 @@ module netgate-frr {
 				type leafref {
 				    path "/ngrt:route-config"
 					+ "/ngrt:dynamic"
-					+ "/prefix-lists/list"
-					+ "/name";
+					+ "/ngfrr:prefix-lists/ngfrr:list"
+					+ "/ngfrr:name";
 				}
 				description
 				    "Match based on the name of a
@@ -514,8 +540,8 @@ module netgate-frr {
 			    leaf ip-next-hop-prefix-list {
 				type leafref {
 				    path "/ngrt:route-config/ngrt:dynamic"
-					+ "/prefix-lists/list"
-					+ "/name";
+					+ "/ngfrr:prefix-lists/ngfrr:list"
+					+ "/ngfrr:name";
 				}
 				description
 				    "Match the prefixes specified by
@@ -1014,6 +1040,21 @@ module netgate-frr {
 				}
 			    }
 
+			    container metric-type {
+				description
+				    "Attributes for setting the metric-type.";
+
+				ngcliext:parent-fmt "$< $%";
+
+				leaf type {
+				    type ospf6-metric-type;
+				    description
+					"Set the metric-type attribute to
+					 type-1 or type-2.";
+				    ngcliext:node-fmt "$< @@$n";
+				}
+			    }
+
 			    leaf origin {
 				type frr:route-map-origin;
 				description
@@ -1069,7 +1110,7 @@ module netgate-frr {
 			    leaf rt-map-name {
 				type leafref {
 				    path "/ngrt:route-config/ngrt:dynamic"
-					+ "/route-maps/map/name";
+					+ "/ngfrr:route-maps/ngfrr:map/ngfrr:name";
 				}
 				description
 				    "Call the named Route Map entry.";

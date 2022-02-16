@@ -22,6 +22,11 @@ module netgate-nacm {
 
 	 Copyright 2021 Rubicon Communications, LLC.";
 
+    revision 2022-02-15 {
+	description
+	    "TNSR Release 22.02.";
+    }
+
     revision 2021-02-15 {
 	description
 	    "TNSR Release 21.02.";
@@ -30,11 +35,22 @@ module netgate-nacm {
 
     augment "/nacm:nacm" {
 	ngcliext:parent-fmt "nacm";
+	ngcliext:pre-node-fmt "nacm disable$n";
+	ngcliext:children-order "read-default
+	    write-default
+	    exec-default
+	    enable-external-groups
+	    denied-operations
+	    denied-data-writes
+	    denied-notifications
+	    groups
+	    rule-list
+	    enable-nacm";
     }
 
     augment "/nacm:nacm/nacm:enable-nacm" {
 	ngcliext:node-op "bool";
-	ngcliext:node-fmt "|$< enable$n";
+	ngcliext:node-fmt "$< disable$n|$< enable$n";
     }
 
     augment "/nacm:nacm/nacm:read-default" {
@@ -77,7 +93,7 @@ module netgate-nacm {
     }
 
     augment "/nacm:nacm/nacm:rule-list/nacm:rule/nacm:access-operations" {
-    	    ngcliext:node-fmt "^$% $q@@$q$n";
+    	    ngcliext:node-fmt "^$% @@$n";
     }
 
     augment "/nacm:nacm/nacm:rule-list/nacm:rule/nacm:action" {

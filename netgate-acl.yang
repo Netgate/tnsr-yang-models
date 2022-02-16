@@ -28,6 +28,11 @@ module netgate-acl {
 	 Copyright 2017-2020 Rubicon Communications, LLC.
 	 ";
 
+    revision 2022-02-15 {
+	description
+	    "TNSR Release 22.02.";
+    }
+
     revision 2021-02-15 {
 	description
 	    "TNSR Release 21.02.";

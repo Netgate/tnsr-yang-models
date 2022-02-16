@@ -1,0 +1,187 @@
+module netgate-conf-rollback {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-conf-rollback";
+    prefix "ngconfrollback";
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides Configuration Rollback operations.
+
+	 Copyright 2021 Rubicon Communications, LLC.";
+
+    revision 2021-11-15 {
+	description
+	    "TNSR Release 21.11.";
+    }
+
+    rpc conf-rollback-start-timer {
+	description
+	    "Start a timer after which expiration the configuration running
+	     at the expiration time is replaced with the configuration saved
+	     before start of the timer unless the rollback is cancelled.";
+
+	input {
+	    container time {
+		description
+		    "Time within which the rollback can be cancelled.";
+
+		leaf minutes {
+		    type uint8 {
+			range "1..120";
+		    }
+		    mandatory true;
+		    description
+			"Number of minutes.";
+		}
+	    }
+
+	    container config-source {
+		description
+		    "Configuration a copy of which is saved before start of
+		     the rollback timer.";
+
+		choice config-source-file {
+		    mandatory true;
+		    description
+			"Particular configuration file to copy from.";
+
+		    case running-db {
+			leaf running {
+			    type empty;
+			    description
+				"Copy of the running configuration file.";
+			}
+		    }
+
+		    case startup-db {
+			leaf startup {
+			    type empty;
+			    description
+				"Copy of the startup configuration file.";
+			}
+		    }
+
+		    case file {
+			leaf filename {
+			    type string {
+				length "1..4096";
+				pattern "[a-zA-Z0-9_.\/-]*";
+			    }
+			    description
+				"Copy of a file on disk.";
+			}
+		    }
+		}
+	    }
+	}
+    }
+
+    rpc conf-rollback-restart-timer {
+	description
+	    "Reset the timer previously started and start it over.";
+
+	input {
+	    container time {
+		description
+		    "Time within which the rollback can be cancelled.";
+
+		leaf minutes {
+		    type uint8 {
+			range "1..120";
+		    }
+		    mandatory true;
+		    description
+			"Number of minutes.";
+		}
+	    }
+	}
+    }
+
+    rpc conf-rollback-show-timer {
+	description
+	    "Show information about the timer previously started (or
+	     restarted).";
+
+	output {
+	    container timer-info {
+		leaf is-started {
+		    type boolean;
+		    mandatory true;
+		    description
+			"Indicates whether the rollback timer is started or
+			 not.";
+		}
+
+		container time {
+		    description
+			"Time within which the rollback can be cancelled.";
+
+		    leaf minutes {
+			type uint8;
+			description
+			    "Number of minutes.";
+		    }
+
+		    leaf seconds {
+			type uint8;
+			description
+			    "Number of seconds.";
+		    }
+		}
+
+		container config-source {
+		    description
+			"Configuration a copy of which is saved before start of
+			 the rollback timer.";
+
+		    choice config-source-file {
+			description
+			    "Particular configuration file a copy of which is
+			     held.";
+
+			leaf running {
+			    type empty;
+			    description
+				"Copy of the running configuration file.";
+			}
+
+			leaf startup {
+			    type empty;
+			    description
+				"Copy of the startup configuration file.";
+			}
+
+			leaf filename {
+			    type string;
+			    description
+				"Copy of a file on disk.";
+			}
+		    }
+		}
+
+		leaf username {
+		    type string;
+		    description
+			"Name of the user who started (or restarted) the
+			 rollback timer.";
+		}
+	    }
+	}
+    }
+
+    rpc conf-rollback-trigger {
+	description
+	    "Trigger the rollback immediately without waiting for the timer
+	     to expire.";
+    }
+
+    rpc conf-rollback-cancel {
+	description
+	    "Cancel the timed rollback.";
+    }
+}

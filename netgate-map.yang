@@ -32,6 +32,11 @@ module netgate-map {
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	 ";
 
+    revision 2022-02-15 {
+	description
+	    "TNSR Release 22.02.";
+    }
+
     revision 2021-06-15 {
 	description
 	    "TNSR Release 21.07.";
@@ -240,7 +245,7 @@ module netgate-map {
 		    }
 
 		    leaf description {
-			type string;
+			type ngcom:description-63;
 			description
 			    "An arbitrary description of the MAP domain.";
 			ngcliext:node-fmt "^$% @@$n";

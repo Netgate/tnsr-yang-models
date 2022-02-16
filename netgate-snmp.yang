@@ -9,6 +9,10 @@ module netgate-snmp {
 	prefix "inet";
     }
 
+    import ietf-yang-types {
+	prefix "yang";
+    }
+
     import netgate-cli-extensions {
 	prefix "ngcliext";
     }
@@ -25,6 +29,11 @@ module netgate-snmp {
 	"This YANG module provides a data model for SNMP Services.
 
 	 Copyright 2019-2020 Rubicon Communications, LLC.";
+
+    revision 2022-02-15 {
+	description
+	    "TNSR Release 22.02.";
+    }
 
     revision 2021-02-15 {
 	description
@@ -264,7 +273,7 @@ module netgate-snmp {
 		    }
 
 		    leaf oid {
-			type string;
+			type ngcom:object-id-view-128;
 			mandatory true;
 			description
 			    "SNMP OID.";

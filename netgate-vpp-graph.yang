@@ -29,7 +29,7 @@ module netgate-vpp-graph {
 
     typedef graph-node-name {
 	type string {
-	    length "1..31";
+	    length "1..64";		/* VPP GRAPH_NODE_NAME_LEN */
 	}
     }
 

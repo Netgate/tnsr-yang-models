@@ -27,6 +27,11 @@ module netgate-route-table {
 
 	 Copyright 2017-2020 Rubicon Communications, LLC.";
 
+    revision 2022-02-15 {
+	description
+	    "TNSR Release 22.02.";
+    }
+
     revision 2021-06-15 {
 	description
 	    "TNSR Release 21.07.";
@@ -77,6 +82,11 @@ module netgate-route-table {
 	    enum special-connected {
 		description
 		    "Special routes automatically added after an IP address
+		     is assigned to an interface.";
+	    }
+	    enum special-drop {
+		description
+		    "Special drop routes automatically added after an IP address
 		     is assigned to an interface.";
 	    }
 	    enum connected {
@@ -222,7 +232,7 @@ module netgate-route-table {
 		}
 
 		leaf description {
-		    type string;
+		    type ngcom:description-63;
 		    description
 			"A description of the route table.";
 		    ngcliext:context "static-routes";
@@ -416,7 +426,7 @@ module netgate-route-table {
 			}
 
 			leaf description {
-			    type string;
+			    type ngcom:description-63;
 			    description
 				"A description of the route.";
 			    ngcliext:context "static-routes";

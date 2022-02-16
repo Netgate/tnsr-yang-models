@@ -85,8 +85,10 @@ module netgate-gre {
 
 	    list tunnel {
 		key "name";
+		unique "instance";
+
 		description
-		    "GRE tunnel name.";
+		    "GRE tunnel configuration.";
 
 		ngcliext:node-fmt "gre @{name}$n";
 		ngcliext:pre-children-op "push";
@@ -99,8 +101,9 @@ module netgate-gre {
 		}
 
 		leaf dst-ip-address {
-		     type inet:ip-address-no-zone;
-		     description
+		    type inet:ip-address-no-zone;
+		    mandatory true;
+		    description
 			"The destination IP address.";
 		    ngcliext:node-fmt "^destination @@$n";
 		}
@@ -116,6 +119,7 @@ module netgate-gre {
 
 		leaf instance {
 		    type uint32;
+		    mandatory true;
 		    description
 			"Each GRE tunnel creates an interface.  The
 			 created interface will be named 'gre<X>',
@@ -133,8 +137,9 @@ module netgate-gre {
 		}
 
 		leaf src-ip-address {
-		     type inet:ip-address-no-zone;
-		     description
+		    type inet:ip-address-no-zone;
+		    mandatory true;
+		    description
 			"The source IP address.";
 		    ngcliext:node-fmt "^source @@$n";
 		}

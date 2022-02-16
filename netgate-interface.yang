@@ -35,6 +35,16 @@ module netgate-interface {
 	 Copyright 2017-2020 Rubicon Communications, LLC.
 	";
 
+    revision 2022-02-15 {
+	description
+	    "TNSR Release 22.02.";
+    }
+
+    revision 2021-11-15 {
+	description
+	    "TNSR Release 21.11.";
+    }
+
     revision 2021-06-15 {
 	description
 	    "TNSR Release 21.07.";
@@ -419,9 +429,7 @@ module netgate-interface {
 	    }
 
 	    leaf description {
-		type string {
-		  length "1..63";
-		}
+		type ngcom:description-63;
 		description
 		    "A textual description of the interface.";
 		ngcliext:context "intf-interfaces";
@@ -866,7 +874,7 @@ module netgate-interface {
 		    }
 
 		    leaf oid {
-			type string;
+			type ngcom:object-id-128;
 			description
 			    "Management object ID.";
 			ngcliext:node-fmt "^lldp management oid @@$n";
@@ -1010,9 +1018,7 @@ module netgate-interface {
 		}
 
 		leaf description {
-		    type string {
-			length "1..63";
-		    }
+		    type ngcom:description-63;
 		    description
 			"A textual description of the bridge.";
 		    ngcliext:node-fmt "^$% @@$n";
@@ -1134,7 +1140,7 @@ module netgate-interface {
 		}
 
 		leaf description {
-		    type string;
+		    type ngcom:description-63;
 		    description
 			"A user description of the Loopback.";
 		    ngcliext:node-fmt "^$% @@$n";
@@ -1361,6 +1367,8 @@ module netgate-interface {
 
 	    list tap {
 		key "host-name";
+		unique "instance";
+
 		description
 		    "Unique identifing host tap name.";
 
@@ -1425,6 +1433,7 @@ module netgate-interface {
 
 		leaf instance {
 		    type uint32;
+		    mandatory true;
 		    description
 			"The tap instance number.";
 		    ngcliext:node-fmt "^$% @@$n";
@@ -1699,6 +1708,69 @@ module netgate-interface {
 				"The directions to which the MSS applies.";
 			}
 		    }
+		}
+	    }
+
+	    container subif {
+		description
+		    "These fields all contribute to the subinterface
+		     definition for VLAN handling.";
+
+		leaf subid {
+		    type uint32;
+		    description
+			"The subinterface id.  It is often also the (outer)
+			 VLAN tag value, though they can be different.";
+		}
+
+		leaf dot1ad {
+		    type boolean;
+		    description
+			"By default the outer tag is dot1q.  If this
+			 value is true, it is instead dot1ad.";
+		}
+
+		leaf dot1ah {
+		    type boolean;
+		    description
+			"If true, it is dot1ah.";
+		}
+
+		leaf exact-match {
+		    type boolean;
+		    description
+			"By default matching is non-exact.  If this
+			 value is true, matching is exact.";
+		}
+
+		leaf default {
+		    type boolean;
+		    description
+			"The default subinterface is associated with a
+			 packet that did not match any other configured
+			 subinterface on this interface.";
+		}
+
+		leaf number-of-tags {
+		    type uint8 {
+			range "0..2";
+		    }
+		    description
+			"The number of VLAN tags.";
+		}
+
+		leaf outer-vlan-id {
+		    type intf-vlan-id;
+		    description
+			"The outer vlan tag id.  It can be an integer
+			 between 1 and 4095 inclusive, or the word 'any'.";
+		}
+
+		leaf inner-vlan-id {
+		    type intf-vlan-id;
+		    description
+			"The inner vlan tag id.  It can be an integer
+			 between 1 and 4095 inclusive, or the word 'any'.";
 		}
 	    }
 

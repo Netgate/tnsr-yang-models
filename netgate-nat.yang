@@ -27,6 +27,11 @@ module netgate-nat {
 
 	 Copyright 2017-2020 Rubicon Communications, LLC.";
 
+    revision 2021-11-15 {
+	description
+	    "TNSR Release 21.11.";
+    }
+
     revision 2021-06-15 {
 	description
 	    "TNSR Release 21.07.";
@@ -181,6 +186,7 @@ module netgate-nat {
 		    type uint32 {
 			range "1..4294967295";
 		    }
+		    default 128000;
 		    description
 			"Maximum number of sessions per thread.";
 		    ngcliext:node-fmt "$< $% @@$n";

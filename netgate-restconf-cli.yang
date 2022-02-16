@@ -1,76 +1,75 @@
-
 module netgate-restconf-cli {
 
-  yang-version 1.1;
+    yang-version 1.1;
 
-  namespace "urn:netgate:xml:yang:netgate-restconf-cli";
-  prefix "ngrccli";
+    namespace "urn:netgate:xml:yang:netgate-restconf-cli";
+    prefix "ngrccli";
 
-  import clixon-restconf {
-    prefix clrc;
-  }
+    import clixon-restconf {
+	prefix clrc;
+    }
 
-  import netgate-cli-extensions {
-    prefix "ngcliext";
-  }
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
 
-  organization "Netgate";
-  contact "Web: <http://www.netgate.com>";
+    organization "Netgate";
+    contact "Web: <http://www.netgate.com>";
 
-  description
-    "This YANG module provides TNSR CLI augments for
-     clixon RESTCONF model.
+    description
+	"This YANG module provides TNSR CLI augments for
+	 clixon RESTCONF model.
 
-     Copyright 2021 Rubicon Communications, LLC.";
+	 Copyright 2021 Rubicon Communications, LLC.";
 
-    revision 2021-06-15 {
+	revision 2021-06-15 {
 	description
 	    "TNSR Release 21.07.";
-    }
+	}
 
-    revision 2021-03-29 {
+	revision 2021-03-29 {
 	description
 	    "initial release.";
-    }
+	}
 
-    augment "/clrc:restconf" {
-      ngcliext:node-fmt "restconf$n";
-      ngcliext:pre-children-op "push";
-    }
+	augment "/clrc:restconf" {
+	    ngcliext:node-fmt "restconf$n";
+	    ngcliext:pre-children-op "push";
+	}
 
-    augment "/clrc:restconf/enable" {
-      ngcliext:node-fmt "    $% @@$n";
-    }
-    
-    augment "/clrc:restconf/auth-type" {
-      ngcliext:node-fmt "    global authentication-type @@$n";
-    }
-    
-    augment "/clrc:restconf/server-ca-cert-path" {
-      ngcliext:node-fmt "    global server-ca-cert-path @@$n";
-    }
+	augment "/clrc:restconf/enable" {
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+	
+	augment "/clrc:restconf/auth-type" {
+	    ngcliext:node-fmt "^global authentication-type @@$n";
+	}
+	
+	augment "/clrc:restconf/server-ca-cert-path" {
+	    ngcliext:node-fmt "^global server-ca-cert-path @@$n";
+	}
 
-    augment "/clrc:restconf/server-cert-path" {
-      ngcliext:node-fmt "    global server-certificate @@$n";
-    }
+	augment "/clrc:restconf/server-cert-path" {
+	    ngcliext:node-fmt "^global server-certificate @@$n";
+	}
 
-    augment "/clrc:restconf/server-key-path" {
-      ngcliext:node-fmt "    global server-key @@$n";
-    }
+	augment "/clrc:restconf/server-key-path" {
+	    ngcliext:node-fmt "^global server-key @@$n";
+	}
 
-    augment "/clrc:restconf/socket/namespace" {
-	ngcliext:node-fmt "    server @@%{address}%{port}%{ssl}$n";
-    }
+	augment "/clrc:restconf/socket/namespace" {
+	    ngcliext:node-fmt "^server @@%{address}%{port}%{ssl}$n";
+	}
 
-    augment "/clrc:restconf/socket/address" {
-	ngcliext:sibling-fmt " @@";
-    }
+	augment "/clrc:restconf/socket/address" {
+	    ngcliext:sibling-fmt " @@";
+	}
 
-    augment "/clrc:restconf/socket/port" {
-	ngcliext:sibling-fmt " @@";
-    }
+	augment "/clrc:restconf/socket/port" {
+	    ngcliext:sibling-fmt " @@";
+	}
 
-    augment "/clrc:restconf/socket/ssl" {
-	ngcliext:sibling-fmt " @@";
-    }
+	augment "/clrc:restconf/socket/ssl" {
+	    ngcliext:sibling-fmt " @@";
+	}
 }

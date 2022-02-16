@@ -40,6 +40,11 @@ module netgate-bgp {
 	 Copyright 2019-2020 Rubicon Communications, LLC.
 	 ";
 
+    revision 2022-02-15 {
+	description
+	    "TNSR Release 22.02.";
+    }
+
     revision 2021-06-15 {
 	description
 	    "TNSR Release 21.07.";
@@ -1135,6 +1140,27 @@ module netgate-bgp {
 
 			ngcliext:parent-fmt "$< $%";
 
+			container ipv4-prefixes {
+			    ngcliext:parent-fmt "$<";
+
+			    leaf-list ipv4-prefix {
+				type inet:ipv4-prefix;
+				description
+				    "Debug bestpath of this IPv4 prefix.";
+				ngcliext:node-fmt "$< @@$n";
+			    }
+			}
+
+			container ipv6-prefixes {
+			    ngcliext:parent-fmt "$<";
+
+			    leaf-list ipv6-prefix {
+				type inet:ipv6-prefix;
+				description
+				    "Debug bestpath of this IPv6 prefix.";
+				ngcliext:node-fmt "$< @@$n";
+			    }
+			}
 			leaf ipv6-prefix {
 			    type inet:ipv6-prefix;
 			    description
@@ -1217,25 +1243,46 @@ module netgate-bgp {
 			    ngcliext:node-fmt "|$<$n";
 			}
 
-			leaf in-peer {
-			    type string;
+		        container in-peers {
 			    description
-				"Debug specific BGP neighbor in-updates.";
-			    ngcliext:node-fmt "$< in @@$n";
+				"Debug BGP neighbor in-peers updates.";
+
+			    ngcliext:parent-fmt "$< in";
+
+			    leaf-list peer {
+				type string;
+				description
+				    "Debug specific BGP neighbor in-updates.";
+				ngcliext:node-fmt "$< @@$n";
+			    }
 			}
 
-			leaf out-peer {
-			    type string;
+		        container out-peers {
 			    description
-				"Debug specific BGP neighbor out-updates.";
-			    ngcliext:node-fmt "$< in @@$n";
+				"Debug BGP neighbor out-peers updaets.";
+
+			    ngcliext:parent-fmt "$< out";
+
+			    leaf-list peer {
+				type string;
+				description
+				    "Debug specific BGP neighbor out-updates.";
+				ngcliext:node-fmt "$< @@$n";
+			    }
 			}
 
-			leaf prefix {
-			    type inet:ip-prefix;
+		        container prefixes {
 			    description
-				"Debug specific BGP IPV4 or IPv6 prefix.";
-			    ngcliext:node-fmt "$< in @@$n";
+				"Debug BGP neighbor prefixes updates.";
+
+			    ngcliext:parent-fmt "$< prefix";
+
+			    leaf-list prefix {
+				type inet:ip-prefix;
+				description
+				    "Debug specific BGP IPv4 or IPv6 prefix.";
+				ngcliext:node-fmt "$< @@$n";
+			    }
 			}
 		    }
 
@@ -1389,7 +1436,7 @@ module netgate-bgp {
 			    }
 
 			    leaf description {
-				type string;
+				type ngcom:description-63;
 				description
 				    "A user description of the neighbor.";
 				ngcliext:node-fmt "^$% @@$n";
@@ -1778,7 +1825,7 @@ module netgate-bgp {
 			    type boolean;
 			    default true;
 			    description
-				"Propogate IPv4 unicast routes.  If true,
+				"Propagate IPv4 unicast routes.  If true,
 				 routes are propagated.  If false, IPv4
 				 unicast routes propagation is disabled.
 				 Default true.";
@@ -1842,6 +1889,14 @@ module netgate-bgp {
 			    "The peer group name for dynamically created
 			     neighbors.";
 			ngcliext:sibling-fmt " peer-group @@";
+		    }
+
+		    leaf log-neighbor-changes {
+			type boolean;
+			description
+			    "Log neighbor up, down, and reset reasons.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
 		    }
 
 		    container max-med {
@@ -2314,7 +2369,7 @@ module netgate-bgp {
 		    }
 
 		    leaf description {
-			type string;
+			type ngcom:description-63;
 			description
 			    "A user description of the community list.";
 			ngcliext:node-fmt "^$% @@$n";
@@ -2505,7 +2560,7 @@ module netgate-bgp {
 			leaf prefix {
 			    type inet:ip-prefix;
 			    description
-				"Debug specific BGP IPV4 or IPv6 prefix.";
+				"Debug specific BGP IPv4 or IPv6 prefix.";
 			}
 		    }
 
@@ -2522,7 +2577,7 @@ module netgate-bgp {
 			leaf prefix {
 			    type inet:ip-prefix;
 			    description
-				"Debug specific BGP IPV4 or IPv6 prefix.";
+				"Debug specific BGP IPv4 or IPv6 prefix.";
 			}
 		    }
 		}

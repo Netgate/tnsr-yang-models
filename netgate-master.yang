@@ -9,6 +9,14 @@ module netgate-master {
 	prefix "ngcom";
     }
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
+    import netgate-conf-history {
+	prefix "ngconfhistory";
+    }
+
     organization "Netgate";
 
     contact "Web: <http://www.netgate.com>";
@@ -165,90 +173,4 @@ module netgate-master {
 	}
     }
 
-	rpc conf-history-get-log {
-		input {
-			leaf commit-header {
-			type string {
-				length "1..128";
-			}
-			}
-		}
-		output {
-			container logs {
-			list log {
-				leaf oid {
-				type string;
-				}
-			}
-			}
-		}
-	}
-
-	rpc conf-history-save-version {
-		input {
-			leaf version-name {
-			type string {
-				length "1..63";
-			}
-			}
-		}
-	}
-
-	rpc conf-history-load-version {
-		input {
-			leaf version-name {
-			type string {
-				length "1..63";
-			}
-			}
-		}
-	}
-
-	rpc conf-history-drop-versions {
-		input {
-			leaf version-name {
-			type string {
-				length "1..63";
-			}
-			}
-		}
-	}
-
-	rpc conf-history-get-versions {
-		output {
-			container versions {
-			list version {
-				leaf version-name {
-				type string;
-				}
-			}
-			}
-		}
-	}
-
-	rpc conf-history-enable {
-		input {
-			leaf enable {
-			type boolean;
-			mandatory true;
-			}
-
-			leaf skip-transactions {
-			type uint32;
-			}
-		}
-	}
-
-	container "master-state" {
-	config "false";
-		container version-history-config {
-			leaf conf-history-enabled {
-			type boolean;
-			}
-
-			leaf conf-history-skip-transactions {
-			type uint32;
-			}
-		}
-	}
 }

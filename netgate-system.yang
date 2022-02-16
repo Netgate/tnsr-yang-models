@@ -32,6 +32,16 @@ module netgate-system {
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	 ";
 
+    revision 2022-02-15 {
+	description
+	    "TNSR Release 22.02.";
+    }
+
+    revision 2021-11-15 {
+	description
+	    "TNSR Release 21.11.";
+    }
+
     revision 2021-02-15 {
 	description
 	    "TNSR Release 21.02.";
@@ -192,7 +202,7 @@ module netgate-system {
 		    "Destination being pinged.";
 	    }
 	    leaf interface {
-		type string;
+		type ngcom:if-identifier-63;
 		description
 		    "Interface source";
 	    }
@@ -265,7 +275,7 @@ module netgate-system {
 		    "Destination being pinged.";
 	    }
 	    leaf interface {
-		type string;
+		type ngcom:if-identifier-63;
 		description
 		    "Interface source";
 	    }
@@ -345,7 +355,7 @@ module netgate-system {
 	ngcliext:parent-fmt "$%";
 
 	leaf description {
-	    type string;
+	    type ngcom:description-63;
 	    description
 		"A textual description of the entity. This value should
 		 include the full name and version identification of the
@@ -356,7 +366,7 @@ module netgate-system {
 	}
 
 	leaf contact {
-	    type string;
+	    type ngcom:description-63;
 	    description
 		"The administrator contact information for the system.
 		 A server implementation MAY map this leaf to the sysContact
@@ -380,7 +390,9 @@ module netgate-system {
 	}
 
 	leaf location {
-	    type string;
+	    type ngcom:string-xml-no-escape {
+		length 1..127;
+	    }
 	    description
 		"The system location.
 
@@ -426,7 +438,7 @@ module netgate-system {
 		key name;
 		ordered-by user;
 
-		ngcliext:node-fmt "^$% @{name}$n";
+		ngcliext:parent-fmt "^$% @{name}";
 
 		description
 		    "List of the DNS servers that the resolver should query.
@@ -445,7 +457,10 @@ module netgate-system {
 		     list.";
 
 		leaf name {
-		    type string;
+		    type union {
+			type ngcom:identifier-31;
+			type inet:ip-address-no-zone;
+		    }
 		    description
 			"An arbitrary name for the DNS server.";
 		}
@@ -455,6 +470,7 @@ module netgate-system {
 		    description
 			"The transport-protocol-specific parameters for this
 			 server.";
+		    ngcliext:parent-fmt "$<";
 
 		    case udp-and-tcp {
 			container udp-and-tcp {
@@ -466,12 +482,14 @@ module netgate-system {
 				 Specification
 				 RFC 5966: DNS Transport over TCP - 
 				 Implementation Requirements";
+			    ngcliext:parent-fmt "$<";
 
 			    leaf address {
 				type inet:ip-address;
 				mandatory true;
 				description
 				    "The address of the DNS server.";
+				ngcliext:node-fmt "$< @@%{port-number}$n";
 			    }
 			    leaf port {
 				if-feature dns-udp-tcp-port;
@@ -480,6 +498,7 @@ module netgate-system {
 				description
 				    "The UDP and TCP port number of the
 				     DNS server.";
+				ngcliext:sibling-fmt " @@";
 			    }
 			}
 		    }
@@ -499,14 +518,14 @@ module netgate-system {
 
 		leaf user-name {
 		    type string {
-			length 2..32;
+			pattern '[a-zA-Z0-9_]([-a-zA-Z0-9_]){1,31}';
 		    }
 		    description
 			"user name identifying user";
 		}
 
 		leaf user-password {
-		    type string {
+		    type ngcom:string-xml-no-escape {
 			length 6..256;
 		    }
 		    description
@@ -517,27 +536,23 @@ module netgate-system {
 		list user-keys {
 		    key "key-name";
 		    description
-			"list of users pubic keys";
+			"A list of user's public keys.";
 
 		    ngcliext:node-fmt "^$% @{key-name}$n";
 
 		    leaf key-name {
-			type string;
+			type ngcom:identifier-31;
 			description
-			    "A unique arbitrary name for this key";
-		    }
-
-		    leaf key-protocol {
-			type string;
-			description
-			    "The key protocol, one of ssh-dsa,
-			    ssh-edcsa, ssh-ed25519, ssh-rsa.";
+			    "A unique identifier for this key.";
 		    }
 
 		    leaf key-data {
-			type string;
+			type string {
+			    length 1..5000;
+			}
 			description
 			    "ASCII encoded data for user key.";
+			ngcliext:node-fmt "@@$n$n";
 		    }
 		}
 	    }

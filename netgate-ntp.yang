@@ -27,6 +27,11 @@ module netgate-ntp {
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	";
 
+    revision 2021-11-15 {
+	description
+	    "TNSR Release 21.11.";
+    }
+
     revision 2021-02-15 {
 	description
 	    "TNSR Release 21.02.";
@@ -508,11 +513,6 @@ module netgate-ntp {
 			mandatory true;
 			description
 			    "Network to restrict.";
-		    }
-
-		    leaf present {
-			type boolean;
-			/* CONSIDER DEPRECATION */
 		    }
 
 		    leaf address-family {

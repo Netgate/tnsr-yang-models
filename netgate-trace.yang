@@ -19,6 +19,11 @@ module netgate-trace {
 	 Copyright 2020 Rubicon Communications, LLC.
 	";
 
+    revision 2022-02-15 {
+	description
+	    "TNSR Release 22.02.";
+    }
+
     revision 2021-02-15 {
 	description
 	    "TNSR Release 21.02.";
@@ -145,7 +150,7 @@ module netgate-trace {
 			    "The time-ordered packet sequence number.";
 		    }
 
-		    leaf thread_id {
+		    leaf thread-id {
 			type uint32;
 			description
 			    "The ID of the thread that handled this packet.";

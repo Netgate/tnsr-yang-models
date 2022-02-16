@@ -1,0 +1,150 @@
+module netgate-conf-history {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-conf-history";
+    prefix "ngconfhistory";
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+        "Definitions of configuration history feature data and operations.
+	 Copyright 2021 Rubicon Communications, LLC.
+	 All rights reserved.";
+
+    revision 2022-02-15 {
+	description
+	    "TNSR Release 22.02.";
+    }
+
+    revision 2021-06-15 {
+	description
+	    "Initial revision.";
+    }
+
+    rpc conf-history-get-log {
+	input {
+	    leaf commit-header {
+	        type string {
+		    length "1..128";
+		}
+	    }
+	}
+	output {
+	    container logs {
+		list log {
+		    leaf commit {
+		        type string;
+		    }
+		}
+	    }
+	}
+    }
+
+    rpc conf-history-save-version {
+	input {
+	    leaf version-name {
+	        type string {
+	            length "1..63";
+	        }
+	    }
+	}
+    }
+
+    rpc conf-history-load-version {
+	input {
+	    leaf version-name {
+	        type string {
+		    length "1..63";
+	        }
+	    }
+	}
+    }
+
+    rpc conf-history-drop-versions {
+	input {
+	    leaf version-name {
+	        type string {
+		    length "1..63";
+		}
+	    }
+	}
+    }
+
+    rpc conf-history-get-versions {
+	output {
+	    container versions {
+		list version {
+		    leaf version-name {
+			type string;
+		    }
+		}
+	    }
+	}
+    }
+
+    rpc conf-history-diff-versions {
+	input {
+	    leaf version1 {
+		type string {
+		    length "1..63";
+		}
+	    }
+	    leaf version2 {
+		type string {
+		    length "1..63";
+		}
+	    }
+	}
+	output {
+	    leaf plain-diff {
+		type string;
+	    }
+	}
+    }
+
+    container conf-history-config {
+
+	container version-history-config {
+	
+	    ngcliext:parent-fmt "configuration history";
+
+	    leaf conf-history-enabled {
+		type boolean;
+		default true;
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "|$< enable$n";
+		}
+
+	    leaf conf-history-autosave-period {
+		type uint32;
+		ngcliext:node-fmt "$< autosave-period @@$n";
+	    }
+	}
+    }
+
+    container conf-history-state {
+    config "false";
+	container version-history-config {
+
+	    leaf conf-history-enabled {
+		type boolean;
+	    }
+
+	    leaf conf-history-autosave-period {
+		type uint32;
+	    }
+	}
+    }
+}
+

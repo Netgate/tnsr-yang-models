@@ -30,6 +30,16 @@ module netgate-kea {
 
 	 Copyright 2019-2020 Rubicon Communications, LLC.";
 
+    revision 2022-02-15 {
+	description
+	    "TNSR Release 22.02.";
+    }
+
+    revision 2021-11-15 {
+	description
+	    "TNSR Release 21.11.";
+    }
+
     revision 2021-06-15 {
 	description
 	    "TNSR Release 21.07.";
@@ -121,7 +131,7 @@ module netgate-kea {
 
 	    enum empty {
 		description
-		    "No value; data is caried in sub-options.";
+		    "No value; data is carried in sub-options.";
 	    }
 
 	    enum fqdn {
@@ -720,8 +730,8 @@ module netgate-kea {
 	    type kea-dhcp4-option-standard;
 
 	    type leafref {
-		path "/ngkea:kea-config/dhcp4-server/Dhcp4"
-		    + "/option-def/name";
+		path "/ngkea:kea-config/dhcp4-server/ngkea:Dhcp4"
+		    + "/ngkea:option-def/ngkea:name";
 	    }
 	}
     }
@@ -905,6 +915,15 @@ module netgate-kea {
 	}
     }
 
+    typedef kea-service-name {
+	type enumeration {
+	    enum dhcp4 {
+		description
+		    "DHCP4 service";
+	    }
+	}
+    }
+
     rpc kea-control {
 	input {
 	    leaf operation {
@@ -915,7 +934,7 @@ module netgate-kea {
 		     or 'status'.";
 	    }
 	    leaf kea-service {
-		type string;
+		type kea-service-name;
 	    }
 	}
 	output {
@@ -956,10 +975,6 @@ module netgate-kea {
 		description
 		    "DHCP IPv4 configuration file.";
 	    }
-	    enum keactrl {
-		description
-		    "Kea control configuration file.";
-	    }
 	}
     }
 
@@ -996,7 +1011,7 @@ module netgate-kea {
 		mandatory true;
 		description
 		    "A Kea show request type.  The string 'config'
-		     along with parameter 'dhcp4' or 'keactrl'.
+		     along with parameter 'dhcp4'.
 		     This request will return the contents of the
 		     corresponding on-disk Kea configuration file.";
 	    }
@@ -1004,7 +1019,7 @@ module netgate-kea {
 		type kea-show-parameter;
 		mandatory true;
 		description
-		    "One of the strings 'dhcp4', or 'keactrl'.";
+		    "Only the string 'dhcp4' is supported.";
 	    }
 	}
 	output {
@@ -1050,7 +1065,7 @@ module netgate-kea {
 	    }
 
 	    leaf encapsulate {
-		type string;
+		type ngcom:description-63;
 		description
 		    "The name of the option space being encapsulated
 		     by the particular option.";
@@ -1058,14 +1073,14 @@ module netgate-kea {
 	    }
 
 	    leaf record-types {
-		type string;
+		type ngcom:description-63;
 		description
 		    "A comma separated list of record field types.";
 		ngcliext:node-fmt "^$% @@$n";
 	    }
 
 	    leaf space {
-		type string;
+		type ngcom:description-63;
 		description
 		    "The namespace for the option definition.";
 		ngcliext:node-fmt "^$% @@$n";
@@ -1206,6 +1221,8 @@ module netgate-kea {
 
 	    leaf severity {
 		type kea-logger-severity;
+		mandatory true;
+		default error;
 		description
 		    "A Kea logger severity level.";
 		ngcliext:node-fmt "^$% @@$n";
@@ -1277,7 +1294,7 @@ module netgate-kea {
 		}
 
 		leaf description {
-		    type string;
+		    type ngcom:description-63;
 		    description
 			"A user-supplied description of the server.";
 		    ngcliext:node-fmt "^$% @@$n";
@@ -1452,7 +1469,7 @@ module netgate-kea {
 			key pool;
 			description
 			    "A list of leased address pools.  Each pool
-			     is specfied as a start and optional end IPv4
+			     is specified as a start and optional end IPv4
 			     addresses, or as an IPv4 address and prefix.";
 
 			ngcliext:node-fmt "^pool @{pool}$n";
@@ -1461,13 +1478,9 @@ module netgate-kea {
 			leaf pool {
 			    type ipv4-prefix-or-range;
 			    description
-				"A pool is specfied as a start and
+				"A pool is specified as a start and
 				 optional end IPv4 addresses, or as an
 				 IPv4 address and prefix.";
-			}
-
-			leaf pool-present {
-			    type boolean;
 			}
 
 			uses kea-dhcp4-option-group;

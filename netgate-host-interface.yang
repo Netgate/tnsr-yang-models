@@ -17,6 +17,10 @@ module netgate-host-interface {
 	prefix "ngcliext";
     }
 
+    import netgate-common {
+	prefix "ngcom";
+    }
+
     organization "Netgate";
 
     contact "Web: <http://www.netgate.com>";
@@ -26,6 +30,11 @@ module netgate-host-interface {
 
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	";
+
+    revision 2022-02-15 {
+	description
+	    "TNSR Release 22.02.";
+    }
 
     revision 2021-06-15 {
 	description
@@ -77,7 +86,7 @@ module netgate-host-interface {
 	    }
 
 	    leaf description {
-		type string;
+		type ngcom:description-63;
 		description
 		    "A textual description of the host interface.";
 		ngcliext:node-fmt "^$% @@$n";

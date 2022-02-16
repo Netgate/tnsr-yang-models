@@ -31,6 +31,16 @@ module netgate-dataplane {
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	";
 
+    revision 2022-02-15 {
+	description
+	    "TNSR Release 22.02.";
+    }
+
+    revision 2021-11-15 {
+	description
+	    "TNSR Release 21.11.";
+    }
+
     revision 2021-06-15 {
 	description
 	    "TNSR Release 21.07.";
@@ -161,35 +171,6 @@ module netgate-dataplane {
 	    enum crypto-vf {
 		description
 		    "VF of cryptographic accelerator";
-	    }
-	}
-    }
-
-    typedef dataplane-scheduler-policy {
-	type enumeration {
-	    enum rr {
-		description
-		    "Round-robin scheduling.";
-	    }
-
-	    enum fifo {
-		description
-		    "First in-first out scheduling.";
-	    }
-
-	    enum batch {
-		description
-		    "Scheduling batch processes.";
-	    }
-
-	    enum idle {
-		description
-		    "Scheduling very low priority jobs.";
-	    }
-
-	    enum other {
-		description
-		    "Default Linux time-sharing scheduling.";
 	    }
 	}
     }
@@ -350,22 +331,6 @@ module netgate-dataplane {
 		}
 	    }
 
-	    leaf scheduler-policy {
-		type dataplane-scheduler-policy;
-		description
-		    "Scheduling algorithm.";
-		ngcliext:node-fmt "$< $% @@$n";
-	    }
-
-	    leaf scheduler-priority {
-		type uint32 {
-		    range "1..99";
-		}
-		description
-		    "Scheduling priority. Only valid if the 'scheduler-policy'
-		     is set to 'fifo' or 'rr'.";
-		ngcliext:node-fmt "$< $% @@$n";
-	    }
 	}
 
 	container ethernet {
@@ -416,25 +381,13 @@ module netgate-dataplane {
 		    ngcliext:child-fmt "dev @@";
 		}
 
-		leaf default {
-		    type boolean;
-		    description
-			"Default settings for device";
-		}
-
 		leaf device-type {
 		    type device-type-t;
 		    description
 			"The type of the device.";
     		    ngcliext:child-fmt "@@";
-		    ngcliext:node-op "test-set:%{name}%{num-rx-desc}%{num-tx-desc}%{num-rx-queues}%{num-tx-queues}%{tso}%{vlan-strip-offload}";
+		    ngcliext:node-op "test-set:%{name}%{devargs}%{num-rx-desc}%{num-tx-desc}%{num-rx-queues}%{num-tx-queues}%{tso}%{vlan-strip-offload}";
 		    ngcliext:node-fmt "$<$n|";
-		}
-
-		leaf present {
-		    type boolean;
-		    description
-			"Device enabled, no attributes necessarily set";
 		}
 
 		leaf name {
@@ -447,6 +400,26 @@ module netgate-dataplane {
 		    }
 		    ngcliext:node-fmt "$< $% @@$n";
 		    ngcliext:sibling-fmt "@@";
+		}
+
+		container devargs {
+		    description
+			    "A list of name=value pairs provided
+			     to a white-listed device.";
+
+		    ngcliext:parent-fmt "$< $%";
+		    ngcliext:sibling-fmt "devargs";
+
+		    leaf-list arg {
+			type string {
+			     pattern "[^=]+=[^=]+";
+			    length "1..128";
+			}
+			description
+			    "A single name=value pair.";
+			ngcliext:child-fmt "@@";
+			ngcliext:node-fmt "$< @@$n";
+		    }
 		}
 
 		leaf num-rx-desc {
