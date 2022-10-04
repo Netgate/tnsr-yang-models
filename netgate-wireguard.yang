@@ -1,0 +1,312 @@
+module netgate-wireguard {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-wireguard";
+    prefix "ngwg";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    import netgate-interface {
+	prefix "ngif";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data-model
+	 for Wireguard data.
+
+	 Copyright 2022 Rubicon Communications, LLC.";
+
+    revision 2022-06-15 {
+	description
+	    "TNSR Release 22.06.";
+    }
+
+
+    augment "/ngif:interfaces-config" {
+
+	container wireguard-interfaces {
+	    description
+		"Wireguard interface.";
+
+	    ngcliext:context "intf-wireguard";
+	    ngcliext:parent-fmt "interface wireguard";
+
+	    list interface {
+		key "instance";
+
+		description
+		    "Wireguard interface configuration.";
+
+		ngcliext:node-fmt "$< @{instance}$n";
+		ngcliext:pre-children-op "push";
+
+		unique "peers/peer/peer-id";
+		unique "peers/peer/public-key";
+
+		leaf instance {
+		    type uint32 {
+			 range "0..16383";
+		    }
+		    description
+			"Each Wireguard tunnel creates an interface.  The
+			 created interface will be named 'wg<instance>'
+			 The instance number must be unique across all
+			 Wireguard tunnels; range 0..16383 inclusive.";
+		}
+
+		leaf description {
+		    type ngcom:description-63;
+		    description
+			"A textual description of the interface.";
+		    ngcliext:node-fmt "^$% @@$n";
+		}
+
+		leaf source-address {
+		    type inet:ip-address-no-zone;
+		    mandatory true;
+		    description
+			"The tunnel source IP address.";
+		    ngcliext:node-fmt "^$% @@$n";
+		}
+
+		leaf port {
+		    type uint16;
+		    description
+			"Port number.";
+		    ngcliext:node-fmt "^$% @@$n";
+		}
+
+		container private-key {
+		    description
+			"The private key is a 32-byte value
+			 as a base64 encoded string.";
+
+		    ngcliext:parent-fmt "^private-key";
+
+
+		    leaf base64 {
+			type ngcom:base64-encoding {
+			    length 43..44;
+			}
+			mandatory true;
+			description
+			    "A base64 encoding of 32-bytes of
+			     the private key";
+			ngcliext:node-fmt "$< $% @@$n";
+		    }
+		}
+
+		container peers {
+		    description
+			"Wireguard peers.";
+
+		    list peer {
+			key "peer-id";
+
+			description
+			    "Peers of the parent wireguard interface.";
+
+			ngcliext:node-fmt "^peer @{peer-id}$n";
+			ngcliext:pre-children-op "push";
+
+			leaf peer-id {
+			    type uint32;
+			    description
+				"A user-assigned ID for this peer.
+				 It must be unique among all peers.";
+			}
+
+			container allowed-prefixes {
+			    description
+				"The set of allowed incoming
+				 tunnel IP prefixes.";
+
+			    leaf-list prefix {
+				type inet:ip-prefix;
+				min-elements 1;
+				description
+				    "An incoming tunnel IP prefix.";
+				ngcliext:node-fmt "^allowed-prefix @@$n";
+			    }
+			}
+
+			leaf description {
+			    type ngcom:description-63;
+			    description
+				"A textual description of the peer.";
+			    ngcliext:node-fmt "^$% @@$n";
+			}
+
+			leaf endpoint-address {
+			    type inet:ip-address-no-zone;
+			    description
+				"Endpoint destination IP address";
+			    ngcliext:node-fmt "^$% @@$n";
+			}
+
+			leaf keep-alive {
+			    type uint16;
+			    default 0;
+			    description
+				"Keep-alive interval in seconds. The default
+				 of 0 is 'off'.";
+			    ngcliext:node-fmt "^$% @@$n";
+			}
+
+			leaf port {
+			    type uint16;
+			    description
+				"Port.";
+			    ngcliext:node-fmt "^$% @@$n";
+			}
+
+			leaf public-key {
+			    type ngcom:base64-encoding;
+			    mandatory true;
+			    description
+				"Base64 encoded 32-byte public key.";
+			    ngcliext:node-fmt "^$% base64 @@$n";
+			}
+
+			leaf route-table {
+			    type ngcom:rt-identifier-63;
+			    description
+				"Endpoint route table name.";
+			    ngcliext:node-fmt "^$% @@$n";
+			}
+		    }
+		}
+	    }
+	}
+    }
+
+
+    augment "/ngif:interfaces-state" {
+
+	description
+	    "State of the Wireguard tunnels.";
+
+	container wireguard-interfaces {
+	    description
+		"Wireguard interface.";
+
+	    list interface {
+		key "instance";
+
+		description
+		    "Wireguard interface configuration.";
+
+		leaf instance {
+		    type uint32 {
+			 range "0..16383";
+		    }
+		    description
+			"Each Wireguard tunnel creates an interface.  The
+			 created interface will be named 'wg<instance>'
+			 The instance number must be unique across all
+			 Wireguard tunnels; range 0..16383 inclusive.";
+		}
+
+		leaf if-name {
+		    type string;
+		    description
+			"The interface name.";
+		}
+
+		leaf description {
+		    type string;
+		    description
+			"A textual description of the interface.";
+		}
+
+		leaf source-address {
+		    type inet:ip-address-no-zone;
+		    description
+			"The tunnel source IP address.";
+		}
+
+		leaf port {
+		    type uint16;
+		    description
+			"Port number.";
+		}
+
+		leaf private-key {
+		    type string;
+		    description
+			"The private key.";
+		}
+
+		leaf public-key {
+		    type string;
+		    description
+			"The public key.";
+		}
+
+		container peers {
+		    description
+			"Wireguard peers.";
+
+		    list peer {
+			key "peer-id";
+
+			description
+			    "Peers of the parent wireguard interface.";
+
+			leaf peer-id {
+			    type uint32;
+			    description
+				"A user-assigned ID for this peer.
+				 It must be unique among all peers.";
+			}
+
+			leaf description {
+			    type string;
+			    description
+				"A textual description of the peer.";
+			}
+
+			leaf endpoint-address {
+			    type inet:ip-address-no-zone;
+			    description
+				"Endpoint destination IP address";
+			}
+
+			leaf flags {
+			    type uint8;
+			    description
+				"Flags, 0x1 = dead, 0x2 = established.";
+			}
+
+			leaf port {
+			    type uint16;
+			    description
+				"Port.";
+			}
+
+			leaf public-key {
+			    type string;
+			    description
+				"The public key.";
+			}
+		    }
+		}
+	    }
+	}
+    }
+}

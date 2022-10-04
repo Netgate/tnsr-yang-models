@@ -29,6 +29,11 @@ module netgate-ipsec {
 	";
 
 
+    revision 2022-06-15 {
+	description
+	    "TNSR Release 22.06.";
+    }
+
     revision 2022-02-15 {
 	description
 	    "TNSR Release 22.02.";
@@ -739,6 +744,13 @@ module netgate-ipsec {
 		type ipsec-tunnel-type-t;
 		default "interface";
 	    }
+
+	    leaf tunnel-enable {
+		type boolean;
+		default false;
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "^disable$n|^enable$n";
+		}
 
 	    container crypto {
 

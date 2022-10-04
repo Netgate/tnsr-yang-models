@@ -30,6 +30,11 @@ module netgate-kea {
 
 	 Copyright 2019-2020 Rubicon Communications, LLC.";
 
+    revision 2022-06-15 {
+	description
+	    "TNSR Release 22.06.";
+    }
+
     revision 2022-02-15 {
 	description
 	    "TNSR Release 22.02.";
@@ -975,6 +980,10 @@ module netgate-kea {
 		description
 		    "DHCP IPv4 configuration file.";
 	    }
+	    enum keactrl {
+		description
+		    "DHCP Kea control configuration file.";
+	    }
 	}
     }
 
@@ -1283,6 +1292,8 @@ module netgate-kea {
 
 		uses kea-dhcp4-option-group;
 
+		uses kea-logging-group;
+
 		leaf decline-probation-period {
 		    type uint32;
 		    description
@@ -1520,13 +1531,6 @@ module netgate-kea {
 			uses kea-dhcp4-option-group;
 		    }
 		}
-	    }
-
-	    container Logging {
-		description
-		    "Configuration for the Kea Logging";
-
-		uses kea-logging-group;
 	    }
 	}
     }

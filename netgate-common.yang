@@ -309,6 +309,13 @@ module netgate-common {
 		  + '|(((\.?)(2))(\.(0|[1-9]\d*))*)';
        }
     }
+
+    /*
+     * Base64 Encoded values
+     */
+     typedef base64-encoding {
+	type string {
+	    pattern '[A-Za-z0-9\+/]*=*';
+	}
+    }
 }
-
-

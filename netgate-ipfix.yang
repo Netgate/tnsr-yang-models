@@ -57,8 +57,7 @@ module netgate-ipfix {
     }
 
     augment "/ipfix:ipfix" {
-	ngcliext:node-fmt "ipfix-exporter$n";
-	ngcliext:pre-children-op "push";
+	ngcliext:parent-fmt "ipfix";
     }
 
     augment "/ipfix:ipfix/ipfix:exportingProcess/ipfix:destination/" +
@@ -67,6 +66,11 @@ module netgate-ipfix {
 	    "Add extended parameters to the UDP exporter parameters.";
 
 	uses udpExporterParametersExtended;
+    }
+
+    augment "/ipfix:ipfix/ipfix:exportingProcess" {
+	ngcliext:node-fmt "$< exporter @{name}$n";
+	ngcliext:pre-children-op "push";
     }
 
     augment "/ipfix:ipfix/ipfix:exportingProcess/ipfix:destination" +
@@ -97,5 +101,37 @@ module netgate-ipfix {
 	    "/ipfix:DestinationParameters/ipfix:udpExporter" +
 	    "/ipfix:templateRefreshTimeout" {
 	ngcliext:node-fmt "^template-interval @@$n";
+    }
+
+
+
+    augment "/ipfix:ipfix/ipfix:observationPoint" {
+	ngcliext:node-fmt "$< observation-point @{name}$n";
+	ngcliext:pre-children-op "push";
+    }
+
+    augment "/ipfix:ipfix/ipfix:observationPoint/ifName" {
+	ngcliext:node-fmt "^interface @@$n";
+    }
+
+    augment "/ipfix:ipfix/ipfix:observationPoint/direction" {
+	ngcliext:node-fmt "^$% @@$n";
+    }
+
+    augment "/ipfix:ipfix/ipfix:selectionProcess" {
+	ngcliext:node-fmt "$< selection-process @{name}$n";
+	ngcliext:pre-children-op "push";
+    }
+
+    augment "/ipfix:ipfix/ipfix:selectionProcess/selector/selectAll" {
+	ngcliext:node-fmt "^selector all$n";
+    }
+
+    augment "/ipfix:ipfix/ipfix:selectionProcess/selector/name" {
+	ngcliext:sibling-fmt "@@";
+    }
+
+    augment "/ipfix:ipfix/ipfix:selectionProcess/selector/filterMatch" {
+	ngcliext:node-fmt "^selector %{name}$n";
     }
 }

@@ -31,6 +31,11 @@ module netgate-dataplane {
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	";
 
+    revision 2022-06-15 {
+	description
+	    "TNSR Release 22.06.";
+    }
+
     revision 2022-02-15 {
 	description
 	    "TNSR Release 22.02.";
@@ -386,7 +391,7 @@ module netgate-dataplane {
 		    description
 			"The type of the device.";
     		    ngcliext:child-fmt "@@";
-		    ngcliext:node-op "test-set:%{name}%{devargs}%{num-rx-desc}%{num-tx-desc}%{num-rx-queues}%{num-tx-queues}%{tso}%{vlan-strip-offload}";
+		    ngcliext:node-op "test-set:%{name}%{devargs}%{num-rx-desc}%{num-tx-desc}%{num-rx-queues}%{num-tx-queues}%{tso}";
 		    ngcliext:node-fmt "$<$n|";
 		}
 
@@ -461,14 +466,6 @@ module netgate-dataplane {
 		    ngcliext:node-fmt "$< $% @@$n";
 		    ngcliext:sibling-fmt "@@";
 		}
-
-		leaf vlan-strip-offload {
-		    type string;
-		    description
-			"VLAN strip offload on/off";
-		    ngcliext:node-fmt "$< $% @@$n";
-		    ngcliext:sibling-fmt "@@";
-		}
 	    }
 
 	    leaf dpdk-log-level {
@@ -476,15 +473,6 @@ module netgate-dataplane {
 		description
 		    "DPDK log level";
 		ngcliext:node-fmt "$< log-level @@$n";
-	    }
-
-	    leaf num-mem-channels {
-		type uint16 {
-		    range "1..65535";
-		}
-		description
-		    "Number of memory channels. Default is 4";
-		ngcliext:node-fmt "$< $% @@$n";
 	    }
 
 	    leaf decimal-interface-names {
@@ -538,15 +526,6 @@ module netgate-dataplane {
 		type iova-mode-t;
 		description
 		    "IO virtual addresses mode";
-		ngcliext:node-fmt "$< $% @@$n";
-	    }
-
-	    leaf num-crypto-mbufs {
-		    type uint32 {
-			range "1..4294967295";
-		    }
-		    description
-			"Number of crypto buffers.";
 		ngcliext:node-fmt "$< $% @@$n";
 	    }
 

@@ -27,6 +27,11 @@ module netgate-unbound {
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	";
 
+    revision 2022-06-15 {
+	description
+	    "TNSR Release 22.06.";
+    }
+
     revision 2022-02-15 {
 	description
 	    "TNSR Release 22.02.";
@@ -310,11 +315,11 @@ module netgate-unbound {
 					"The host name within the simple zone.";
 				}
 
-				leaf ip-address {
+				leaf-list ip-address {
 				    type inet:ip-address-no-zone;
-				    mandatory true;
+				    min-elements 1;
 				    description
-					"The IP address of host.";
+					"An IP address for the host.";
 				    ngcliext:node-fmt "^address @@$n";
 				}
 
@@ -366,7 +371,7 @@ module netgate-unbound {
 		    description
 			"If true, IPv4 queries are answered.";
 		    ngcliext:node-op "bool";
-		    ngcliext:node-fmt "^disable ip4$n|^enable ip4$n";
+		    ngcliext:node-fmt "^no $%$n|^$%$n";
 		}
 
 		leaf do-ip6 {
@@ -374,7 +379,7 @@ module netgate-unbound {
 		    description
 			"If true, IPv6 queries are answered.";
 		    ngcliext:node-op "bool";
-		    ngcliext:node-fmt "^disable ip6$n|^enable ip6$n";
+		    ngcliext:node-fmt "^no $%$n|^$%$n";
 		}
 
 		leaf do-tcp {
@@ -383,7 +388,7 @@ module netgate-unbound {
 		    description
 			"If true, TCP queries are answered.";
 		    ngcliext:node-op "bool";
-		    ngcliext:node-fmt "^disable tcp$n|^enable tcp$n";
+		    ngcliext:node-fmt "^no $%$n|^$%$n";
 		}
 
 		leaf do-udp {
@@ -392,7 +397,7 @@ module netgate-unbound {
 		    description
 			"If true, UDP queries are answered.";
 		    ngcliext:node-op "bool";
-		    ngcliext:node-fmt "^disable udp$n|^enable udp$n";
+		    ngcliext:node-fmt "^no $%$n|^$%$n";
 		}
 
 		leaf edns-buffer-size {
@@ -410,7 +415,7 @@ module netgate-unbound {
 			"If true, require DNSSEC data for trust-anchored
 			 zones.";
 		    ngcliext:node-op "bool";
-		    ngcliext:node-fmt "^disable harden dnssec-stripped$n|^enable harden dnssec-stripped$n";
+		    ngcliext:node-fmt "^no harden dnssec-stripped$n|^harden dnssec-stripped$n";
 		}
 
 		leaf harden-glue {
@@ -420,7 +425,7 @@ module netgate-unbound {
 			"If true, and it is within the server's authority,
 			 glue will be trusted.";
 		    ngcliext:node-op "bool";
-		    ngcliext:node-fmt "^disable harden glue$n|^enable harden glue$n";
+		    ngcliext:node-fmt "^no harden glue$n|^harden glue$n";
 		}
 
 		leaf hide-identity {
@@ -430,7 +435,7 @@ module netgate-unbound {
 			"If true, id.server and hostname.bind queries are
 			 refused.";
 		    ngcliext:node-op "bool";
-		    ngcliext:node-fmt "^disable hide identity$n|^enable hide identity$n";
+		    ngcliext:node-fmt "^no hide identity$n|^hide identity$n";
 		}
 
 		leaf hide-version {
@@ -439,7 +444,7 @@ module netgate-unbound {
 			"If true, version.server and version.bind queries
 			 are refused.";
 		    ngcliext:node-op "bool";
-		    ngcliext:node-fmt "^disable hide version$n|^enable hide version$n";
+		    ngcliext:node-fmt "^no hide version$n|^hide version$n";
 		}
 
 		leaf incoming-num-tcp {
@@ -563,7 +568,7 @@ module netgate-unbound {
 			 validation process when a DS record is
 			 encountered.";
 		    ngcliext:node-op "bool";
-		    ngcliext:node-fmt "^disable key prefetch$n|^enable key prefetch$n";
+		    ngcliext:node-fmt "^no key prefetch$n|^key prefetch$n";
 		}
 
 		leaf prefetch {
@@ -572,7 +577,7 @@ module netgate-unbound {
 			"If true, message cache elements are prefetched
 			 before they expire to keep the cache up to date.";
 		    ngcliext:node-op "bool";
-		    ngcliext:node-fmt "^disable message prefetch$n|^enable message prefetch$n";
+		    ngcliext:node-fmt "^no message prefetch$n|^message prefetch$n";
 		}
 
 		leaf rrset-cache-size {
@@ -599,7 +604,7 @@ module netgate-unbound {
 			 response without waiting for the actual
 			 resolution to finish.";
 		    ngcliext:node-op "bool";
-		    ngcliext:node-fmt "^disable $%$n|^enable $%$n";
+		    ngcliext:node-fmt "^no $%$n|^$%$n";
 		}
 
 		leaf so-rcvbuf {
@@ -628,7 +633,7 @@ module netgate-unbound {
 			"If true, use 0x20-encoded random bits in the
 			 query to foil spoof attempts.";
 		    ngcliext:node-op "bool";
-		    ngcliext:node-fmt "^disable use-caps-for-id$n|^enable use-caps-for-id$n";
+		    ngcliext:node-fmt "^$%no $n|^$%$n";
 		}
 
 		leaf verbosity {
@@ -713,7 +718,7 @@ module netgate-unbound {
 			     forwarder first, lookups are then sent to
 			     authoritative, root nameservers.";
 			ngcliext:node-op "bool";
-			ngcliext:node-fmt "^disable forward-first$n|^enable forward-first$n";
+			ngcliext:node-fmt "^no $%$n|^$%$n";
 		    }
 
 		    leaf forward-tls-upstream {
@@ -722,7 +727,7 @@ module netgate-unbound {
 			    "If true, queries to this forwarder use TLS
 			     for transport.";
 			ngcliext:node-op "bool";
-			ngcliext:node-fmt "^disable forward-tls-upstream$n|^enable forward-tls-upstream$n";
+			ngcliext:node-fmt "^no $%|^$%$n";
 		    }
 		}
 	    }

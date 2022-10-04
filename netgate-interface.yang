@@ -35,6 +35,11 @@ module netgate-interface {
 	 Copyright 2017-2020 Rubicon Communications, LLC.
 	";
 
+    revision 2022-06-15 {
+	description
+	    "TNSR Release 22.06.";
+    }
+
     revision 2022-02-15 {
 	description
 	    "TNSR Release 22.02.";
@@ -221,6 +226,31 @@ module netgate-interface {
 		value 2;
 		description
 		    "L23";
+	    }
+	}
+    }
+
+    typedef intf-rx-mode {
+	type enumeration {
+	    enum unknown {
+		description
+		    "unknown";
+	    }
+	    enum polling {
+		description
+		    "polling";
+	    }
+	    enum interrupt {
+		description
+		    "interrupt";
+	    }
+	    enum adaptive {
+		description
+		    "adaptive";
+	    }
+	    enum default {
+		description
+		    "default";
 	    }
 	}
     }

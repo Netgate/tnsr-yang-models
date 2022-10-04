@@ -23,6 +23,11 @@ module netgate-interface-extensions {
 
 	 Copyright 2019-2020 Rubicon Communications, LLC.";
 
+    revision 2022-06-15 {
+	description
+	    "TNSR Release 22.06.";
+    }
+
     revision 2021-02-15 {
 	description
 	    "TNSR Release 21.02.";
@@ -38,15 +43,50 @@ module netgate-interface-extensions {
 	    "TNSR Release 20.02.";
     }
 
-    grouping interface-extensions {
+    grouping interface-config-extensions {
 	description
-	    "The interface extensions data contains interface
+	    "The interface extensions configuration data contains interface
 	     information that is not covered by standard data models.";
 	
 	list rx-queue {
 	    key rx-queue-id;
 
-	    ngcliext:node-fmt "^$% @{rx-queue-id} cpu @{pinned-cpu-id}$n";
+	    ngcliext:parent-fmt "^$% @{rx-queue-id}";
+
+	    leaf rx-queue-id {
+		type uint16;
+		description
+		    "Queue number";
+	    }
+
+	    leaf pinned-cpu-id {
+		type uint16;
+		mandatory true;
+		description
+		    "CPU ID";
+		ngcliext:node-fmt "$< cpu @@$n";
+	    }
+
+	    /*
+	     * rx-mode is not supported for configuration yet.
+	     *
+	    leaf rx-mode {
+		type ngif:intf-rx-mode;
+		description
+		    "Rx mode";
+		ngcliext:node-fmt "$< $% @@$n";
+	    }
+	    */
+	}
+    }
+
+    grouping interface-state-extensions {
+	description
+	    "The interface extensions state data contains interface
+	     information that is not covered by standard data models.";
+	
+	list rx-queue {
+	    key rx-queue-id;
 
 	    leaf rx-queue-id {
 		type uint16;
@@ -60,18 +100,24 @@ module netgate-interface-extensions {
 		description
 		    "CPU ID";
 	    }
+
+	    leaf rx-mode {
+		type string;
+		description
+		    "Rx mode";
+	    }
 	}
     }
 
     augment "/ngif:interfaces-config/ngif:interface" {
 	container rx-queues {
-	    uses interface-extensions;
+	    uses interface-config-extensions;
 	}
     }
 
     augment "/ngif:interfaces-state/ngif:interface" {
 	container rx-queues {
-	    uses interface-extensions;
+	    uses interface-state-extensions;
 	}
     }
 

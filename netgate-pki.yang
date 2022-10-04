@@ -5,16 +5,25 @@ module netgate-pki {
     namespace "urn:netgate:xml:yang:netgate-pki";
     prefix "ngpki";
 
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
     organization "Netgate";
 
     contact "Web: <http://www.netgate.com>";
 
     description
-        "This YANG module provides specifications of operations and data
-         related to PKI management on TNSR.
+	"This YANG module provides specifications of operations and data
+	 related to PKI management on TNSR.
 
-         Copyright 2018-2020 Rubicon Communications, LLC.
-        ";
+	 Copyright 2018-2022 Rubicon Communications, LLC.
+	";
+
+    revision 2022-06-15 {
+	description
+	    "TNSR Release 22.06.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -37,515 +46,575 @@ module netgate-pki {
     }
 
     revision 2018-03-29 {
-        description
-            "Initial revision.";
+	description
+	    "Initial revision.";
     }
 
     typedef private-key-algorithm-t {
-        type enumeration {
-            enum RSA {
-                description
-                    "RSA";
-            }
-            enum ec-p256 {
-                description
-                    "Elliptic curve p-256";
-            }
-        }
+	type enumeration {
+	    enum RSA {
+		description
+		    "RSA";
+	    }
+	    enum ec-p256 {
+		description
+		    "Elliptic curve p-256";
+	    }
+	}
 
-        description
-            "Supported public key algorithms.";
+	description
+	    "Supported public key algorithms.";
     }
 
     typedef csr-digest-t {
-        type enumeration {
-            enum md5 {
-                description
-                    "MD5";
-            }
-            enum sha1 {
-                description
-                    "SHA-1";
-            }
-            enum sha224 {
-                description
-                    "SHA2-224";
-            }
-            enum sha256 {
-                description
-                    "SHA2-256";
-            }
-            enum sha384 {
-                description
-                    "SHA2-384";
-            }
-            enum sha512 {
-                description
-                    "SHA2-512";
-            }
-        }
+	type enumeration {
+	    enum sha224 {
+		description
+		    "SHA2-224";
+	    }
+	    enum sha256 {
+		description
+		    "SHA2-256";
+	    }
+	    enum sha384 {
+		description
+		    "SHA2-384";
+	    }
+	    enum sha512 {
+		description
+		    "SHA2-512";
+	    }
+	}
     }
 
     rpc pki-private-key-delete {
-        description
-            "Delete an existing private key.";
-        input {
-            leaf name {
-                type string {
-                    length "1..32";
-                    pattern "[0-9A-Za-z_-]+";
-                }
-                mandatory true;
-                description
-                    "The name of the key.";
-            }
-        }
+	description
+	    "Delete an existing private key.";
+	input {
+	    leaf name {
+		type string {
+		    length "1..32";
+		    pattern "[0-9A-Za-z_-]+";
+		}
+		mandatory true;
+		description
+		    "The name of the key.";
+	    }
+	}
     }
 
     rpc pki-private-key-generate {
-        description
-            "Generate a new private key.";
-        input {
-            leaf name {
-                type string {
-                    length "1..32";
-                    pattern "[0-9A-Za-z_-]+";
-                }
-                mandatory true;
-                description
-                    "The name to be used for the key.";
-            }
-            leaf algorithm {
-                type private-key-algorithm-t;
-                description
-                    "The algorithm to be used for the key.";
-            }
-            leaf length {
-                type uint32;
-                description
-                    "The length in bits of the key.";
-            }
-        }
-        output {
-            leaf stdout {
-                type string;
-                description
-                    "PEM-encoded text of new private key.";
-            }
-        }
+	description
+	    "Generate a new private key.";
+
+	input {
+	    leaf name {
+		type string {
+		    length "1..32";
+		    pattern "[0-9A-Za-z_-]+";
+		}
+		mandatory true;
+		description
+		    "The name to be used for the key.";
+	    }
+	    leaf algorithm {
+		type private-key-algorithm-t;
+		description
+		    "The algorithm to be used for the key.";
+	    }
+	    leaf length {
+		type uint32;
+		description
+		    "The length in bits of the key.";
+	    }
+	}
+
+	output {
+	    leaf stdout {
+		type string;
+		description
+		    "PEM-encoded text of new private key.";
+	    }
+	}
     }
 
     rpc pki-private-key-get {
-        description
-            "Fetch the contents of an existing private key.";
-        input {
-            leaf name {
-                type string {
-                    length "1..32";
-                    pattern "[0-9A-Za-z_-]+";
-                }
-                mandatory true;
-                description
-                    "The name of the key.";
-            }
-        }
-        output {
-            leaf stdout {
-                type string;
-                description
-                    "Text of the requested private key.";
-            }
-        }
+	description
+	    "Fetch the contents of an existing private key.";
+
+	input {
+	    leaf name {
+		type string {
+		    length "1..32";
+		    pattern "[0-9A-Za-z_-]+";
+		}
+		mandatory true;
+		description
+		    "The name of the key.";
+	    }
+	}
+
+	output {
+	    leaf stdout {
+		type string;
+		description
+		    "Text of the requested private key.";
+	    }
+	}
     }
 
     rpc pki-private-key-list {
-        description
-            "List the existing private keys.";
-        output {
-            leaf-list name {
-                type string;
-                description
-                    "Name of a key.";
-            }
-        }
+	description
+	    "List the existing private keys.";
+
+	output {
+	    leaf-list name {
+		type string;
+		description
+		    "Name of a key.";
+	    }
+	}
     }
 
     rpc pki-private-key-import {
-        description
-            "Import a private key.";
-        input {
-            leaf name {
-                type string {
-                    length "1..32";
-                    pattern "[0-9A-Za-z_-]+";
-                }
-                mandatory true;
-                description
-                    "The name of the private key.";
-            }
-            leaf contents {
-                type string;
-                mandatory true;
-                description
-                    "Text of a PEM-encoded private key, including the
-                     'BEGIN PRIVATE KEY' and 'END PRIVATE KEY' blocks.";
-            }
-        }
+	description
+	    "Import a private key.";
+
+	input {
+	    leaf name {
+		type string {
+		    length "1..32";
+		    pattern "[0-9A-Za-z_-]+";
+		}
+		mandatory true;
+		description
+		    "The name of the private key.";
+	    }
+	    leaf contents {
+		type string;
+		mandatory true;
+		description
+		    "Text of a PEM-encoded private key, including the
+		     'BEGIN PRIVATE KEY' and 'END PRIVATE KEY' blocks.";
+	    }
+	}
     }
 
     rpc pki-csr-generate {
-        description
-            "Create a certificate signing request using a local private key.";
-        input {
-            leaf name {
-                type string {
-                    length "1..32";
-                    pattern "[0-9A-Za-z_-]+";
-                }
-                mandatory true;
-                description
-                    "The name of the CSR (and key).";
-            }
-            leaf common-name {
-                type string {
-                    length "1..64";
-                }
-                mandatory true;
-                description
-                    "Common name for certificate. Typically this is the
-                     hostname for a server certificate or the user's full
-                     name for a user certificate.";
-            }
-            leaf country {
-                type string {
-                    length "2";
-                }
-                description
-                    "2 letter country code.";
-            }
-            leaf state {
-                type string {
-                    length "1..128";
-                }
-                description
-                    "State or Province.";
-            }
-            leaf city {
-                type string {
-                    length "1..128";
-                }
-                description
-                    "City or Locality";
-            }
-            leaf org {
-                type string {
-                    length "1..64";
-                }
-                description
-                    "Organization (Company, school, etc).";
-            }
-            leaf org-unit {
-                type string {
-                    length "1..64";
-                }
-                description
-                    "Organization Unit (Department).";
-            }
-            leaf digest {
-                type csr-digest-t;
-                mandatory true;
-                description
-                    "Message digest to sign the CSR with.";
-            }
-        }
-        output {
-            leaf stdout {
-                type string;
-                description
-                    "PEM-encoded text of new certificate signing request.";
-            }
-        }
+	description
+	    "Create a certificate signing request using a local private key.";
+
+	input {
+	    leaf name {
+		type string {
+		    length "1..32";
+		    pattern "[0-9A-Za-z_-]+";
+		}
+		mandatory true;
+		description
+		    "The name of the CSR (and key).";
+	    }
+	    leaf common-name {
+		type string {
+		    length "1..64";
+		}
+		mandatory true;
+		description
+		    "Common name for certificate. Typically this is the
+		     hostname for a server certificate or the user's full
+		     name for a user certificate.";
+	    }
+	    leaf country {
+		type string {
+		    length "2";
+		}
+		description
+		    "2 letter country code.";
+	    }
+	    leaf state {
+		type string {
+		    length "1..128";
+		}
+		description
+		    "State or Province.";
+	    }
+	    leaf city {
+		type string {
+		    length "1..128";
+		}
+		description
+		    "City or Locality";
+	    }
+	    leaf org {
+		type string {
+		    length "1..64";
+		}
+		description
+		    "Organization (Company, school, etc).";
+	    }
+	    leaf org-unit {
+		type string {
+		    length "1..64";
+		}
+		description
+		    "Organization Unit (Department).";
+	    }
+	    leaf digest {
+		type csr-digest-t;
+		mandatory true;
+		description
+		    "Message digest to sign the CSR with.";
+	    }
+	    container subject-alt-names {
+		description
+		    "Additional identifiers for the Certificate Sign
+		     Request.  Common name is automatically added here.";
+
+		list subject-alt-name {
+		    key "index";
+
+		    leaf index {
+			type uint8;
+			description
+			    "SAN index.";
+		    }
+
+		    choice subject-alt-name-type {
+			case email {
+			    leaf email {
+				type inet:email-address;
+			    }
+			}
+			case hostname {
+			    leaf hostname {
+				type inet:host;
+			    }
+			}
+			case ipv4-address {
+			    leaf ipv4-address {
+				type inet:ipv4-address;
+			    }
+			}
+			case ipv6-address {
+			    leaf ipv6-address {
+				type inet:ipv6-address;
+			    }
+			}
+			case uri {
+			    leaf uri {
+				type inet:uri;
+			    }
+			}
+		    }
+		}
+	    }
+	}
+
+	output {
+	    leaf stdout {
+		type string;
+		description
+		    "PEM-encoded text of new certificate signing request.";
+	    }
+	}
     }
 
     rpc pki-csr-delete {
-        description
-            "Delete an existing certificate signing request.";
-        input {
-            leaf name {
-                type string {
-                    length "1..32";
-                    pattern "[0-9A-Za-z_-]+";
-                }
-                mandatory true;
-                description
-                    "The name of the CSR (and key).";
-            }
-        }
+	description
+	    "Delete an existing certificate signing request.";
+
+	input {
+	    leaf name {
+		type string {
+		    length "1..32";
+		    pattern "[0-9A-Za-z_-]+";
+		}
+		mandatory true;
+		description
+		    "The name of the CSR (and key).";
+	    }
+	}
     }
 
     rpc pki-csr-get {
-        description
-            "Retrieve an existing certificate signing request.";
-        input {
-            leaf name {
-                type string {
-                    length "1..32";
-                    pattern "[0-9A-Za-z_-]+";
-                }
-                mandatory true;
-                description
-                    "The name of the CSR.";
-            }
-        }
-        output {
-            leaf stdout {
-                type string;
-                description
-                    "PEM-encoded text of certificate signing request.";
-            }
-        }
+	description
+	    "Retrieve an existing certificate signing request.";
+
+	input {
+	    leaf name {
+		type string {
+		    length "1..32";
+		    pattern "[0-9A-Za-z_-]+";
+		}
+		mandatory true;
+		description
+		    "The name of the CSR.";
+	    }
+	}
+
+	output {
+	    leaf stdout {
+		type string;
+		description
+		    "PEM-encoded text of certificate signing request.";
+	    }
+	}
     }
 
     rpc pki-csr-list {
-        description
-            "List the existing certificate signing requests.";
-        output {
-            leaf-list name {
-                type string;
-                description
-                    "Name of a CSR.";
-            }
-        }
+	description
+	    "List the existing certificate signing requests.";
+
+	output {
+	    leaf-list name {
+		type string;
+		description
+		    "Name of a CSR.";
+	    }
+	}
     }
 
     rpc pki-csr-sign {
-        description
-            "Sign an existing signing request. Creates a signed certificate.";
-        input {
-            leaf name {
-                type string {
-                    length "1..32";
-                    pattern "[0-9A-Za-z_-]+";
-                }
-                mandatory true;
-                description
-                    "The name of the signing request.";
-            }
-            leaf ca-name {
-                type string {
-                    length "1..32";
-                    pattern "[0-9A-Za-z_-]+";
-                }
-                description
-                    "The name of the CA. If self-signing, omit this
-		     parameter.";
-            }
-            leaf days-valid {
-                type uint16 {
-                    range "1..65535";
-                }
-                default 365;
-                description
-                    "The number of days the signed cert should be valid for.";
-            }
-            leaf digest {
-                type csr-digest-t;
-                default sha512;
-                description
-                    "Message digest to sign the CSR with.";
-            }
-            container extensions {
-                description
-                    "X509 extension configurations";
+	description
+	    "Sign an existing signing request. Creates a signed certificate.";
 
-                leaf enable-ca {
-                    type boolean;
-                    default false;
-                    description
-                        "Whether the signed certificate will be
+	input {
+	    leaf name {
+		type string {
+		    length "1..32";
+		    pattern "[0-9A-Za-z_-]+";
+		}
+		mandatory true;
+		description
+		    "The name of the signing request.";
+	    }
+	    leaf ca-name {
+		type string {
+		    length "1..32";
+		    pattern "[0-9A-Za-z_-]+";
+		}
+		description
+		    "The name of the CA. If self-signing, omit this
+		     parameter.";
+	    }
+	    leaf days-valid {
+		type uint16 {
+		    range "1..65535";
+		}
+		default 365;
+		description
+		    "The number of days the signed cert should be valid for.";
+	    }
+	    leaf digest {
+		type csr-digest-t;
+		default sha512;
+		description
+		    "Message digest to sign the CSR with.";
+	    }
+	    container extensions {
+		description
+		    "X509 extension configurations";
+
+		leaf enable-ca {
+		    type boolean;
+		    default false;
+		    description
+			"Whether the signed certificate will be
 			 allowed to sign other certificates.";
-                }
-            }
-        }
-        output {
-            leaf stdout {
-                type string;
-                description
-                    "PEM-encoded text of certificate signing request.";
-            }
-        }
+		}
+	    }
+	}
+
+	output {
+	    leaf stdout {
+		type string;
+		description
+		    "PEM-encoded text of certificate signing request.";
+	    }
+	}
     }
 
     rpc pki-cert-delete {
-        description
-            "Delete an existing certificate.";
-        input {
-            leaf name {
-                type string {
-                    length "1..32";
-                    pattern "[0-9A-Za-z_-]+";
-                }
-                mandatory true;
-                description
-                    "The name of the certificate.";
-            }
-        }
+	description
+	    "Delete an existing certificate.";
+
+	input {
+	    leaf name {
+		type string {
+		    length "1..32";
+		    pattern "[0-9A-Za-z_-]+";
+		}
+		mandatory true;
+		description
+		    "The name of the certificate.";
+	    }
+	}
     }
 
     rpc pki-cert-get {
-        description
-            "Retrieve an existing certificate.";
-        input {
-            leaf name {
-                type string {
-                    length "1..32";
-                    pattern "[0-9A-Za-z_-]+";
-                }
-                mandatory true;
-                description
-                    "The name of the certificate.";
-            }
-        }
-        output {
-            leaf stdout {
-                type string;
-                description
-                    "PEM-encoded text of certificate.";
-            }
-        }
+	description
+	    "Retrieve an existing certificate.";
+
+	input {
+	    leaf name {
+		type string {
+		    length "1..32";
+		    pattern "[0-9A-Za-z_-]+";
+		}
+		mandatory true;
+		description
+		    "The name of the certificate.";
+	    }
+	}
+
+	output {
+	    leaf stdout {
+		type string;
+		description
+		    "PEM-encoded text of certificate.";
+	    }
+	}
     }
 
     rpc pki-cert-list {
-        description
-            "List the existing certificates.";
-        output {
-            leaf-list name {
-                type string;
-                description
-                    "Name of a certificate.";
-            }
-        }
+	description
+	    "List the existing certificates.";
+
+	output {
+	    leaf-list name {
+		type string;
+		description
+		    "Name of a certificate.";
+	    }
+	}
     }
 
     rpc pki-cert-import {
-        description
-            "Import a signed certificate.";
-        input {
-            leaf name {
-                type string {
-                    length "1..32";
-                    pattern "[0-9A-Za-z_-]+";
-                }
-                mandatory true;
-                description
-                    "The name of the certificate.";
-            }
-            leaf contents {
-                type string;
-                mandatory true;
-                description
-                    "Text of a PEM-encoded certificate, including the
-                     'BEGIN CERTIFICATE' and 'END CERTIFICATE' blocks.";
-            }
-        }
+	description
+	    "Import a signed certificate.";
+
+	input {
+	    leaf name {
+		type string {
+		    length "1..32";
+		    pattern "[0-9A-Za-z_-]+";
+		}
+		mandatory true;
+		description
+		    "The name of the certificate.";
+	    }
+	    leaf contents {
+		type string;
+		mandatory true;
+		description
+		    "Text of a PEM-encoded certificate, including the
+		     'BEGIN CERTIFICATE' and 'END CERTIFICATE' blocks.";
+	    }
+	}
     }
 
     rpc pki-ca-delete {
-        description
-            "Delete an existing CA certificate.";
-        input {
-            leaf name {
-                type string {
-                    length "1..32";
-                    pattern "[0-9A-Za-z_-]+";
-                }
-                mandatory true;
-                description
-                    "The name of the CA certificate.";
-            }
-        }
+	description
+	    "Delete an existing CA certificate.";
+
+	input {
+	    leaf name {
+		type string {
+		    length "1..32";
+		    pattern "[0-9A-Za-z_-]+";
+		}
+		mandatory true;
+		description
+		    "The name of the CA certificate.";
+	    }
+	}
     }
 
     rpc pki-ca-get {
-        description
-            "Retrieve an existing CA certificate.";
-        input {
-            leaf name {
-                type string {
-                    length "1..32";
-                    pattern "[0-9A-Za-z_-]+";
-                }
-                mandatory true;
-                description
-                    "The name of the CA certificate.";
-            }
-        }
-        output {
-            leaf stdout {
-                type string;
-                description
-                    "PEM-encoded text of CA certificate.";
-            }
-        }
+	description
+	    "Retrieve an existing CA certificate.";
+
+	input {
+	    leaf name {
+		type string {
+		    length "1..32";
+		    pattern "[0-9A-Za-z_-]+";
+		}
+		mandatory true;
+		description
+		    "The name of the CA certificate.";
+	    }
+	}
+
+	output {
+	    leaf stdout {
+		type string;
+		description
+		    "PEM-encoded text of CA certificate.";
+	    }
+	}
     }
 
     rpc pki-ca-list {
-        description
-            "List the existing CA certificates.";
-        output {
-            leaf-list name {
-                type string;
-                description
-                    "Name of a CA certificate.";
-            }
-        }
+	description
+	    "List the existing CA certificates.";
+
+	output {
+	    leaf-list name {
+		type string;
+		description
+		    "Name of a CA certificate.";
+	    }
+	}
     }
 
     rpc pki-ca-import {
-        description
-            "Import a CA certificate.";
-        input {
-            leaf name {
-                type string {
-                    length "1..32";
-                    pattern "[0-9A-Za-z_-]+";
-                }
-                mandatory true;
-                description
-                    "The name of the CA certificate.";
-            }
-            leaf contents {
-                type string;
-                mandatory true;
-                description
-                    "Text of a PEM-encoded CA certificate, including the
-                     'BEGIN CERTIFICATE' and 'END CERTIFICATE' blocks.";
-            }
-        }
+	description
+	    "Import a CA certificate.";
+
+	input {
+	    leaf name {
+		type string {
+		    length "1..32";
+		    pattern "[0-9A-Za-z_-]+";
+		}
+		mandatory true;
+		description
+		    "The name of the CA certificate.";
+	    }
+	    leaf contents {
+		type string;
+		mandatory true;
+		description
+		    "Text of a PEM-encoded CA certificate, including the
+		     'BEGIN CERTIFICATE' and 'END CERTIFICATE' blocks.";
+	    }
+	}
     }
 
     rpc pki-ca-append {
-        description
-            "Append a CA to the current CA. Used to build CA chains.";
-        input {
-            leaf name {
-                type string {
-                    length "1..32";
-                    pattern "[0-9A-Za-z_-]+";
-                }
-                mandatory true;
-                description
-                    "The name of the CA certificate to write.";
-            } 
-            leaf source-name {
-                type string {
-                    length "1..32";
-                    pattern "[0-9A-Za-z_-]+";
-                }
-                mandatory true;
-                description
-                    "The name of the CA certificate to read.";
-            } 
-        }
+	description
+	    "Append a CA to the current CA. Used to build CA chains.";
+
+	input {
+	    leaf name {
+		type string {
+		    length "1..32";
+		    pattern "[0-9A-Za-z_-]+";
+		}
+		mandatory true;
+		description
+		    "The name of the CA certificate to write.";
+	    } 
+	    leaf source-name {
+		type string {
+		    length "1..32";
+		    pattern "[0-9A-Za-z_-]+";
+		}
+		mandatory true;
+		description
+		    "The name of the CA certificate to read.";
+	    } 
+	}
     }
 }

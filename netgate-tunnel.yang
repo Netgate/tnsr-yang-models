@@ -1,0 +1,222 @@
+module netgate-tunnel {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-tunnel";
+    prefix "ngtun";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import netgate-cli-extensions {
+	prefix ngcliext;
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    import netgate-interface {
+	prefix "ngif";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data model
+	 for tunnel management.
+
+	 Copyright 2022 Rubicon Communications, LLC.";
+
+    revision 2022-06-15 {
+	description
+	    "TNSR Release 22.06.";
+    }
+
+    container tunnels-config {
+	description
+	    "Tunnel-related configurations.";
+
+	container next-hops {
+	    description
+		"Next hop configurations for multipoint tunnels.";
+
+	    ngcliext:context "tunnel-nexthops";
+	    ngcliext:parent-fmt "tunnel next-hops";
+
+	    list tunnel-interface {
+		key "name";
+
+		description
+		    "Next-hop configuration for a tunnel interface.";
+
+		ngcliext:node-fmt "$< @{name}$n";
+		ngcliext:pre-children-op "push";
+
+		leaf name {
+		    description
+			"Tunnel interface";
+		    type leafref {
+			path "/ngif:interfaces-config/ngif:interface/ngif:name";
+		    }
+		}
+
+		list ipv4-tunnel-destination {
+		    key "address";
+
+		    description
+			"IPv4 address reachable over a multipoint tunnel.";
+
+		    ngcliext:node-fmt "^$% @{address}";
+
+		    leaf address {
+			type inet:ipv4-address-no-zone;
+			description
+			    "IPv4 address reachable via tunnel interface (inside address)";
+		    }
+
+		    choice peer-address-family {
+			mandatory true;
+
+			case ipv4 {
+			    leaf ipv4-next-hop-address {
+				type inet:ipv4-address-no-zone;
+				description
+				    "The tunnel peer IPv4 address (outside address)"; 
+				ngcliext:node-fmt "$< $% @@$n";
+			    }
+			}
+
+			case ipv6 {
+			    leaf ipv6-next-hop-address {
+				type inet:ipv6-address-no-zone;
+				description
+				    "The tunnel peer IPv6 address (outside address)"; 
+				ngcliext:node-fmt "$< $% @@$n";
+			    }
+			}
+		    }
+		}
+
+		list ipv6-tunnel-destination {
+		    key "address";
+
+		    ngcliext:node-fmt "^$% @{address}";
+
+		    leaf address {
+			type inet:ipv6-address-no-zone;
+			description
+			    "IPv4 address reachable via tunnel interface";
+		    }
+
+		    choice peer-address-family {
+			mandatory true;
+
+			case ipv4 {
+			    leaf ipv4-next-hop-address {
+				type inet:ipv4-address-no-zone;
+				description
+				    "The tunnel peer IPv4 address (outside address)"; 
+				ngcliext:node-fmt "$< $% @@$n";
+			    }
+			}
+
+			case ipv6 {
+			    leaf ipv6-next-hop-address {
+				type inet:ipv6-address-no-zone;
+				description
+				    "The tunnel peer IPv6 address (outside address)"; 
+				ngcliext:node-fmt "$< $% @@$n";
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+
+    container tunnels-state {
+	description
+	    "Tunnel-related state.";
+
+	container next-hops {
+	    description
+		"Next hop state for multipoint tunnels.";
+
+	    list tunnel-interface {
+		key "name";
+
+		leaf name {
+		    description
+			"Tunnel interface";
+		    type leafref {
+			path "/ngif:interfaces-config/ngif:interface/ngif:name";
+		    }
+		}
+
+		list ipv4-tunnel-destination {
+		    key "address";
+
+		    leaf address {
+			type inet:ipv4-address-no-zone;
+			description
+			    "IPv4 address reachable via tunnel interface (inside address)";
+		    }
+
+		    choice peer-address-family {
+			mandatory true;
+
+			case ipv4 {
+			    leaf ipv4-next-hop-address {
+				type inet:ipv4-address-no-zone;
+				description
+				    "The tunnel peer IPv4 address (outside address)"; 
+			    }
+			}
+
+			case ipv6 {
+			    leaf ipv6-next-hop-address {
+				type inet:ipv6-address-no-zone;
+				description
+				    "The tunnel peer IPv6 address (outside address)"; 
+			    }
+			}
+		    }
+		}
+
+		list ipv6-tunnel-destination {
+		    key "address";
+
+		    leaf address {
+			type inet:ipv6-address-no-zone;
+			description
+			    "IPv6 address reachable via tunnel interface (inside address)";
+		    }
+
+		    choice peer-address-family {
+			mandatory true;
+
+			case ipv4 {
+			    leaf ipv4-next-hop-address {
+				type inet:ipv4-address-no-zone;
+				description
+				    "The tunnel peer IPv4 address (outside address)"; 
+			    }
+			}
+
+			case ipv6 {
+			    leaf ipv6-next-hop-address {
+				type inet:ipv6-address-no-zone;
+				description
+				    "The tunnel peer IPv6 address (outside address)"; 
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+}

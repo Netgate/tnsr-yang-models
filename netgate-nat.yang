@@ -27,6 +27,11 @@ module netgate-nat {
 
 	 Copyright 2017-2020 Rubicon Communications, LLC.";
 
+    revision 2022-06-15 {
+	description
+	    "TNSR Release 22.06.";
+    }
+
     revision 2021-11-15 {
 	description
 	    "TNSR Release 21.11.";

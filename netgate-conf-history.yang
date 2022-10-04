@@ -123,7 +123,7 @@ module netgate-conf-history {
 		type boolean;
 		default true;
 		ngcliext:node-op "bool";
-		ngcliext:node-fmt "|$< enable$n";
+		ngcliext:node-fmt "$< disable$n|$< enable$n";
 		}
 
 	    leaf conf-history-autosave-period {

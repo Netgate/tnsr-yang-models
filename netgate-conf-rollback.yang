@@ -14,6 +14,11 @@ module netgate-conf-rollback {
 
 	 Copyright 2021 Rubicon Communications, LLC.";
 
+    revision 2022-06-15 {
+	description
+	    "TNSR Release 22.06.";
+    }
+
     revision 2021-11-15 {
 	description
 	    "TNSR Release 21.11.";
@@ -70,7 +75,7 @@ module netgate-conf-rollback {
 			leaf filename {
 			    type string {
 				length "1..4096";
-				pattern "[a-zA-Z0-9_.\/-]*";
+				pattern "[a-zA-Z0-9_./-]*";
 			    }
 			    description
 				"Copy of a file on disk.";
