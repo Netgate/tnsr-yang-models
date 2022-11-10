@@ -95,7 +95,7 @@ module netgate-neighbor {
 			ngcliext:node-fmt "$< ";
 			ngcliext:children-order "ip-address
 			    mac-address
-			    is-no-adj-route-table-entry";
+			    is-no-route-table-entry";
 			ngcliext:post-node-fmt "$n";
 
 			leaf ip-address {
@@ -118,7 +118,7 @@ module netgate-neighbor {
 				"True if this neighbor entry is shoud have no
 				 entry made in the adjacency route table.";
 			    ngcliext:node-op "bool";
-			    ngcliext:node-fmt "|no-adj-route-table-entry";
+			    ngcliext:node-fmt "| no-adj-route-table-entry";
 			}
 		    }
 		}

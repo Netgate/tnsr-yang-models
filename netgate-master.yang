@@ -9,14 +9,6 @@ module netgate-master {
 	prefix "ngcom";
     }
 
-    import netgate-cli-extensions {
-	prefix "ngcliext";
-    }
-
-    import netgate-conf-history {
-	prefix "ngconfhistory";
-    }
-
     organization "Netgate";
 
     contact "Web: <http://www.netgate.com>";

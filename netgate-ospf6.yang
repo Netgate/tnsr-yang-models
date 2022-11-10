@@ -633,7 +633,12 @@ module netgate-ospf6 {
 			ngcliext:parent-fmt "^$%";
 
 			leaf prefix-list-name {
-			    type string;
+			    type leafref {
+				path "/ngrt:route-config"
+				    + "/ngrt:dynamic"
+				    + "/ngfrr:prefix-lists/ngfrr:list"
+				    + "/ngfrr:name";
+			    }
 			    description
 				"Use prefix-list as a filter.";
 			    ngcliext:node-fmt "$< prefix-list @@$n";
@@ -1044,7 +1049,13 @@ module netgate-ospf6 {
 				ngcliext:node-fmt "$<${route-map}$n";
 
 				leaf route-map {
-				    type string;
+				    type leafref {
+					path "/ngrt:route-config"
+					    + "/ngrt:dynamic"
+					    + "/ngfrr:route-maps"
+					    + "/ngfrr:map"
+					    + "/ngfrr:name";
+				    }
 				    description
 					"Route-map used to filter routes into
 					 OSPF6.";

@@ -32,6 +32,11 @@ module netgate-rip {
 	 Copyright 2019-2020 Rubicon Communications, LLC.
 	 ";
 
+    revision 2022-10-15 {
+	description
+	    "TNSR Release 22.10.";
+    }
+
     revision 2021-06-15 {
 	description
 	    "TNSR Release 21.07.";
@@ -553,7 +558,12 @@ module netgate-rip {
 				}
 
 				leaf filter {
-				    type string;
+				    type leafref {
+					path "/ngrt:route-config"
+					    + "/ngrt:dynamic"
+					    + "/ngfrr:access-lists/ngfrr:list"
+					    + "/ngfrr:name";
+				    }
 				    description
 					"Use access-list as matching filter.";
 				    ngcliext:child-fmt " access-list @@";
@@ -586,14 +596,24 @@ module netgate-rip {
 				ngcliext:parent-fmt "$< access-list";
 
 				leaf in {
-				    type string;
+				    type leafref {
+					path "/ngrt:route-config"
+					    + "/ngrt:dynamic"
+					    + "/ngfrr:access-lists/ngfrr:list"
+					    + "/ngfrr:name";
+				    }
 				    description
 					"Filter incoming routes.";
 				    ngcliext:node-fmt "$< $% @@$n";
 				}
 
 				leaf out {
-				    type string;
+				    type leafref {
+					path "/ngrt:route-config"
+					    + "/ngrt:dynamic"
+					    + "/ngfrr:access-lists/ngfrr:list"
+					    + "/ngfrr:name";
+				    }
 				    description
 					"Filter outgoing routes.";
 				    ngcliext:node-fmt "$< $% @@$n";
@@ -608,14 +628,24 @@ module netgate-rip {
 				ngcliext:parent-fmt "$< prefix-list";
 
 				leaf in {
-				    type string;
+				    type leafref {
+					path "/ngrt:route-config"
+					    + "/ngrt:dynamic"
+					    + "/ngfrr:prefix-lists/ngfrr:list"
+					    + "/ngfrr:name";
+				    }
 				    description
 					"Filter incoming routes.";
 				    ngcliext:node-fmt "$< $% @@$n";
 				}
 
 				leaf out {
-				    type string;
+				    type leafref {
+					path "/ngrt:route-config"
+					    + "/ngrt:dynamic"
+					    + "/ngfrr:prefix-lists/ngfrr:list"
+					    + "/ngfrr:name";
+				    }
 				    description
 					"Filter outgoing routes.";
 				    ngcliext:node-fmt "$< $% @@$n";
@@ -699,7 +729,12 @@ module netgate-rip {
 				ngcliext:node-fmt "$< $% ${access-list-name} ${metric}$n";
 
 				leaf access-list-name {
-				    type string;
+				    type leafref {
+					path "/ngrt:route-config"
+					    + "/ngrt:dynamic"
+					    + "/ngfrr:access-lists/ngfrr:list"
+					    + "/ngfrr:name";
+				    }
 				    description
 					"Filter incoming routes.";
 				    ngcliext:child-fmt "@@";
@@ -722,7 +757,12 @@ module netgate-rip {
 				ngcliext:node-fmt "$< $% ${access-list-name} ${metric}$n";
 
 				leaf access-list-name {
-				    type string;
+				    type leafref {
+					path "/ngrt:route-config"
+					    + "/ngrt:dynamic"
+					    + "/ngfrr:access-lists/ngfrr:list"
+					    + "/ngfrr:name";
+				    }
 				    description
 					"Filter incoming routes.";
 				    ngcliext:child-fmt "@@";
@@ -791,11 +831,29 @@ module netgate-rip {
 				}
 
 				leaf route-map {
-				    type string;
+				    type leafref {
+					path "/ngrt:route-config"
+					    + "/ngrt:dynamic"
+					    + "/ngfrr:route-maps"
+					    + "/ngfrr:map"
+					    + "/ngfrr:name";
+				    }
 				    description
 					"Route-map used to filter routes into
 					 RIP.";
 				    ngcliext:child-fmt "$< $% @@$n";
+				}
+
+				leaf table-instance {
+				    type uint32 {
+					range "1..65535";
+				    }
+				    description
+					"When the source is table, and
+					 if present, a non-main kernel
+					 routing table is used as the
+					 source of routes.";
+				    ngcliext:node-fmt "$< table-id @@$n";
 				}
 			    }
 			}
@@ -836,7 +894,13 @@ module netgate-rip {
 				ngcliext:parent-fmt "$< $%";
 
 				leaf route-map-name {
-				    type string;
+				    type leafref {
+					path "/ngrt:route-config"
+					    + "/ngrt:dynamic"
+					    + "/ngfrr:route-maps"
+					    + "/ngfrr:map"
+					    + "/ngfrr:name";
+				    }
 				    description
 					"The name of a route-map filter.";
 				    ngcliext:node-fmt "$< route-map @@$n";
@@ -850,7 +914,13 @@ module netgate-rip {
 				ngcliext:parent-fmt "$< $%";
 
 				leaf route-map-name {
-				    type string;
+				    type leafref {
+					path "/ngrt:route-config"
+					    + "/ngrt:dynamic"
+					    + "/ngfrr:route-maps"
+					    + "/ngfrr:map"
+					    + "/ngfrr:name";
+				    }
 				    description
 					"The name of a route-map filter.";
 				    ngcliext:node-fmt "$< route-map @@$n";

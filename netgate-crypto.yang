@@ -1,0 +1,60 @@
+module netgate-crypto {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-crypto";
+    prefix "ngcrypto";
+
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data model
+	 for configuration of cryptographic parameters.
+
+	 Copyright 2022 Rubicon Communications, LLC.";
+
+    revision 2022-10-15 {
+	description
+	    "TNSR Release 22.10.";
+    }
+
+    typedef asynchronous-dispatch-mode {
+	description
+	    "Modes available for processing of completed crypto operations.";
+	type enumeration {
+	    enum polling {
+		description
+		    "Poll for completed crypto operations";
+	    }
+	    enum interrupt {
+		description
+		    "Completed crypto operations processed on interrupt";
+	    }
+	}
+    }
+
+    container crypto-config {
+	description
+	    "Crypography configurations.";
+	ngcliext:parent-fmt "crypto";
+
+	container asynchronous {
+	    description
+		"Asynchronous processing of cryptographic operations.";
+	    ngcliext:parent-fmt "$< $%";
+
+	    leaf dispatch-mode {
+		description
+		    "Mode for processing of completed crypto operations.";
+		type asynchronous-dispatch-mode;
+		ngcliext:node-fmt "$< $% @@$n";
+	    }
+	}
+    }
+}

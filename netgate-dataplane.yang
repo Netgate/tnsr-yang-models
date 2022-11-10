@@ -31,6 +31,11 @@ module netgate-dataplane {
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	";
 
+    revision 2022-10-15 {
+	description
+	    "TNSR Release 22.10.";
+    }
+
     revision 2022-06-15 {
 	description
 	    "TNSR Release 22.06.";

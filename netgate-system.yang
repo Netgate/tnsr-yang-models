@@ -9,10 +9,6 @@ module netgate-system {
 	prefix "inet";
     }
 
-    import ietf-yang-types {
-	prefix "yang";
-    }
-
     import netgate-cli-extensions {
 	prefix "ngcliext";
     }

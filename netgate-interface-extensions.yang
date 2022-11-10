@@ -61,22 +61,10 @@ module netgate-interface-extensions {
 
 	    leaf pinned-cpu-id {
 		type uint16;
-		mandatory true;
 		description
 		    "CPU ID";
 		ngcliext:node-fmt "$< cpu @@$n";
 	    }
-
-	    /*
-	     * rx-mode is not supported for configuration yet.
-	     *
-	    leaf rx-mode {
-		type ngif:intf-rx-mode;
-		description
-		    "Rx mode";
-		ngcliext:node-fmt "$< $% @@$n";
-	    }
-	    */
 	}
     }
 
@@ -96,7 +84,6 @@ module netgate-interface-extensions {
 
 	    leaf pinned-cpu-id {
 		type uint16;
-		mandatory true;
 		description
 		    "CPU ID";
 	    }

@@ -1,0 +1,253 @@
+module netgate-rpki {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-rpki";
+    prefix "ngrpki";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    import netgate-route {
+	prefix "ngrt";
+    }
+
+    import netgate-bgp {
+	prefix "ngbgp";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data-model
+	 for RPKI data.
+
+	 Copyright 2022 Rubicon Communications, LLC.
+	 ";
+
+    revision 2022-10-15 {
+	description
+	    "TNSR Release 22.10.";
+    }
+
+    typedef rpki-transport-type {
+	type enumeration {
+	    enum "tcp" {
+		description
+		    "Server connection uses TCP.";
+	    }
+
+	    enum "ssh" {
+		description
+		    "Server connection uses SSH.";
+	    }
+	}
+    }
+
+    typedef rpki-cache-server {
+	type union {
+	    type inet:ipv4-address-no-zone;
+	    type inet:host-name;
+	}
+	description
+	    "The host type represents either an IPv4 address
+	     or a (fully qualified) host name.";
+    }
+
+    typedef rpki-route-state {
+	type enumeration {
+	    enum "invalid" {
+		description
+		    "Invalid prefixes.";
+	    }
+
+	    enum "notfound" {
+		description
+		    "Not among the valid or invalid prefixes.";
+	    }
+
+	    enum "valid" {
+		description
+		    "Valid prefixes.";
+	    }
+	}
+    }
+
+    augment "/ngrt:route-config/ngrt:dynamic/ngbgp:bgp" {
+
+	container rpki {
+
+	    ngcliext:node-fmt "^$%$n";
+	    ngcliext:pre-children-op "push";
+	    ngcliext:context "bgp-config";
+
+	    container global-options {
+		description
+		    "These are options that apply to the RPKI Server or
+		     to all RPKI Router configurations.";
+
+		leaf enable {
+		    type boolean;
+		    description
+			"If true, RPKI is enabled.";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|$< $%$n";
+		}
+
+		container debug {
+		    description
+			"RPKI debug configurations.";
+
+		    ngcliext:parent-fmt "^$%";
+
+		    leaf rpki {
+			type boolean;
+			description
+			    "If true, debug RPKI is enabled.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
+		    }
+		}
+	    }
+
+	    container cache-servers {
+		description
+		    "Cache servers.";
+
+		list server {
+		    key "host port";
+
+		    ngcliext:node-fmt "^cache @{transport-type} @{host} port @{port}$n";
+		    ngcliext:pre-children-op "push";
+
+		    unique "preference";
+
+		    leaf host {
+			type rpki-cache-server;
+			description
+			    "Cache server IPv4 addess or FQDN.";
+		    }
+
+		    leaf transport-type {
+			type rpki-transport-type;
+			description
+			    "One of 'tcp' or 'ssh' to indicate the
+			     server connection transport.";
+		    }
+
+		    leaf port {
+			type uint16 {
+			    range "1..65535";
+			}
+			description
+			    "Cache server port, 1..65535.";
+		    }
+
+		    leaf preference {
+			type uint8 {
+			    range "1..255";
+			}
+			mandatory true;
+			description
+			    "Preference, 1..255.";
+			ngcliext:node-fmt "^$% @@$n";
+		    }
+
+		    container transport {
+			description
+			    "The transport type and connection details
+			     for connecting to a cache server.";
+
+			container ssh {
+			    when "../../transport-type = 'ssh'";
+			    description
+				"SSH information for the cache server.";
+
+			    leaf private-key {
+				type string {
+				    length "1..5000";
+				}
+				description
+				    "The name of a configured private
+				     key of this router entered or
+				     uploaded.";
+				ngcliext:node-fmt "^$% @@$n";
+			    }
+
+			    leaf server-public-key {
+				type string {
+				    length "1..5000";
+				}
+				description
+				    "The name of a configured public
+				     key of the cache server entered
+				     or uploaded.";
+				ngcliext:node-fmt "^$% @@$n";
+			    }
+
+			    leaf source {
+				type inet:ipv4-address-no-zone;
+				description
+				    "The IPv4 address to use as the source
+				     address of SSH cache servers.";
+				ngcliext:node-fmt "^$% @@$n";
+			    }
+
+			    leaf user-name {
+				type string {
+				    length "1..16";
+				}
+				description
+				    "The user name to use for the ssh cache.";
+				ngcliext:node-fmt "^$% @@$n";
+			    }
+			}
+		    }
+		}
+	    }
+
+	    leaf expire-interval {
+		type uint32 {
+		    range "600..172800";
+		}
+		description
+		    "The number of seconds the router waits until the
+		     router expires the cache.  Default 7200 seconds.";
+		ngcliext:node-fmt "^$% @@$n";
+	    }
+
+	    leaf polling-period {
+		type uint32 {
+		    range "1..3600";
+		}
+		description
+		    "The number of seconds the router waits until the
+		     router asks the cache again for updated data.
+		     Default 300 seconds.";
+		ngcliext:node-fmt "^$% @@$n";
+	    }
+
+	    leaf retry-interval {
+		type uint32 {
+		    range "1..7200";
+		}
+		description
+		    "The number of seconds the router waits until
+		     retrying to connect to the cache server.
+		     Default 600 seconds.";
+		ngcliext:node-fmt "^$% @@$n";
+	    }
+	}
+    }
+}

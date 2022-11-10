@@ -13,10 +13,6 @@ module netgate-tunnel {
 	prefix ngcliext;
     }
 
-    import netgate-common {
-	prefix "ngcom";
-    }
-
     import netgate-interface {
 	prefix "ngif";
     }

@@ -48,7 +48,7 @@ module netgate-packet-trace {
 
 	container filters {
 	    description
-		"Table of filters that select gtraced packets.";
+		"Table of filters that select traced packets.";
 
 	    list filter {
 		key name;
@@ -123,7 +123,7 @@ module netgate-packet-trace {
 			    description
 				"L4 UDP fields";
 
-			    ngcliext:node-fmt "^ip6$n";
+			    ngcliext:node-fmt "^udp$n";
 			    ngcliext:pre-children-op "push";
 
 			    uses ngpf:l4-udp;

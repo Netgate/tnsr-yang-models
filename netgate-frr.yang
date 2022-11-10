@@ -29,6 +29,10 @@ module netgate-frr {
 	prefix "ngrt";
     }
 
+    import netgate-rpki {
+	prefix "ngrpki";
+    }
+
     organization "Netgate";
 
     contact "Web: <http://www.netgate.com>";
@@ -39,6 +43,11 @@ module netgate-frr {
 
 	 Copyright 2017-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2022-10-15 {
+	description
+	    "TNSR Release 22.10.";
+    }
 
     revision 2022-02-15 {
 	description
@@ -132,7 +141,6 @@ module netgate-frr {
 	    }
 	}
     }
-
 
     grouping zebra-packet-send-recv {
 	description
@@ -448,7 +456,14 @@ module netgate-frr {
 			    ngcliext:parent-fmt "^$%";
 
 			    leaf as-path-name {
-				type string;
+				type leafref {
+				    path "/ngrt:route-config"
+					+ "/ngrt:dynamic"
+					+ "/ngbgp:bgp"
+					+ "/ngbgp:as-path-table"
+					+ "/ngbgp:as-path"
+					+ "/ngbgp:name";
+				}
 				description
 				    "The name of an as-path entry.";
 				ngcliext:node-fmt "$< as-path @@$n";
@@ -461,7 +476,14 @@ module netgate-frr {
 				ngcliext:parent-fmt "$< $%";
 
 				leaf comm-list-name {
-				    type string;
+				    type leafref {
+					path "/ngrt:route-config"
+					    + "/ngrt:dynamic"
+					    + "/ngbgp:bgp"
+					    + "/ngbgp:community-lists"
+					    + "/ngbgp:community"
+					    + "/ngbgp:name";
+				    }
 				    description
 					"The name of a community list.";
 				    ngcliext:node-fmt "$< @@%{exact-match}$n";
@@ -502,7 +524,12 @@ module netgate-frr {
 			    }
 
 			    leaf ip-address-access-list {
-				type string;
+				type leafref {
+				    path "/ngrt:route-config"
+					+ "/ngrt:dynamic"
+					+ "/ngfrr:access-lists/ngfrr:list"
+					+ "/ngfrr:name";
+				}
 				description
 				    "Match based on the name of an
 				     Access List.";
@@ -523,7 +550,12 @@ module netgate-frr {
 			    }
 
 			    leaf ip-next-hop-access-list {
-				type string;
+				type leafref {
+				    path "/ngrt:route-config"
+					+ "/ngrt:dynamic"
+					+ "/ngfrr:access-lists/ngfrr:list"
+					+ "/ngfrr:name";
+				}
 				description
 				    "Match based on the name of an
 				     Access List.";
@@ -550,7 +582,12 @@ module netgate-frr {
 			    }
 
 			    leaf ipv6-address-access-list {
-				type string;
+				type leafref {
+				    path "/ngrt:route-config"
+					+ "/ngrt:dynamic"
+					+ "/ngfrr:access-lists/ngfrr:list"
+					+ "/ngfrr:name";
+				}
 				description
 				    "Match according to the name of an
 				     Access List.";
@@ -558,7 +595,13 @@ module netgate-frr {
 			    }
 
 			    leaf ipv6-address-prefix-list {
-				type string;
+				type leafref {
+				    path "/ngrt:route-config"
+					+ "/ngrt:dynamic"
+					+ "/ngfrr:prefix-lists"
+					+ "/ngfrr:list"
+					+ "/ngfrr:name";
+				}
 				description
 				    "Match according to the name of a
 				     Prefix List.";
@@ -642,6 +685,15 @@ module netgate-frr {
 				    "Match the router tag value.";
 				ngcliext:node-fmt "$< $% @@$n";
 			    }
+
+			    leaf rpki {
+				type ngrpki:rpki-route-state;
+				description
+				    "Match prefixes with the specified RPKI
+				     state. One of 'invalid', 'notfound',
+				     'valid'.";
+				ngcliext:node-fmt "$< $% @@$n";
+			    }
 			}
 
 			container set {
@@ -656,7 +708,7 @@ module netgate-frr {
 				description
 				    "Attributes about an aggregator.";
 
-				ngcliext:node-fmt "$< $% as @{asn} ip address @{ip-address}%$n";
+				ngcliext:node-fmt "$< $% as @{asn} ip address @{ip-address}$n";
 
 				leaf asn {
 				    type uint32;
@@ -751,9 +803,12 @@ module netgate-frr {
 
 				leaf delete {
 				    type leafref {
-					path "/ngrt:route-config/ngrt:dynamic"
-					    + "/ngbgp:bgp/ngbgp:community-lists"
-					    + "/ngbgp:community/ngbgp:name";
+					path "/ngrt:route-config"
+					    + "/ngrt:dynamic"
+					    + "/ngbgp:bgp"
+					    + "/ngbgp:community-lists"
+					    + "/ngbgp:community"
+					    + "/ngbgp:name";
 				    }
 				    description
 					"The community values from the given
@@ -763,34 +818,36 @@ module netgate-frr {
 				}
 			    }
 
-			    container extcommunity-list {
+			    container extcommunity {
 				description
-				    "Configuration for extcommunity-lists.";
+				    "Configuration for extcommunity values.";
 
-				ngcliext:parent-fmt "$< comm-list";
+				ngcliext:parent-fmt "$< $%";
 
-				leaf rt {
-				    type leafref {
-					path "/ngrt:route-config/ngrt:dynamic"
-					    + "/ngbgp:bgp/ngbgp:community-lists"
-					    + "/ngbgp:community/ngbgp:name";
+				choice ext-value {
+				    case rt-value {
+					leaf rt {
+					    type string {
+						pattern "[0-9]+:[0-9]+";
+					    }
+					    description
+						"Route Target Extcommunity
+						 value rt value1:value2.";
+					    ngcliext:node-fmt "$< $% @@$n";
+					}
 				    }
-				    description
-					"The Router Target is set to this
-					 extended community value.";
-				    ngcliext:node-fmt "$< $% @@$n";
-				}
 
-				leaf soo {
-				    type leafref {
-					path "/ngrt:route-config/ngrt:dynamic"
-					    + "/ngbgp:bgp/ngbgp:community-lists"
-					    + "/ngbgp:community/ngbgp:name";
+				    case soo-value {
+					leaf soo {
+					    type string {
+						pattern "[0-9]+:[0-9]+";
+					    }
+					    description
+						"Source of Origin Extcommunity
+						 value soo value1:value2.";
+					    ngcliext:node-fmt "$< $% @@$n";
+					}
 				    }
-				    description
-					"The Site of Origin is set to this
-					 extended community value.";
-				    ngcliext:node-fmt "$< $% @@$n";
 				}
 			    }
 
@@ -1003,9 +1060,12 @@ module netgate-frr {
 
 				leaf delete {
 				    type leafref {
-					path "/ngrt:route-config/ngrt:dynamic"
-					    + "/ngbgp:bgp/ngbgp:community-lists"
-					    + "/ngbgp:community/ngbgp:name";
+					path "/ngrt:route-config"
+					    + "/ngrt:dynamic"
+					    + "/ngbgp:bgp"
+					    + "/ngbgp:community-lists"
+					    + "/ngbgp:community"
+					    + "/ngbgp:name";
 				    }
 				    description
 					"The community values from the given
@@ -1109,8 +1169,10 @@ module netgate-frr {
 
 			    leaf rt-map-name {
 				type leafref {
-				    path "/ngrt:route-config/ngrt:dynamic"
-					+ "/ngfrr:route-maps/ngfrr:map/ngfrr:name";
+				    path "/ngrt:route-config"
+					+ "/ngrt:dynamic"
+					+ "/ngfrr:route-maps"
+					+ "/ngfrr:map/ngfrr:name";
 				}
 				description
 				    "Call the named Route Map entry.";

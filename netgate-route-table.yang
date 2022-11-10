@@ -138,6 +138,12 @@ module netgate-route-table {
 			"Name of the route table containing the route.";
 		}
 
+		leaf table-id {
+		    type uint32;
+		    description
+			"Id of the route table containing the route.";
+		}
+
 		leaf destination-prefix {
 		    type inet:ip-prefix;
 		    description

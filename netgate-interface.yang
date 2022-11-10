@@ -35,6 +35,11 @@ module netgate-interface {
 	 Copyright 2017-2020 Rubicon Communications, LLC.
 	";
 
+    revision 2022-10-15 {
+	description
+	    "TNSR Release 22.10.";
+    }
+
     revision 2022-06-15 {
 	description
 	    "TNSR Release 22.06.";
@@ -232,10 +237,6 @@ module netgate-interface {
 
     typedef intf-rx-mode {
 	type enumeration {
-	    enum unknown {
-		description
-		    "unknown";
-	    }
 	    enum polling {
 		description
 		    "polling";
@@ -243,14 +244,6 @@ module netgate-interface {
 	    enum interrupt {
 		description
 		    "interrupt";
-	    }
-	    enum adaptive {
-		description
-		    "adaptive";
-	    }
-	    enum default {
-		description
-		    "default";
 	    }
 	}
     }
@@ -510,6 +503,14 @@ module netgate-interface {
 		description
 		    "If this interface is associated with a host tap,
 		     this field names that host tap interface.";
+	    }
+
+	    leaf rx-mode {
+		type ngif:intf-rx-mode;
+		description
+		    "Rx mode";
+		ngcliext:context "intf-interfaces";
+		ngcliext:node-fmt "^$% @@$n";
 	    }
 
 	    leaf vrf {

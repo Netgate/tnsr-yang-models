@@ -1,0 +1,251 @@
+module netgate-ipip {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-ipip";
+    prefix "ngipip";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import netgate-cli-extensions {
+	prefix ngcliext;
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    import netgate-tunnel {
+	prefix "ngtun";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data model
+	 for IPIP tunnel management.
+
+	 Copyright 2022 Rubicon Communications, LLC.";
+
+    revision 2022-10-15 {
+	description
+	    "TNSR Release 22.06.";
+    }
+
+    augment "/ngtun:tunnels-config" {
+	container ipip {
+	    description
+		"IPIP tunnel configurations";
+
+	    ngcliext:context "tunnel-ipip";
+
+	    list tunnel {
+		description
+		    "Configuration for a single tunnel";
+
+		key "instance";
+
+		leaf instance {
+		    type uint32;
+		    description
+			"Numeric identifier used in interface name";
+		}
+
+		ngcliext:node-fmt "tunnel ipip @{instance}$n";
+		ngcliext:pre-children-op "push";
+
+		choice tunnel-address-family {
+		    case ipv4 {
+			leaf ipv4-local-endpoint-address {
+			    type inet:ipv4-address-no-zone;
+			    mandatory true;
+			    ngcliext:node-fmt "^source ipv4 address @@$n";
+			}
+			/*
+			 * work in progress on supporting interfaces as a tunnel
+			 * endpoint.
+			leaf ipv4-local-endpoint-interface {
+			    type leafref {
+				path "/ngif:interfaces-config/ngif:interface/ngif:name";
+			    }
+			}
+			 */
+			choice remote-type {
+			    case address {
+				leaf ipv4-remote-endpoint-address {
+				    type inet:ipv4-address-no-zone;
+				    ngcliext:node-fmt "^destination ipv4 address @@$n";
+				}
+			    }
+			    case hostname {
+				leaf ipv4-remote-endpoint-hostname {
+				    type inet:domain-name;
+				    ngcliext:node-fmt "^destination ipv4 hostname @@$n";
+				}
+			    }
+			}
+		    }
+		    case ipv6 {
+			leaf ipv6-local-endpoint-address {
+			    type inet:ipv6-address-no-zone;
+			    mandatory true;
+			    ngcliext:node-fmt "^source ipv6 address @@$n";
+			}
+			choice remote-type {
+			    case address {
+				leaf ipv6-remote-endpoint-address {
+				    type inet:ipv6-address-no-zone;
+				    ngcliext:node-fmt "^destination ipv6 address @@$n";
+				}
+			    }
+			    case hostname {
+				leaf ipv6-remote-endpoint-hostname {
+				    type inet:domain-name;
+				    ngcliext:node-fmt "^destination ipv6 hostname @@$n";
+				}
+			    }
+			}
+		    }
+		}
+
+		container encapsulation-options {
+
+		    ngcliext:parent-fmt "^encapsulation";
+
+		    choice dscp-type {
+			case copy {
+			    leaf copy-dscp {
+				type boolean;
+				description
+				    "Copy DSCP flags from inner packet header";
+				ngcliext:node-op "bool";
+				ngcliext:node-fmt "|$< $%$n";
+			    }
+			}
+			case explicit {
+			    leaf dscp {
+				type uint8;
+				description
+				    "DSCP value set on encapsulated packets";
+				ngcliext:node-fmt "$< $% @@$n";
+			    }
+			}
+		    }
+
+		    leaf set-df {
+			type boolean;
+			default false;
+			description
+			    "Set the Do Not Fragment bit";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
+		    }
+
+		    leaf route-table {
+			type ngcom:rt-identifier-63;
+			description
+			    "Encapsulation route table name.";
+			ngcliext:node-fmt "$< $% @@$n";
+		    }
+		}
+	    }
+	}
+    }
+
+    augment "/ngtun:tunnels-state" {
+	container ipip {
+	    description
+		"IPIP tunnel interface state.";
+
+	    list tunnel {
+		description
+		    "State of a single tunnel";
+		key "instance";
+		leaf instance {
+		    type uint32;
+		    description
+			"Numeric identifier used in interface name";
+		}
+
+		choice tunnel-address-family {
+		    case ipv4 {
+			leaf ipv4-local-endpoint-address {
+			    type inet:ipv4-address-no-zone;
+			    ngcliext:node-fmt "^source ipv4 address @@$n";
+			}
+			/*
+			 * work in progress on supporting interfaces as a tunnel
+			 * endpoint.
+			leaf ipv4-local-endpoint-interface {
+			    type leafref {
+				path "/ngif:interfaces-config/ngif:interface/ngif:name";
+			    }
+			}
+			 */
+			leaf ipv4-remote-endpoint-address {
+			    type inet:ipv4-address-no-zone;
+			    ngcliext:node-fmt "^destination ipv4 address @@$n";
+			}
+			leaf ipv4-remote-endpoint-hostname {
+			    type inet:domain-name;
+			    ngcliext:node-fmt "^destination ipv4 hostname @@$n";
+			}
+		    }
+		    case ipv6 {
+			leaf ipv6-local-endpoint-address {
+			    type inet:ipv6-address-no-zone;
+			    ngcliext:node-fmt "^source ipv6 address @@$n";
+			}
+			leaf ipv6-remote-endpoint-address {
+			    type inet:ipv6-address-no-zone;
+			    ngcliext:node-fmt "^destination ipv6 address @@$n";
+			}
+			leaf ipv6-remote-endpoint-hostname {
+			    type inet:domain-name;
+			    ngcliext:node-fmt "^destination ipv6 hostname @@$n";
+			}
+		    }
+		}
+
+		container encapsulation-options {
+		    description
+			"Options which may affect tunnel encapsulation";
+
+		    choice dscp-type {
+			case copy {
+			    leaf copy-dscp {
+				type boolean;
+				description
+				    "Copy DSCP flags from inner packet header";
+			    }
+			}
+			case explicit {
+			    leaf dscp {
+				type uint8;
+				description
+				    "DSCP value set on encapsulated packets";
+			    }
+			}
+		    }
+
+		    leaf set-df {
+			type boolean;
+			default false;
+			description
+			    "Set the Do Not Fragment bit";
+		    }
+
+		    leaf route-table {
+			type ngcom:rt-identifier-63;
+			description
+			    "Encapsulation route table name.";
+		    }
+		}
+	    }
+	}
+    }
+}

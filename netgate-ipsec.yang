@@ -28,6 +28,10 @@ module netgate-ipsec {
 	Copyright 2016-2020 Rubicon Communications, LLC.
 	";
 
+    revision 2022-10-15 {
+	description
+	    "TNSR Release 22.10.";
+    }
 
     revision 2022-06-15 {
 	description
@@ -261,6 +265,11 @@ module netgate-ipsec {
 		description
 		    "256 bit AES-GCM with 16 byte ICV";
 	    }
+	    enum chacha20poly1305 {
+		description
+		    "256 bit ChaCha20/Poly1305 with 16 byte ICV";
+	    }
+
 	    enum 3des {
 		description
 		    "Triple-DES";
@@ -426,11 +435,6 @@ module netgate-ipsec {
 		description
 		    "SHA1 PRF";
 	    }
-	    enum prfaesxcbc {
-		value 4;
-		description
-		    "AES128-XCBC PRF";
-	    }
 	    enum prfsha256 {
 		value 5;
 		description
@@ -445,11 +449,6 @@ module netgate-ipsec {
 		value 7;
 		description
 		    "SHA2-512 PRF";
-	    }
-	    enum prfaescmac {
-		value 8;
-		description
-		    "AES128-CMAC PRF";
 	    }
 	}
 	description
@@ -492,12 +491,12 @@ module netgate-ipsec {
 		description
 		    "Pre-Shared Key";
 	    }
+	    enum pubkey {
+		value 1;
+		description
+		    "Certificate";
+	    }
 	    /* future support
-	       enum pubkey {
-	       value 1;
-	       description
-	       "Certificate";
-	       }
 	       enum xauth {
 	       value 2;
 	       description
@@ -717,22 +716,6 @@ module netgate-ipsec {
 		    "Numeric identifier of tunnel";
 	    }
 
-	    leaf local-addr {
-		type inet:ip-address;
-		mandatory true;
-		description
-		    "IP address used locally to terminate tunnel.";
-		ngcliext:node-fmt "^local-address @@$n";
-	    }
-
-	    leaf remote-addr {
-		type inet:host;
-		mandatory true;
-		description
-		    "IP address or hostname of remote tunnel peer.";
-		ngcliext:node-fmt "^remote-address @@$n";
-	    }
-
 	    leaf remote-type {
 		type ipsec-peer-type-t;
 		default "gateway";
@@ -843,7 +826,6 @@ module netgate-ipsec {
 
 			leaf integrity-algorithm {
 			    type ng-ike-integrity-algorithm-t;
-			    mandatory true;
 			    description
 				"IKE integrity algorithm.";
 			    ngcliext:node-fmt "^integrity @@$n";
@@ -930,19 +912,33 @@ module netgate-ipsec {
 				    authentications";
 			    }
 
-			    leaf type {
-				type authentication-method-t;
+			    choice auth-type-and-peer {
 				mandatory true;
-				description
-				    "The type of authentication used.";
-				ngcliext:node-fmt "^$% @@$n";
-			    }
 
-			    leaf psk {
-				type string;
-				description
-				    "Pre Shared Key";
-				ngcliext:node-fmt "^$% @@$n";
+				case psk-both {
+				    leaf psk {
+					type string;
+					description
+					    "Pre Shared Key";
+					ngcliext:node-fmt "^$% @@$n";
+				    }
+				}
+				case pubkey-local {
+				    leaf certificate {
+					type string;
+					description
+					    "Name of a certificate file";
+					ngcliext:node-fmt "^$% @@$n";
+				    }
+				}
+				case pubkey-remote {
+				    leaf ca-certificate {
+					type string;
+					description
+					    "Name of a CA certificate file";
+					ngcliext:node-fmt "^$% @@$n";
+				    }
+				}
 			    }
 			}
 		    }

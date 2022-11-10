@@ -27,6 +27,11 @@ module netgate-vxlan {
 
 	 Copyright 2018-2020 Rubicon Communications, LLC. ";
 
+    revision 2022-10-15 {
+	description
+	    "TNSR Release 22.10.";
+    }
+
     revision 2021-06-15 {
 	description
 	    "TNSR Release 21.07.";
@@ -97,12 +102,6 @@ module netgate-vxlan {
 		    ngcliext:node-fmt "^encapsulation route-table @@$n";
 		}
 
-		leaf decap-next-node {
-		    type string;
-		    description
-			"The name of the decapsulation next graph node.";
-		}
-
 		leaf instance {
 		    type uint32;
 		    description
@@ -169,12 +168,6 @@ module netgate-vxlan {
 		    description
 			"The VXLAN tunnel identifier.  A unique name
 			 for this VXLAN tunnel.";
-		}
-
-		leaf decap-next-node {
-		    type string;
-		    description
-			"The name of the decapsulation next graph node.";
 		}
 
 		leaf dst-ip-address {

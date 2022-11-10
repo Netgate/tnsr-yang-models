@@ -1,0 +1,429 @@
+module netgate-abf {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-abf";
+    prefix "ngabf";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    import netgate-interface {
+	prefix "ngif";
+    }
+
+    import netgate-route {
+	prefix "ngrt";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data-model for
+	 policy-based routing using the VPP ACL Based Forwarding.
+
+	 Copyright 2022 Rubicon Communications, LLC.";
+
+    revision 2022-10-15 {
+	description
+	    "TNSR Release 22.10.";
+    }
+
+    augment "/ngrt:route-config" {
+
+	container acl-based-forwarding {
+	    description
+		"ACL based forwarding.";
+
+	    ngcliext:parent-fmt "^route $%";
+
+	    container policies {
+
+		ngcliext:parent-fmt "$<";
+
+		list policy {
+		    key "policy-id";
+
+		    ngcliext:node-fmt "$< policy @{policy-id}$n";
+		    ngcliext:pre-children-op "push";
+
+		    leaf policy-id {
+			type uint32;
+		    }
+
+		    leaf acl-name {
+			type leafref {
+			    path "/ngacl:acl-config"
+				+ "/ngacl:acl-table"
+				+ "/ngacl:acl-list"
+				+ "/ngacl:acl-name";
+			}
+			ngcliext:node-fmt "^acl @@$n";
+		    }
+
+		    choice address-family {
+			case ipv4 {
+			    container ipv4 {
+
+				list ipv4-next-hop {
+				    key "hop-id";
+
+				    ngcliext:node-fmt "^$% @{hop-id}$n";
+				    ngcliext:pre-children-op "push";
+
+				    leaf hop-id {
+					type uint32;
+				    }
+
+				    leaf weight {
+					type uint8;
+					ngcliext:node-fmt "^$% @@$n";
+				    }
+
+				    choice next-hop-type {
+					case peer {
+					    leaf ipv4-address {
+						type inet:ipv4-address;
+						ngcliext:node-fmt "^$% @@$n";
+					    }
+
+					    leaf if-name {
+						type leafref {
+						    path "/ngif:interfaces-config"
+							+ "/ngif:interface"
+							+ "/ngif:name";
+						}
+						ngcliext:node-fmt "^interface @@$n";
+					    }
+					}
+
+					case null {
+					    leaf drop {
+						type boolean;
+						ngcliext:node-op "bool";
+						ngcliext:node-fmt "|^$%$n";
+					    }
+					}
+
+					case local {
+					    leaf local {
+						type boolean;
+						ngcliext:node-op "bool";
+						ngcliext:node-fmt "|^$%$n";
+					    }
+					}
+
+					case unreachable {
+					    leaf null-send-unreachable {
+						type boolean;
+						ngcliext:node-op "bool";
+						ngcliext:node-fmt "|^unreachable$n";
+					    }
+					}
+
+					case prohibited {
+					    leaf null-send-prohibited {
+						type boolean;
+						ngcliext:node-op "bool";
+						ngcliext:node-fmt "|^prohibited$n";
+					    }
+					}
+				    }
+				}
+			    }
+			}
+
+			case ipv6 {
+			    container ipv6 {
+
+				list ipv6-next-hop {
+				    key "hop-id";
+
+				    ngcliext:node-fmt "^$% @{hop-id}$n";
+				    ngcliext:pre-children-op "push";
+
+				    leaf hop-id {
+					type uint32;
+				    }
+
+				    leaf weight {
+					type uint8;
+					ngcliext:node-fmt "^$% @@$n";
+				    }
+
+				    choice next-hop-type {
+					case peer {
+					    leaf ipv6-address {
+						type inet:ipv6-address;
+						ngcliext:node-fmt "^$% @@$n";
+					    }
+
+					    leaf if-name {
+						type leafref {
+						    path "/ngif:interfaces-config"
+							+ "/ngif:interface"
+							+ "/ngif:name";
+						}
+						ngcliext:node-fmt "^interface @@$n";
+					    }
+					}
+
+					case null {
+					    leaf drop {
+						type boolean;
+						ngcliext:node-op "bool";
+						ngcliext:node-fmt "|^$%$n";
+					    }
+					}
+
+					case local {
+					    leaf local {
+						type boolean;
+						ngcliext:node-op "bool";
+						ngcliext:node-fmt "|^$%$n";
+					    }
+					}
+
+					case unreachable {
+					    leaf null-send-unreachable {
+						type boolean;
+						ngcliext:node-op "bool";
+						ngcliext:node-fmt "|^unreachable$n";
+					    }
+					}
+
+					case prohibited {
+					    leaf null-send-prohibited {
+						type boolean;
+						ngcliext:node-op "bool";
+						ngcliext:node-fmt "|^prohibited$n";
+					    }
+					}
+				    }
+				}
+			    }
+			}
+		    }
+		}
+	    }
+
+	    container interfaces {
+
+		ngcliext:parent-fmt "$<";
+
+		list interface {
+		    key "name";
+
+		    description
+			"ABF interface attachment.";
+
+		    ngcliext:node-fmt "$< interface @{name}$n";
+		    ngcliext:pre-children-op "push";
+
+		    leaf name {
+			type leafref {
+			    path "/ngif:interfaces-config"
+				+ "/ngif:interface"
+				+ "/ngif:name";
+			}
+		    }
+
+		    container policy-attachments {
+			list attachment {
+			    key policy-id;
+
+			    ngcliext:node-fmt "^${policy-id} ${address-family} ${priority}$n";
+
+			    leaf policy-id {
+				type leafref {
+				    path "/ngrt:route-config"
+					+ "/ngabf:acl-based-forwarding"
+					+ "/ngabf:policies"
+					+ "/ngabf:policy"
+					+ "/ngabf:policy-id";
+				}
+				ngcliext:child-fmt "policy @@";
+			    }
+
+			    leaf address-family {
+				type ngcom:ip-address-family;
+				mandatory true;
+				ngcliext:child-fmt "@@";
+			    }
+
+			    leaf priority {
+				type uint32;
+				mandatory true;
+				ngcliext:child-fmt "$% @@";
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+
+    augment "/ngrt:route-state" {
+
+	container acl-based-forwarding {
+	    description
+		"ACL based forwarding.";
+
+	    container policies {
+
+		list policy {
+		    key "policy-id";
+
+		    leaf policy-id {
+			type uint32;
+		    }
+
+		    leaf acl-name {
+			type string;
+		    }
+
+		    choice address-family {
+			case ipv4 {
+			    container ipv4 {
+
+				list ipv4-next-hop {
+				    key "hop-id";
+
+				    leaf hop-id {
+					type uint32;
+				    }
+
+				    leaf weight {
+					type uint8;
+				    }
+
+				    choice next-hop-type {
+					case peer {
+					    leaf ipv4-address {
+						type inet:ipv4-address;
+					    }
+
+					    leaf if-name {
+						type string;
+					    }
+					}
+
+					case null {
+					    leaf drop {
+						type boolean;
+					    }
+					}
+
+					case local {
+					    leaf local {
+						type boolean;
+					    }
+					}
+
+					case unreachable {
+					    leaf null-send-unreachable {
+						type boolean;
+					    }
+					}
+
+					case prohibited {
+					    leaf null-send-prohibited {
+						type boolean;
+					    }
+					}
+				    }
+				}
+			    }
+			}
+
+			case ipv6 {
+			    container ipv6 {
+
+				list ipv6-next-hop {
+				    key "hop-id";
+
+				    leaf hop-id {
+					type uint32;
+				    }
+
+				    leaf weight {
+					type uint8;
+				    }
+
+				    choice next-hop-type {
+					case peer {
+					    leaf ipv6-address {
+						type inet:ipv6-address;
+					    }
+
+					    leaf if-name {
+						type string;
+					    }
+					}
+
+					case null {
+					    leaf drop {
+						type boolean;
+					    }
+					}
+
+					case local {
+					    leaf local {
+						type boolean;
+					    }
+					}
+
+					case unreachable {
+					    leaf null-send-unreachable {
+						type boolean;
+					    }
+					}
+
+					case prohibited {
+					    leaf null-send-prohibited {
+						type boolean;
+					    }
+					}
+				    }
+				}
+			    }
+			}
+		    }
+		}
+	    }
+
+	    container policy-attachments {
+		list attachment {
+		    key "if-name policy-id";
+
+		    leaf if-name {
+			type string;
+		    }
+
+		    leaf policy-id {
+			type string;
+		    }
+
+		    leaf address-family {
+			type ngcom:ip-address-family;
+		    }
+
+		    leaf priority {
+			type uint32;
+		    }
+		}
+	    }
+	}
+    }
+}

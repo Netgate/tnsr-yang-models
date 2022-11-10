@@ -9,10 +9,6 @@ module netgate-snmp {
 	prefix "inet";
     }
 
-    import ietf-yang-types {
-	prefix "yang";
-    }
-
     import netgate-cli-extensions {
 	prefix "ngcliext";
     }

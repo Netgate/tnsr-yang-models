@@ -409,6 +409,10 @@ module netgate-nat {
 		    }
 
 		    leaf local-port {
+			/*
+			 * there must always be a value set here, it is
+			 * ignored for icmp though
+			 */
 			type nat-ipv4-port-any;
 			description
 			    "The local port mapped, or wildcard 'any'.";
@@ -428,6 +432,10 @@ module netgate-nat {
 		    }
 
 		    leaf external-port {
+			/*
+			 * there must always be a value set here, it is
+			 * ignored for icmp though
+			 */
 			type nat-ipv4-port-any;
 			description
 			    "The external port mapped, or wildcard 'any'.";

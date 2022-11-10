@@ -18,6 +18,11 @@ module netgate-route {
 
          Copyright 2017-2020 Rubicon Communications, LLC. All rights reserved.";
 
+    revision 2022-10-15 {
+	description
+	    "TNSR Release 22.10.";
+    }
+
     revision 2022-02-15 {
 	description
 	    "TNSR Release 22.02.";

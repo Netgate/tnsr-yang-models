@@ -1231,7 +1231,6 @@ module netgate-kea {
 	    leaf severity {
 		type kea-logger-severity;
 		mandatory true;
-		default error;
 		description
 		    "A Kea logger severity level.";
 		ngcliext:node-fmt "^$% @@$n";

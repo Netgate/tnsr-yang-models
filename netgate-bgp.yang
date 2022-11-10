@@ -40,6 +40,11 @@ module netgate-bgp {
 	 Copyright 2019-2020 Rubicon Communications, LLC.
 	 ";
 
+    revision 2022-10-15 {
+	description
+	    "TNSR Release 22.10.";
+    }
+
     revision 2022-02-15 {
 	description
 	    "TNSR Release 22.02.";
@@ -345,7 +350,12 @@ module netgate-bgp {
 	}
 
 	leaf access-list-name {
-	    type string;
+	    type leafref {
+		path "/ngrt:route-config"
+		    + "/ngrt:dynamic"
+		    + "/ngfrr:access-lists/ngfrr:list"
+		    + "/ngfrr:name";
+	    }
 	    description
 		"An optional Access List name.";
 	    ngcliext:child-fmt " access-list @@";
@@ -372,7 +382,12 @@ module netgate-bgp {
 	}
 
 	leaf access-list-name {
-	    type string;
+	    type leafref {
+		path "/ngrt:route-config"
+		    + "/ngrt:dynamic"
+		    + "/ngfrr:access-lists/ngfrr:list"
+		    + "/ngfrr:name";
+	    }
 	    description
 		"An optional Access List name.";
 	    ngcliext:child-fmt " access-list @@";
@@ -574,7 +589,13 @@ module netgate-bgp {
 		ngcliext:node-fmt "^$%${route-map}$n";
 
 		leaf route-map {
-		    type string;
+		    type leafref {
+			path "/ngrt:route-config"
+			    + "/ngrt:dynamic"
+			    + "/ngfrr:route-maps"
+			    + "/ngfrr:map"
+			    + "/ngfrr:name";
+		    }
 		    description
 			"A route map to specify criteria to originate
 			 default.";
@@ -599,7 +620,14 @@ module netgate-bgp {
 	    }
 
 	    leaf filter-list-in {
-		type string;
+		type leafref {
+		    path "/ngrt:route-config"
+			+ "/ngrt:dynamic"
+			+ "/ngbgp:bgp"
+			+ "/ngbgp:as-path-table"
+			+ "/ngbgp:as-path"
+			+ "/ngbgp:name";
+		}
 		description
 		    "The name of an 'in' AS-path access-list name used
 		     to filter incoming routes.";
@@ -607,7 +635,14 @@ module netgate-bgp {
 	    }
 
 	    leaf filter-list-out {
-		type string;
+		type leafref {
+		    path "/ngrt:route-config"
+			+ "/ngrt:dynamic"
+			+ "/ngbgp:bgp"
+			+ "/ngbgp:as-path-table"
+			+ "/ngbgp:as-path"
+			+ "/ngbgp:name";
+		}
 		description
 		    "The name of an 'in' AS-path access-list name used
 		     to filter outgoing routes.";
@@ -676,7 +711,12 @@ module netgate-bgp {
 	    }
 
 	    leaf prefix-list-in {
-		type string;
+		type leafref {
+		    path "/ngrt:route-config"
+			+ "/ngrt:dynamic"
+			+ "/ngfrr:prefix-lists/ngfrr:list"
+			+ "/ngfrr:name";
+		}
 		description
 		    "If present, this is the name of the 'in' prefix
 		     list used to filter incoming updates.";
@@ -684,7 +724,12 @@ module netgate-bgp {
 	    }
 
 	    leaf prefix-list-out {
-		type string;
+		type leafref {
+		    path "/ngrt:route-config"
+			+ "/ngrt:dynamic"
+			+ "/ngfrr:prefix-lists/ngfrr:list"
+			+ "/ngfrr:name";
+		}
 		description
 		    "If present, this is the name of the 'out' prefix
 		     list used to filter outgoing updates.";
@@ -720,7 +765,13 @@ module netgate-bgp {
 	    }
 
 	    leaf route-map-in {
-		type string;
+		type leafref {
+		    path "/ngrt:route-config"
+			+ "/ngrt:dynamic"
+			+ "/ngfrr:route-maps"
+			+ "/ngfrr:map"
+			+ "/ngfrr:name";
+		}
 		description
 		    "The name of a route-map to apply to incoming
 		     routes.";
@@ -728,7 +779,13 @@ module netgate-bgp {
 	    }
 
 	    leaf route-map-out {
-		type string;
+		type leafref {
+		    path "/ngrt:route-config"
+			+ "/ngrt:dynamic"
+			+ "/ngfrr:route-maps"
+			+ "/ngfrr:map"
+			+ "/ngfrr:name";
+		}
 		description
 		    "The name of a route-map to apply to outbound
 		     routes.";
@@ -799,7 +856,13 @@ module netgate-bgp {
 	    }
 
 	    leaf unsuppress-route-map {
-		type string;
+		type leafref {
+		    path "/ngrt:route-config"
+			+ "/ngrt:dynamic"
+			+ "/ngfrr:route-maps"
+			+ "/ngfrr:map"
+			+ "/ngfrr:name";
+		}
 		description
 		    "The name of a route map to use to selectively
 		     unspress otherwise suppressed routes.";
@@ -845,7 +908,13 @@ module netgate-bgp {
 		ngcliext:node-fmt "$<$n|${route-map-name}${backdoor}";
 
 		leaf route-map-name {
-		    type string;
+		    type leafref {
+			path "/ngrt:route-config"
+			    + "/ngrt:dynamic"
+			    + "/ngfrr:route-maps"
+			    + "/ngfrr:map"
+			    + "/ngfrr:name";
+		    }
 		    description
 			"An optional route map name used to modify
 			 attributes.";
@@ -892,12 +961,57 @@ module netgate-bgp {
 		ngcliext:node-fmt "$<$n|${route-map-name}";
 
 		leaf route-map-name {
-		    type string;
+		    type leafref {
+			path "/ngrt:route-config"
+			    + "/ngrt:dynamic"
+			    + "/ngfrr:route-maps"
+			    + "/ngfrr:map"
+			    + "/ngfrr:name";
+		    }
 		    description
 			"An optional route map name used to modify
 			 attributes.";
 		    ngcliext:node-fmt "$< route-map @@$n";
 		}
+	    }
+	}
+    }
+
+    grouping bgp-imports {
+	description
+	    "This is the list of vrf imports and route-maps
+	     used for inter-vrf route leaking.";
+
+	list vrf-import {
+	    description
+		"Each import is identified by a VRF ID.";
+	    key "vrf-id-import";
+
+	    leaf vrf-id-import {
+		type bgp-vrf-id;
+		description
+		    "Import from a custom or 'default' VRF.";
+
+		ngcliext:node-fmt "^import vrf @@$n";
+	    }
+	}
+
+	list route-map-imports {
+	    description
+		"Apply various route-maps to leaked routes.";
+	    key "route-map-import";
+
+	    leaf route-map-import {
+		type leafref {
+		    path "/ngrt:route-config"
+			+ "/ngrt:dynamic"
+			+ "/ngfrr:route-maps"
+			+ "/ngfrr:map"
+			+ "/ngfrr:name";
+		}
+		description
+		    "A route map used to modify leaked routes.";
+		ngcliext:node-fmt "^import vrf route-map @@$n";
 	    }
 	}
     }
@@ -947,7 +1061,13 @@ module netgate-bgp {
 		    }
 
 		    leaf route-map {
-			type string;
+			type leafref {
+			    path "/ngrt:route-config"
+				+ "/ngrt:dynamic"
+				+ "/ngfrr:route-maps"
+				+ "/ngfrr:map"
+				+ "/ngfrr:name";
+			}
 			description
 			    "Route map for
 			     redistributed routes";
@@ -996,7 +1116,13 @@ module netgate-bgp {
 		    }
 
 		    leaf route-map {
-			type string;
+			type leafref {
+			    path "/ngrt:route-config"
+				+ "/ngrt:dynamic"
+				+ "/ngfrr:route-maps"
+				+ "/ngfrr:map"
+				+ "/ngfrr:name";
+			}
 			description
 			    "Route map for
 			     redistributed routes";
@@ -2092,7 +2218,13 @@ module netgate-bgp {
 				}
 
 				leaf table-map {
-				    type string;
+				    type leafref {
+					path "/ngrt:route-config"
+					    + "/ngrt:dynamic"
+					    + "/ngfrr:route-maps"
+					    + "/ngfrr:map"
+					    + "/ngfrr:name";
+				    }
 				    description
 					"A route-map to use as a BGP
 					 to RIB router download filter.";
@@ -2150,6 +2282,13 @@ module netgate-bgp {
 				    uses bgp-ipv4-network-announcements;
 				}
 
+				container network-imports {
+				    description
+					"Network imports.";
+
+				    uses bgp-imports;
+				}
+
 				container redistributions {
 				    description
 					"Route redistributions.";
@@ -2158,7 +2297,13 @@ module netgate-bgp {
 				}
 
 				leaf table-map {
-				    type string;
+				    type leafref {
+					path "/ngrt:route-config"
+					    + "/ngrt:dynamic"
+					    + "/ngfrr:route-maps"
+					    + "/ngfrr:map"
+					    + "/ngfrr:name";
+				    }
 				    description
 					"A route-map to use as a BGP
 					 to RIB router download filter.";
@@ -2260,6 +2405,13 @@ module netgate-bgp {
 				    uses bgp-ipv6-network-announcements;
 				}
 
+				container network-imports {
+				    description
+					"Network imports.";
+
+				    uses bgp-imports;
+				}
+
 				container redistributions {
 				    description
 					"Route redistributions.";
@@ -2268,7 +2420,13 @@ module netgate-bgp {
 				}
 
 				leaf table-map {
-				    type string;
+				    type leafref {
+					path "/ngrt:route-config"
+					    + "/ngrt:dynamic"
+					    + "/ngfrr:route-maps"
+					    + "/ngfrr:map"
+					    + "/ngfrr:name";
+				    }
 				    description
 					"A route-map to use as a BGP
 					 to RIB router download filter.";
@@ -2409,7 +2567,7 @@ module netgate-bgp {
 			    description
 				"A set of Community List Rules.";
 
-			    ngcliext:node-fmt "^sequence @{sequence} @{action} @{community}$n";
+			    ngcliext:node-fmt "^sequence @{sequence} @{action}";
 
 			    leaf sequence {
 				type uint32;
@@ -2424,8 +2582,7 @@ module netgate-bgp {
 				    "One of the actions 'deny', 'permit'.";
 			    }
 
-			    leaf community {
-				type string;
+			    choice community-value {
 				description
 				    "The Community value.  A standard community
 				     value can be one of <ASN>:<policy>,
@@ -2434,6 +2591,44 @@ module netgate-bgp {
 				     <ip-address>:<policy> is also allowed.
 				      An expanded value is a regular
 				      expression.";
+
+				case community {
+				    description
+					"The Community value.  A standard
+					 community value can be one of
+					 <ASN>:<policy>, 'internet',
+					 'no-export', 'local-AS',
+					  'no-advertise'";
+
+				    leaf community {
+					type string;
+					ngcliext:node-fmt "$< @@$n";
+				    }
+				}
+
+				case rt-value {
+				    leaf rt {
+					type string {
+					    pattern "[0-9]+:[0-9]+";
+					}
+					description
+					    "Route Target Extcommunity value
+					     rt value1:value2.";
+					ngcliext:node-fmt "$< $% @@$n";
+				    }
+				}
+
+				case soo-value {
+				    leaf soo {
+					type string {
+					    pattern "[0-9]+:[0-9]+";
+					}
+					description
+					    "Source of Origin Extcommunity
+					     value soo value1:value2.";
+					ngcliext:node-fmt "$< $% @@$n";
+				    }
+				}
 			    }
 			}
 		    }
@@ -3005,6 +3200,13 @@ module netgate-bgp {
 				    uses bgp-ipv4-network-announcements;
 				}
 
+				container network-imports {
+				    description
+					"Network imports.";
+
+				    uses bgp-imports;
+				}
+
 				container redistributions {
 				    description
 					"Route redistributions.";
@@ -3104,6 +3306,13 @@ module netgate-bgp {
 					"Network announcements.";
 
 				    uses bgp-ipv6-network-announcements;
+				}
+
+				container network-imports {
+				    description
+					"Network imports.";
+
+				    uses bgp-imports;
 				}
 
 				container redistributions {

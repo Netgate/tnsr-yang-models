@@ -33,8 +33,13 @@ module netgate-ospf {
 	"This YANG module provides a Netgate-defined data-model
 	 for OSPF data.
 
-	 Copyright 2019-2020 Rubicon Communications, LLC.
+	 Copyright 2019-2022 Rubicon Communications, LLC.
 	 ";
+
+    revision 2022-10-15 {
+	description
+	    "TNSR Release 22.10.";
+    }
 
     revision 2021-06-15 {
 	description
@@ -160,10 +165,6 @@ module netgate-ospf {
 	    enum kernel {
 		description
 		    "Kernel";
-	    }
-	    enum ospf {
-		description
-		    "OSPF";
 	    }
 	    enum table {
 		description
@@ -1192,7 +1193,13 @@ module netgate-ospf {
 			    }
 
 			    leaf route-map {
-				type string;
+				type leafref {
+				    path "/ngrt:route-config"
+					+ "/ngrt:dynamic"
+					+ "/ngfrr:route-maps"
+					+ "/ngfrr:map"
+					+ "/ngfrr:name";
+				}
 				description
 				    "Route map reference.";
 				ngcliext:node-fmt "$< $% @@$n";
@@ -1272,7 +1279,12 @@ module netgate-ospf {
 			    }
 
 			    leaf access-list-name {
-				type string;
+				type leafref {
+				    path "/ngrt:route-config"
+					+ "/ngrt:dynamic"
+					+ "/ngfrr:access-lists/ngfrr:list"
+					+ "/ngfrr:name";
+				}
 				description
 				    "Apply this access-list to redistributed
 				     routes of the named type before allowing
@@ -1572,7 +1584,13 @@ module netgate-ospf {
 				}
 
 				leaf route-map {
-				    type string;
+				    type leafref {
+					path "/ngrt:route-config"
+					    + "/ngrt:dynamic"
+					    + "/ngfrr:route-maps"
+					    + "/ngfrr:map"
+					    + "/ngfrr:name";
+				    }
 				    description
 					"Route-map used to filter routes into
 					 OSPF.";
@@ -1774,7 +1792,12 @@ module netgate-ospf {
 			    }
 
 			    leaf export-list {
-				type string;
+				type leafref {
+				    path "/ngrt:route-config"
+					+ "/ngrt:dynamic"
+					+ "/ngfrr:access-lists/ngfrr:list"
+					+ "/ngfrr:name";
+				}
 				description
 				    "The access-list filter for Type-3 Summary
 				     LSA networks announced to other areas
@@ -1784,7 +1807,12 @@ module netgate-ospf {
 			    }
 
 			    leaf import-list {
-				type string;
+				type leafref {
+				    path "/ngrt:route-config"
+					+ "/ngrt:dynamic"
+					+ "/ngfrr:access-lists/ngfrr:list"
+					+ "/ngfrr:name";
+				}
 				description
 				    "The access-list filter for networks
 				     imported into this area from other areas
@@ -1793,7 +1821,12 @@ module netgate-ospf {
 			    }
 
 			    leaf filter-list-in {
-				type string;
+				type leafref {
+				    path "/ngrt:route-config"
+					+ "/ngrt:dynamic"
+					+ "/ngfrr:prefix-lists/ngfrr:list"
+					+ "/ngfrr:name";
+				}
 				description
 				    "The prefix-list filter for Type-3 Summary
 				     LSA networks imported from other areas.
@@ -1802,7 +1835,12 @@ module netgate-ospf {
 			    }
 
 			    leaf filter-list-out {
-				type string;
+				type leafref {
+				    path "/ngrt:route-config"
+					+ "/ngrt:dynamic"
+					+ "/ngfrr:prefix-lists/ngfrr:list"
+					+ "/ngfrr:name";
+				}
 				description
 				    "The prefix-list filter for Type-3 Summary
 				     LSA networks exported to other areas.
@@ -3133,7 +3171,12 @@ module netgate-ospf {
 			    }
 
 			    leaf filter-list-in {
-				type string;
+				type leafref {
+				    path "/ngrt:route-config"
+					+ "/ngrt:dynamic"
+					+ "/ngfrr:prefix-lists/ngfrr:list"
+					+ "/ngfrr:name";
+				}
 				description
 				    "The prefix-list filter for Type-3 Summary
 				     LSA networks imported from other areas.
@@ -3141,7 +3184,12 @@ module netgate-ospf {
 			    }
 
 			    leaf filter-list-out {
-				type string;
+				type leafref {
+				    path "/ngrt:route-config"
+					+ "/ngrt:dynamic"
+					+ "/ngfrr:prefix-lists/ngfrr:list"
+					+ "/ngfrr:name";
+				}
 				description
 				    "The prefix-list filter for Type-3 Summary
 				     LSA networks exported to other areas.

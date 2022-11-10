@@ -200,6 +200,139 @@ module netgate-pki {
 	}
     }
 
+
+    typedef ssh-key-choices {
+	type enumeration {
+	    enum private {
+		description
+		    "The private key.";
+	    }
+	    enum public {
+		description
+		    "The public key.";
+	    }
+	    enum both {
+		description
+		    "Both the public and private keys.";
+	    }
+	}
+
+	description
+	    "Select which keys are involved in an operation.";
+    }
+
+    rpc pki-ssh-key-delete {
+	description
+	    "Delete an existing ssh key or key pair.";
+
+	input {
+	    leaf name {
+		type string {
+		    length "1..32";
+		    pattern "[0-9A-Za-z_-]+";
+		}
+		mandatory true;
+		description
+		    "The name of the key.";
+	    }
+	    leaf which-keys {
+		type ssh-key-choices;
+		description
+		    "Delete the ssh public key, the private key,
+		     or both keys.  A missing value is 'both'.";
+	     }
+	}
+    }
+
+    rpc pki-ssh-key-get {
+	description
+	    "Fetch the contents of an existing ssh key or key pair.";
+
+	input {
+	    leaf name {
+		type string {
+		    length "1..32";
+		    pattern "[0-9A-Za-z_-]+";
+		}
+		mandatory true;
+		description
+		    "The name of the key.";
+	    }
+	    leaf which-keys {
+		type ssh-key-choices;
+		description
+		    "Retrieve the ssh public key, the private key,
+		     or both keys.";
+	    }
+	}
+
+	output {
+	    leaf private-key {
+		type string;
+		description
+		    "Text of new ssh private key.";
+	    }
+	    leaf public-key {
+		type string;
+		description
+		    "Text of new ssh public key.";
+	    }
+	}
+    }
+
+    rpc pki-ssh-key-list {
+	description
+	    "List the existing ssh key pairs.";
+
+	output {
+	    list key {
+		key name;
+
+		leaf name {
+		    type string;
+		    description
+			"Name of a key pair.";
+		}
+
+		leaf which-keys {
+		    type ssh-key-choices;
+		    description
+			"States which ssh keys are configured: public,
+			 private, or both.";
+		}
+	    }
+	}
+    }
+
+    rpc pki-ssh-key-import {
+	description
+	    "Import an ssh key.";
+
+	input {
+	    leaf name {
+		type string {
+		    length "1..32";
+		    pattern "[0-9A-Za-z_-]+";
+		}
+		mandatory true;
+		description
+		    "The name of the ssh key.";
+	    }
+	    leaf private-key {
+		type string;
+		description
+		    "Text of a PEM-encoded ssh private key, including
+		     'the BEGIN OPENSSH PRIVATE KEY' and
+		     'END OPENSSH PRIVATE KEY' lines.";
+	    }
+	    leaf public-key {
+		type string;
+		description
+		    "Text of an ssh public key.";
+	    }
+	}
+    }
+
     rpc pki-csr-generate {
 	description
 	    "Create a certificate signing request using a local private key.";
