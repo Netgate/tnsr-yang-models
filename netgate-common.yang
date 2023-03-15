@@ -15,6 +15,11 @@ module netgate-common {
 
     Copyright 2017-2020 Rubicon Communications, LLC. All rights reserved.";
 
+    revision 2023-02-15 {
+	description
+	    "TNSR Release 23.02.";
+    }
+
     revision 2022-02-15 {
 	description
 	    "TNSR Release 22.02.";
@@ -178,7 +183,7 @@ module netgate-common {
 	    }
 	    enum ipv6 {
 		description
-		    "IPv4";
+		    "IPv6";
 	    }
 	}
 	description

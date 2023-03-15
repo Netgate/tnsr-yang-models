@@ -27,6 +27,11 @@ module netgate-tunnel {
 
 	 Copyright 2022 Rubicon Communications, LLC.";
 
+    revision 2023-02-15 {
+	description
+	    "TNSR Release 23.02.";
+    }
+
     revision 2022-06-15 {
 	description
 	    "TNSR Release 22.06.";
@@ -135,6 +140,8 @@ module netgate-tunnel {
     }
 
     container tunnels-state {
+	config "false";
+
 	description
 	    "Tunnel-related state.";
 

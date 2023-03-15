@@ -17,20 +17,12 @@ module netgate-frr {
 	prefix "ngcom";
     }
 
-    import netgate-bgp {
-	prefix "ngbgp";
-    }
-
     import netgate-frr-types {
 	prefix "frr";
     }
 
     import netgate-route {
 	prefix "ngrt";
-    }
-
-    import netgate-rpki {
-	prefix "ngrpki";
     }
 
     organization "Netgate";
@@ -43,6 +35,11 @@ module netgate-frr {
 
 	 Copyright 2017-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2023-02-16 {
+	description
+	    "TNSR Release 23.02.";
+    }
 
     revision 2022-10-15 {
 	description
@@ -455,66 +452,6 @@ module netgate-frr {
 
 			    ngcliext:parent-fmt "^$%";
 
-			    leaf as-path-name {
-				type leafref {
-				    path "/ngrt:route-config"
-					+ "/ngrt:dynamic"
-					+ "/ngbgp:bgp"
-					+ "/ngbgp:as-path-table"
-					+ "/ngbgp:as-path"
-					+ "/ngbgp:name";
-				}
-				description
-				    "The name of an as-path entry.";
-				ngcliext:node-fmt "$< as-path @@$n";
-			    }
-
-			    container community {
-				description
-				    "Match community list.";
-
-				ngcliext:parent-fmt "$< $%";
-
-				leaf comm-list-name {
-				    type leafref {
-					path "/ngrt:route-config"
-					    + "/ngrt:dynamic"
-					    + "/ngbgp:bgp"
-					    + "/ngbgp:community-lists"
-					    + "/ngbgp:community"
-					    + "/ngbgp:name";
-				    }
-				    description
-					"The name of a community list.";
-				    ngcliext:node-fmt "$< @@%{exact-match}$n";
-				}
-
-				leaf exact-match {
-				    type boolean;
-				    description
-					"If matching a community list,
-					 it may be specified as an
-					 exact match.";
-				    ngcliext:sibling-op "bool";
-				    ngcliext:sibling-fmt "| $%";
-				}
-			    }
-
-			    container extcommunity {
-				description
-				    "Match extended community list.";
-
-				ngcliext:parent-fmt "$< $%";
-
-				leaf extcomm-list-name {
-				    type string;
-				    description
-					"The name of an extended
-					 community list.";
-				    ngcliext:node-fmt "$< @@$n";
-				}
-			    }
-
 			    leaf if-name {
 				type string;
 				description
@@ -608,21 +545,6 @@ module netgate-frr {
 				ngcliext:node-fmt "$< ipv6 address prefix-list @@$n";
 			    }
 
-			    container large-community {
-				description
-				    "Match large community list.";
-
-				ngcliext:parent-fmt "$< $%";
-
-				leaf large-comm-list-name {
-				    type string;
-				    description
-					"The name of a large
-					 community list.";
-				    ngcliext:node-fmt "$< @@$n";
-				}
-			    }
-
 			    leaf local-preference {
 				type uint32;
 				description
@@ -651,18 +573,6 @@ module netgate-frr {
 				ngcliext:node-fmt "$< origin @@$n";
 			    }
 
-			    leaf peer-ip-address {
-				type leafref {
-				    path "/ngrt:route-config/ngrt:dynamic"
-					+ "/ngbgp:bgp/ngbgp:routers"
-					+ "/ngbgp:router/ngbgp:neighbors"
-					+ "/ngbgp:neighbor/ngbgp:peer";
-				}
-				description
-				    "The peer IP address is matched.";
-				ngcliext:node-fmt "$< peer @@$n";
-			    }
-
 			    leaf probability {
 				type uint32;
 				description
@@ -683,15 +593,6 @@ module netgate-frr {
 				type uint32;
 				description
 				    "Match the router tag value.";
-				ngcliext:node-fmt "$< $% @@$n";
-			    }
-
-			    leaf rpki {
-				type ngrpki:rpki-route-state;
-				description
-				    "Match prefixes with the specified RPKI
-				     state. One of 'invalid', 'notfound',
-				     'valid'.";
 				ngcliext:node-fmt "$< $% @@$n";
 			    }
 			}
@@ -723,134 +624,6 @@ module netgate-frr {
 				}
 			    }
 
-			    container as-path {
-				description
-				    "Group as-path related attributes.";
-
-				ngcliext:parent-fmt "$< $%";
-
-				leaf exclude {
-				    type string;
-				    description
-					"Exclude this set of AS numbers.";
-				    ngcliext:node-fmt "$< $% @@$n";
-				}
-
-				leaf prepend {
-				    type string;
-				    description
-					"Prepend this set of AS numbers.";
-				    ngcliext:node-fmt "$< $% @@$n";
-				}
-
-				leaf last-as {
-				    type uint32;
-				    description
-					"Prepend the leftmost ASN to the
-					 AS_PATH.";
-				    ngcliext:node-fmt "$< $% @@$n";
-				}
-			    }
-
-			    leaf atomic-aggregate {
-				type boolean;
-				description
-				    "BGP atomic-aggregate attribute.";
-				ngcliext:node-op "bool";
-				ngcliext:node-fmt "|$< $%$n";
-			    }
-
-			    container community {
-				description
-				    "Configuration to set community.";
-
-				ngcliext:parent-fmt "$< $%";
-
-				leaf none {
-				    type boolean;
-				    description
-					"Remove the community values from
-					 the update.";
-				    ngcliext:node-op "bool";
-				    ngcliext:node-fmt "|$< $%$n";
-				}
-
-				leaf value {
-				    type string;
-				    description
-					"The existing BGP community values are
-					 replaced with this community value.";
-				    ngcliext:node-fmt "$< $q@@$q%{additive}$n";
-				}
-
-				leaf additive {
-				    type boolean;
-				    description
-					"Rather than replacing the existing
-					 community values, this community
-					 value is appended to the existing
-					 set.";
-				    ngcliext:sibling-op "bool";
-				    ngcliext:sibling-fmt "| $%";
-				}
-			    }
-
-			    container community-list {
-				description
-				    "Configuration for community-lists.";
-
-				ngcliext:parent-fmt "$< comm-list";
-
-				leaf delete {
-				    type leafref {
-					path "/ngrt:route-config"
-					    + "/ngrt:dynamic"
-					    + "/ngbgp:bgp"
-					    + "/ngbgp:community-lists"
-					    + "/ngbgp:community"
-					    + "/ngbgp:name";
-				    }
-				    description
-					"The community values from the given
-					 Community List are removed from the
-					 BGP update.";
-				    ngcliext:node-fmt "$< @@ $%$n";
-				}
-			    }
-
-			    container extcommunity {
-				description
-				    "Configuration for extcommunity values.";
-
-				ngcliext:parent-fmt "$< $%";
-
-				choice ext-value {
-				    case rt-value {
-					leaf rt {
-					    type string {
-						pattern "[0-9]+:[0-9]+";
-					    }
-					    description
-						"Route Target Extcommunity
-						 value rt value1:value2.";
-					    ngcliext:node-fmt "$< $% @@$n";
-					}
-				    }
-
-				    case soo-value {
-					leaf soo {
-					    type string {
-						pattern "[0-9]+:[0-9]+";
-					    }
-					    description
-						"Source of Origin Extcommunity
-						 value soo value1:value2.";
-					    ngcliext:node-fmt "$< $% @@$n";
-					}
-				    }
-				}
-			    }
-
 			    leaf forwarding-address {
 				type inet:ipv6-address;
 				description
@@ -876,15 +649,6 @@ module netgate-frr {
 					    "The next-hop is set to this
 					     IPv4 address.";
 					ngcliext:node-fmt "$< @@$n";
-				    }
-
-				    leaf use-peer-address {
-					type boolean;
-					description
-					    "If true, the BGP peer address
-					     is use as the next hop.";
-					ngcliext:node-op "bool";
-					ngcliext:node-fmt "|$< peer-address$n";
 				    }
 
 				    leaf unchanged {
@@ -967,15 +731,6 @@ module netgate-frr {
 					ngcliext:node-fmt "$< local @@$n";
 				    }
 
-				    leaf use-peer-address {
-					type boolean;
-					description
-					    "If true, the BGP peer address
-					     is use as the next hop.";
-					ngcliext:node-op "bool";
-					ngcliext:node-fmt "|$< peer-address$n";
-				    }
-
 				    leaf prefer-global {
 					type boolean;
 					description
@@ -1016,62 +771,6 @@ module netgate-frr {
 					    ngcliext:node-fmt "$< @@$n";
 					}
 				    }
-				}
-			    }
-
-			    container large-community {
-				description
-				    "Information about large communities.";
-
-				ngcliext:parent-fmt "$< $%";
-
-				leaf none {
-				    type boolean;
-				    description
-					"Large community list.";
-				    ngcliext:node-op "bool";
-				    ngcliext:node-fmt "|$< $%$n";
-				}
-
-				leaf value {
-				    type string;
-				    description
-					"List of large communities.";
-				    ngcliext:node-fmt "$< $q@@$q%{additive}$n";
-				}
-
-				leaf additive {
-				    type boolean;
-				    description
-					"Rather than replacing the existing
-					 community values, this community
-					 value is appended to the existing
-					 set.";
-				    ngcliext:sibling-op "bool";
-				    ngcliext:sibling-fmt "| $%";
-				}
-			    }
-
-			    container large-comm-list {
-				description
-				    "Configuration for large-comm-lists.";
-
-				ngcliext:parent-fmt "$< $%";
-
-				leaf delete {
-				    type leafref {
-					path "/ngrt:route-config"
-					    + "/ngrt:dynamic"
-					    + "/ngbgp:bgp"
-					    + "/ngbgp:community-lists"
-					    + "/ngbgp:community"
-					    + "/ngbgp:name";
-				    }
-				    description
-					"The community values from the given
-					 Large Communities List are
-					 removed from the BGP update.";
-				    ngcliext:node-fmt "$< @@ $%$n";
 				}
 			    }
 

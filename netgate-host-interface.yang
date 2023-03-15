@@ -31,6 +31,11 @@ module netgate-host-interface {
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	";
 
+    revision 2023-02-15 {
+	description
+	    "TNSR Release 23.02.";
+    }
+
     revision 2022-02-15 {
 	description
 	    "TNSR Release 22.02.";
@@ -118,12 +123,44 @@ module netgate-host-interface {
 		description
 		    "Parameters for the IPv4 address family.";
 
-		container address {
-		    leaf-list ip {
-			type inet:ipv4-prefix;
-			description
-			    "An IPv4 prefix on the host interface.";
-			ngcliext:node-fmt "^ip address @@$n";
+		ngcliext:parent-fmt "^ip";
+
+		choice address-type {
+		    case dhcp {
+			container dhcp-client {
+
+			    ngcliext:parent-fmt "$< dhcp-client";
+
+			    leaf enabled {
+				type boolean;
+				description
+				    "Enable DHCP client on the host
+				     interface.";
+				ngcliext:node-op "bool";
+				ngcliext:node-fmt "|$< enable$n";
+			    }
+
+			    leaf hostname {
+				type inet:domain-name;
+				description
+				    "Hostname";
+				ngcliext:node-fmt "$< $% @@$n";
+			    }
+			}
+		    }
+
+		    case static {
+			container address {
+
+			    ngcliext:parent-fmt "$< address";
+
+			    leaf-list ip {
+				type inet:ipv4-prefix;
+				description
+				    "An IPv4 prefix on the host interface.";
+				ngcliext:node-fmt "$< @@$n";
+			    }
+			}
 		    }
 		}
 	    }
@@ -134,12 +171,37 @@ module netgate-host-interface {
 		description
 		    "Parameters for the IPv6 address family.";
 
-		container address {
-		    leaf-list ip {
-			type inet:ipv6-prefix;
-			description
-			    "An IPv6 prefix on the host interface.";
-			ngcliext:node-fmt "^ipv6 address @@$n";
+		ngcliext:parent-fmt "^ipv6";
+
+		choice address-type {
+		    case dhcp {
+			container dhcp-client {
+
+			    ngcliext:parent-fmt "$< dhcp-client";
+
+			    leaf enabled {
+				type boolean;
+				description
+				    "Enable DHCPv6 client on the host
+				     interface.";
+				ngcliext:node-op "bool";
+				ngcliext:node-fmt "|$< enable$n";
+			    }
+			}
+		    }
+
+		    case static {
+			container address {
+
+			    ngcliext:parent-fmt "$< address";
+
+			    leaf-list ip {
+				type inet:ipv6-prefix;
+				description
+				    "An IPv6 prefix on the host interface.";
+				ngcliext:node-fmt "$< @@$n";
+			    }
+			}
 		    }
 		}
 	    }

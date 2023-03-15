@@ -17,6 +17,10 @@ module netgate-rip {
 	prefix "ngcom";
     }
 
+    import netgate-frr {
+	prefix "ngfrr";
+    }
+
     import netgate-route {
 	prefix "ngrt";
     }
@@ -31,6 +35,11 @@ module netgate-rip {
 
 	 Copyright 2019-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2023-02-15 {
+	description
+	    "TNSR Release 23.02.";
+    }
 
     revision 2022-10-15 {
 	description

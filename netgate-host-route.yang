@@ -1,0 +1,674 @@
+module netgate-host-route {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-host-route";
+    prefix "nghroute";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import ietf-yang-types {
+	prefix "yang";
+    }
+
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a data model for host IP routes.
+
+	 Copyright 2019-2020 Rubicon Communications, LLC.
+	";
+
+    revision 2023-02-15 {
+	description
+	    "TNSR Release 23.02.";
+    }
+
+    typedef host-route-type {
+	type enumeration {
+	    enum unicast {
+		description
+		    "Route type unicast.";
+	    }
+
+	    enum anycast {
+		description
+		    "Route type anycast.";
+	    }
+
+	    enum blackhole {
+		description
+		    "Route type blackhole.";
+	    }
+
+	    enum broadcast {
+		description
+		    "Route type broadcast.";
+	    }
+
+	    enum local {
+		description
+		    "Route type local.";
+	    }
+
+	    enum multicast {
+		description
+		    "Route type multicast.";
+	    }
+
+	    enum nat {
+		description
+		    "Route type nat.  ";
+	    }
+
+	    enum prohibit {
+		description
+		    "Route type prohibit.";
+	    }
+
+	    enum throw {
+		description
+		    "Route type throw.";
+	    }
+
+	    enum unreachable {
+		description
+		    "Route type unreachable.";
+	    }
+
+	    enum xresolve {
+		description
+		    "Route type xresolve.";
+	    }
+	}
+    }
+
+    typedef host-route-scope {
+	type enumeration {
+	    enum global {
+		description
+		    "Route scope is global.";
+	    }
+	    enum link {
+		description
+		    "Route scope is link.";
+	    }
+	    enum host {
+		description
+		    "Route scope is host.";
+	    }
+	}
+    }
+
+    container host-route-config {
+	description
+	    "Host system IP route configuration.";
+
+	container route-tables {
+	    description
+		"Host system static routes.";
+
+	    list route-table {
+		key "name";
+		description
+		    "Currently, one host route table named
+		     'default' is supported.";
+
+		ngcliext:node-fmt "host route table @{name}$n";
+		ngcliext:pre-children-op "push";
+
+		leaf name {
+		    type ngcom:rt-identifier-15;
+		    description
+			"The name of a Route Table.  Use 'default'.";
+		}
+
+		leaf description {
+		    type ngcom:description-63;
+		    description
+			"A user description of the route table.";
+
+		    ngcliext:node-fmt "^$% @@$n";
+		}
+
+		container static-routes {
+		    description
+			"Host system IPv4 and IPv6 static routes.";
+
+		    container interfaces {
+			description
+			    "Static routes are associated with a
+			     specific, required interface.";
+
+			list interface {
+			    key "if-name";
+			    description
+				"An interface with static routes.";
+
+			    ngcliext:node-fmt "^interface @{if-name}$n";
+			    ngcliext:pre-children-op "push";
+
+			    leaf if-name {
+				type ngcom:if-identifier-63;
+				description
+				    "The interface on which the
+				     route is made.";
+			    }
+
+			    container ipv4-routes {
+				description
+				    "List of IPv4 routes by destination prefix
+				     for a given interface.  The destination
+				     'to' prefix is required and used as the
+				     unique key for the route.  If type is
+				     local or nat a default scope of host is
+				     assumed.  If type is unicast and no
+				     gateway (via) is given or type is
+				     broadcast, multicast or anycast a default
+				     scope of link is assumed.  Otherwise,
+				     a global scope is the default setting.";
+
+				list route {
+				    key "to";
+				    description
+					"Routes are index by their
+					 destination prefix.";
+
+				    ngcliext:node-fmt "^route @{to}$";
+				    ngcliext:pre-children-op "push";
+
+				    leaf to {
+					type inet:ipv4-prefix;
+					description
+					    "IPv4 destination prefix.";
+				    }
+
+				    leaf advertised-receive-window {
+					type uint32 {
+					    range "1..max";
+					}
+					description
+					    "The receive window to be
+					     advertised for the route.
+					     Represented by the number of
+					     segments. (1..4294967295)";
+					ngcliext:node-fmt "^$% @@$n";
+				    }
+
+				    leaf congestion-window {
+					type uint32 {
+					    range "1..max";
+					}
+					description
+					    "The congestion window to be used
+					     for the route.  Represented by
+					     the number of segments.
+					     (1..4294967295)";
+					ngcliext:node-fmt "^$% @@$n";
+				    }
+
+				    leaf description {
+					type ngcom:description-63;
+					description
+					    "A description of the route.";
+					ngcliext:node-fmt "^$% @@$n";
+				    }
+
+				    leaf from {
+					type inet:ipv4-address-no-zone;
+					description
+					    "Set a source IP address for
+					     traffic going through the route.";
+					ngcliext:node-fmt "^$% @@$n";
+				    }
+
+				    leaf metric {
+					type uint32 {
+					    range "1..max";
+					}
+					description
+					    "The route's relative priority
+					      metric.  (1..4294967295)";
+					ngcliext:node-fmt "^$% @@$n";
+				    }
+
+				    leaf mtu {
+					type uint32 {
+					    range "1..max";
+					}
+					description
+					    "The MTU to be used for the route,
+					     in bytes.  (1 .. 4294967295).";
+					ngcliext:node-fmt "^$% @@$n";
+				    }
+
+				    leaf on-link {
+					type boolean;
+					description
+					    "If 'true', the route is directly
+					     connected to the interface.";
+					ngcliext:node-op "bool";
+					ngcliext:node-fmt "|^$%$n";
+				    }
+
+				    leaf scope {
+					type host-route-scope;
+					description
+					    "The route scope specifies how
+					     wide-ranging the route is to the
+					     network.  Possible values are
+					     global, link, and host.";
+					ngcliext:node-fmt "^$% @@$n";
+				    }
+
+				    leaf table {
+					type uint32 {
+					    range "1..max";
+					}
+					description
+					    "The table number to use for the
+					     route. In some scenarios, it may
+					     be useful to set routes in a
+					     separate routing table. It may
+					     also be used to refer to routing
+					     policy rules which also accept
+					     a table parameter. Allowed values
+					     are positive integers starting
+					     from 1.  Some values are already
+					     in use to refer to specific
+					     routing tables.";
+					ngcliext:node-fmt "^$% @@$n";
+				    }
+
+				    leaf type {
+					type host-route-type;
+					description
+					    "The type of route. Valid options
+					     are unicast (default), anycast,
+					     blackhole, broadcast, local,
+					     multicast, nat, prohibit, throw,
+					     unreachable, and xresolve.";
+					ngcliext:node-fmt "^$% @@$n";
+				    }
+
+				    leaf via {
+					type inet:ipv4-address-no-zone;
+					description
+					    "IPv4 address to the gateway to
+					     use for this route.";
+					ngcliext:node-fmt "^$% @@$n";
+				    }
+				}
+			    }
+
+			    container ipv6-routes {
+				description
+				    "List of IPv6 routes by destination prefix
+				     for a given interface.  The destination
+				     'to' prefix is required and used as the
+				     unique key for the route.  If type is
+				     local or nat a default scope of host is
+				     assumed.  If type is unicast and no
+				     gateway (via) is given or type is
+				     broadcast, multicast or anycast a default
+				     scope of link is assumed.  Otherwise,
+				     a global scope is the default setting.";
+
+				list route {
+				    key "to";
+				    description
+					"Routes are index by their
+					 destination prefix.";
+
+				    ngcliext:node-fmt "^route @{to}$";
+				    ngcliext:pre-children-op "push";
+
+				    leaf to {
+					type inet:ipv6-prefix;
+					description
+					    "IPv6 destination prefix.";
+				    }
+
+				    leaf advertised-receive-window {
+					type uint32 {
+					    range "1..max";
+					}
+					description
+					    "The receive window to be
+					     advertised for the route.
+					     Represented by the number of
+					     segments. (1..4294967295)";
+					ngcliext:node-fmt "^$% @@$n";
+				    }
+
+				    leaf congestion-window {
+					type uint32 {
+					    range "1..max";
+					}
+					description
+					    "The congestion window to be used
+					     for the route.  Represented by
+					     the number of segments.
+					     (1..4294967295)";
+					ngcliext:node-fmt "^$% @@$n";
+				    }
+
+				    leaf description {
+					type ngcom:description-63;
+					description
+					    "A description of the route.";
+					ngcliext:node-fmt "^$% @@$n";
+				    }
+
+				    leaf from {
+					type inet:ipv4-address-no-zone;
+					description
+					    "Set a source IP address for
+					     traffic going through the route.";
+					ngcliext:node-fmt "^$% @@$n";
+				    }
+
+				    leaf metric {
+					type uint32 {
+					    range "1..max";
+					}
+					description
+					    "The route's relative priority
+					      metric.  (1..4294967295)";
+					ngcliext:node-fmt "^$% @@$n";
+				    }
+
+				    leaf mtu {
+					type uint32 {
+					    range "1..max";
+					}
+					description
+					    "The MTU to be used for the route,
+					     in bytes.  (1 .. 4294967295).";
+					ngcliext:node-fmt "^$% @@$n";
+				    }
+
+				    leaf on-link {
+					type boolean;
+					description
+					    "If 'true', the route is directly
+					     connected to the interface.";
+					ngcliext:node-op "bool";
+					ngcliext:node-fmt "|^$%$n";
+				    }
+
+				    leaf scope {
+					type host-route-scope;
+					description
+					    "The route scope specifies how
+					     wide-ranging the route is to the
+					     network.  Possible values are
+					     global, link, and host.";
+					ngcliext:node-fmt "^$% @@$n";
+				    }
+
+				    leaf table {
+					type uint32 {
+					    range "1..max";
+					}
+					description
+					    "The table number to use for the
+					     route. In some scenarios, it may
+					     be useful to set routes in a
+					     separate routing table. It may
+					     also be used to refer to routing
+					     policy rules which also accept
+					     a table parameter. Allowed values
+					     are positive integers starting
+					     from 1.  Some values are already
+					     in use to refer to specific
+					     routing tables.";
+					ngcliext:node-fmt "^$% @@$n";
+				    }
+
+				    leaf type {
+					type host-route-type;
+					description
+					    "The type of route. Valid options
+					     are unicast (default), anycast,
+					     blackhole, broadcast, local,
+					     multicast, nat, prohibit, throw,
+					     unreachable, and xresolve.";
+					ngcliext:node-fmt "^$% @@$n";
+				    }
+
+				    leaf via {
+					type inet:ipv6-address-no-zone;
+					description
+					    "IPv6 address to the gateway to
+					     use for this route.";
+					ngcliext:node-fmt "^$% @@$n";
+				    }
+				}
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+
+    container host-route-state {
+	config "false";
+
+	description
+	    "Host system IP route state information.";
+
+	container interfaces {
+	    description
+		"The list of host interfaces with static routes.";
+
+	    list interface {
+		key "name";
+
+		description
+		    "A host interface with static routes.";
+
+		leaf name {
+		    type string;
+		    description
+			"The name of the host interface.";
+		}
+
+		container ipv4-routes {
+		    description
+			"List of IPv4 routes by destination prefix
+			 for a given interface.";
+
+		    list route {
+			key "to";
+			description
+			    "Routes are index by their
+			     destination prefix.";
+
+			leaf to {
+			    type inet:ipv4-prefix;
+			    description
+				"IPv4 destination prefix.";
+			}
+
+			leaf from {
+			    type inet:ipv4-address-no-zone;
+			    description
+				"IPv4 source address.";
+			}
+
+			leaf metric {
+			    type uint32;
+			    description
+				"The route's relative priority metric.
+				 (1..4294967295)";
+			}
+
+			leaf scope {
+			    type string;
+			    description
+				"The route scope specifies how wide-ranging
+				 the route is to the network.  Possible
+				 values are global, link, and host.";
+			}
+
+			leaf protocol {
+			    type string;
+			    description
+				"The route protocol.";
+			}
+
+			leaf table {
+			    type uint32;
+			    description
+				"The table number to use for the route. In
+				 some scenarios, it may be useful to set
+				 routes in a separate routing table. It
+				 may also be used to refer to routing
+				 policy rules which also accept a table
+				 parameter. Allowed values are positive
+				 integers starting from 1.  Some values
+				 are already in use to refer to specific
+				 routing tables.";
+			}
+
+			leaf type {
+			    type string;
+			    description
+				"The type of route. Valid options are unicast
+				 (default), anycast, blackhole, broadcast,
+				 local, multicast, nat, prohibit, throw,
+				 unreachable, and xresolve.";
+			}
+
+			container next-hops {
+			    list hop {
+				key address;
+				description
+				    "A list of hops in a multi-hop route.";
+
+				leaf address {
+				    type inet:ipv4-address-no-zone;
+				    description
+					"IPv4 address to the gateway to use
+					 for this route.";
+				}
+
+				leaf weight {
+				    type uint32;
+				    description
+					"The route's relative priority metric.
+					 (1..4294967295)";
+				}
+			    }
+			}
+		    }
+		}
+
+		container ipv6-routes {
+		    description
+			"List of IPv6 routes by destination prefix
+			 for a given interface.";
+
+		    list route {
+			key "to";
+			description
+			    "Routes are index by their
+			     destination prefix.";
+
+			leaf to {
+			    type inet:ipv6-prefix;
+			    description
+				"IPv6 destination prefix.";
+			}
+
+			leaf from {
+			    type inet:ipv6-address-no-zone;
+			    description
+				"IPv6 source address.";
+			}
+
+			leaf metric {
+			    type uint32;
+			    description
+				"The route's relative priority metric.
+				 (1..4294967295)";
+			}
+
+			leaf scope {
+			    type string;
+			    description
+				"The route scope specifies how wide-ranging
+				 the route is to the network.  Possible
+				 values are global, link, and host.";
+			}
+
+			leaf protocol {
+			    type string;
+			    description
+				"The route protocol.";
+			}
+
+			leaf table {
+			    type uint32;
+			    description
+				"The table number to use for the route. In
+				 some scenarios, it may be useful to set
+				 routes in a separate routing table. It
+				 may also be used to refer to routing
+				 policy rules which also accept a table
+				 parameter. Allowed values are positive
+				 integers starting from 1.  Some values
+				 are already in use to refer to specific
+				 routing tables.";
+			}
+
+			leaf type {
+			    type string;
+			    description
+				"The type of route. Valid options are unicast
+				 (default), anycast, blackhole, broadcast,
+				 local, multicast, nat, prohibit, throw,
+				 unreachable, and xresolve.";
+			}
+
+			container next-hops {
+			    list hop {
+				key address;
+				description
+				    "A list of hops in a multi-hop route.";
+
+				leaf address {
+				    type inet:ipv6-address-no-zone;
+				    description
+					"IPv6 address to the gateway to use
+					 for this route.";
+				}
+
+				leaf weight {
+				    type uint32;
+				    description
+					"The route's relative priority metric.
+					 (1..4294967295)";
+				}
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+}

@@ -28,6 +28,11 @@ module netgate-system {
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	 ";
 
+    revision 2023-02-01 {
+	description
+	    "TNSR Release 23.02.";
+    }
+
     revision 2022-06-15 {
 	description
 	    "TNSR Release 22.06.";
@@ -505,6 +510,47 @@ module netgate-system {
 				     DNS server.";
 				ngcliext:sibling-fmt " @@";
 			    }
+			}
+		    }
+		}
+	    }
+
+	}
+
+	container kernel {
+	    ngcliext:context "system-kernel";
+	    ngcliext:parent-fmt "system $%";
+
+	    container arguments {
+		description
+		    "Linux kernel arguments";
+		ngcliext:parent-fmt "$< $%";
+
+		choice config-type {
+		    ngcliext:parent-fmt "$<";
+
+		    case auto {
+			container auto {
+			    ngcliext:parent-fmt "$< $%";
+
+			    leaf isolcpus {
+				type boolean;
+				description
+				    "Enable or disable isolcpus";
+				    ngcliext:node-op "bool";
+				    ngcliext:node-fmt "|$< $%$n";
+			    }
+			}
+		    }
+
+		    case manual {
+			leaf manual {
+			    type string {
+				pattern '[a-zA-Z0-9_\-=.,\/ ]+';
+			    }
+			    description
+				"String to be added to kernel command line";
+		    	    ngcliext:node-fmt "$< $% @@$n";
 			}
 		    }
 		}

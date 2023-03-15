@@ -46,6 +46,13 @@ module clixon-config {
 
        ***** END LICENSE BLOCK *****";
 
+    revision 2022-11-01 {
+        description
+            "Added option:
+                    CLICON_NETCONF_MONITORING
+                    CLICON_NETCONF_MONITORING_LOCATION
+             Released in Clixon 6.1";
+    }
     revision 2022-03-21 {
         description
             "Added option:
@@ -974,7 +981,7 @@ module clixon-config {
         }
         leaf CLICON_NAMESPACE_NETCONF_DEFAULT {
             type boolean;
-            default true;
+            default false;
             description
                 "Undefine if you want to ensure strict namespace assignment on all netconf
                  and XML statements according to the standard RFC 6241.
@@ -1061,6 +1068,7 @@ module clixon-config {
                  See also CLICON_YANG_LIBRARY and CLICON_MODULE_SET_ID";
             status obsolete;
         }
+
         leaf CLICON_MODULE_SET_ID {
             type string;
             default "0";
@@ -1072,6 +1080,21 @@ module clixon-config {
                  The /yang-library/content-id state-data leaf is set with this value
                  If CLICON_MODULE_LIBRARY_RFC7895 is enabled, it sets the modules-state/module-set-id 
                  instead";
+        }
+        leaf CLICON_NETCONF_MONITORING {
+            type boolean;
+            default true;
+            description
+                "Enable Netconf monitoring support as state data according to RFC6022. 
+                 If enabled, netconf monitoring info will appear when doing netconf get or 
+                 restconf GET.";
+        }
+        leaf CLICON_NETCONF_MONITORING_LOCATION {
+            type string;
+            description
+                "Extra Netconf monitoring location directory where schemas can be retrieved
+                 apart from NETCONF.
+                 Only if CLICON_NETCONF_MONITORING";
         }
         leaf CLICON_STREAM_DISCOVERY_RFC5277 {
             type boolean;

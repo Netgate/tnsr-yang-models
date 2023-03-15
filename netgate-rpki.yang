@@ -21,6 +21,10 @@ module netgate-rpki {
 	prefix "ngrt";
     }
 
+    import netgate-frr {
+	prefix "ngfrr";
+    }
+
     import netgate-bgp {
 	prefix "ngbgp";
     }
@@ -35,6 +39,11 @@ module netgate-rpki {
 
 	 Copyright 2022 Rubicon Communications, LLC.
 	 ";
+
+    revision 2023-02-15 {
+	description
+	    "TNSR Release 23.02.";
+    }
 
     revision 2022-10-15 {
 	description
@@ -250,4 +259,16 @@ module netgate-rpki {
 	    }
 	}
     }
+
+    augment "/ngrt:route-config/ngrt:dynamic/ngfrr:route-maps/ngfrr:map/ngfrr:rules/ngfrr:rule/ngfrr:match" {
+	leaf rpki {
+	    type ngrpki:rpki-route-state;
+	    description
+		"Match prefixes with the specified RPKI
+		 state. One of 'invalid', 'notfound',
+		 'valid'.";
+	    ngcliext:node-fmt "$< $% @@$n";
+	}
+    }
+
 }

@@ -17,6 +17,10 @@ module netgate-abf {
 	prefix "ngcom";
     }
 
+    import netgate-acl {
+	prefix "ngacl";
+    }
+
     import netgate-interface {
 	prefix "ngif";
     }
@@ -38,6 +42,11 @@ module netgate-abf {
     revision 2022-10-15 {
 	description
 	    "TNSR Release 22.10.";
+    }
+
+    revision 2023-02-01 {
+	description
+	    "TNSR Release 23.02.";
     }
 
     augment "/ngrt:route-config" {
@@ -301,7 +310,10 @@ module netgate-abf {
 				    key "hop-id";
 
 				    leaf hop-id {
-					type uint32;
+					type int64;
+				        description
+					    "Negative ids used for reporting
+					     config-unmatched rules.";
 				    }
 
 				    leaf weight {
@@ -354,7 +366,10 @@ module netgate-abf {
 				    key "hop-id";
 
 				    leaf hop-id {
-					type uint32;
+					type int64;
+				        description
+					    "Negative ids used for reporting
+					     config-unmatched rules.";
 				    }
 
 				    leaf weight {

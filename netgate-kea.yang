@@ -30,6 +30,11 @@ module netgate-kea {
 
 	 Copyright 2019-2020 Rubicon Communications, LLC.";
 
+    revision 2023-02-15 {
+	description
+	    "TNSR Release 23.02.";
+    }
+
     revision 2022-06-15 {
 	description
 	    "TNSR Release 22.06.";
@@ -1205,16 +1210,16 @@ module netgate-kea {
 		    }
 		    description
 			"The maximum number of rotation log files
-			 to keep.";
+			 to keep. The default value is 1.";
 		    ngcliext:node-fmt "^$% @@$n";
 		}
 
 		leaf maxsize {
 		    type uint32 {
-			range "1000..max";
+			range "204800..max";
 		    }
 		    description
-			"The maximum size of a rotating log file.
+			"The maximum size of a rotating log file in bytes.
 			 The default is 10MB.";
 		    ngcliext:node-fmt "^$% @@$n";
 		}

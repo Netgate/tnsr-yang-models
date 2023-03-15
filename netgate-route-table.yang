@@ -27,6 +27,11 @@ module netgate-route-table {
 
 	 Copyright 2017-2020 Rubicon Communications, LLC.";
 
+    revision 2023-02-15 {
+	description
+	    "TNSR Release 23.02.";
+    }
+
     revision 2022-02-15 {
 	description
 	    "TNSR Release 22.02.";
@@ -309,12 +314,73 @@ module netgate-route-table {
 					 each next-hop.";
 				}
 
-				leaf ipv4-address {
-				    type inet:ipv4-address;
-				    description
-					"The next hop IPv4 address.";
-				    ngcliext:context "static-routes";
-				    ngcliext:node-fmt "@@%{if-name}%{next-hop-table-name}%{weight}%{resolve-host}%{resolve-attached}$n";
+				choice next-hop-choice {
+				    case ipv4-address-case {
+					leaf ipv4-address {
+					    type inet:ipv4-address;
+					    description
+						"The next hop IPv4 address.";
+					    ngcliext:context "static-routes";
+					    ngcliext:node-fmt "@@%{if-name}%{next-hop-table-name}%{weight}%{resolve-host}%{resolve-attached}$n";
+					}
+				    }
+
+				    case drop-case {
+					leaf drop {
+					    type boolean;
+					    description
+						"Drop the packet.";
+					    ngcliext:context "static-routes";
+					    ngcliext:node-op "bool";
+					    ngcliext:node-fmt "|$%$n";
+					}
+				    }
+
+				    case local-case {
+					leaf local {
+					    type boolean;
+					    description
+						"Receive the packet locally.";
+					    ngcliext:context "static-routes";
+					    ngcliext:node-op "bool";
+					    ngcliext:node-fmt "|$%$n";
+					}
+				    }
+
+				    case null-send-unreach-case {
+					leaf null-send-unreach {
+					    type boolean;
+					    description
+						"Drop packet with an
+						 'unreachable' reply.";
+					    ngcliext:context "static-routes";
+					    ngcliext:node-op "bool";
+					    ngcliext:node-fmt "|$%$n";
+					}
+				    }
+
+				    case null-send-prohibit-case {
+					leaf null-send-prohibit {
+					    type boolean;
+					    description
+						"Drop packet with a
+						 'prohibited' reply.";
+					    ngcliext:context "static-routes";
+					    ngcliext:node-op "bool";
+					    ngcliext:node-fmt "|$%$n";
+					}
+				    }
+
+				    case classify-table-name-case {
+					leaf classify-table-name {
+					    type string;
+					    description
+						"Use the given Classify Table
+						 name as the next hop.";
+					    ngcliext:context "static-routes";
+					    ngcliext:node-fmt "classify @@$n";
+					}
+				    }
 				}
 
 				leaf if-name {
@@ -325,23 +391,6 @@ module netgate-route-table {
 				    ngcliext:sibling-fmt " @@";
 				}
 
-				leaf next-hop-table-name {
-				    type ngcom:rt-identifier-63;
-				    description
-					"The next hop route table name.";
-				    ngcliext:context "static-routes";
-				    ngcliext:sibling-fmt " next-hop-table @@";
-				}
-
-				leaf classify-table-name {
-				    type string;
-				    description
-					"Use the given Classify Table
-					 name as the next hop.";
-				    ngcliext:context "static-routes";
-				    ngcliext:node-fmt "classify @@$n";
-				}
-
 				leaf weight {
 				    type uint8 {
 					range "1..255";
@@ -350,44 +399,6 @@ module netgate-route-table {
 					"Multipath route weight.";
 				    ngcliext:context "static-routes";
 				    ngcliext:sibling-fmt " $% @@";
-				}
-
-				leaf drop {
-				    type boolean;
-				    description
-					"Drop the packet.";
-				    ngcliext:context "static-routes";
-				    ngcliext:node-op "bool";
-				    ngcliext:node-fmt "|$%$n";
-				}
-
-				leaf local {
-				    type boolean;
-				    description
-					"Receive the packet locally.";
-				    ngcliext:context "static-routes";
-				    ngcliext:node-op "bool";
-				    ngcliext:node-fmt "|$%$n";
-				}
-
-				leaf null-send-unreach {
-				    type boolean;
-				    description
-					"Drop packet with an
-					 'unreachable' reply.";
-				    ngcliext:context "static-routes";
-				    ngcliext:node-op "bool";
-				    ngcliext:node-fmt "|$%$n";
-				}
-
-				leaf null-send-prohibit {
-				    type boolean;
-				    description
-					"Drop packet with a
-					 'prohibited' reply.";
-				    ngcliext:context "static-routes";
-				    ngcliext:node-op "bool";
-				    ngcliext:node-fmt "|$%$n";
 				}
 
 				leaf resolve-host {
@@ -406,6 +417,14 @@ module netgate-route-table {
 				    ngcliext:context "static-routes";
 				    ngcliext:sibling-op "bool";
 				    ngcliext:sibling-fmt "| resolve-via-attached";
+				}
+
+				leaf next-hop-table-name {
+				    type ngcom:rt-identifier-63;
+				    description
+					"The next hop route table name.";
+				    ngcliext:context "static-routes";
+				    ngcliext:sibling-fmt " next-hop-table @@";
 				}
 			    }
 			}
@@ -467,12 +486,73 @@ module netgate-route-table {
 					 each next-hop.";
 				}
 
-				leaf ipv6-address {
-				    type inet:ipv6-address;
-				    description
-					"The next hop IPv6 address.";
-				    ngcliext:context "static-routes";
-				    ngcliext:node-fmt "@@%{if-name}%{next-hop-table-name}%{weight}%{resolve-host}%{resolve-attached}$n";
+				choice next-hop-choice {
+				    case ipv6-address-case {
+					leaf ipv6-address {
+					    type inet:ipv6-address;
+					    description
+						"The next hop IPv6 address.";
+					    ngcliext:context "static-routes";
+					    ngcliext:node-fmt "@@%{if-name}%{next-hop-table-name}%{weight}%{resolve-host}%{resolve-attached}$n";
+					}
+				    }
+
+				    case classify-table-name-case {
+					leaf classify-table-name {
+					    type string;
+					    description
+						"Use the given Classify Table
+						name as the next hop.";
+					    ngcliext:context "static-routes";
+					    ngcliext:node-fmt "classify @@$n";
+					}
+				    }
+
+				    case drop-case {
+					leaf drop {
+					    type boolean;
+					    description
+						"Drop the packet.";
+					    ngcliext:context "static-routes";
+					    ngcliext:node-op "bool";
+					    ngcliext:node-fmt "|$%$n";
+					}
+				    }
+
+				    case local-case {
+					leaf local {
+					    type boolean;
+					    description
+						"Receive the packet locally.";
+					    ngcliext:context "static-routes";
+					    ngcliext:node-op "bool";
+					    ngcliext:node-fmt "|$%$n";
+					}
+				    }
+
+				    case null-send-unreach-case {
+					leaf null-send-unreach {
+					    type boolean;
+					    description
+						"Drop packet with an
+						'unreachable' reply.";
+					    ngcliext:context "static-routes";
+					    ngcliext:node-op "bool";
+					    ngcliext:node-fmt "|$%$n";
+					}
+				    }
+
+				    case null-send-prohibit-case {
+					leaf null-send-prohibit {
+					    type boolean;
+					    description
+						"Drop packet with a
+						'prohibited' reply.";
+					    ngcliext:context "static-routes";
+					    ngcliext:node-op "bool";
+					    ngcliext:node-fmt "|$%$n";
+					}
+				    }
 				}
 
 				leaf if-name {
@@ -491,15 +571,6 @@ module netgate-route-table {
 				    ngcliext:sibling-fmt " next-hop-table @@";
 				}
 
-				leaf classify-table-name {
-				    type string;
-				    description
-					"Use the given Classify Table
-					 name as the next hop.";
-				    ngcliext:context "static-routes";
-				    ngcliext:node-fmt "classify @@$n";
-				}
-
 				leaf weight {
 				    type uint8 {
 					range "1..255";
@@ -508,44 +579,6 @@ module netgate-route-table {
 					"Multipath route weight.";
 				    ngcliext:context "static-routes";
 				    ngcliext:sibling-fmt " $% @@";
-				}
-
-				leaf drop {
-				    type boolean;
-				    description
-					"Drop the packet.";
-				    ngcliext:context "static-routes";
-				    ngcliext:node-op "bool";
-				    ngcliext:node-fmt "|$%$n";
-				}
-
-				leaf local {
-				    type boolean;
-				    description
-					"Receive the packet locally.";
-				    ngcliext:context "static-routes";
-				    ngcliext:node-op "bool";
-				    ngcliext:node-fmt "|$%$n";
-				}
-
-				leaf null-send-unreach {
-				    type boolean;
-				    description
-					"Drop packet with an
-					 'unreachable' reply.";
-				    ngcliext:context "static-routes";
-				    ngcliext:node-op "bool";
-				    ngcliext:node-fmt "|$%$n";
-				}
-
-				leaf null-send-prohibit {
-				    type boolean;
-				    description
-					"Drop packet with a
-					 'prohibited' reply.";
-				    ngcliext:context "static-routes";
-				    ngcliext:node-op "bool";
-				    ngcliext:node-fmt "|$%$n";
 				}
 
 				leaf resolve-host {

@@ -1,0 +1,305 @@
+module netgate-ipv6-ra {
+
+    yang-version "1.1";
+
+    namespace "urn:netgate:xml:yang:netgate-ipv6-ra";
+    prefix "ngipv6ra";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
+    import netgate-interface {
+	prefix "ngif";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a data model for IPv6 Router Advertisements.
+	 The model is duplicated directly, to the extent possible, from the
+	 IETF IPv6 Router Advertisements data model introduced by RFC 8349.
+
+	 Copyright 2022 Rubicon Communications, LLC.";
+
+    revision 2023-02-01 {
+	description
+	    "TNSR Release 23.02.";
+    }
+
+    augment "/ngif:interfaces-config/ngif:interface/ngif:ipv6" {
+	description
+	    "Augments interface configuration with parameters of IPv6
+	     Router Advertisements.";
+
+	container ipv6-router-advertisements {
+	    description
+		"Support for IPv6 Router Advertisements.";
+
+	    ngcliext:context "intf-interfaces";
+	    ngcliext:node-fmt "$< router-advertisements$n";
+	    ngcliext:pre-children-op "push";
+
+	    leaf send-advertisements {
+		type boolean;
+		default "false";
+		description
+		    "A flag indicating whether or not the router sends
+		     periodic Router Advertisements and responds to
+		     Router Solicitations.";
+		reference
+		    "RFC 4861: Neighbor Discovery for IP version 6 (IPv6)
+			       - AdvSendAdvertisements";
+		ngcliext:node-fmt "^$% @@$n";
+	    }
+
+	    leaf max-rtr-adv-interval {
+		type uint16 {
+		    range "4..65535";
+		}
+		units "seconds";
+		default "600";
+		description
+		    "The maximum time allowed between sending unsolicited
+		     multicast Router Advertisements from the interface.";
+		ngcliext:node-fmt "^$% @@$n";
+	    }
+
+	    leaf min-rtr-adv-interval {
+		type uint16 {
+		    range "3..1350";
+		}
+		units "seconds";
+		must ". <= 0.75 * ../max-rtr-adv-interval" {
+		    description
+			"The value MUST NOT be greater than 75% of
+			 'max-rtr-adv-interval'.";
+		}
+		description
+		    "The minimum time allowed between sending unsolicited
+		     multicast Router Advertisements from the interface.
+
+		     The default value to be used operationally if this
+		     leaf is not configured is determined as follows:
+
+		     - if max-rtr-adv-interval >= 9 seconds, the default
+		       value is 0.33 * max-rtr-adv-interval;
+
+		     - otherwise, it is 0.75 * max-rtr-adv-interval.";
+		ngcliext:node-fmt "^$% @@$n";
+	    }
+
+	    leaf managed-flag {
+		type boolean;
+		default "false";
+		description
+		    "The value to be placed in the 'Managed address
+		     configuration' flag field in the Router
+		     Advertisement.";
+		ngcliext:node-fmt "^$% @@$n";
+	    }
+
+	    leaf other-config-flag {
+		type boolean;
+		default "false";
+		description
+		    "The value to be placed in the 'Other configuration'
+		     flag field in the Router Advertisement.";
+		ngcliext:node-fmt "^$% @@$n";
+	    }
+
+	    /* Currently, the value cannot be configured. Instead, the value of
+	     * IPv6 MTU configured on the corresponding interface will be used.
+	     */
+	    /*
+	    leaf link-mtu {
+		type uint32;
+		default "0";
+		description
+		    "The value to be placed in MTU options sent by the
+		     router.  A value of zero indicates that no MTU options
+		     are sent.";
+		ngcliext:node-fmt "^$% @@$n";
+	    }
+	    */
+
+	    /* Currently, the value cannot be configured. Instead, zero will be
+	     * used.
+	     */
+	    /*
+	    leaf reachable-time {
+		type uint32 {
+		    range "0..3600000";
+		}
+		units "milliseconds";
+		default "0";
+		description
+		    "The value to be placed in the Reachable Time field in
+		     the Router Advertisement messages sent by the router.
+		     A value of zero means unspecified (by this router).";
+		ngcliext:node-fmt "^$% @@$n";
+	    }
+	    */
+
+	    /* Currently, the value cannot be configured. Instead, zero will be
+	     * used.
+	     */
+	    /*
+	    leaf retrans-timer {
+		type uint32;
+		units "milliseconds";
+		default "0";
+		description
+		    "The value to be placed in the Retrans Timer field in
+		     the Router Advertisement messages sent by the router.
+		     A value of zero means unspecified (by this router).";
+		ngcliext:node-fmt "^$% @@$n";
+	    }
+	    */
+
+	    /* Currently, the value cannot be configured. Instead, 64 will be
+	     * used.
+	     */
+	    /*
+	    leaf cur-hop-limit {
+		type uint8;
+		description
+		    "The value to be placed in the Cur Hop Limit field in
+		     the Router Advertisement messages sent by the router.
+		     A value of zero means unspecified (by this router).
+
+		     If this parameter is not configured, the device SHOULD
+		     use the IANA-specified value for the default IPv4
+		     Time to Live (TTL) parameter that was in effect at the
+		     time of implementation.";
+		ngcliext:node-fmt "^$% @@$n";
+	    }
+	*/
+
+	    leaf default-lifetime {
+		type uint16 {
+		    range "0..65535";
+		}
+		units "seconds";
+		description
+		    "The value to be placed in the Router Lifetime field of
+		     Router Advertisements sent from the interface, in
+		     seconds.  It MUST be either zero or between
+		     max-rtr-adv-interval and 9000 seconds.  A value of zero
+		     indicates that the router is not to be used as a
+		     default router.  These limits may be overridden by
+		     specific documents that describe how IPv6 operates over
+		     different link layers.
+
+		     If this parameter is not configured, the device SHOULD
+		     use a value of 3 * max-rtr-adv-interval.";
+		ngcliext:node-fmt "^$% @@$n";
+	    }
+
+	    container prefix-list {
+		description
+		    "Support for prefixes to be placed in Prefix
+		     Information options in Router Advertisement messages
+		     sent from the interface.
+
+		     Prefixes that are advertised by default but do not
+		     have their entries in the child 'prefix' list are
+		     advertised with the default values of all parameters.
+
+		     The link-local prefix SHOULD NOT be included in the
+		     list of advertised prefixes.";
+
+		list prefix {
+		    key "prefix-spec";
+		    description
+			"Support for an advertised prefix entry.";
+
+		    ngcliext:node-fmt "^$% @{prefix-spec}$n";
+		    ngcliext:pre-children-op "push";
+
+		    leaf prefix-spec {
+			type inet:ipv6-prefix;
+			description
+			    "IPv6 address prefix.";
+		    }
+
+		    choice control-adv-prefixes {
+			default "advertise";
+			description
+			    "Either (1) the prefix is explicitly removed from
+			     the set of advertised prefixes or (2) the
+			     parameters with which the prefix is advertised are
+			     specified (default case).";
+
+			leaf no-advertise {
+			    type empty;
+			    description
+				"The prefix will not be advertised.
+
+				 This can be used for removing the prefix from
+				 the default set of advertised prefixes.";
+			    ngcliext:node-fmt "^$%$n";
+			}
+
+			case advertise {
+			    leaf valid-lifetime {
+				type uint32;
+				units "seconds";
+				default "2592000";
+				description
+				    "The value to be placed in the Valid
+				     Lifetime in the Prefix Information option.
+				     The designated value of all 1's
+				     (0xffffffff) represents infinity.";
+				ngcliext:node-fmt "^$% @@$n";
+			    }
+
+			    leaf on-link-flag {
+				type boolean;
+				default "true";
+				description
+				    "The value to be placed in the on-link flag
+				     ('L-bit') field in the Prefix Information
+				     option.";
+				ngcliext:node-fmt "^$% @@$n";
+			    }
+
+			    leaf preferred-lifetime {
+				type uint32;
+				units "seconds";
+				must ". <= ../valid-lifetime" {
+				    description
+					"This value MUST NOT be greater than
+					 valid-lifetime.";
+				}
+				default "604800";
+				description
+				    "The value to be placed in the Preferred
+				     Lifetime in the Prefix Information option.
+				     The designated value of all 1's
+				     (0xffffffff) represents infinity.";
+				ngcliext:node-fmt "^$% @@$n";
+			    }
+
+			    leaf autonomous-flag {
+				type boolean;
+				default "true";
+				description
+				    "The value to be placed in the Autonomous
+				     Flag field in the Prefix Information
+				     option.";
+				ngcliext:node-fmt "^$% @@$n";
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+}

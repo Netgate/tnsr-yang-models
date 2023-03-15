@@ -32,8 +32,13 @@ module netgate-interface {
     description
 	"This YANG module provides a data model for network interfaces.
 
-	 Copyright 2017-2020 Rubicon Communications, LLC.
+	 Copyright 2017-2023 Rubicon Communications, LLC.
 	";
+
+    revision 2023-02-01 {
+	description
+	    "TNSR Release 23.02.";
+    }
 
     revision 2022-10-15 {
 	description
@@ -244,6 +249,10 @@ module netgate-interface {
 	    enum interrupt {
 		description
 		    "interrupt";
+	    }
+	    enum adaptive {
+		description
+		    "adaptive";
 	    }
 	}
     }
@@ -1630,19 +1639,19 @@ module netgate-interface {
 		     'outside', or 'both'.";
 	    }
 
+	    leaf vrf {
+		type ngcom:rt-identifier-63;
+		description
+		    "If present, this is the name of the Route Table
+		     to which this interface is bound.  If not present,
+		     the IF uses the Default Route Table.";
+	    }
+
 	    container ipv4 {
 		presence
 		    "Enables IPv4'";
 		description
 		    "IPv4 address family state information.";
-
-		leaf route-table-name {
-		    type ngcom:rt-identifier-63;
-		    description
-			"If present, this is the name of the IPv4 Route Table
-			 to which this interface is bound.  If not present,
-			 the IF uses the Default Route Table.";
-		}
 
 		container address {
 		    leaf-list ip {
@@ -1691,14 +1700,6 @@ module netgate-interface {
 		    "Enables IPv6";
 		description
 		    "IPv6 address family state information.";
-
-		leaf route-table-name {
-		    type ngcom:rt-identifier-63;
-		    description
-			"If present, this is the name of the IPv6 Route Table
-			 to which this interface is bound.  If not present,
-			 the IF uses the Default Route Table.";
-		}
 
 		container address {
 		    leaf-list ip {

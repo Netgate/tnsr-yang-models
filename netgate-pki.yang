@@ -9,6 +9,10 @@ module netgate-pki {
 	prefix "inet";
     }
 
+    import netgate-common {
+	prefix "ngcom";
+    }
+
     organization "Netgate";
 
     contact "Web: <http://www.netgate.com>";
@@ -19,6 +23,11 @@ module netgate-pki {
 
 	 Copyright 2018-2022 Rubicon Communications, LLC.
 	";
+
+    revision 2023-02-15 {
+	description
+	    "TNSR Release 23.02.";
+    }
 
     revision 2022-06-15 {
 	description
@@ -90,6 +99,7 @@ module netgate-pki {
     rpc pki-private-key-delete {
 	description
 	    "Delete an existing private key.";
+
 	input {
 	    leaf name {
 		type string {
@@ -398,6 +408,7 @@ module netgate-pki {
 		description
 		    "Message digest to sign the CSR with.";
 	    }
+
 	    container subject-alt-names {
 		description
 		    "Additional identifiers for the Certificate Sign
@@ -544,6 +555,7 @@ module netgate-pki {
 		description
 		    "Message digest to sign the CSR with.";
 	    }
+
 	    container extensions {
 		description
 		    "X509 extension configurations";
@@ -598,6 +610,14 @@ module netgate-pki {
 		description
 		    "The name of the certificate.";
 	    }
+
+	    leaf output-level {
+		type uint8;
+		default 0;
+		description
+		    "Level of output. Absence or 0 means PEM-encoded
+		     text, 1 - short, 2 - full.";
+	    }
 	}
 
 	output {
@@ -605,6 +625,35 @@ module netgate-pki {
 		type string;
 		description
 		    "PEM-encoded text of certificate.";
+	    }
+	}
+    }
+
+    rpc pki-cert-status-list {
+	description
+	    "List the existing certificates.";
+
+	output {
+	    list entry {
+		key name;
+
+		leaf name {
+		    type string;
+		    description
+			"Name of a certificate.";
+		}
+
+		leaf not-after {
+		    type string;
+		}
+
+		leaf days-left {
+		    type int32;
+		}
+
+		leaf seconds-left {
+		    type int32;
+		}
 	    }
 	}
     }
@@ -636,6 +685,7 @@ module netgate-pki {
 		description
 		    "The name of the certificate.";
 	    }
+
 	    leaf contents {
 		type string;
 		mandatory true;
@@ -677,6 +727,14 @@ module netgate-pki {
 		description
 		    "The name of the CA certificate.";
 	    }
+
+	    leaf output-level {
+		type uint8;
+		default 0;
+		description
+		    "Level of output. Absence or 0 means PEM-encoded
+		    text, 1 - short, 2 - full.";
+	    }
 	}
 
 	output {
@@ -697,6 +755,35 @@ module netgate-pki {
 		type string;
 		description
 		    "Name of a CA certificate.";
+	    }
+	}
+    }
+
+    rpc pki-ca-status-list {
+	description
+	    "List the existing CA certificates.";
+
+	output {
+	    list entry {
+		key name;
+
+		leaf name {
+		type string;
+		description
+		    "Name of a CA certificate.";
+		}
+
+		leaf not-after {
+		    type string;
+		}
+
+		leaf days-left {
+		    type int32;
+		}
+
+		leaf seconds-left {
+		    type int32;
+		}
 	    }
 	}
     }
@@ -750,4 +837,149 @@ module netgate-pki {
 	    } 
 	}
     }
+
+    typedef p12-pbe-algorithm-t {
+	type enumeration {
+	    enum PBE-SHA1-3DES {
+		description
+		    "PBE with SHA1 and 3DES";
+	    }
+	    enum AES-256-CBC {
+		description
+		    "PBE with 256 bit AES-CBC";
+	    }
+	}
+
+	description
+	    "Supported encryption algorithms for PBE with PCKS-12 archives.";
+    }
+
+    typedef p12-mac-algorithm-t {
+	type enumeration {
+	    enum sha1 {
+		description
+		    "SHA1";
+	    }
+	    enum sha256 {
+		description
+		    "SHA256";
+	    }
+	}
+
+	description
+	    "Supported digest algorithms for MAC with PCKS-12 archives.";
+    }
+
+    rpc pki-p12-delete {
+	description
+	    "Delete an existing PKCS-12 archive.";
+
+	input {
+	    leaf name {
+		type string {
+		    length "1..32";
+		    pattern "[0-9A-Za-z_-]+";
+		}
+		mandatory true;
+		description
+		    "The name of the key.";
+	    }
+	}
+    }
+
+    rpc pki-p12-generate {
+	description
+	    "Generate a new PKCS-12 archive.";
+
+	input {
+	    leaf name {
+		type string {
+		    length "1..32";
+		    pattern "[0-9A-Za-z_-]+";
+		}
+		mandatory true;
+		description
+		    "The name of an existing  key and certificate to build
+		     a PKCS-12 archive from.";
+	    }
+	    leaf ca-name {
+		type string {
+		    length "1..32";
+		    pattern "[0-9A-Za-z_-]+";
+		}
+		description
+		    "The name of an existing CA cert to include in the archive.";
+	    }
+	    leaf key-pbe-algorithm {
+		type p12-pbe-algorithm-t;
+		description
+		    "The PBE algorithm to be used for the key.";
+	    }
+	    leaf certificate-pbe-algorithm {
+		type p12-pbe-algorithm-t;
+		description
+		    "The PBE algorithm to be used for the certificate.";
+	    }
+	    leaf mac-algorithm {
+		type p12-mac-algorithm-t;
+		description
+		    "The digest algorithm to use in MAC.";
+	    }
+	    leaf export-password {
+		type ngcom:string-xml-no-escape {
+		    length "8..64";
+		}
+		mandatory true;
+		description
+		     "Password to protect privacy of archive contents.";
+	    }
+	}
+
+	output {
+	    leaf base64 {
+		type string;
+		description
+		    "base64-encoded text of new PCKS-12 archive.";
+	    }
+	}
+    }
+
+    rpc pki-p12-list {
+	description
+	    "List the existing PKCS-12 archives.";
+
+	output {
+	    leaf-list name {
+		type string;
+		description
+		    "Name of a PKCS-12 archive.";
+	    }
+	}
+    }
+
+    rpc pki-p12-get {
+	description
+	    "Fetch contents of an existing PKCS-12 archive (base64 encoded).";
+
+	input {
+	    leaf name {
+		type string {
+		    length "1..32";
+		    pattern "[0-9A-Za-z_-]+";
+		}
+		mandatory true;
+		description
+		    "The name of the key.";
+	    }
+	}
+
+	output {
+	    leaf base64 {
+		type string;
+		description
+		    "base64-encoded text of existing PCKS-12 archive.";
+	    }
+	}
+    }
+
 }

@@ -21,6 +21,10 @@ module netgate-ospf6 {
 	prefix "ngcom";
     }
 
+    import netgate-frr {
+	prefix "ngfrr";
+    }
+
     import netgate-route {
 	prefix "ngrt";
     }
@@ -35,6 +39,11 @@ module netgate-ospf6 {
 
 	 Copyright 2019-2020 Rubicon Communications, LLC.
 	 ";
+
+    revision 2023-02-01 {
+	description
+	    "TNSR Release 23.02.";
+    }
 
     revision 2021-06-15 {
 	description
@@ -918,6 +927,63 @@ module netgate-ospf6 {
 				"The reference bandwidth, 1..4294967,
 				 in MBits/sec.";
 			    ngcliext:node-fmt "$< $% @@$n";
+			}
+		    }
+
+		    container default-information {
+			description
+			    "Control distribution of default route.";
+
+			ngcliext:parent-fmt "^$%";
+
+			container originate {
+			    description
+				"Distribute a default route.";
+
+			    ngcliext:node-fmt "$< $%${always}${metric}${metric-type}${route-map}$n";
+
+			    presence
+				"When present, a default route will
+				 be distributed.";
+
+			    leaf always {
+				type boolean;
+				description
+				    "Always advertise default route.";
+				ngcliext:child-op "bool";
+				ngcliext:child-fmt "| $%";
+			    }
+
+			    leaf metric {
+				type uint32 {
+				    range "0..16777214";
+				}
+				description
+				    "Default OSPFv3 metric.";
+				ngcliext:child-fmt " $% @@";
+			    }
+
+			    leaf metric-type {
+				type uint32 {
+				    range "1..2";
+				}
+				description
+				    "Metric type for default routes.";
+				ngcliext:child-fmt " $% @@";
+			    }
+
+			    leaf route-map {
+				type leafref {
+				    path "/ngrt:route-config"
+					+ "/ngrt:dynamic"
+					+ "/ngfrr:route-maps"
+					+ "/ngfrr:map"
+					+ "/ngfrr:name";
+				}
+				description
+				    "Name of a route-map.";
+				ngcliext:child-fmt " $% @@";
+			    }
 			}
 		    }
 

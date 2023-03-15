@@ -25,8 +25,13 @@ module netgate-ipsec {
 	"This YANG module provides mappings of the CLI command structure
 	to the underlying data-model elements for the Netgate router.
 
-	Copyright 2016-2020 Rubicon Communications, LLC.
+	Copyright 2016-2023 Rubicon Communications, LLC.
 	";
+
+    revision 2023-02-15 {
+	description
+	    "TNSR Release 23.02.";
+    }
 
     revision 2022-10-15 {
 	description
@@ -81,10 +86,6 @@ module netgate-ipsec {
 
     typedef ng-ike-encryption-algorithm-t {
 	type enumeration {
-	    enum 3des {
-		description
-		    "Triple-DES";
-	    }
 	    enum aes128 {
 		description
 		    "128 bit AES-CBC";
@@ -269,11 +270,6 @@ module netgate-ipsec {
 		description
 		    "256 bit ChaCha20/Poly1305 with 16 byte ICV";
 	    }
-
-	    enum 3des {
-		description
-		    "Triple-DES";
-	    }
 	    enum aes128 {
 		description
 		    "128 bit AES-CBC";
@@ -294,10 +290,6 @@ module netgate-ipsec {
 
     typedef ng-ike-integrity-algorithm-t {
 	type enumeration {
-	    enum md5 {
-		description
-		    "MD5 96";
-	    }
 	    enum sha1 {
 		description
 		    "SHA1 96";
@@ -331,10 +323,6 @@ module netgate-ipsec {
 
     typedef dataplane-esp-integrity-algorithm-t {
 	type enumeration {
-	    enum md5 {
-		description
-		    "MD5 96";
-	    }
 	    enum sha1 {
 		description
 		    "SHA1 96";
@@ -425,11 +413,6 @@ module netgate-ipsec {
 
     typedef ng-pseudo-random-function-t {
 	type enumeration {
-	    enum prfmd5 {
-		value 1;
-		description
-		    "MD5 PRF";
-	    }
 	    enum prfsha1 {
 		value 2;
 		description
@@ -484,35 +467,6 @@ module netgate-ipsec {
 	}
     }
 
-    typedef authentication-method-t {
-	type enumeration {
-	    enum psk {
-		value 0;
-		description
-		    "Pre-Shared Key";
-	    }
-	    enum pubkey {
-		value 1;
-		description
-		    "Certificate";
-	    }
-	    /* future support
-	       enum xauth {
-	       value 2;
-	       description
-	       "IKEv1 extended auth";
-	       }
-	       enum eap {
-	       value 3;
-	       description
-	       "IKEv2 EAP auth";
-	       }
-	     */
-	}
-	description
-	    "Available authentication methods.";
-    }
-
     typedef connection-type-t {
 	type enumeration {
 	    enum initiator-only {
@@ -535,21 +489,6 @@ module netgate-ipsec {
 	}
 	description
 	    "Connection type for IKE session.";
-    }
-
-    typedef ike-phase1-mode-t {
-	type enumeration {
-	    enum main {
-		value 0;
-		description
-		    "IKEv1 phase 1 main mode exchange.";
-	    }
-	    enum aggressive {
-		value 1;
-		description
-		    "IKEv1 phase 1 aggressive mode exchange.";
-	    }
-	}
     }
 
     typedef ipsec-protocol-t {

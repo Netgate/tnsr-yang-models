@@ -31,6 +31,11 @@ module netgate-dataplane {
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	";
 
+    revision 2023-02-01 {
+	description
+	    "TNSR Release 23.02.";
+    }
+
     revision 2022-10-15 {
 	description
 	    "TNSR Release 22.10.";
@@ -289,17 +294,17 @@ module netgate-dataplane {
 
 	    ngcliext:parent-fmt "$< $%";
 
-	    leaf workers {
-		type uint16;
-		description
-		    "Number of worker threads";
-		ngcliext:node-fmt "$< $% @@$n";
-	    }
-
 	    leaf main-core {
 		type uint32;
 		description
 		    "Assign main thread to a specific core.";
+		ngcliext:node-fmt "$< $% @@$n";
+	    }
+
+	    leaf workers {
+		type uint16;
+		description
+		    "Number of worker threads";
 		ngcliext:node-fmt "$< $% @@$n";
 	    }
 
@@ -312,35 +317,18 @@ module netgate-dataplane {
 		ngcliext:node-fmt "$< $% @@$n";
 	    }
 
-	    choice core-workers {
-		case coremask {
-		    leaf coremask-workers {
-			type uint64 {
-			    range "1..max";
-			}
-			description
-			    "Place worker threads according to the
-			     bitmap hex-mask.";
-			ngcliext:node-fmt "$< $% @@$n";
-		    }
-		}
+	    container corelist-workers {
 
-		case corelist {
-		    container corelist-workers {
+		ngcliext:parent-fmt "$< $%";
 
-		        ngcliext:parent-fmt "$< $%";
-
-			leaf-list corelist-worker {
-			    type uint32;
-			    description
-				"Place worker threads according to the
-				 list of cores.";
-			    ngcliext:node-fmt "$< @@$n";
-			}
-		    }
+		leaf-list corelist-worker {
+		    type uint32;
+		    description
+			"Place worker threads according to the
+			 list of cores.";
+		    ngcliext:node-fmt "$< @@$n";
 		}
 	    }
-
 	}
 
 	container ethernet {
@@ -564,6 +552,51 @@ module netgate-dataplane {
 		    "Size of page in main heap. Should be a number. "+
 		    "Optionally followed by a specified of k, m, or g, "+
 		    "to indicate kilo, mega, or giga bytes. ";
+		ngcliext:node-fmt "$< $% @@$n";
+	    }
+	}
+
+	container api-segment {
+	    description
+		"VPP API segment configuration";
+
+	    ngcliext:parent-fmt "$< $%";
+
+	    leaf api-size {
+		type ngcom:memory-size-string;
+		default "16M";
+		description
+		    "The API shared memory size in bytes. An optional
+		     K, M, or G suffix is allowed.  Default is 16M.  The API
+		     memory size must be smaller than the global-size.";
+		ngcliext:node-fmt "$< $% @@$n";
+	    }
+
+	    leaf global-size {
+		type ngcom:memory-size-string;
+		default "64M";
+		description
+		    "The global memory size in bytes. An optional
+		     K, M, or G suffix is allowed.  Default is 64M.  The
+		     global memory size must be larger than the api-size.";
+		ngcliext:node-fmt "$< $% @@$n";
+	    }
+
+	    leaf api-pvt-heap-size {
+		type ngcom:memory-size-string;
+		default "128K";
+		description
+		    "The API private heap size in bytes. An optional
+		     K, M, or G suffix is allowed.  Default is 128K.";
+		ngcliext:node-fmt "$< $% @@$n";
+	    }
+
+	    leaf global-pvt-heap-size {
+		type ngcom:memory-size-string;
+		default "128K";
+		description
+		    "The global private heap size in bytes. An optional
+		     K, M, or G suffix is allowed.  Default is 128K.";
 		ngcliext:node-fmt "$< $% @@$n";
 	    }
 	}
