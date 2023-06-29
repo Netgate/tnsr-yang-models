@@ -1,0 +1,228 @@
+module netgate-vhost-user {
+
+    yang-version "1.1";
+
+    namespace "urn:netgate:xml:yang:netgate-vhost-user";
+    prefix "ngvhostuser";
+
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
+    import netgate-interface {
+	prefix "ngif";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data-model
+	 for vhost-user data.
+
+	 Copyright 2023 Rubicon Communications, LLC.";
+
+    revision 2023-06-01 {
+	description
+	    "TNSR Release 23.06.";
+    }
+
+    augment "/ngif:interfaces-config" {
+	description
+	    "Augments interface configuration with vhost-user interfaces.";
+
+	container vhost-user-interfaces {
+	    description
+		"Data of the vhost-user interfaces.";
+
+	    ngcliext:context "intf-vhost-user";
+	    ngcliext:parent-fmt "interface vhost-user";
+
+	    list vhost-user-interface {
+		key "instance";
+
+		description
+		    "vhost-user interface configuration.";
+
+		ngcliext:node-fmt "$< @{instance}$n";
+		ngcliext:pre-children-op "push";
+
+		unique "sock-filename";
+
+		leaf instance {
+		    type uint16;
+		    description
+			"The interface identifier that will be present in the
+			 last segment of its name.";
+		}
+
+		leaf sock-filename {
+		    type string {
+			length "1..255";
+			pattern "[a-zA-Z0-9_./-]*";
+		    }
+		    mandatory true;
+		    description
+			"Unix socket filename that the interface uses to
+			 communicate with frontend.";
+		    ngcliext:node-fmt "^$% @@$n";
+		}
+
+		leaf is-server {
+		    type boolean;
+		    default "false";
+		    description
+			"If true, enable server mode. The interface will create
+			 the socket if it does not already exist. If false,
+			 enable client mode, hypervisor will create the socket
+			 if it does not already exist";
+		    ngcliext:node-fmt "|^server-mode$n";
+		    ngcliext:node-op "bool";
+		}
+
+		leaf disable-merge-rx-buf {
+		    type boolean;
+		    default "false";
+		    description
+			"Disable the use of merge receive buffers.";
+		    ngcliext:node-fmt "|^disable merge-rx-buffers$n";
+		    ngcliext:node-op "bool";
+		}
+
+		leaf disable-indirect-desc {
+		    type boolean;
+		    default "false";
+		    description
+			"Disable the use of indirect descriptors.";
+		    ngcliext:node-fmt "|^disable indirect-descriptors$n";
+		    ngcliext:node-op "bool";
+		}
+
+		leaf enable-gso {
+		    type boolean;
+		    default "false";
+		    description
+			"Enable the use of GSO.";
+		    ngcliext:node-fmt "|^enable gso$n";
+		    ngcliext:node-op "bool";
+		}
+
+		leaf enable-packed-ring {
+		    type boolean;
+		    default "false";
+		    description
+			"Enable the use of packed ring.";
+		    ngcliext:node-fmt "|^enable packed-ring$n";
+		    ngcliext:node-op "bool";
+		}
+
+		leaf enable-event-index {
+		    type boolean;
+		    default "false";
+		    description
+			"Enable the use of event index.";
+		    ngcliext:node-fmt "|^enable event-index$n";
+		    ngcliext:node-op "bool";
+		}
+	    }
+	}
+    }
+
+    augment "/ngif:interfaces-state" {
+	description
+	    "Augments interface state with vhost-user interfaces.";
+
+	container vhost-user-interfaces {
+	    description
+		"State of the vhost-user interfaces.";
+
+	    list vhost-user-interface {
+		key "instance";
+
+		description
+		    "vhost-user interface state.";
+
+		unique "sock-filename";
+
+		leaf instance {
+		    type uint16;
+		    description
+			"The interface identifier that will be present in the
+			 last segment of its name.";
+		}
+
+		leaf if-name {
+		    type string;
+		    description
+			"The interface name.";
+		}
+
+		leaf sock-filename {
+		    type string;
+		    description
+			"Unix socket filename that the interface uses to
+			 communicate with frontend.";
+		}
+
+		leaf sock-errno {
+		    type int32;
+		    description
+			"Socket error number.";
+		}
+
+		leaf is-server {
+		    type boolean;
+		    description
+			"If true, enable server mode. The interface will create
+			 the socket if it does not already exist. If false,
+			 enable client mode, hypervisor will create the socket
+			 if it does not already exist";
+		}
+
+		leaf virtio-net-header-size {
+		    type uint32;
+		    description
+			"Virtio net header size.";
+		}
+
+		leaf features {
+		    type uint64;
+		    description
+			"Interface features.";
+		}
+
+		container feature-table {
+		    description
+			"Details on set bits in interface features.";
+
+		    list feature-entry {
+			key "bit-position";
+
+			description
+			    "Details on a single set bit in interface
+			     features.";
+
+			leaf bit-position {
+			    type uint8;
+			    description
+				"Bit position.";
+			}
+
+			leaf bit-title {
+			    type string;
+			    description
+				"Bit title.";
+			}
+		    }
+		}
+
+		leaf num-regions {
+		    type uint32;
+		    description
+			"Number of used memory regions.";
+		}
+	    }
+	}
+    }
+}

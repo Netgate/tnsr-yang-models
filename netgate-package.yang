@@ -96,8 +96,19 @@ module netgate-package {
         }
     }
 
-    // clean dnf cache
+    // clean package cache
     rpc package-cache-cleanup {
+	output {
+	    leaf result {
+	        type string;
+		description
+		    "results of cache cleanup";
+	    }
+        }
+    }
+
+    // update package cache
+    rpc package-update {
 	output {
 	    leaf result {
 	        type string;

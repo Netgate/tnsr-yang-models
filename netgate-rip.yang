@@ -251,7 +251,7 @@ module netgate-rip {
 		default "default";
 		description
 		    "Each router is identified using the name of
-		     a host interface, or the word 'default'.";
+		     a VRF, or the word 'default'.";
 	    }
 	    leaf request {
 		type rip-show-request;
@@ -497,7 +497,7 @@ module netgate-rip {
 			type rip-vrf-id;
 			description
 			    "Each router is identified using the name of
-			     a host interface, or the word 'default'.";
+			     a VRF, or the word 'default'.";
 		    }
 
 		    leaf allow-ecmp {
@@ -1186,7 +1186,7 @@ module netgate-rip {
 			type rip-vrf-id;
 			description
 			    "Each router is identified using the name of
-			     a host interface, or the word 'default'.";
+			     a VRF, or the word 'default'.";
 		    }
 
 		    leaf allow-ecmp {

@@ -41,8 +41,13 @@ module netgate-bgp {
 	"This YANG module provides a Netgate-defined data-model
 	 for BGP data.
 
-	 Copyright 2019-2020 Rubicon Communications, LLC.
+	 Copyright 2019-2023 Rubicon Communications, LLC.
 	 ";
+
+    revision 2023-06-01 {
+	description
+	    "TNSR Release 23.06.";
+    }
 
     revision 2023-02-15 {
 	description
@@ -1150,7 +1155,7 @@ module netgate-bgp {
 		default "default";
 		description
 		    "Each router is identified using the name of
-		     a host interface, or the word 'default'.";
+		     a VRF, or the word 'default'.";
 	    }
 	    leaf request {
 		type bgp-show-request;
@@ -1197,7 +1202,7 @@ module netgate-bgp {
 		default "default";
 		description
 		    "Each router is identified using the name of
-		     a host interface, or the word 'default'.";
+		     a VRF, or the word 'default'.";
 	    }
 	    leaf peer {
 		type string;
@@ -1475,7 +1480,7 @@ module netgate-bgp {
 			description
 			    "The Virtual Routing and Forwrding ID,
 			     Each router is identified using the name of
-			     a host interface, or the word 'default'.";
+			     a VRF, or the word 'default'.";
 		    }
 
 		    leaf asn {
@@ -2700,7 +2705,14 @@ module netgate-bgp {
 	    ngcliext:parent-fmt "$< $%";
 
 	    leaf extcomm-list-name {
-		type string;
+		type leafref {
+		    path "/ngrt:route-config"
+			+ "/ngrt:dynamic"
+			+ "/ngbgp:bgp"
+			+ "/ngbgp:community-lists"
+			+ "/ngbgp:community"
+			+ "/ngbgp:name";
+		}
 		description
 		    "The name of an extended
 		     community list.";
@@ -2715,7 +2727,14 @@ module netgate-bgp {
 	    ngcliext:parent-fmt "$< $%";
 
 	    leaf large-comm-list-name {
-		type string;
+		type leafref {
+		    path "/ngrt:route-config"
+			+ "/ngrt:dynamic"
+			+ "/ngbgp:bgp"
+			+ "/ngbgp:community-lists"
+			+ "/ngbgp:community"
+			+ "/ngbgp:name";
+		}
 		description
 		    "The name of a large
 		     community list.";
@@ -3113,7 +3132,7 @@ module netgate-bgp {
 			description
 			    "The Virtual Routing and Forwrding ID,
 			     Each router is identified using the name of
-			     a host interface, or the word 'default'.";
+			     a VRF, or the word 'default'.";
 		    }
 
 		    leaf asn {

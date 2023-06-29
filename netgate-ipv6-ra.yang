@@ -302,4 +302,286 @@ module netgate-ipv6-ra {
 	    }
 	}
     }
+
+    augment "/ngif:interfaces-state/ngif:interface/ngif:ipv6" {
+	description
+	    "Augments interface state data with parameters of IPv6
+	     Router Advertisements.";
+
+	container ipv6-router-advertisements {
+	    description
+		"Parameters of IPv6 Router Advertisements.";
+
+	    leaf send-advertisements {
+		type boolean;
+		description
+		    "A flag indicating whether or not the router sends
+		     periodic Router Advertisements and responds to
+		     Router Solicitations.";
+	    }
+
+	    leaf max-rtr-adv-interval {
+		type uint16 {
+		    range "4..1800";
+		}
+		units "seconds";
+		description
+		    "The maximum time allowed between sending unsolicited
+		     multicast Router Advertisements from the interface.";
+	    }
+
+	    leaf min-rtr-adv-interval {
+		type uint16 {
+		    range "3..1350";
+		}
+		units "seconds";
+		description
+		    "The minimum time allowed between sending unsolicited
+		     multicast Router Advertisements from the interface.";
+	    }
+
+	    leaf managed-flag {
+		type boolean;
+		description
+		    "The value that is placed in the 'Managed address
+		     configuration' flag field in the Router Advertisement.";
+	    }
+
+	    leaf other-config-flag {
+		type boolean;
+		description
+		    "The value that is placed in the 'Other configuration' flag
+		     field in the Router Advertisement.";
+	    }
+
+	    leaf link-mtu {
+		type uint32;
+		description
+		    "The value that is placed in MTU options sent by the
+		     router.  A value of zero indicates that no MTU options
+		     are sent.";
+	    }
+
+	    leaf reachable-time {
+		type uint32 {
+		    range "0..3600000";
+		}
+		units "milliseconds";
+		description
+		    "The value that is placed in the Reachable Time field in
+		     the Router Advertisement messages sent by the router.  A
+		     value of zero means unspecified (by this router).";
+	    }
+
+	    leaf retrans-timer {
+		type uint32;
+		units "milliseconds";
+		description
+		    "The value that is placed in the Retrans Timer field in the
+		     Router Advertisement messages sent by the router.  A value
+		     of zero means unspecified (by this router).";
+	    }
+
+	    leaf cur-hop-limit {
+		type uint8;
+		description
+		    "The value that is placed in the Cur Hop Limit field in the
+		     Router Advertisement messages sent by the router.  A value
+		     of zero means unspecified (by this router).";
+	    }
+
+	    leaf default-lifetime {
+		type uint16 {
+		    range "0..9000";
+		}
+		units "seconds";
+		description
+		    "The value that is placed in the Router Lifetime field of
+		     Router Advertisements sent from the interface, in seconds.
+		     A value of zero indicates that the router is not to be
+		     used as a default router.";
+	    }
+
+	    container prefix-list {
+		description
+		    "A list of prefixes that are placed in Prefix Information
+		     options in Router Advertisement messages sent from the
+		     interface.
+
+		     By default, these are all prefixes that the router
+		     advertises via routing protocols as being on-link for the
+		     interface from which the advertisement is sent.";
+
+		list prefix {
+		    key "prefix-spec";
+		    description
+			"Advertised prefix entry and its parameters.";
+
+		    leaf prefix-spec {
+			type inet:ipv6-prefix;
+			description
+			    "IPv6 address prefix.";
+		    }
+
+		    leaf valid-lifetime {
+			type uint32;
+			units "seconds";
+			description
+			    "The value that is placed in the Valid Lifetime in
+			     the Prefix Information option.  The designated
+			     value of all 1's (0xffffffff) represents infinity.
+
+			     An implementation SHOULD keep this value constant
+			     in consecutive advertisements, except when it is
+			     explicitly changed in configuration.";
+		    }
+
+		    leaf valid-lifetime-expires {
+			type int32;
+			units "seconds";
+			description
+			    "If positive, the number of seconds in which valid
+			     lifetime expires. If negative, the number of
+			     seconds passed since valid lifetime has expired.
+			     Zero represents never.";
+		    }
+
+		    leaf on-link-flag {
+			type boolean;
+			description
+			    "The value that is placed in the on-link flag
+			     ('L-bit') field in the Prefix Information
+			     option.";
+		    }
+
+		    leaf preferred-lifetime {
+			type uint32;
+			units "seconds";
+			description
+			    "The value that is placed in the Preferred Lifetime
+			     in the Prefix Information option, in seconds.  The
+			     designated value of all 1's (0xffffffff)
+			     represents infinity.
+
+			     An implementation SHOULD keep this value constant
+			     in consecutive advertisements, except when it is
+			     explicitly changed in configuration.";
+		    }
+
+		    leaf preferred-lifetime-expires {
+			type int32;
+			units "seconds";
+			description
+			    "If positive, the number of seconds in which
+			     preferred lifetime expires. If negative, the
+			     number of seconds passed since preferred lifetime
+			     has expired. Zero represents never.";
+		    }
+
+		    leaf autonomous-flag {
+			type boolean;
+			description
+			    "The value that is placed in the Autonomous Flag
+			     field in the Prefix Information option.";
+		    }
+
+		    leaf decrement-lifetime-flag {
+			type boolean;
+			description
+			    "Indicates whether decrement valid lifetime and
+			     preferred lifetime.";
+		    }
+		}
+	    }
+
+	    container initial-advertisements {
+		description
+		    "Initial Router Advertisement messages sent from the
+		     interface.";
+
+		leaf count {
+		    type uint32;
+		    description
+			"The number of initial Router Advertisement
+			 messages to be sent.";
+		}
+
+		leaf interval {
+		    type uint32;
+		    units "seconds";
+		    description
+			"The number of seconds between initial Router
+			 Advertisement messages.";
+		}
+
+		leaf all-sent-flag {
+		    type boolean;
+		    description
+			"Indicates whether all initial Router Advertisement
+			 messages have been sent.";
+		}
+	    }
+
+	    container timers {
+		description
+		    "Timers of Router Advertisement messages that have been
+		     sent from the interface or are planned to be sent.";
+
+		leaf last-solicited-time {
+		    type uint32;
+		    units "seconds";
+		    description
+			"The number of seconds since the last time a solicited
+			 Router Advertisement message was sent. Zero represents
+			 never";
+		}
+
+		leaf last-unsolicited-time {
+		    type uint32;
+		    units "seconds";
+		    description
+			"The number of seconds since the last time an
+			 unsolicited Router Advertisement message was sent.
+			 Zero represents never";
+		}
+
+		leaf next-unsolicited-time {
+		    type uint32;
+		    units "seconds";
+		    description
+			"The number of seconds within which next time an
+			 unsolicited Router Advertisement message will be sent.
+			 Zero represents never";
+		}
+	    }
+
+	    container counters {
+		description
+		    "Counters of Router Advertisement messages that have been
+		     sent from the interface and Router Solicitation
+		     messages that have been received on the interface.";
+
+		leaf advertisements-sent {
+		    type uint32;
+		    description
+			"The number of Router Advertisement messages that have
+			 been sent.";
+		}
+
+		leaf solicitations-received {
+		    type uint32;
+		    description
+			"The number of Router Solicitation messages that have
+			 been received.";
+		}
+
+		leaf solicitations-dropped {
+		    type uint32;
+		    description
+			"The number of Router Solicitation messages that have
+			 been dropped.";
+		}
+	    }
+	}
+    }
 }

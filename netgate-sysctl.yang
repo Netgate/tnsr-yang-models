@@ -59,6 +59,7 @@ module netgate-sysctl {
 
 	    leaf nr_hugepages {
 		type uint64;
+		default 1024;
 		description
 		    "Number of hugepages.";
 		ngcliext:node-fmt "$< $% @@$n";
@@ -66,6 +67,7 @@ module netgate-sysctl {
 
 	    leaf max_map_count {
 		type uint64;
+		default 3096;
 		description
 		    "Maximum map count.";
 		ngcliext:node-fmt "$< $% @@$n";
@@ -80,6 +82,7 @@ module netgate-sysctl {
 
 	    leaf shmmax {
 	        type uint64;
+		default 2147483648;
 		description
 		    "Shared memory maximum.";
 		ngcliext:node-fmt "$< $% @@$n";

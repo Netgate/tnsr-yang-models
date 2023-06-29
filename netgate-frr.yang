@@ -36,6 +36,11 @@ module netgate-frr {
 	 Copyright 2017-2020 Rubicon Communications, LLC.
 	 ";
 
+    revision 2023-06-01 {
+	description
+	    "TNSR Release 23.06.";
+    }
+
     revision 2023-02-16 {
 	description
 	    "TNSR Release 23.02.";

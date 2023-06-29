@@ -35,6 +35,11 @@ module netgate-interface {
 	 Copyright 2017-2023 Rubicon Communications, LLC.
 	";
 
+    revision 2023-06-01 {
+	description
+	    "TNSR Release 23.06.";
+    }
+
     revision 2023-02-01 {
 	description
 	    "TNSR Release 23.02.";
@@ -1380,10 +1385,12 @@ module netgate-interface {
 		    }
 
 		    leaf outer-vlan-id {
-			type intf-vlan-id;
+	    		type uint16 {
+			    range "1..4095";
+	    		}
 			description
 			    "The outer vlan tag id.  It can be an integer
-			     between 1 and 4095 inclusive, or the word 'any'.";
+			     between 1 and 4095 inclusive.";
 			ngcliext:node-op "test-set:%{dot1ad}";
 			ngcliext:node-fmt "^outer-dot1q @@$n|^outer-dot1ad @@$n";
 		    }

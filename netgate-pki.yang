@@ -24,6 +24,10 @@ module netgate-pki {
 	 Copyright 2018-2022 Rubicon Communications, LLC.
 	";
 
+    revision 2023-06-15 {
+	description
+	    "TNSR Release 23.06.";
+    }
     revision 2023-02-15 {
 	description
 	    "TNSR Release 23.02.";
@@ -92,6 +96,23 @@ module netgate-pki {
 	    enum sha512 {
 		description
 		    "SHA2-512";
+	    }
+	}
+    }
+
+    typedef sign-purpose {
+	type enumeration {
+	    enum ca {
+		description
+		    "Issue CA cert";
+	    }
+	    enum server {
+		description
+		    "Issue TLS Web Server Auth cert";
+	    }
+	    enum client {
+		description
+		    "Issue TLS Web Client Auth cert";
 	    }
 	}
     }
@@ -408,6 +429,12 @@ module netgate-pki {
 		description
 		    "Message digest to sign the CSR with.";
 	    }
+	    leaf purpose {
+		type sign-purpose;
+		description
+		    "CA or server or client. Selected purpose
+		     defines a set of standard X509 extensions.";
+	    }
 
 	    container subject-alt-names {
 		description
@@ -555,17 +582,22 @@ module netgate-pki {
 		description
 		    "Message digest to sign the CSR with.";
 	    }
-
+	    leaf purpose {
+		type sign-purpose;
+		description
+		    "CA or server or client. Selected purpose
+		     defines a set of standard X509 extensions.";
+	    }
 	    container extensions {
 		description
 		    "X509 extension configurations";
 
 		leaf enable-ca {
-		    type boolean;
-		    default false;
-		    description
+		   type boolean;
+		   default false;
+		   description
 			"Whether the signed certificate will be
-			 allowed to sign other certificates.";
+			allowed to sign other certificates.";
 		}
 	    }
 	}
@@ -836,6 +868,60 @@ module netgate-pki {
 		    "The name of the CA certificate to read.";
 	    } 
 	}
+    }
+
+    rpc pki-all-restconf-cert {
+        description
+            "Generate self-signed CA and restconf required keys and certs.";
+
+        input {
+            leaf length {
+                type uint32;
+                description
+                    "The bit-length of the keys.";
+            }
+
+	    container subject-alt-names {
+		description
+		    "Additional identifiers for the Certificate";
+
+		list subject-alt-name {
+		    key "index";
+
+		    leaf index {
+			type uint8;
+			description
+			    "SAN index.";
+		    }
+
+		    choice subject-alt-name-type {
+			case hostname {
+			    leaf hostname {
+				type inet:host;
+			    }
+			}
+			case ipv4-address {
+			    leaf ipv4-address {
+				type inet:ipv4-address;
+			    }
+			}
+			case ipv6-address {
+			    leaf ipv6-address {
+				type inet:ipv6-address;
+			    }
+			}
+		    }
+		}
+	    }
+        }
+
+        output {
+            leaf stdout {
+                type string;
+                description
+                    "List of generated certificates.";
+            }
+        }
     }
 
     typedef p12-pbe-algorithm-t {

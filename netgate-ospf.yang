@@ -423,7 +423,7 @@ module netgate-ospf {
 		default "default";
 		description
 		    "Each router is identified using the name of
-		     a host interface, or the word 'default'.";
+		     a VRF, or the word 'default'.";
 	    }
 	    leaf request {
 		type ospf-show-request;
@@ -1107,7 +1107,7 @@ module netgate-ospf {
 			type ospf-vrf-id;
 			description
 			    "Each router is identified using the name of
-			     a host interface, or the word 'default'.";
+			     a VRF, or the word 'default'.";
 		    }
 
 		    container auto-cost {

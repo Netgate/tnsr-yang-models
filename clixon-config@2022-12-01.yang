@@ -46,6 +46,21 @@ module clixon-config {
 
        ***** END LICENSE BLOCK *****";
 
+    revision 2022-12-01 {
+        description
+            "Added options:
+                    CLICON_YANG_SCHEMA_MOUNT
+             Removed (previosly marked) obsolete options:
+                    CLICON_MODULE_LIBRARY_RFC7895
+             Released in Clixon 6.1";
+    }
+    revision 2022-11-01 {
+        description
+            "Added option:
+                    CLICON_NETCONF_MONITORING
+                    CLICON_NETCONF_MONITORING_LOCATION
+             Released in Clixon 6.0";
+    }
     revision 2022-03-21 {
         description
             "Added option:
@@ -489,6 +504,12 @@ module clixon-config {
                 "Location of backend .so plugins. Load all .so 
                  plugins in this dir as backend plugins";
         }
+        leaf CLICON_YANG_SCHEMA_MOUNT{
+            type boolean;
+            description
+                "YANG schema mount, RFC 8528";
+            default false;
+        }
         leaf CLICON_BACKEND_REGEXP {
             type string;
             description
@@ -900,8 +921,7 @@ module clixon-config {
             description
                 "If set, tag datastores with RFC 8525 YANG Module Library 
                  info. When loaded at startup, a check is made if the system
-                 yang modules match.
-                 See also CLICON_MODULE_LIBRARY_RFC7895";
+                 yang modules match.";
         }
         leaf CLICON_XMLDB_UPGRADE_CHECKOLD {
             type boolean;
@@ -974,7 +994,7 @@ module clixon-config {
         }
         leaf CLICON_NAMESPACE_NETCONF_DEFAULT {
             type boolean;
-            default true;
+            default false;
             description
                 "Undefine if you want to ensure strict namespace assignment on all netconf
                  and XML statements according to the standard RFC 6241.
@@ -1046,20 +1066,10 @@ module clixon-config {
                  restconf GET.
                  The module state data is on the form:
                        <yang-library><module-set>...
-                 If CLICON_MODULE_LIBRARY_RFC7895 is set (as well), the module state uses RFC7895
                  instead where the modile state is on the form:
                        <modules-state>...
                  See also CLICON_XMLDB_MODSTATE where the module state info is used to tag datastores
                  with module information.";
-        }
-        leaf CLICON_MODULE_LIBRARY_RFC7895 {
-            type boolean;
-            default false;
-            description
-                "Enable RFC 7895 YANG Module library support as state data, instead of RFC8525.
-                 Note CLICON_YANG_LIBRARY must be enabled for this to have effect.
-                 See also CLICON_YANG_LIBRARY and CLICON_MODULE_SET_ID";
-            status obsolete;
         }
         leaf CLICON_MODULE_SET_ID {
             type string;
@@ -1072,6 +1082,21 @@ module clixon-config {
                  The /yang-library/content-id state-data leaf is set with this value
                  If CLICON_MODULE_LIBRARY_RFC7895 is enabled, it sets the modules-state/module-set-id 
                  instead";
+        }
+        leaf CLICON_NETCONF_MONITORING {
+            type boolean;
+            default true;
+            description
+                "Enable Netconf monitoring support as state data according to RFC6022. 
+                 If enabled, netconf monitoring info will appear when doing netconf get or 
+                 restconf GET.";
+        }
+        leaf CLICON_NETCONF_MONITORING_LOCATION {
+            type string;
+            description
+                "Extra Netconf monitoring location directory where schemas can be retrieved
+                 apart from NETCONF.
+                 Only if CLICON_NETCONF_MONITORING";
         }
         leaf CLICON_STREAM_DISCOVERY_RFC5277 {
             type boolean;

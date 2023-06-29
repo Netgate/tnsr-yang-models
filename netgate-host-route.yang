@@ -28,8 +28,13 @@ module netgate-host-route {
     description
 	"This YANG module provides a data model for host IP routes.
 
-	 Copyright 2019-2020 Rubicon Communications, LLC.
+	 Copyright 2023 Rubicon Communications, LLC.
 	";
+
+    revision 2023-06-01 {
+	description
+	    "TNSR Release 23.06.";
+    }
 
     revision 2023-02-15 {
 	description
@@ -43,19 +48,9 @@ module netgate-host-route {
 		    "Route type unicast.";
 	    }
 
-	    enum anycast {
-		description
-		    "Route type anycast.";
-	    }
-
 	    enum blackhole {
 		description
 		    "Route type blackhole.";
-	    }
-
-	    enum broadcast {
-		description
-		    "Route type broadcast.";
 	    }
 
 	    enum local {
@@ -63,34 +58,14 @@ module netgate-host-route {
 		    "Route type local.";
 	    }
 
-	    enum multicast {
-		description
-		    "Route type multicast.";
-	    }
-
-	    enum nat {
-		description
-		    "Route type nat.  ";
-	    }
-
 	    enum prohibit {
 		description
 		    "Route type prohibit.";
 	    }
 
-	    enum throw {
-		description
-		    "Route type throw.";
-	    }
-
 	    enum unreachable {
 		description
 		    "Route type unreachable.";
-	    }
-
-	    enum xresolve {
-		description
-		    "Route type xresolve.";
 	    }
 	}
     }
@@ -173,10 +148,9 @@ module netgate-host-route {
 				     for a given interface.  The destination
 				     'to' prefix is required and used as the
 				     unique key for the route.  If type is
-				     local or nat a default scope of host is
+				     local a default scope of host is
 				     assumed.  If type is unicast and no
-				     gateway (via) is given or type is
-				     broadcast, multicast or anycast a default
+				     gateway (via) is given a default
 				     scope of link is assumed.  Otherwise,
 				     a global scope is the default setting.";
 
@@ -296,10 +270,10 @@ module netgate-host-route {
 					type host-route-type;
 					description
 					    "The type of route. Valid options
-					     are unicast (default), anycast,
-					     blackhole, broadcast, local,
-					     multicast, nat, prohibit, throw,
-					     unreachable, and xresolve.";
+					     are unicast (default),
+					     blackhole, local,
+					     prohibit, 
+					     unreachable.";
 					ngcliext:node-fmt "^$% @@$n";
 				    }
 
@@ -319,10 +293,9 @@ module netgate-host-route {
 				     for a given interface.  The destination
 				     'to' prefix is required and used as the
 				     unique key for the route.  If type is
-				     local or nat a default scope of host is
+				     local a default scope of host is
 				     assumed.  If type is unicast and no
-				     gateway (via) is given or type is
-				     broadcast, multicast or anycast a default
+				     gateway (via) is given a default
 				     scope of link is assumed.  Otherwise,
 				     a global scope is the default setting.";
 
@@ -373,7 +346,7 @@ module netgate-host-route {
 				    }
 
 				    leaf from {
-					type inet:ipv4-address-no-zone;
+					type inet:ipv6-address-no-zone;
 					description
 					    "Set a source IP address for
 					     traffic going through the route.";
@@ -442,10 +415,9 @@ module netgate-host-route {
 					type host-route-type;
 					description
 					    "The type of route. Valid options
-					     are unicast (default), anycast,
-					     blackhole, broadcast, local,
-					     multicast, nat, prohibit, throw,
-					     unreachable, and xresolve.";
+					     are unicast (default),
+					     blackhole, local, prohibit,
+					     unreachable.";
 					ngcliext:node-fmt "^$% @@$n";
 				    }
 
@@ -549,9 +521,8 @@ module netgate-host-route {
 			    type string;
 			    description
 				"The type of route. Valid options are unicast
-				 (default), anycast, blackhole, broadcast,
-				 local, multicast, nat, prohibit, throw,
-				 unreachable, and xresolve.";
+				 (default), blackhole, local, prohibit,
+				 unreachable.";
 			}
 
 			container next-hops {
@@ -640,9 +611,8 @@ module netgate-host-route {
 			    type string;
 			    description
 				"The type of route. Valid options are unicast
-				 (default), anycast, blackhole, broadcast,
-				 local, multicast, nat, prohibit, throw,
-				 unreachable, and xresolve.";
+				 (default), blackhole, local, prohibit,
+				 unreachable.";
 			}
 
 			container next-hops {
