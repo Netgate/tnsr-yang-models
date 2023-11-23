@@ -182,14 +182,6 @@ module netgate-package {
     }
 
     rpc package-upgrade {
-        input {
-	    leaf glob {
-	        type string;
-		description
-		    "a glob to specify which packages, if
-                     not specified then default is '*' (all)";
-            }
-	}
 	output {
 	    leaf result {
 	        type string;

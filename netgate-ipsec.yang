@@ -28,6 +28,11 @@ module netgate-ipsec {
 	Copyright 2016-2023 Rubicon Communications, LLC.
 	";
 
+    revision 2023-11-01 {
+	description
+	    "TNSR Release 23.11.";
+    }
+
     revision 2023-02-15 {
 	description
 	    "TNSR Release 23.02.";
@@ -878,6 +883,14 @@ module netgate-ipsec {
 					ngcliext:node-fmt "^$% @@$n";
 				    }
 				}
+				case eap-tls-remote {
+				    leaf eap-tls-ca-certificate {
+					type string;
+					description
+					    "Name of a CA certificate file";
+					ngcliext:node-fmt "^$% @@$n";
+				    }
+				}
 			    }
 			}
 		    }
@@ -973,31 +986,107 @@ module netgate-ipsec {
 			    ngcliext:node-fmt "^$% @@$n";
 			}
 
-			/* traffic selectors not used for interface-based */
 			list traffic-selector {
-			    key "number";
+			    key "ts-number";
 
 			    description
-				"Local and remote address ranges that match "+
-				"packets that should go over a policy-based "+
-				"IPsec tunnel.";
+				"Specification of traffic which should be "+
+				"routed through an IPsec tunnel.";
 
-			    leaf number {
+			    ngcliext:parent-fmt "^$% @{ts-number}";
+
+			    leaf ts-number {
 				type uint8;
 				description
 				    "Numeric identifier for traffic selector.";
 			    }
 
-			    leaf local-net {
-				type string;
+			    leaf local {
+				type inet:ip-prefix;
 				description
-				    "Local network prefix.";
+				    "Local IPv4 or IPv6 network prefix.";
+				ngcliext:node-fmt "$< $% @@$n";
+			    }
+			}
+		    }
+
+		    container remote-access {
+			description
+			    "Configurations for remote access VPN";
+
+			ngcliext:parent-fmt "^$%";
+
+			container address-pools {
+			    description
+				"Pools for assigning remote client addresses.";
+
+			    ngcliext:parent-fmt "$< $%";
+
+			    container ipv4-range {
+				description
+				    "Range of client virtual IPv4 addresses.";
+
+				ngcliext:parent-fmt "$< $%";
+
+				leaf first-address  {
+					description
+					    "First IPv4 address in range.";
+					type inet:ipv4-address-no-zone;
+					ngcliext:node-fmt "$< @@%{last-address}$n";
+				}
+				leaf last-address  {
+					description
+					    "Last IPv4 address in range.";
+					type inet:ipv4-address-no-zone;
+					ngcliext:sibling-fmt " to @@";
+				}
 			    }
 
-			    leaf remote-net {
-				type string;
+			    container ipv6-range {
 				description
-				    "Remote network prefix.";
+				    "Range of client virtual IPv6 addresses.";
+
+				ngcliext:parent-fmt "$< $%";
+
+				leaf first-address  {
+					description
+					    "First IPv6 address in range.";
+					type inet:ipv6-address-no-zone;
+					ngcliext:node-fmt "$< @@%{last-address}$n";
+				}
+				leaf last-address  {
+					description
+					    "Last IPv6 address in range.";
+					type inet:ipv6-address-no-zone;
+					ngcliext:sibling-fmt " to @@";
+				}
+			    }
+			}
+			container dns {
+			    description
+				"DNS configurations.";
+
+			    ngcliext:parent-fmt "$< $%";
+
+			    list resolver {
+				description
+				    "Address of DNS resolvers to be "+
+				    "used by clients.";
+
+				ngcliext:parent-fmt "$< $% @{res-number}";
+
+				key "res-number";
+				leaf res-number {
+				    description
+					"Numeric identifier of resolver.";
+				    type uint8;
+				}
+				leaf address {
+				    description
+					"IPv4 or IPv6 address of resolver.";
+				    type inet:ip-address-no-zone;
+				    ngcliext:node-fmt "$< $% @@$n";
+				}
 			    }
 			}
 		    }
@@ -1091,6 +1180,12 @@ module netgate-ipsec {
 		    type uint16;
 		    description
 			"Remote port";
+		}
+
+		leaf-list remote-virtual-addr {
+		    type inet:ip-address;
+		    description
+			"Virtual IP address assigned to a mobile client";
 		}
 
 		leaf version {

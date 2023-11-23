@@ -27,6 +27,11 @@ module netgate-ipfix {
 
 	 Copyright 2019-2020 Rubicon Communications, LLC.";
 
+    revision 2023-11-01 {
+	description
+	    "TNSR Release 23.11.";
+    }
+
     revision 2021-02-15 {
 	description
 	    "TNSR Release 21.02.";
@@ -103,7 +108,26 @@ module netgate-ipfix {
 	ngcliext:node-fmt "^template-interval @@$n";
     }
 
+    augment "/ipfix:ipfix/ipfix:cache" {
+	ngcliext:node-fmt "$< cache @{name}$n";
+	ngcliext:pre-children-op "push";
+    }
 
+    augment "/ipfix:ipfix/ipfix:cache/ipfix:timeoutCache" {
+	ngcliext:parent-fmt "^timeout-cache";
+    }
+
+    augment "/ipfix:ipfix/ipfix:cache/ipfix:timeoutCache/ipfix:activeTimeout" {
+	ngcliext:node-fmt "$< active-timeout @@$n";
+    }
+
+    augment "/ipfix:ipfix/ipfix:cache/ipfix:timeoutCache/ipfix:idleTimeout" {
+	ngcliext:node-fmt "$< idle-timeout @@$n";
+    }
+
+    deviation "/ipfix:ipfix/ipfix:cache/ipfix:timeoutCache/ipfix:cacheLayout" {
+	deviate not-supported;
+    }
 
     augment "/ipfix:ipfix/ipfix:observationPoint" {
 	ngcliext:node-fmt "$< observation-point @{name}$n";

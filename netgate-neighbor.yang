@@ -31,6 +31,11 @@ module netgate-neighbor {
 
 	 Copyright 2017-2020 Rubicon Communications, LLC.";
 
+    revision 2023-11-01 {
+	description
+	    "TNSR Release 23.11.";
+    }
+
     revision 2021-02-15 {
 	description
 	    "TNSR Release 21.02.";
@@ -54,6 +59,60 @@ module netgate-neighbor {
     revision 2017-11-06 {
 	description
 	    "Initial revision.";
+    }
+
+    grouping neighbor-cache-options-config {
+	description
+	    "Group of attributes for neighbor cache options state.";
+
+	leaf max-number {
+	    type uint32 {
+		range "1..max";
+	    }
+	    default 50000;
+	    description
+		"The maximum number of neighbors that can be stored in
+		 the cache.";
+	    ngcliext:node-fmt "$< $% @@$n";
+	}
+
+	leaf max-age {
+	    type uint32;
+	    units "seconds";
+	    default 300;
+	    description
+		"The maximum age (in seconds) before an inactive neighbor
+		 is removed from the cache. When zero, aging is disabled.";
+	    ngcliext:node-fmt "$< $% @@$n";
+	}
+    }
+
+    grouping neighbor-cache-options-state {
+	description
+	    "Group of attributes for neighbor cache options state.";
+
+	leaf max-number {
+	    type uint32;
+	    description
+		"The maximum number of neighbors that can be stored in
+		 the cache.";
+	}
+
+	leaf max-age {
+	    type uint32;
+	    units "seconds";
+	    description
+		"The maximum age (in seconds) before an inactive neighbor
+		 is removed from the cache. When zero, aging is disabled.";
+	}
+
+	leaf recycle {
+	    type boolean;
+	    description
+		"If true, the oldest neighbor will be recycled when maximum
+		 number of neighbors is reached and new ones need to be
+		 created.";
+	}
     }
 
     container "neighbor-config" {
@@ -124,13 +183,38 @@ module netgate-neighbor {
 		}
 	    }
 	}
+
+	container neighbor-cache-options {
+	    description
+		"Neighbor cache options.";
+
+	    ngcliext:parent-fmt "$< cache-options";
+
+	    container ipv4 {
+		description
+		    "IPv4 neighbor cache options.";
+
+		ngcliext:parent-fmt "$< $%";
+
+		uses neighbor-cache-options-config;
+	    }
+
+	    container ipv6 {
+		description
+		    "IPv6 neighbor cache options.";
+
+		ngcliext:parent-fmt "$< $%";
+
+		uses neighbor-cache-options-config;
+	    }
+	}
     }
 
     container "neighbor-state" {
 	config "false";
 
 	description
-	    "Neighbor table state.";
+	    "Neighbor state data.";
 
 	container neighbor-table {
 	    description
@@ -181,6 +265,25 @@ module netgate-neighbor {
 			}
 		    }
 		}
+	    }
+	}
+
+	container neighbor-cache-options {
+	    description
+		"Neighbor cache options.";
+
+	    container ipv4 {
+		description
+		    "IPv4 neighbor cache options.";
+
+		uses neighbor-cache-options-state;
+	    }
+
+	    container ipv6 {
+		description
+		    "IPv6 neighbor cache options.";
+
+		uses neighbor-cache-options-state;
 	    }
 	}
     }

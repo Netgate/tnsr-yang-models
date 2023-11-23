@@ -28,7 +28,12 @@ module netgate-kea {
     description
 	"This YANG module provides a data model for the Kea DHCP server.
 
-	 Copyright 2019-2020 Rubicon Communications, LLC.";
+	 Copyright 2019-2023 Rubicon Communications, LLC.";
+
+    revision 2023-11-01 {
+	description
+	    "TNSR Release 23.11.";
+    }
 
     revision 2023-02-15 {
 	description
@@ -1292,6 +1297,16 @@ module netgate-kea {
 		description
 		    "Configuration for the Kea DHCP IPv4 Server";
 
+		leaf authoritative {
+		    type boolean;
+		    default true;
+		    description
+			"Global flag to determine whether to send a NAK in
+			 response to requests by clients for unknown IP
+			 addresses. Defaults to true.";
+		    ngcliext:node-fmt "^$% @@$n";
+		}
+
 		uses kea-dhcp4-option-def-group;
 
 		uses kea-dhcp4-option-group;
@@ -1461,6 +1476,15 @@ module netgate-kea {
 			type inet:ipv4-prefix;
 			description
 			    "The IPv4 subnet prefix.";
+		    }
+
+		    leaf authoritative {
+			type boolean;
+			description
+			    "Per-subnet flag to determine whether to send a
+			     NAK in response to requests by clients for
+			     unknown IP addresses.";
+		        ngcliext:node-fmt "^$% @@$n";
 		    }
 
 		    leaf id {

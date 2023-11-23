@@ -1,0 +1,151 @@
+module netgate-radius {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-radius";
+    prefix "ngradius";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"The YANG module provides a data-model for the Radius client.
+
+	 Copyright 2023 Rubicon Communications, LLC.
+	";
+
+    revision 2023-11-01 {
+	description
+	    "TNSR Release 23.11.";
+    }
+
+
+    grouping server-tuple {
+	leaf host {
+	    type inet:host;
+	    ngcliext:node-op "test-set:%{port}";
+	    ngcliext:node-fmt " @@| @@ %{port}";
+	}
+	leaf port {
+	    type inet:port-number;
+	    ngcliext:sibling-fmt "@@";
+	}
+    }
+
+
+    container radius-client {
+
+	description
+	    "Radius client configuration for PAM subsystem.";
+
+	ngcliext:node-fmt "radius$n";
+	ngcliext:pre-children-op "push";
+
+	container client {
+	    description
+		"The Radius client parameters.";
+
+	    list servers {
+		key "name";
+		ordered-by user;
+
+		max-elements 5;
+
+		ngcliext:node-fmt "^server";
+		ngcliext:post-node-fmt "$n";
+
+		leaf name {
+		    type string {
+			length "1..16";
+		    }
+		    mandatory true;
+		    description
+			"Server handle.";
+		    ngcliext:node-fmt " @@";
+		}
+
+		container server {
+		    uses server-tuple {
+			refine host {
+			    mandatory true;
+			}
+			refine port {
+			    mandatory false;
+			}
+		    }
+		    description
+			"Server name or address, and port number.";
+		}
+
+		leaf secret {
+		    type string {
+			length "1..16";
+		    }
+		    mandatory true;
+		    description
+			"Shared secret for server.";
+		    ngcliext:node-fmt " $q@@$q";
+		}
+
+		leaf timeout {
+		    type uint32 {
+			range "3..60";
+		    }
+		    mandatory false;
+		    description
+			"Timeout for server requests.";
+		    ngcliext:node-fmt " @@";
+		}
+
+		leaf source-address {
+		    type inet:ip-address;
+		    mandatory false;
+		    description
+			"Client address to use.";
+		    ngcliext:node-fmt " @@";
+		}
+	    }
+	}
+
+	//
+	// There are no statistics that PAM collects (for now)
+	// but I'll work with the architects to see if we can
+	// add a way to include statistics for external
+	// authentication (timeouts, round-trip-times, retransmits,
+	// etc).
+	//
+    }
+
+    rpc radius-config-operation {
+	input {
+	    leaf request {
+		type string;
+		description
+		    "The operation, 'get-config-file'.";
+	    }
+	    leaf param {
+		type string;
+		description
+		    "An optional parameter.";
+	    }
+	}
+	output {
+	    leaf stdout {
+		type string;
+	    }
+	}
+    }
+}

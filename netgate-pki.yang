@@ -588,18 +588,6 @@ module netgate-pki {
 		    "CA or server or client. Selected purpose
 		     defines a set of standard X509 extensions.";
 	    }
-	    container extensions {
-		description
-		    "X509 extension configurations";
-
-		leaf enable-ca {
-		   type boolean;
-		   default false;
-		   description
-			"Whether the signed certificate will be
-			allowed to sign other certificates.";
-		}
-	    }
 	}
 
 	output {

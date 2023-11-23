@@ -40,6 +40,11 @@ module netgate-ospf {
 	 Copyright 2019-2022 Rubicon Communications, LLC.
 	 ";
 
+    revision 2023-11-01 {
+	description
+	    "TNSR Release 23.11.";
+    }
+
     revision 2023-02-15 {
 	description
 	    "TNSR Release 23.02.";
@@ -174,10 +179,6 @@ module netgate-ospf {
 	    enum kernel {
 		description
 		    "Kernel";
-	    }
-	    enum table {
-		description
-		    "Table";
 	    }
 	}
     }
@@ -1570,7 +1571,7 @@ module netgate-ospf {
 				     be distributed into OSPF.";
 
 				ngcliext:parent-fmt "$<";
-				ngcliext:node-op "test-set:@{metric-type}@{metric}@{route-map}@{ospf-instance}@{table-instance}";
+				ngcliext:node-op "test-set:@{metric-type}@{metric}@{route-map}@{ospf-instance}";
 				ngcliext:node-fmt "$<$n|";
 
 				leaf metric-type {
@@ -1616,18 +1617,6 @@ module netgate-ospf {
 					specifies which instance to
 					use.";
 				    ngcliext:node-fmt "$< ospf-instance @@$n";
-				}
-
-				leaf table-instance {
-				    type uint32 {
-					range "1..65535";
-				    }
-				    description
-					"When the source is table, and
-					 if present, a non-main kernel
-					 routing table is used as the
-					 source of routes.";
-				    ngcliext:node-fmt "$< table-id @@$n";
 				}
 			    }
 			}
@@ -1992,6 +1981,21 @@ module netgate-ospf {
 					    "If present and empty, the
 					     virtual link has no other
 					     attributes.";
+
+					container authentication {
+					    presence
+						"If present, authentication is
+						 enabled.";
+
+					    ngcliext:node-fmt "^$% @{vlink-auth}$n";
+
+					    leaf vlink-auth {
+						type ospf-if-auth;
+						description
+						    "Use 'message-digest' or
+						     'null' authentication.";
+					    }
+					}
 
 					leaf authentication-key {
 					    type string {

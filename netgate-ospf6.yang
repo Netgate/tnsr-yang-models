@@ -40,6 +40,11 @@ module netgate-ospf6 {
 	 Copyright 2019-2020 Rubicon Communications, LLC.
 	 ";
 
+    revision 2023-11-01 {
+	description
+	    "TNSR Release 23.11.";
+    }
+
     revision 2023-02-01 {
 	description
 	    "TNSR Release 23.02.";
@@ -94,10 +99,6 @@ module netgate-ospf6 {
 	    enum kernel {
 		description
 		    "Kernel";
-	    }
-	    enum table {
-		description
-		    "Table";
 	    }
 	}
     }
@@ -1052,9 +1053,9 @@ module netgate-ospf6 {
 			    }
 
 			    leaf area-id {
-				type inet:ipv4-address-no-zone;
+				type ospf6-area-id;
 				description
-				    "The dotted-quad area identifier.";
+				    "The dotted-quad or uint32 area identifier.";
 			    }
 			}
 		    }

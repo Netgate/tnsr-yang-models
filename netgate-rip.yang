@@ -36,6 +36,11 @@ module netgate-rip {
 	 Copyright 2019-2020 Rubicon Communications, LLC.
 	 ";
 
+    revision 2023-11-01 {
+	description
+	    "TNSR Release 23.11.";
+    }
+
     revision 2023-02-15 {
 	description
 	    "TNSR Release 23.02.";
@@ -165,10 +170,6 @@ module netgate-rip {
 	    enum ospf {
 		description
 		    "OSPF";
-	    }
-	    enum table {
-		description
-		    "Table";
 	    }
 	}
     }
@@ -851,18 +852,6 @@ module netgate-rip {
 					"Route-map used to filter routes into
 					 RIP.";
 				    ngcliext:child-fmt "$< $% @@$n";
-				}
-
-				leaf table-instance {
-				    type uint32 {
-					range "1..65535";
-				    }
-				    description
-					"When the source is table, and
-					 if present, a non-main kernel
-					 routing table is used as the
-					 source of routes.";
-				    ngcliext:node-fmt "$< table-id @@$n";
 				}
 			    }
 			}

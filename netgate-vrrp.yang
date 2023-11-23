@@ -17,6 +17,11 @@ module netgate-vrrp {
 	prefix "ngif";
     }
 
+    import ietf-yang-types {
+	prefix "yang";
+    }
+
+
     organization "Netgate";
 
     contact "Web: <http://www.netgate.com>";
@@ -28,6 +33,11 @@ module netgate-vrrp {
 
 	 Copyright 2019-2020 Rubicon Communications, LLC.
 	";
+
+    revision 2023-11-01 {
+	description
+	    "TNSR Release 23.11.";
+    }
 
     revision 2021-06-15 {
 	description
@@ -418,6 +428,15 @@ module netgate-vrrp {
 		"Calculated based on the priority and advertisement
 		 interval configuration command parameters.    See RFC 3768.";
 	}
+
+	leaf virtual-mac {
+	    type yang:mac-address;
+	    description
+	        "The Media Access Control (MAC) address used by the
+		 virtual router.";
+	    config false;
+	}
+
 
     } // vrrp-state-attributes
 

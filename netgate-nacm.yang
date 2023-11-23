@@ -22,6 +22,11 @@ module netgate-nacm {
 
 	 Copyright 2021 Rubicon Communications, LLC.";
 
+    revision 2023-11-01 {
+	description
+	    "TNSR Release 23.11.";
+    }
+
     revision 2022-02-15 {
 	description
 	    "TNSR Release 22.02.";

@@ -28,9 +28,9 @@ module netgate-acl {
 	 Copyright 2017-2020 Rubicon Communications, LLC.
 	 ";
 
-    revision 2023-10-01 {
+    revision 2023-11-01 {
         description
-	    "TNSR Release 23.10.";
+	    "TNSR Release 23.11.";
     }
 
     revision 2022-02-15 {
@@ -414,25 +414,25 @@ module netgate-acl {
 			}
 
 			leaf icmp-first-type {
-			    type uint16;
+			    type uint8;
 			    description
 				"The first ICMP type in a range.";
 			}
 
 			leaf icmp-last-type {
-			    type uint16;
+			    type uint8;
 			    description
 				"The last ICMP type in a range.";
 			}
 
 			leaf icmp-first-code {
-			    type uint16;
+			    type uint8;
 			    description
 				"The first ICMP code in a range.";
 			}
 
 			leaf icmp-last-code {
-			    type uint16;
+			    type uint8;
 			    description
 				"The last ICMP code in a range.";
 			}

@@ -44,6 +44,16 @@ module netgate-bgp {
 	 Copyright 2019-2023 Rubicon Communications, LLC.
 	 ";
 
+    revision 2023-11-02 {
+	description
+	    "TNSR Release 23.11.";
+    }
+
+    revision 2023-11-01 {
+	description
+	    "TNSR Release 23.11.";
+    }
+
     revision 2023-06-01 {
 	description
 	    "TNSR Release 23.06.";
@@ -134,10 +144,6 @@ module netgate-bgp {
 		description
 		"OSPF";
 	    }
-	    enum table {
-		description
-		"Table";
-	    }
 	}
     }
 
@@ -218,35 +224,44 @@ module netgate-bgp {
 	type enumeration {
 	    enum advertised-routes {
 		description
-		    "advertised-routes";
+		    "Routes advertised to BGP neighbor";
 	    }
 	    enum dampened-routes {
 		description
-		    "dampened-routes";
+		    "Dampened routes received from BGP neighbor";
 	    }
 	    enum flap-statistics {
 		description
-		    "flap-statistics";
+		    "Flap statistics of the routes learned from BGP neighbor";
 	    }
 	    enum prefix-counts {
 		description
-		    "prefix-counts";
+		    "Detailed prefix count information";
 	    }
 	    enum received {
 		description
-		    "received'";
+		    "Information received from BGP neighbor";
 	    }
 	    enum received-routes {
 		description
-		    "received-routes";
+		    "Received routes from BGP neighbor";
 	    }
 	    enum routes {
 		description
-		    "routes";
+		    "Routes learned from BGP neighbor";
 	    }
 	    enum detail {
 		description
-		    "detail";
+		    "Detail";
+	    }
+	}
+    }
+
+    typedef bgp-show-parameter2 {
+	type enumeration {
+	    enum prefix-filter {
+		description
+		    "Prefix-list filter";
 	    }
 	}
     }
@@ -1054,7 +1069,7 @@ module netgate-bgp {
 		    type bgp-source;
 		    description
 			"The route source.  One of 'kernel',
-			 'connected', 'ospf', 'table'.";
+			 'connected', 'ospf'.";
 		}
 
 		container route-data {
@@ -1086,61 +1101,6 @@ module netgate-bgp {
 			    "Route map for
 			     redistributed routes";
 			ngcliext:child-fmt "$< $% @@$n";
-		    }
-		}
-	    }
-	}
-
-	container kernel-tables {
-	    description
-		"Route redistributions to kernel tables.";
-
-	    ngcliext:parent-fmt "$<";
-
-	    list table {
-		key "id";
-		description
-		    "Non-main kernel tables.";
-
-		ngcliext:parent-fmt "$< table @{id}";
-
-		leaf id {
-		    type uint16 {
-			range "1..65535";
-		    }
-		    description
-			"Non-main kernel table id.";
-		}
-
-		container table-data {
-		    presence
-			"If present, this redistribution is present
-			 and configured.";
-
-		    ngcliext:parent-fmt "$<";
-		    ngcliext:node-op "test-set:@{metric}@{route-map}";
-		    ngcliext:node-fmt "$<$n|${metric}${route-map}";
-
-		    leaf metric {
-			type uint32;
-			description
-			    "Metric for redistributed
-			     routes.";
-			 ngcliext:child-fmt "$< $% @@$n";
-		    }
-
-		    leaf route-map {
-			type leafref {
-			    path "/ngrt:route-config"
-				+ "/ngrt:dynamic"
-				+ "/ngfrr:route-maps"
-				+ "/ngfrr:map"
-				+ "/ngfrr:name";
-			}
-			description
-			    "Route map for
-			     redistributed routes";
-			 ngcliext:child-fmt "$< $% @@$n";
 		    }
 		}
 	    }
@@ -1181,6 +1141,12 @@ module netgate-bgp {
 		     'advertised-routes', 'dampened-routes',
 		     'flap-statistics', 'prefix-counts', 'received',
 		     'received-routes', 'routes', or 'detail'.";
+	    }
+	    leaf param2 {
+		type bgp-show-parameter2;
+		description
+		    "An additional parameter string.  One of the strings
+		     'prefix-filter'.";
 	    }
 	    leaf family {
 		type bgp-ip-family;
@@ -1583,23 +1549,40 @@ module netgate-bgp {
 				ngcliext:node-fmt "|^$%$n";
 			    }
 
-			    container ebgp-multihop {
-				presence
-				    "Allow eBGP neighbors not on directly
-				     connected netowrks.";
+			    choice hops-control {
 				description
-				    "Control multi-hop neighbors.";
+				    "Options to control allowed hops between
+				     this router and the neighbor.";
 
-				ngcliext:node-fmt "^$%${max-hop-count}$n";
-
-				leaf max-hop-count {
-				    type uint8;
+				container ebgp-multihop {
+				    presence
+					"Allow eBGP neighbors not on directly
+					 connected netowrks.";
 				    description
-					"Allow neighbors to be
-					 multi-hop distant.  Mutually
-					 exclusive with 'ttl
-					 security'.";
-				    ngcliext:child-fmt " hop-maximum @@";
+					"Control multi-hop neighbors.";
+
+				    ngcliext:node-fmt "^$%${max-hop-count}$n";
+
+				    leaf max-hop-count {
+					type uint8;
+					description
+					    "Allow neighbors to be
+					     multi-hop distant.  Mutually
+					     exclusive with 'ttl
+					     security'.";
+					ngcliext:child-fmt " hop-maximum @@";
+				    }
+				}
+
+				leaf ttl-security-hops {
+				    type uint8 {
+					range "1..254";
+				    }
+				    description
+					"Limit neighbors to being exactly
+					 <n-hops> distant.  Mutually exclusive
+					 with the 'ebgp-multihop' option.";
+				    ngcliext:node-fmt "^ttl-security hops @@$n";
 				}
 			    }
 
@@ -1748,17 +1731,6 @@ module netgate-bgp {
 					 seconds, maybe.";
 				    ngcliext:sibling-fmt " $% @@";
 				}
-			    }
-
-			    leaf ttl-security-hops {
-				type uint8 {
-				    range "1..254";
-				}
-				description
-				    "Limit neighbors to being exactly <n-hops>
-				     distant.	Mutually exclusive with the
-				     'ebgp-multihop' option.";
-				ngcliext:node-fmt "^ttl-security hops @@$n";
 			    }
 
 			    leaf update-source {
