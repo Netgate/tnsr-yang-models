@@ -17,6 +17,10 @@ module netgate-ipsec {
 	prefix "ngcom";
     }
 
+    import netgate-system {
+	prefix "ngsys";
+    }
+
     organization "Netgate";
 
     contact "Web: <http://www.netgate.com>";
@@ -27,6 +31,11 @@ module netgate-ipsec {
 
 	Copyright 2016-2023 Rubicon Communications, LLC.
 	";
+
+    revision 2024-02-01 {
+	description
+	    "TNSR Release 24.02.";
+    }
 
     revision 2023-11-01 {
 	description
@@ -624,6 +633,24 @@ module netgate-ipsec {
     } 
 
 
+    rpc ike-control {
+	input {
+	    leaf operation {
+		mandatory true;
+		type ngcom:service-operation;
+		description
+		    "One of the strings 'start', 'stop', 'restart', " +
+		    "or 'status'.";
+	    }
+	}
+	output {
+	    leaf stdout {
+		type string;
+	    }
+	}
+    }
+
+
     rpc ike-coredump {
 	input {
 	    leaf operation {
@@ -644,6 +671,57 @@ module netgate-ipsec {
     container ipsec-config {
 
 	ngcliext:parent-fmt "ipsec";
+
+	container global-options {
+	    description
+		"Global IPsec options.";
+
+	    ngcliext:parent-fmt "$< $%";
+
+	    container eap-radius {
+		description
+		    "EAP-RADIUS plugin settings.";
+
+	        ngcliext:parent-fmt "$< $%";
+
+		leaf server-group {
+		    description
+			"The RADIUS server group for IPsec.";
+
+		    type leafref {
+			path "/ngsys:system/ngsys:auth/ngsys:server-groups/ngsys:server-group/ngsys:name";
+		    }
+		    must "/ngsys:system/ngsys:auth/ngsys:server-groups/ngsys:server-group[ngsys:name=current()]/ngsys:type = 'radius'" {
+			error-message "IPsec EAP-RADIUS server group must have type 'radius'";
+		    }
+		    ngcliext:node-fmt "$< $% @@$n";
+		}
+
+		container accounting {
+		    description
+			"RADIUS accounting settings.";
+
+	            ngcliext:parent-fmt "$< $%";
+
+		    leaf enabled {
+			description
+			    "If true, send accounting packets for remote access IPsec tunnels.";
+			type boolean;
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
+		    }
+
+		    leaf interim-interval {
+			description
+			    "Seconds between interim updates.";
+			type uint16 {
+			    range "1..65535";
+			}
+			ngcliext:node-fmt "$< $% @@$n";
+		    }
+		}
+	    }
+	}
 
 	list tunnel {
 	    key "instance";
@@ -889,6 +967,14 @@ module netgate-ipsec {
 					description
 					    "Name of a CA certificate file";
 					ngcliext:node-fmt "^$% @@$n";
+				    }
+				}
+				case eap-radius-remote {
+				    leaf eap-radius {
+					type empty;
+					description
+					    "Enable EAP-RADIUS using global settings";
+					ngcliext:node-fmt "^$%$n";
 				    }
 				}
 			    }

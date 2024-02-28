@@ -17,6 +17,14 @@ module netgate-system {
 	prefix "ngcom";
     }
 
+    import netgate-radius {
+	prefix "ngradius";
+    }
+
+    import netgate-ldap {
+	prefix "ngldap";
+    }
+
     organization "Netgate";
 
     contact "Web: <http://www.netgate.com>";
@@ -25,8 +33,13 @@ module netgate-system {
 	"This YANG module provides a Netgate-defined data-model
 	 for SYSTEM data.
 
-	 Copyright 2018-2020 Rubicon Communications, LLC.
+	 Copyright 2018-2024 Rubicon Communications, LLC.
 	 ";
+
+    revision 2024-02-01 {
+	description
+	    "TNSR Release 24.02.";
+    }
 
     revision 2023-02-01 {
 	description
@@ -147,6 +160,22 @@ module netgate-system {
 		"PCI address function.";
 	}
 
+    }
+
+
+    typedef aaa-server-type {
+	type enumeration {
+	    enum radius {
+		description
+		    "Radius authentication server.";
+	    }
+	    enum ldap {
+		description
+		    "LDAP authentication server.";
+	    }
+	}
+	description
+	    "AAA server types.";
     }
 
 
@@ -517,6 +546,16 @@ module netgate-system {
 
 	}
 
+	leaf login-banner {
+	    type string {
+		    length 1..4096;
+	    }
+	    description
+		"A banner message to be displayed at user login, as part
+		 of update-motd.";
+	    ngcliext:node-fmt "$< banner .$n@@.$n";
+	}
+
 	container kernel {
 	    ngcliext:context "system-kernel";
 	    ngcliext:parent-fmt "system $%";
@@ -558,13 +597,14 @@ module netgate-system {
 	}
 
 	container auth {
+	    ngcliext:parent-fmt "$%";
 
 	    list user {
 		key "user-name";
 		description
 		    "allowed users of the system";
 
-		ngcliext:node-fmt "auth user @{user-name}$n";
+		ngcliext:node-fmt "$< $% @{user-name}$n";
 		ngcliext:pre-children-op "push";
 
 		leaf user-name {
@@ -604,6 +644,155 @@ module netgate-system {
 			description
 			    "ASCII encoded data for user key.";
 			ngcliext:node-fmt "@@$n$n";
+		    }
+		}
+	    }
+
+	    container server-groups {
+		description
+		    "Server groups to use for authentication methods.";
+
+		ngcliext:parent-fmt "$<";
+
+		list server-group {
+		    key "name";
+
+		    max-elements 5;
+
+		    ngcliext:node-fmt "$< $% @{name}$n";
+		    ngcliext:pre-children-op "push";
+
+		    leaf name {
+			type string {
+			    length "1..16";
+			    pattern '[a-zA-Z0-9_]([-a-zA-Z0-9_]){0,15}';
+			}
+			description
+			    "Server group name.";
+		    }
+
+		    leaf type {
+			type aaa-server-type;
+			mandatory true;
+			description
+			    "Type of AAA server.";
+
+			ngcliext:node-fmt "^$% @@$n";
+		    }
+
+		    container servers {
+			description
+			    "Servers in this group.";
+
+			choice server-list-type {
+			    mandatory true;
+
+			    case subset {
+				list server {
+				    key "priority";
+
+				    description
+					"Configured auth server of the type used by this group.";
+
+				    unique radius-server;
+				    unique ldap-server;
+
+				    max-elements 5;
+				    must "radius-server or ldap-server" {
+					error-message "A server in a server-group must contain an available radius or ldap server";
+				    }
+
+				    ngcliext:node-fmt "^priority @{priority}";
+
+				    leaf priority {
+					type uint8 {
+					    range "1..255";
+					}
+					description
+					    "Server priority (lowest to highest).";
+				    }
+
+				    leaf radius-server {
+					when "../../../type = 'radius'";
+
+					type leafref {
+					    path "/ngradius:radius-client/ngradius:client/ngradius:servers/ngradius:name";
+					}
+
+					description
+					    "Radius server name.";
+
+					ngcliext:node-fmt " radius @@$n";
+				    }
+
+				    leaf ldap-server {
+					when "../../../type = 'ldap'";
+	
+					type leafref {
+					    path "/ngldap:ldap-client/ngldap:client/ngldap:servers/ngldap:name";
+					}
+
+					description
+					    "LDAP server name.";
+
+					ngcliext:node-fmt " ldap @@$n";
+				    }
+				}
+			    }
+			    case all {
+				leaf all-servers {
+				    type empty;
+				    description
+					"All configured servers for the auth type used by this group.";
+				    ngcliext:node-fmt "^$%$n";
+				}
+			    }
+			}
+		    }
+		}
+	    }
+
+
+	    container authentication-methods {
+		ngcliext:parent-fmt "$< method";
+
+		container radius {
+		    description
+			"Radius server-group to use.";
+
+		    ngcliext:pre-child-fmt "$< $%";
+		    ngcliext:post-child-fmt "$n";
+
+		    leaf server-group {
+			type leafref {
+			    path "/ngsys:system/auth/server-groups/server-group/name";
+			}
+
+			must "/ngsys:system/ngsys:auth/ngsys:server-groups/ngsys:server-group[ngsys:name=current()]/ngsys:type = 'radius'" {
+			    error-message "System authentication Radius server group must have type 'radius'";
+			}
+
+			ngcliext:node-fmt " $% @@";
+		    }
+		}
+
+		container ldap {
+		    description
+			"LDAP server-group to use.";
+
+		    ngcliext:pre-child-fmt "$< $%";
+		    ngcliext:post-child-fmt "$n";
+
+		    leaf server-group {
+			type leafref {
+			    path "/ngsys:system/auth/server-groups/server-group/name";
+			}
+
+			must "/ngsys:system/ngsys:auth/ngsys:server-groups/ngsys:server-group[ngsys:name=current()]/ngsys:type = 'ldap'" {
+			    error-message "System authentication LDAP server group must have type 'ldap'";
+			}
+
+			ngcliext:node-fmt " $% @@";
 		    }
 		}
 	    }

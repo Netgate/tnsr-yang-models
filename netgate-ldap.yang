@@ -1,0 +1,358 @@
+module netgate-ldap {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-ldap";
+    prefix "ngldap";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"The YANG module provides a data-model for the LDAP client.
+
+	 Copyright 2023, 2024 Rubicon Communications, LLC.
+	";
+
+    revision 2024-02-01 {
+	description
+	    "TNSR Release 24.02.";
+    }
+
+
+    grouping server-tuple {
+	leaf host {
+	    type inet:host;
+	    ngcliext:node-op "test-set:%{port}";
+	    ngcliext:node-fmt " @@| @@ %{port}";
+	}
+	leaf port {
+	    type inet:port-number;
+	    ngcliext:sibling-fmt "@@";
+	}
+    }
+
+    typedef attribute-identifier {
+	type string {
+	    pattern "^[A-Za-z][-A-Za-z0-9]+$";
+	}
+	description
+	    "An LDAP attribute name.";
+    }
+
+    typedef distinguished-name {
+	type string {
+	    pattern "^(((CN|cn)=([^,]*)),)?((((CN|cn|OU|ou)=[^,]+,?)+),)?(((DC|dc)=[^,]+,?)+)$";
+	    length "4..255";
+	}
+	description
+	    "An LDAP distinguished name.";
+    }
+
+    typedef search-scope {
+	type enumeration {
+	    enum sub {
+		description
+		    "Subtree search.";
+	    }
+
+	    enum one {
+		description
+		    "One-level deep search.";
+	    }
+
+	    enum base {
+		description
+		    "Base-level search only.";
+	    }
+	}
+    }
+
+    typedef transport-type {
+	type enumeration {
+	    enum tcp {
+		description
+		    "Unencrypted TCP transport.";
+	    }
+
+	    enum tcp-starttls {
+		description
+		    "STARTTLS over TCP transport.";
+	    }
+
+	    enum tcp-ssltls {
+		description
+		    "SSL/TLS over TCP transport.";
+	    }
+	}
+    }
+
+    typedef password-attribute-type {
+	type enumeration {
+	    enum userPassword {
+		description
+		    "User password.";
+	    }
+
+	    enum gidNumber {
+		description
+		    "GID number.";
+	    }
+
+	    enum gecos {
+		description
+		    "GECOS comment.";
+	    }
+
+	    enum homeDirectory {
+		description
+		    "Home directory.";
+	    }
+
+	    enum loginShell {
+		description
+		    "Login shell.";
+	    }
+
+	}
+    }
+
+    typedef unix-pathname {
+	type string {
+	    pattern "[a-zA-Z0-9_./-]*";
+	    length "1..4096";
+	}
+    }
+
+    container ldap-client {
+
+	description
+	    "LDAP client configuration for PAM subsystem.";
+
+	ngcliext:node-fmt "ldap$n";
+	ngcliext:pre-children-op "push";
+	ngcliext:post-children-op "pop";
+
+	container client {
+	    description
+		"The LDAP client parameters.";
+
+	    when "count(servers) > 0";
+
+	    list servers {
+		key "name";
+		ordered-by user;
+
+		max-elements 5;
+
+		ngcliext:node-fmt "^server";
+		ngcliext:post-node-fmt "$n";
+
+		leaf name {
+		    type string {
+			length "1..16";
+		    }
+		    mandatory true;
+		    description
+			"Server handle.";
+
+		    ngcliext:node-fmt " @@";
+		}
+
+		container server {
+		    uses server-tuple {
+			refine host {
+			    mandatory true;
+			}
+			refine port {
+			    mandatory false;
+			}
+		    }
+		    description
+			"Server name or address, and port number.";
+		}
+	    }
+
+	    leaf scope {
+		type search-scope;
+		mandatory true;
+		description
+		    "Scope of search.";
+
+		ngcliext:pre-node-fmt "^$%";
+		ngcliext:node-fmt " @@";
+		ngcliext:post-node-fmt "$n";
+	    }
+
+	    leaf base-dn {
+		type distinguished-name;
+		mandatory true;
+		description
+		    "Base DN to bind to.";
+
+		ngcliext:pre-node-fmt "^basedn";
+		ngcliext:node-fmt " $q@@$q";
+		ngcliext:post-node-fmt "$n";
+	    }
+
+	    leaf timeout {
+		type uint32 {
+		    range "0..60";
+		}
+		mandatory false;
+		description
+			"Timeout for server requests.";
+
+		ngcliext:pre-node-fmt "^$%";
+		ngcliext:node-fmt " @@";
+		ngcliext:post-node-fmt "$n";
+	    }
+
+	    leaf version {
+		type uint32 {
+		    range "2..3";
+		}
+		mandatory false;
+		description
+		    "Protocol version to use.";
+
+		ngcliext:pre-node-fmt "^$%";
+		ngcliext:node-fmt " @@";
+		ngcliext:post-node-fmt "$n";
+	    }
+
+	    leaf bind-dn {
+		type distinguished-name;
+		mandatory false;
+		description
+		    "Distinguished name to bind to the server with.";
+
+		ngcliext:pre-node-fmt "^binddn";
+		ngcliext:node-op "test-set:%{bind-password}";
+		ngcliext:node-fmt " $q@@$q| $q@@$q %{bind-password}";
+		ngcliext:post-node-fmt "$n";
+	    }
+
+	    leaf bind-password {
+		type string {
+		    length "1..16";
+		}
+		mandatory false;
+		description
+		    "Bind password.";
+
+		when "../bind-dn != ''";
+
+		ngcliext:sibling-fmt "$q@@$q";
+	    }
+
+	    leaf group-dn {
+		type distinguished-name;
+		mandatory false;
+		description
+		    "Group DN.";
+
+		ngcliext:pre-node-fmt "^groupdn";
+		ngcliext:node-fmt " $q@@$q";
+		ngcliext:post-node-fmt "$n";
+	    }
+
+	    leaf peer-ca {
+		type string;
+		when "../transport = 'tcp-starttls' or ../transport = 'tcp-ssltls'";
+		mandatory true;
+		description
+		    "Name of the certificate in the certificate store
+		     for the CA which issued the server's certificate.";
+
+		ngcliext:pre-node-fmt "^peer-ca";
+		ngcliext:node-fmt " @@";
+		ngcliext:post-node-fmt "$n";
+	    }
+
+	    container attributes {
+		list overrides {
+		    key "attribute";
+		    ordered-by user;
+
+		    max-elements 100;
+		    ngcliext:node-fmt "^attribute-override";
+		    ngcliext:post-node-fmt "$n";
+
+		    leaf attribute {
+			type password-attribute-type;
+			mandatory true;
+			description
+			    "LDAP attribute to override from server.";
+
+			ngcliext:node-fmt " @@";
+		    }
+
+		    leaf value {
+			type string {
+			    length "0..1024";
+			}
+			mandatory true;
+			description
+			    "LDAP value to override from server.";
+			ngcliext:node-fmt " $q@@$q";
+		    }
+		}
+
+	    }
+
+	    leaf transport {
+		type transport-type;
+		mandatory false;
+		description
+		    "Transport to use.";
+
+		ngcliext:pre-node-fmt "^$%";
+		ngcliext:node-fmt " @@";
+		ngcliext:post-node-fmt "$n";
+	    }
+
+	}
+
+	//
+	// There are no statistics that PAM collects (for now)
+	// but I'll work with the architects to see if we can
+	// add a way to include statistics for external
+	// authentication (timeouts, round-trip-times, retransmits,
+	// etc).
+	//
+    }
+
+    rpc ldap-config-operation {
+	input {
+	    leaf request {
+		type string;
+		description
+		    "The operation, 'get-config-file'.";
+	    }
+	    leaf param {
+		type string;
+		description
+		    "An optional parameter.";
+	    }
+	}
+	output {
+	    leaf stdout {
+		type string;
+	    }
+	}
+    }
+}

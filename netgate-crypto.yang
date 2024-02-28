@@ -19,6 +19,11 @@ module netgate-crypto {
 
 	 Copyright 2022 Rubicon Communications, LLC.";
 
+    revision 2024-02-01 {
+	description
+	    "TNSR Release 24.02.";
+    }
+
     revision 2022-10-15 {
 	description
 	    "TNSR Release 22.10.";
@@ -28,6 +33,12 @@ module netgate-crypto {
 	description
 	    "Modes available for processing of completed crypto operations.";
 	type enumeration {
+	    enum adaptive {
+		description
+		    "Adaptive mode allows auto-switching between
+		     interrupt and polling modes based on current
+		     crypto load volume";
+	    }
 	    enum polling {
 		description
 		    "Poll for completed crypto operations";

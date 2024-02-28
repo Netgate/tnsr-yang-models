@@ -31,6 +31,11 @@ module netgate-dataplane {
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	";
 
+    revision 2024-02-02 {
+	description
+	    "TNSR Release 24.02.";
+    }
+
     revision 2023-11-01 {
 	description
 	    "TNSR Release 23.11.";
@@ -575,6 +580,7 @@ module netgate-dataplane {
 
 	    leaf main-heap-page-size {
 		type ngcom:memory-page-size;
+		default "2m";
 		description
 		    "Size of page in main heap. Should be a number. "+
 		    "Optionally followed by a specified of k, m, or g, "+

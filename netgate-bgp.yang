@@ -44,6 +44,11 @@ module netgate-bgp {
 	 Copyright 2019-2023 Rubicon Communications, LLC.
 	 ";
 
+    revision 2024-02-01 {
+	description
+	    "TNSR Release 24.02.";
+    }
+
     revision 2023-11-02 {
 	description
 	    "TNSR Release 23.11.";
@@ -230,9 +235,17 @@ module netgate-bgp {
 		description
 		    "Dampened routes received from BGP neighbor";
 	    }
+	    enum detail {
+		description
+		    "Detail";
+	    }
 	    enum flap-statistics {
 		description
 		    "Flap statistics of the routes learned from BGP neighbor";
+	    }
+	    enum graceful-restart {
+		description
+		    "graceful-restart";
 	    }
 	    enum prefix-counts {
 		description
@@ -249,10 +262,6 @@ module netgate-bgp {
 	    enum routes {
 		description
 		    "Routes learned from BGP neighbor";
-	    }
-	    enum detail {
-		description
-		    "Detail";
 	    }
 	}
     }
@@ -275,6 +284,23 @@ module netgate-bgp {
 	    enum ipv6 {
 		description
 		    "IPv6 address";
+	    }
+	}
+    }
+
+    typedef bgp-graceful-restart-mode {
+	type enumeration {
+	    enum enable {
+		description
+		"graceful-restart enabled";
+	    }
+	    enum helper {
+		description
+		"graceful-restart helper mode";
+	    }
+	    enum disable {
+		description
+		"graceful-restart disabled";
 	    }
 	}
     }
@@ -1139,8 +1165,11 @@ module netgate-bgp {
 		description
 		    "An additional parameter string.  One of the strings
 		     'advertised-routes', 'dampened-routes',
-		     'flap-statistics', 'prefix-counts', 'received',
-		     'received-routes', 'routes', or 'detail'.";
+		     'detail',
+		     'flap-statistics',
+		     'graceful-restart',
+		     'prefix-counts', 'received', 'received-routes',
+		     or 'routes'.";
 	    }
 	    leaf param2 {
 		type bgp-show-parameter2;
@@ -1599,10 +1628,19 @@ module netgate-bgp {
 				type uint32 {
 				    range "1..4294967295";
 				}
+				must ". != ../../../asn" {
+				    error-message
+				        "The local-as must not match the"
+					+ " router AS number.";
+				    description
+				        "The local-as must not match the
+					 router AS number.";
+				}
 				description
 				    "If present, this value is an alternate
 				     AS-number for this BGP instance.
-				     Valid for only eBGP peers.";
+				     Valid for only eBGP peers.
+				     Must not match the router AS number.";
 				ngcliext:node-fmt "^local-as @@%{local-as-no-prepend}$n";
 			    }
 
@@ -1740,6 +1778,24 @@ module netgate-bgp {
 				     It is either an if-name or ipv4-address.";
 				ngcliext:node-fmt "^$% @@$n";
 			    }
+
+                            container graceful-restart {
+                                presence
+                                    "Allows to set individual values.";
+                                description
+				    "Graceful-restart per peer settings";
+
+				ngcliext:parent-fmt "$%";
+
+                                leaf mode {
+                                    description
+                                        "Select BGP graceful-restart per peer
+                                         mode of operation.";
+
+				    type bgp-graceful-restart-mode;
+				    ngcliext:node-fmt "^$< @@$n";
+                                }
+                            }
 			}
 		    }
 
@@ -2146,6 +2202,97 @@ module netgate-bgp {
 			    "The number of packets to write to peer sockets
 			     per update.  Default 10 packets.";
 			ngcliext:node-fmt "^$% @@$n";
+		    }
+
+		    container graceful-restart {
+			description
+			    "Graceful-restart specific settings.";
+			ngcliext:parent-fmt "graceful-restart";
+
+			leaf notification {
+			    type boolean;
+			    default true;
+			    description
+				"Support for BGP NOTIFICATION messages.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|^$< $%$n";
+			}
+
+			leaf preserve-fw-state {
+			    type boolean;
+			    description
+				"Whether preserve the forwarding state
+				 for routes or not.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|^$< $%$n";
+			}
+
+			leaf restart-time {
+			    type uint16 {
+				range "0..4095";
+			    }
+			    description
+				"This is the estimated time (in seconds) it
+				 will take for the BGP session to be
+				 re-established after a restart. FRR's default is 120";
+			    ngcliext:node-fmt "^$< $% @@$n";
+			}
+
+			leaf rib-stale-time {
+			    type uint16 {
+				range "1..3600";
+			    }
+			    description
+				"The time the stale routes are kept in RIB.";
+			    ngcliext:node-fmt "^$< $% @@$n";
+			}
+
+			leaf select-defer-time {
+			    type uint16 {
+				range "0..3600";
+			    }
+			    description
+				"Max time for the router to defer route selection
+				 after restart.";
+			    ngcliext:node-fmt "^$< $% @@$n";
+			}
+
+			leaf stalepath-time {
+			    type uint16 {
+				range "1..4095";
+			    }
+			    description
+				"The max time (in seconds) to hold onto restarting
+				 peer’s stale paths";
+			    ngcliext:node-fmt "^$< $% @@$n";
+			}
+
+			leaf mode {
+			    type bgp-graceful-restart-mode;
+			    description
+				"Select BGP graceful-restart global
+				 mode of operation.";
+
+			    ngcliext:node-fmt "^$< @@$n";
+			}
+		    }
+
+		    container long-lived-graceful-restart {
+			description
+			    "Long-lived Graceful Restart settings.";
+			ngcliext:parent-fmt "long-lived-graceful-restart";
+
+			leaf stale-time {
+			    type uint32 {
+				range "0..16777215";
+			    }
+			    description
+				"The max time to wait before purging long-lived stale
+				 routes for helper routers. Value of 0 means
+				 the feature is off. This is default.
+				 Only graceful restart mode is affected.";
+			    ngcliext:node-fmt "^$< $% @@$n";
+			}
 		    }
 
 		    container address-families {

@@ -28,8 +28,13 @@ module netgate-host-route {
     description
 	"This YANG module provides a data model for host IP routes.
 
-	 Copyright 2023 Rubicon Communications, LLC.
+	 Copyright 2024 Rubicon Communications, LLC.
 	";
+
+    revision 2024-02-01 {
+	description
+	    "TNSR Release 24.02.";
+    }
 
     revision 2023-06-01 {
 	description
