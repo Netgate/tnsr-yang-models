@@ -683,6 +683,24 @@ module netgate-dataplane {
 	    }
 	}
 
+	container plugins {
+	    description
+		"VPP plugins";
+
+	    ngcliext:parent-fmt "$< $%";
+
+	    leaf-list plugin {
+	        description "List of additional VPP plugins.
+			    Short plugin name matches name_plugin.so file";
+		type string {
+		    pattern '[0-9a-zA-Z._-]+';
+		    length "1..63";
+		}
+
+		ngcliext:node-fmt "$< $% @@ enable$n";
+	    }
+	}
+
 	container statseg {
 	    description
 		"Statistics segment settings";
@@ -758,8 +776,9 @@ module netgate-dataplane {
 
 	    leaf default-syslog-log-level {
 		type log-level-type-t;
+		default notice;
 		description
-		    "Defailt log level to process messages into the syslog. "+
+		    "Default log level to process messages into the syslog. "+
 		    "Message will be preocessed to syslog if log level "+
 		    "is less then or equal to the message's log level.";
 		ngcliext:node-fmt "$< $% @@$n";

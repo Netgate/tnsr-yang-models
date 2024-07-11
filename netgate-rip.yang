@@ -318,7 +318,7 @@ module netgate-rip {
 		    description
 			"If true, the RIP Daemon is enabled.";
 		    ngcliext:node-op "bool";
-		    ngcliext:node-fmt "|$%$n";
+		    ngcliext:node-fmt "|^$%$n";
 		}
 	    }
 

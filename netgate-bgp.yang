@@ -44,6 +44,11 @@ module netgate-bgp {
 	 Copyright 2019-2023 Rubicon Communications, LLC.
 	 ";
 
+    revision 2024-06-01 {
+	description
+	    "TNSR Release 24.06.";
+    }
+
     revision 2024-02-01 {
 	description
 	    "TNSR Release 24.02.";
@@ -2605,10 +2610,12 @@ module netgate-bgp {
 			list pattern {
 			    key sequence;
 			    description
-				"The set of ordered policiy and patterns pairs
+				"The set of ordered patterns and policy pairs
 				 for an AS-path.";
 
 			    ngcliext:node-fmt "^rule @{sequence} @{policy} @{regex}$n";
+
+			    unique "regex";
 
 			    leaf sequence {
 				type uint32;
@@ -4040,7 +4047,7 @@ module netgate-bgp {
 			list pattern {
 			    key sequence;
 			    description
-				"The set of ordered policiy and patterns pairs
+				"The set of ordered patterns and policy pairs
 				 for an AS-path.";
 
 			    leaf sequence {

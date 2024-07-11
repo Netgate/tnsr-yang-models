@@ -190,6 +190,370 @@ module netgate-common {
 	    "Enumeration of basic IP address family types.";
     }
 
+    typedef ip-protocol-bit {
+	type bits {
+	    bit icmp {
+		position 1;
+		description "internet control message protocol";
+	    }
+
+	    bit igmp {
+		position 2;
+		description "Internet Group Management";
+	    }
+
+	    bit ggp {
+		position 3;
+		description "gateway-gateway protocol";
+	    }
+
+	    bit ipencap {
+		position 4;
+		description "IP encapsulated in IP (officially ``IP'')";
+	    }
+
+	    bit st {
+		position 5;
+		description "ST datagram mode";
+	    }
+
+	    bit tcp {
+		position 6;
+		description "transmission control protocol";
+	    }
+
+	    bit egp {
+		position 8;
+		description "exterior gateway protocol";
+	    }
+
+	    bit igp {
+		position 9;
+		description "any private interior gateway (Cisco)";
+	    }
+
+	    bit pup {
+		position 12;
+		description "PARC universal packet protocol";
+	    }
+
+	    bit udp {
+		position 17;
+		description "user datagram protocol";
+	    }
+
+	    bit hmp {
+		position 20;
+		description "host monitoring protocol";
+	    }
+
+	    bit xns-idp {
+		position 22;
+		description "Xerox NS IDP";
+	    }
+
+	    bit rdp {
+		position 27;
+		description "Reliable Datagram Protocol";
+	    }
+
+	    bit iso-tp4 {
+		position 29;
+		description "ISO Transport Protocol class 4 [RFC905]";
+	    }
+
+	    bit dccp {
+		position 33;
+		description "Datagram Congestion Control Prot. [RFC4340]";
+	    }
+
+	    bit xtp {
+		position 36;
+		description "Xpress Transfer Protocol";
+	    }
+
+	    bit ddp {
+		position 37;
+		description "Datagram Delivery Protocol";
+	    }
+
+	    bit idpr-cmtp {
+		position 38;
+		description "IDPR Control Message Transport";
+	    }
+
+	    bit ipv6 {
+		position 41;
+		description "Internet Protocol, version 6";
+	    }
+
+	    bit ipv6-route {
+		position 43;
+		description "Routing Header for IPv6";
+	    }
+
+	    bit ipv6-frag {
+		position 44;
+		description "Fragment Header for IPv6";
+	    }
+
+	    bit idrp {
+		position 45;
+		description "Inter-Domain Routing Protocol";
+	    }
+
+	    bit rsvp {
+		position 46;
+		description "Reservation Protocol";
+	    }
+
+	    bit gre {
+		position 47;
+		description "General Routing Encapsulation";
+	    }
+
+	    bit esp {
+		position 50;
+		description "Encap Security Payload [RFC2406]";
+	    }
+
+	    bit ah {
+		position 51;
+		description "Authentication Header [RFC2402]";
+	    }
+
+	    bit skip {
+		position 57;
+		description "SKIP";
+	    }
+
+	    bit ipv6-icmp {
+		position 58;
+		description "ICMP for IPv6";
+	    }
+
+	    bit ipv6-nonxt {
+		position 59;
+		description "No Next Header for IPv6";
+	    }
+
+	    bit ipv6-opts {
+		position 60;
+		description "Destination Options for IPv6";
+	    }
+
+	    bit rspf {
+		position 73;
+		description "Radio Shortest Path First (officially CPHB)";
+	    }
+
+	    bit vmtp {
+		position 81;
+		description "Versatile Message Transport";
+	    }
+
+	    bit eigrp {
+		position 88;
+		description "Enhanced Interior Routing Protocol (Cisco)";
+	    }
+
+	    bit ospf {
+		position 89;
+		description "Open Shortest Path First IGP";
+	    }
+
+	    bit ax.25 {
+		position 93;
+		description "AX.25 frames";
+	    }
+
+	    bit ipip {
+		position 94;
+		description "IP-within-IP Encapsulation Protocol";
+	    }
+
+	    bit etherip {
+		position 97;
+		description "Ethernet-within-IP Encapsulation [RFC3378]";
+	    }
+
+	    bit encap {
+		position 98;
+		description "Yet Another IP encapsulation [RFC1241]";
+	    }
+
+	    bit pim {
+		position 103;
+		description "Protocol Independent Multicast";
+	    }
+
+	    bit ipcomp {
+		position 108;
+		description "IP Payload Compression Protocol";
+	    }
+
+	    bit vrrp {
+		position 112;
+		description "Virtual Router Redundancy Protocol [RFC5798]";
+	    }
+
+	    bit l2tp {
+		position 115;
+		description "Layer Two Tunneling Protocol [RFC2661]";
+	    }
+
+	    bit isis {
+		position 124;
+		description "IS-IS over IPv4";
+	    }
+
+	    bit sctp {
+		position 132;
+		description "Stream Control Transmission Protocol";
+	    }
+
+	    bit fc {
+		position 133;
+		description "Fibre Channel";
+	    }
+
+	    bit mobility-header {
+		position 135;
+		description "Mobility Support for IPv6 [RFC3775]";
+	    }
+
+	    bit udplite {
+		position 136;
+		description "UDP-Lite [RFC3828]";
+	    }
+
+	    bit mpls-in-ip {
+		position 137;
+		description "MPLS-in-IP [RFC4023]";
+	    }
+
+	    bit manet {
+		position 138;
+		description "MANET Protocols [RFC5498]";
+	    }
+
+	    bit hip {
+		position 139;
+		description "Host Identity Protocol";
+	    }
+
+	    bit shim6 {
+		position 140;
+		description "Shim6 Protocol [RFC5533]";
+	    }
+
+	    bit wesp {
+		position 141;
+		description "Wrapped Encapsulating Security Payload";
+	    }
+
+	    bit rohc {
+		position 142;
+		description "Robust Header Compression";
+	    }
+	}
+    }
+
+    typedef ip-protocol-number {
+	type uint8 {
+	    range "0..255";
+	}
+	description "IP protocol number, [0-255]";
+    }
+
+    typedef ip-protocol-name-or-number {
+	type union {
+	    type ip-protocol-bit;
+	    type ip-protocol-number;
+	}
+    }
+
+    /*
+     * This pattern matches a set of intermixed, whitespace separated
+     * IP protocols by name or number.
+     * For example: "icmp 211 udp tcp 42".
+     */
+    typedef ip-protocol-name-or-number-set {
+	type string {
+	    pattern "(icmp|igmp|ggp|ipencap|st|tcp"
+		    + "|egp|igp|pup|udp|hmp|xns-idp"
+		    + "|rdp|iso-tp4|dccp|xtp|ddp|idpr-cmtp"
+		    + "|ipv6|ipv6-route|ipv6-frag|idrp"
+		    + "|rsvp|gre|esp|ah|skip|ipv6-icmp"
+		    + "|ipv6-nonxt|ipv6-opts|rspf|vmtp"
+		    + "|eigrp|ospf|ax.25|ipip|etherip"
+		    + "|encap|pim|ipcomp|vrrp|l2tp"
+		    + "|isis|sctp|fc|mobility-header"
+		    + "|udplite|mpls-in-ip|manet"
+		    + "|hip|shim6|wesp|rohc"
+		    + "|[0-9]|1[0-9]|2[0-4][0-9]|25[0-5])"
+		    + "((\s+)"
+		    + "(icmp|igmp|ggp|ipencap|st|tcp"
+		    + "|egp|igp|pup|udp|hmp|xns-idp"
+		    + "|rdp|iso-tp4|dccp|xtp|ddp|idpr-cmtp"
+		    + "|ipv6|ipv6-route|ipv6-frag|idrp"
+		    + "|rsvp|gre|esp|ah|skip|ipv6-icmp"
+		    + "|ipv6-nonxt|ipv6-opts|rspf|vmtp"
+		    + "|eigrp|ospf|ax.25|ipip|etherip"
+		    + "|encap|pim|ipcomp|vrrp|l2tp"
+		    + "|isis|sctp|fc|mobility-header"
+		    + "|udplite|mpls-in-ip|manet"
+		    + "|hip|shim6|wesp|rohc"
+		    + "|[0-9]|1[0-9]|2[0-4][0-9]|25[0-5])"
+		    + ")*";
+	}
+    }
+
+    typedef tcp-flags {
+	type bits {
+	    bit fin {
+		position 0;
+		description
+		    "This is the last packet from sender.";
+	    }
+	    bit syn {
+		position 1;
+		description
+		    "Synchronize sequence numbers.";
+	    }
+	    bit rst {
+		position 2;
+		description
+		    "Reset the connection.";
+	    }
+	    bit psh {
+		position 3;
+		description
+		    "Request to push buffered data to receiver.";
+	    }
+	    bit ack {
+		position 4;
+		description
+		    "Indicates that the acknowledgement number is valid.";
+	    }
+	    bit urg {
+		position 5;
+		description
+		    "Indicates that the Urgent pointer field is valid.";
+	    }
+	    bit ece {
+		position 6;
+		description
+		    "ECN echo.";
+	    }
+	    bit cwr {
+		position 7;
+		description
+		    "Congestion window reduced.";
+	    }
+	}
+    }
+
     typedef ng-tunnel-type {
         type enumeration {
             enum none {

@@ -127,6 +127,10 @@ module netgate-ldap {
 		    "Login shell.";
 	    }
 
+	    enum uidNumber {
+		description
+		    "UID number.";
+	    }
 	}
     }
 
@@ -192,9 +196,7 @@ module netgate-ldap {
 		description
 		    "Scope of search.";
 
-		ngcliext:pre-node-fmt "^$%";
-		ngcliext:node-fmt " @@";
-		ngcliext:post-node-fmt "$n";
+		ngcliext:node-fmt "^$% @@$n";
 	    }
 
 	    leaf base-dn {
@@ -203,9 +205,7 @@ module netgate-ldap {
 		description
 		    "Base DN to bind to.";
 
-		ngcliext:pre-node-fmt "^basedn";
-		ngcliext:node-fmt " $q@@$q";
-		ngcliext:post-node-fmt "$n";
+		ngcliext:node-fmt "^basedn $q@@$q$n";
 	    }
 
 	    leaf timeout {
@@ -216,9 +216,7 @@ module netgate-ldap {
 		description
 			"Timeout for server requests.";
 
-		ngcliext:pre-node-fmt "^$%";
-		ngcliext:node-fmt " @@";
-		ngcliext:post-node-fmt "$n";
+		ngcliext:node-fmt "^$% @@$n";
 	    }
 
 	    leaf version {
@@ -229,9 +227,7 @@ module netgate-ldap {
 		description
 		    "Protocol version to use.";
 
-		ngcliext:pre-node-fmt "^$%";
-		ngcliext:node-fmt " @@";
-		ngcliext:post-node-fmt "$n";
+		ngcliext:node-fmt "^$% @@$n";
 	    }
 
 	    leaf bind-dn {
@@ -265,9 +261,7 @@ module netgate-ldap {
 		description
 		    "Group DN.";
 
-		ngcliext:pre-node-fmt "^groupdn";
-		ngcliext:node-fmt " $q@@$q";
-		ngcliext:post-node-fmt "$n";
+		ngcliext:node-fmt "^groupdn $q@@$q$n";
 	    }
 
 	    leaf peer-ca {
@@ -278,9 +272,7 @@ module netgate-ldap {
 		    "Name of the certificate in the certificate store
 		     for the CA which issued the server's certificate.";
 
-		ngcliext:pre-node-fmt "^peer-ca";
-		ngcliext:node-fmt " @@";
-		ngcliext:post-node-fmt "$n";
+		ngcliext:node-fmt "^$% @@$n";
 	    }
 
 	    container attributes {
@@ -320,9 +312,7 @@ module netgate-ldap {
 		description
 		    "Transport to use.";
 
-		ngcliext:pre-node-fmt "^$%";
-		ngcliext:node-fmt " @@";
-		ngcliext:post-node-fmt "$n";
+		ngcliext:node-fmt "^$% @@$n";
 	    }
 
 	}

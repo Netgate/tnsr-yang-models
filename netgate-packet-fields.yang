@@ -1,5 +1,3 @@
-
-
 module netgate-packet-fields {
 
     yang-version 1.1;
@@ -28,6 +26,11 @@ module netgate-packet-fields {
 	 for datagram packet fields.
 
 	 Copyright 2020 Rubicon Communications, LLC.";
+
+    revision 2024-06-01 {
+	description
+	    "TNSR Release 24.06.";
+    }
 
     revision 2021-02-15 {
 	description
@@ -804,11 +807,6 @@ module netgate-packet-fields {
 		    position 7;
 		    description
 			"Congestion window reduced.";
-		}
-		bit ns {
-		    position 8;
-		    description
-			"ECN none for concealment protection.";
 		}
 	    }
 	    ngcliext:node-fmt "^$% @@$n";

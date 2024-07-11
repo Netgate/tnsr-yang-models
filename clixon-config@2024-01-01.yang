@@ -49,6 +49,22 @@ module clixon-config {
 
        ***** END LICENSE BLOCK *****";
 
+    revision 2024-01-01 {
+        description
+            "Changed semantics:
+                    CLICON_VALIDATE_STATE_XML - disable return sanity checks if false
+             Marked as obsolete:
+                    CLICON_DATASTORE_CACHE
+                    CLICON_NETCONF_CREATOR_ATTR
+             Changed semantics of 
+             Released in Clixon 7.0";
+    }
+    revision 2023-11-01 {
+        description
+            "Added options:
+                    CLICON_NETCONF_CREATOR_ATTR
+             Released in Clixon 6.5";
+    }
     revision 2023-05-01 {
         description
             "Added options:
@@ -576,6 +592,21 @@ module clixon-config {
                  RFC6242 for example.
                  This only applies to the external NETCONF";
         }
+        leaf CLICON_NETCONF_CREATOR_ATTR {
+            type boolean;
+            default false;
+            description
+                "If set, clixon will accept the 'creator' attribute as defined by the
+                 creator annotation in clixon-lib.
+                 It can be used when several clients (such as a 'service') can create the same object. 
+                 If one such client/service is deleted, the object is deleted only if all services
+                 that created the object are deleted.
+                 The clixon controller uses this feature, but could in principle be used by other 
+                 applications.
+                 Marked as obsolete in 7.0 since creators attribute replaced by clixon-lib creators
+                 config";
+            status obsolete;
+        }
         leaf CLICON_RESTCONF_API_ROOT {
             type string;
             default "/restconf";
@@ -933,7 +964,9 @@ module clixon-config {
                 "Clixon datastore cache behaviour. There are three values: no cache, 
                  cache with copy, or cache without copy.
                  Note: 'cache' is default value and supported with regressions etc.
-                 Others are experimental (in Clixon 5.5)";
+                 Others are experimental (in Clixon 5.5)
+                 Note that from 7.0 this is OBSOLETED, only datastore_cache is supported";
+            status obsolete;
         }
         leaf CLICON_XMLDB_FORMAT {
             type cl:datastore_format;
@@ -983,6 +1016,7 @@ module clixon-config {
             default false;
             description
                 "Validate user state callback content.
+                 AND NETCONF reply sanity (misnomer)
                  Users may register state callbacks using ca_statedata callback
                  When set, the XML returned from the callback is validated after merging with 
                  the running db. If it fails, an internal error is returned to the originating 

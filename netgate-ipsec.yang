@@ -632,6 +632,27 @@ module netgate-ipsec {
 	    "Type of IKE/IPsec peer";
     } 
 
+    typedef ike-unique-policy-t {
+	type enumeration {
+	    enum "never" {
+		description
+		    "Never enforce peer ID uniqueness.";
+	    }
+	    enum "no" {
+		description
+		    "Do not enforce peer ID uniqueness unless initial contact notify received.";
+	    }
+	    enum "keep" {
+		description
+		    "Enforce peer ID uniqueness - keep existing IKE SAs.";
+	    }
+	    enum "replace" {
+		description
+		    "Enforce peer ID uniqueness - replace existing IKE SAs.";
+	    }
+	}
+    }
+
 
     rpc ike-control {
 	input {
@@ -814,6 +835,13 @@ module netgate-ipsec {
 			ngcliext:node-fmt "^$% @@$n";
 		    }
 
+		    leaf mobike {
+			type empty;
+			description
+			    "Enable MOBIKE mobility/multihoming extension.";
+			ngcliext:node-fmt "^$%$n";
+		    }
+
 		    leaf udp-encapsulation {
 			type boolean;
 			default false;
@@ -821,6 +849,13 @@ module netgate-ipsec {
 			    "Force UDP encapsulation.";
 			ngcliext:node-op "bool";
 			ngcliext:node-fmt "|^$%$n";
+		    }
+
+		    leaf unique-id-policy {
+			type ike-unique-policy-t;
+			description
+			    "Policy for enforcing uniqueness of remote peer ID.";
+			ngcliext:node-fmt "^$% @@$n";
 		    }
 
 		    list proposals {
@@ -1146,6 +1181,17 @@ module netgate-ipsec {
 					type inet:ipv6-address-no-zone;
 					ngcliext:sibling-fmt " to @@";
 				}
+			    }
+
+			    leaf radius {
+				description
+				    "Enable virtual IP address allocation " +
+				    "by radius server.";
+				type empty;
+				must "../../../authentication[peer='remote']/round/eap-radius" {
+				    error-message "Virtual IP addresses cannot be allocated by radius unless eap-radius authentication is enabled.";
+				}
+				ngcliext:node-fmt "$< $%$n";
 			    }
 			}
 			container dns {

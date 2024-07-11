@@ -869,37 +869,10 @@ module netgate-pki {
                     "The bit-length of the keys.";
             }
 
-	    container subject-alt-names {
+	    leaf-list subject-alt-name {
+		type inet:host;
 		description
-		    "Additional identifiers for the Certificate";
-
-		list subject-alt-name {
-		    key "index";
-
-		    leaf index {
-			type uint8;
-			description
-			    "SAN index.";
-		    }
-
-		    choice subject-alt-name-type {
-			case hostname {
-			    leaf hostname {
-				type inet:host;
-			    }
-			}
-			case ipv4-address {
-			    leaf ipv4-address {
-				type inet:ipv4-address;
-			    }
-			}
-			case ipv6-address {
-			    leaf ipv6-address {
-				type inet:ipv6-address;
-			    }
-			}
-		    }
-		}
+		    "IPv4 or IPv6 or FQDN address";
 	    }
         }
 

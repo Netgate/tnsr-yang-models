@@ -1,0 +1,401 @@
+module netgate-logging {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-logging";
+    prefix "nglog";
+
+    import ietf-inet-types {
+        prefix "inet";
+    }
+
+    import ietf-yang-types {
+        prefix "yang";
+    }
+
+    import netgate-cli-extensions {
+        prefix ngcliext;
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides specifications of operations and data
+	 related to logging management on TNSR.
+
+	 Copyright 2024 Rubicon Communications, LLC.
+	";
+
+    revision 2024-06-01 {
+	description
+	    "TNSR Release 24.06."
+	    + " Initial revision.";
+    }
+
+    typedef systemd-priority-t {
+        description
+	    "Priority ranking enum.";
+
+	type enumeration {
+	    enum emerg {
+	        value 0;
+		description
+		    "The highest priority.";
+	    }
+	    enum alert;
+	    enum crit;
+	    enum err;
+	    enum warning;
+	    enum notice;
+	    enum info;
+	    enum debug;
+	}
+    }
+
+    typedef syslog-facility-t {
+        description
+	    "Syslog facility names from syslog.h.";
+
+	type enumeration {
+	    enum kern {
+	        value 0;
+		description
+		    "kernel messages.";
+	    }
+	    enum user {
+		description
+		    "user-level messages.";
+	    }
+	    enum mail {
+		description
+		    "mail system.";
+	    }
+	    enum daemon {
+		description
+		    "system daemons.";
+	    }
+	    enum auth {
+		description
+		    "security/authorization messages.";
+	    }
+	    enum syslog {
+		description
+		    "messages generated internally by syslogd.";
+	    }
+	    enum lpr {
+		description
+		    "line printer subsystem.";
+	    }
+	    enum news {
+		description
+		    "network news subsystem.";
+	    }
+	    enum uucp {
+		description
+		    "UUCP subsystem.";
+	    }
+	    enum cron {
+		description
+		    "clock daemon.";
+	    }
+	    enum authpriv {
+		description
+		    "security/authorization messages.";
+	    }
+	    enum ftp {
+		value 11;
+		description
+		    "FTP daemon.";
+	    }
+
+	    // codes 12 - 15 are system use only
+	    enum local0 {
+	        value 16;
+		description
+		    "local use 0.";
+	    }
+	    enum local1 {
+		description
+		    "local use 1.";
+	    }
+	    enum local2 {
+		description
+		    "local use 2.";
+	    }
+	    enum local3 {
+		description
+		    "local use 3.";
+	    }
+	    enum local4 {
+		description
+		    "local use 4.";
+	    }
+	    enum local5 {
+		description
+		    "local use 5.";
+	    }
+	    enum local6 {
+		description
+		    "local use 6.";
+	    }
+	    enum local7 {
+		description
+		    "local use 7.";
+	    }
+	}
+    }
+
+    typedef syslog-facility-or-all-t {
+	description
+	    "Standard facilities extended with all.";
+	type union {
+	    type syslog-facility-t;
+	    type enumeration {
+		enum all;
+	    }
+	}
+    }
+
+    typedef logserver-transport-protocol-t {
+        description
+	    "Protocol used in communication with the server.";
+
+	type enumeration {
+	    enum udp;
+	    enum tcp;
+	}
+    }
+
+    container logging-config {
+	description
+	    "Logging configuration parameters.";
+
+	container remote-servers {
+	    description
+                "Remote servers.";
+
+            list remote-server {
+		key "name";
+		description
+		    "Server name.";
+
+                ngcliext:node-fmt "logging $% @{name}$n";
+                ngcliext:pre-children-op "push";
+
+                leaf name {
+                    type string;
+                    mandatory true;
+                    description
+                         "A name you give to a server.";
+                }
+
+                leaf description {
+                    type ngcom:description-63;
+                    description
+                        "A text description for the log server.";
+                    ngcliext:node-fmt "^description @@$n";
+                }
+
+		leaf address {
+		    type inet:host;
+		    description
+			"IPv4 or IPv6 or FQDN address";
+		    mandatory true;
+
+		    ngcliext:node-fmt "^$% @@$n";
+		}
+
+		leaf port {
+		    type uint16 {
+			range "1..65535";
+		    }
+		    description
+			"Logging server port";
+		    mandatory true;
+
+		    ngcliext:node-fmt "^$% @@$n";
+		}
+
+		leaf transport-protocol {
+		    type logserver-transport-protocol-t;
+		    description
+			"UDP or TCP";
+		    mandatory true;
+
+		    ngcliext:node-fmt "^$% @@$n";
+		}
+
+		list filter {
+		    key facility;
+		    description
+			"Filters by facility";
+
+		    leaf facility {
+			type syslog-facility-or-all-t;
+			description
+			    "Syslog facility";
+
+			ngcliext:node-fmt "^$^ syslog-facility @@%{priority}$n";
+		    }
+
+		    leaf priority {
+			type systemd-priority-t;
+			description
+			    "Standard 7-rank severity scale";
+
+			ngcliext:sibling-fmt " $% @@";
+		    }
+		}
+	    }
+	}
+    }
+
+    typedef systemd-kernel-t {
+        description
+	    "Kernel loggging";
+
+	type enumeration {
+	    enum kernel {
+		description
+		    "dmesg messages";
+	    }
+	}
+    }
+
+    typedef systemd-unit-t {
+        description
+	    "Systemd unit logging";
+
+	type enumeration {
+	    enum ipsec {
+		description
+		    "strongswan-dataplane.service";
+	    }
+	    enum routing {
+		description
+		    "netgate-frr@dataplane.service";
+	    }
+	    enum ntp {
+		description
+		    "ntp.service or ntpd-dataplane.service";
+	    }
+	    enum dhcp {
+		description
+		    "netgate-kea-dhcp4-server-dataplane.service";
+	    }
+	    enum dns {
+		description
+		    "unbound-dataplane.service";
+	    }
+	    enum dataplane {
+		description
+		    "vpp.service";
+	    }
+	    enum snmp {
+		description
+		    "snmpd and snmp-subagent";
+	    }
+	    enum ssh {
+		description
+		    "sshd and ssh-dataplane";
+	    }
+	    enum backend {
+		description
+		    "clixon-backend.service";
+	    }
+	}
+    }
+
+    rpc rsyslog-control {
+	input {
+	    leaf operation {
+		type ngcom:service-operation;
+		mandatory true;
+		description
+		    "The operation to perform";
+	    }
+	}
+	output {
+	    leaf stdout {
+		type string;
+	    }
+	}
+    }
+
+    rpc logging-get-messages {
+	description
+	    "Retrieve info from the logs.";
+
+	input {
+	    leaf-list unit {
+		type systemd-unit-t;
+		description
+		    "Units to get log messages from."
+		    + " journalctl --unit=<unit1>.service"
+		    + " [--unit=<unit2>.service]";
+	    }
+
+	    leaf kernel {
+		type boolean;
+		description
+		    "Request messages from the kernel.";
+	    }
+
+	    leaf priority {
+		type systemd-priority-t;
+		description
+		    "Message priority.";
+	    }
+
+	    leaf-list facility {
+	        type syslog-facility-t;
+		description "Filter output by syslog facility";
+	    }
+
+	    leaf-list identifier {
+	        type string {
+		    length "1..63";
+		}
+		description "Specified syslog identifier";
+	    }
+
+	    leaf recent-lines {
+	        type uint32;
+		description
+		    "Number of lines.";
+            }
+
+	    leaf after-time {
+	        type uint64;
+		description
+		    "Since time_t.";
+            }
+
+	    leaf before-time {
+	        type uint64;
+		description
+		    "Before time_t.";
+            }
+
+	    leaf reverse {
+		type boolean;
+		description
+		    "Sort newest messages first.";
+	    }
+	}
+
+	output {
+	    leaf stdout {
+		type string;
+		description
+		    "Log messages from the system.";
+	    }
+	}
+    }
+}

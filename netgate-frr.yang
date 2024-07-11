@@ -36,6 +36,11 @@ module netgate-frr {
 	 Copyright 2017-2020 Rubicon Communications, LLC.
 	 ";
 
+    revision 2024-06-01 {
+	description
+	    "TNSR Release 24.06.";
+    }
+
     revision 2023-06-01 {
 	description
 	    "TNSR Release 23.06.";
@@ -344,6 +349,8 @@ module netgate-frr {
 			ngcliext:node-fmt "^sequence @{sequence} @{action} @{prefix}";
 			ngcliext:post-node-fmt "$n";
 
+			unique "prefix le-len ge-len";
+
 			leaf sequence {
 			    type uint32;
 			    description
@@ -367,6 +374,7 @@ module netgate-frr {
 
 			leaf le-len {
 			    type uint8;
+			    default 0;
 			    description
 				"An upper bound on the prefix length.";
 			    ngcliext:node-fmt " le @@";
@@ -374,6 +382,7 @@ module netgate-frr {
 
 			leaf ge-len {
 			    type uint8;
+			    default 0;
 			    description
 				"A lower bound on the prefix length.";
 			    ngcliext:node-fmt " ge @@";
@@ -922,6 +931,52 @@ module netgate-frr {
 	    container global-options {
 		description
 		    "These are options that apply to the Zebra daemon.";
+
+		container ipv4 {
+		    description
+			"Zebra global IPv4 options.";
+
+		    container nht {
+			description
+			    "Zebra Nexthop Tracking options.";
+
+			ngcliext:parent-fmt "$^ $%";
+
+			leaf resolve-via-default {
+			    type boolean;
+			    default true;
+			    description
+				"Allow ipv4 nexthop tracking
+				 to resolve via the default route.";
+
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "^no $< $%$n|";
+			}
+		    }
+		}
+
+		container ipv6 {
+		    description
+			"Zebra global IPv6 options.";
+
+		    container nht {
+			description
+			    "Zebra Nexthop Tracking options.";
+
+			ngcliext:parent-fmt "$^ $%";
+
+			leaf resolve-via-default {
+			    type boolean;
+			    default true;
+			    description
+				"Allow ipv6 nexthop tracking
+				 to resolve via the default route.";
+
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "^no $< $%$n|";
+			}
+		    }
+		}
 
 		container debug {
 		    description
