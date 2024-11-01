@@ -30,6 +30,11 @@ module netgate-kea {
 
 	 Copyright 2019-2023 Rubicon Communications, LLC.";
 
+    revision 2024-10-01 {
+	description
+	    "TNSR Release 24.10.";
+    }
+
     revision 2023-11-01 {
 	description
 	    "TNSR Release 23.11.";
@@ -1259,6 +1264,9 @@ module netgate-kea {
 
     container kea-config {
 
+	description
+	    "Dynamic Host Configuration Protocol (DHCP) configuration.";
+
 	container keactrl {
 	    description
 		"This section contains parameters for the keactrl
@@ -1465,6 +1473,7 @@ module netgate-kea {
 
 		list subnet4 {
 		    key subnet;
+		    unique id;
 		    description
 			"An IPv4 subnet configuration within the DHCPv4
 			server.";
@@ -1488,7 +1497,10 @@ module netgate-kea {
 		    }
 
 		    leaf id {
-			type uint32;
+			type uint32 {
+			range "1..max";
+			}
+			mandatory true;
 			description
 			    "Manually assigned subnet id.";
 			ngcliext:node-fmt "^$% @@$n";

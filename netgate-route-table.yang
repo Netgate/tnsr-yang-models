@@ -27,6 +27,11 @@ module netgate-route-table {
 
 	 Copyright 2017-2020 Rubicon Communications, LLC.";
 
+    revision 2024-10-01 {
+	description
+	    "TNSR Release 24.10.";
+    }
+
     revision 2024-06-01 {
 	description
 	    "TNSR Release 24.06.";
@@ -75,6 +80,20 @@ module netgate-route-table {
     revision 2017-08-26 {
 	description
 	    "Initial Revision.";
+    }
+
+    typedef route-table-id {
+	type union {
+	    type enumeration {
+		enum "default";
+	    }
+	    type leafref {
+		path "/ngrttab:route-table-config" +
+		     "/ngrttab:static-routes" +
+		     "/ngrttab:route-table" +
+		     "/ngrttab:name";
+	    }
+	}
     }
 
     typedef route-class {

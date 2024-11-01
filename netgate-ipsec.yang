@@ -691,6 +691,9 @@ module netgate-ipsec {
 
     container ipsec-config {
 
+	description
+	    "Internet Key Exchange (IKE) configuration for IPsec.";
+
 	ngcliext:parent-fmt "ipsec";
 
 	container global-options {
@@ -1217,6 +1220,27 @@ module netgate-ipsec {
 				    description
 					"IPv4 or IPv6 address of resolver.";
 				    type inet:ip-address-no-zone;
+				    ngcliext:node-fmt "$< $% @@$n";
+				}
+			    }
+
+			    list internal-domain {
+				description
+				    "DNS domains which should be handled "+
+				    "by the configured resolvers.";
+
+				ngcliext:parent-fmt "$< $% @{domain-number}";
+
+				key "domain-number";
+				leaf domain-number {
+				    description
+					"Numeric identifier of domain.";
+				    type uint8;
+				}
+				leaf domain-name {
+				    description
+					"DNS domain name.";
+				    type inet:domain-name;
 				    ngcliext:node-fmt "$< $% @@$n";
 				}
 			    }

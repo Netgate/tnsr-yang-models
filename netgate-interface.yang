@@ -35,6 +35,11 @@ module netgate-interface {
 	 Copyright 2017-2024 Rubicon Communications, LLC.
 	";
 
+    revision 2024-10-01 {
+	description
+	    "TNSR Release 24.10.";
+    }
+
     revision 2024-06-02 {
 	description
 	    "TNSR Release 24.06.";
@@ -1494,7 +1499,9 @@ module netgate-interface {
 		}
 
 		leaf instance {
-		    type uint32;
+		    type uint32 {
+			range "0..4095";
+		    }
 		    mandatory true;
 		    description
 			"The tap instance number.";
@@ -2503,7 +2510,9 @@ module netgate-interface {
 		}
 
 		leaf instance {
-		    type uint32;
+		    type uint32 {
+			range "0..8192";
+		    }
 		    description
 			"The tap instance number.";
 		}

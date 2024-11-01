@@ -40,6 +40,11 @@ module netgate-rpki {
 	 Copyright 2022 Rubicon Communications, LLC.
 	 ";
 
+    revision 2024-10-01 {
+	description
+	    "TNSR Release 24.10.";
+    }
+
     revision 2023-02-15 {
 	description
 	    "TNSR Release 23.02.";
@@ -230,6 +235,12 @@ module netgate-rpki {
 		type uint32 {
 		    range "600..172800";
 		}
+		default 7200;
+		must "current() >= ../polling-period" {
+		    error-message
+			"RPKI expire interval must be greater or equal to "
+			+ "RPKI polling period.";
+		}
 		description
 		    "The number of seconds the router waits until the
 		     router expires the cache.  Default 7200 seconds.";
@@ -238,12 +249,13 @@ module netgate-rpki {
 
 	    leaf polling-period {
 		type uint32 {
-		    range "1..3600";
+		    range "1..86400";
 		}
+		default 3600;
 		description
 		    "The number of seconds the router waits until the
 		     router asks the cache again for updated data.
-		     Default 300 seconds.";
+		     Default 3600 seconds.";
 		ngcliext:node-fmt "^$% @@$n";
 	    }
 
@@ -251,6 +263,7 @@ module netgate-rpki {
 		type uint32 {
 		    range "1..7200";
 		}
+		default 600;
 		description
 		    "The number of seconds the router waits until
 		     retrying to connect to the cache server.

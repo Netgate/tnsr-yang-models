@@ -37,8 +37,13 @@ module netgate-ospf {
 	"This YANG module provides a Netgate-defined data-model
 	 for OSPF data.
 
-	 Copyright 2019-2022 Rubicon Communications, LLC.
+	 Copyright 2019-2024 Rubicon Communications, LLC.
 	 ";
+
+    revision 2024-10-02 {
+	description
+	    "TNSR Release 24.10.";
+    }
 
     revision 2023-11-01 {
 	description
@@ -197,14 +202,6 @@ module netgate-ospf {
 		description
 		    "Kernel";
 	    }
-	    enum rip {
-		description
-		    "RIP";
-	    }
-	    enum table {
-		description
-		    "Table";
-	    }
 	}
     }
 
@@ -262,13 +259,8 @@ module netgate-ospf {
     }
 
     typedef ospf-dead-interval {
-	type union {
-	    type uint16 {
-		range "1..65535";
-	    }
-	    type string {
-		pattern "minimal";
-	    }
+	type uint16 {
+	    range "1..65535";
 	}
     }
 
@@ -848,24 +840,30 @@ module netgate-ospf {
 					 on this interface.";
 				}
 
-				leaf interval {
-				    type ospf-dead-interval;
-				    description
-					"Interval time after which a neighbor is
-					 declared dead.";
-				}
-
-				leaf multiplier {
-				    type uint8 {
-					range "1..10";
+				choice dead-interval-value {
+				    case interval-value {
+					leaf interval {
+					    type ospf-dead-interval;
+					    description
+						"Interval time after which a neighbor is
+						declared dead.";
+					}
 				    }
-				    description
-					"Only when the interval is
-					 'minimal', use 1s dead-interval
-					 with fast sub-second hellos.
-					 This is the number of hellos to
-					 send each second.";
-				    ngcliext:child-fmt " hello @@";
+
+				    case multiplier-value {
+					leaf multiplier {
+						type uint8 {
+						    range "2..20";
+					}
+					description
+					    "Only when the interval is
+					     'minimal', use 1s dead-interval
+					     with fast sub-second hellos.
+					     This is the number of hellos to
+					     send each second.";
+					    ngcliext:child-fmt " hello @@";
+					}
+				    }
 				}
 			    }
 			}

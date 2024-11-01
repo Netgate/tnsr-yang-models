@@ -147,6 +147,9 @@ module netgate-snmp {
 
     container snmp-config {
 
+	description
+	    "Simple Network Management Protocol (SNMP) configuration.";
+
 	ngcliext:parent-fmt "snmp";
 
 	leaf snmp-enable {

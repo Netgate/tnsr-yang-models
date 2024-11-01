@@ -1,0 +1,1381 @@
+module netgate-vpf {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-vpf";
+    prefix "ngvpf";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    import netgate-route-table {
+	prefix "ngrttab";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data-model
+	 for Netbsd Packet Filters.
+
+	 Copyright 2024 Rubicon Communications, LLC.";
+
+    revision 2024-10-04 {
+	description
+	    "TNSR Release 24.10.";
+    }
+
+    typedef vpf-nat-direction {
+	type enumeration {
+	    enum in {
+		value 1;
+		description "Inbound destination translation on packet receive.";
+
+	    }
+
+	    enum out {
+		value 2;
+		description "Outbound source translation on packet transmit.";
+	    }
+	}
+    }
+
+    typedef vpf-filter-direction {
+	type enumeration {
+	    enum in {
+		value 1;
+		description "Inbound filter on packet receive.";
+	    }
+
+	    enum out {
+		value 2;
+		description "Outbound filter on packet transmit.";
+	    }
+
+	    enum both {
+		value 3;
+		description "Filter applied to packets in both directions.";
+	    }
+	}
+    }
+
+    typedef vpf-nat-algorithm {
+	type enumeration {
+	    enum one-to-one {
+		description
+		    "Use static 1:1 mapping.";
+	    }
+
+	    enum netmap {
+		description
+		    "Network address mapping from one segment to another,
+		     leaving the host part as-is.  The new address is
+		     computed as following:
+			 addr = net-addr | (orig-addr & ~mask).";
+	    }
+
+	    enum "ip-hash" {
+		description
+		    "The translation address for a new connection is
+		     selected based on a hash of the original source
+		     and destination addresses.  This algorithms
+		     attempts to keep all connections of particular
+		     client associated with the same translation address.
+		     This is the default algorithm.";
+	    }
+
+	    enum "round-robin" {
+		description
+		    "The translation address for each new connection is
+		     selected on a round-robin basis.";
+	    }
+
+	    enum "npt66" {
+		description
+		    "IPv6-to-IPv6 network prefix translation (NPTv6).";
+	    }
+	}
+    }
+
+    grouping vpf-endpoint {
+	description
+	    "VPF source or destination endpoint";
+
+	leaf inverted {
+	    type boolean;
+	    description
+		"If true, endpoint matching is inverted.";
+	    ngcliext:node-op "bool";
+	    ngcliext:node-fmt "|$< $%$n";
+	}
+
+	choice type {
+	    description
+		"VPF source or destination endpoint IP addresses";
+
+	    case ipv4-prefix {
+		leaf ipv4-prefix {
+		    type inet:ipv4-prefix;
+		    ngcliext:node-fmt "$< $% @@$n";
+		}
+	    }
+
+	    case ipv6-prefix {
+		leaf ipv6-prefix {
+		    type inet:ipv6-prefix;
+		    ngcliext:node-fmt "$< $% @@$n";
+		}
+	    }
+
+	    case table-name {
+		leaf table-name {
+		    type leafref {
+			path "/ngvpf:vpf-config"
+			    + "/ngvpf:prefix-tables"
+			    + "/ngvpf:table"
+			    + "/ngvpf:name";
+		    }
+		    ngcliext:node-fmt "$< table @@$n";
+		}
+	    }
+
+	    case if-name {
+		leaf if-name {
+		    type ngcom:if-identifier-63;
+		    ngcliext:node-fmt "$< ifaddrs @@$n";
+		}
+	    }
+	}
+
+	leaf port-min {
+	    type uint16;
+	    description
+		"The first source port in a range.";
+		ngcliext:node-fmt "$< port @@%{port-max}$n";
+	}
+
+	leaf port-max {
+	    type uint16;
+	    description
+		"The last source port in a range.";
+	    ngcliext:sibling-fmt " @@";
+	}
+    }
+
+    grouping vpf-match-base {
+	description
+	    "The packet attributes to match in an VPF rule.";
+
+	container from {
+	    description
+		"The source pattern to match in an VPF rule.";
+
+	    ngcliext:parent-fmt "^from";
+
+	    uses vpf-endpoint;
+	}
+
+	container to {
+	    description
+		"The destination pattern to match in an VPF rule.";
+
+	    ngcliext:parent-fmt "^to";
+
+	    uses vpf-endpoint;
+	}
+
+	leaf protocol-set {
+	    type ngcom:ip-protocol-name-or-number-set;
+	    description
+		"A set of IP protocol names or numbers.";
+	    ngcliext:node-fmt "^protocol @@$n";
+	}
+
+	leaf tcp-flags-mask {
+	    type ngcom:tcp-flags;
+	    description
+		"The TCP flags mask as a set of names.";
+	    ngcliext:node-fmt "^tcp flags mask $q@@$q$n";
+	}
+
+	leaf tcp-flags-value {
+	    type ngcom:tcp-flags;
+	    description
+		"The TCP flags value as a set of flags names.";
+	    ngcliext:node-fmt "^tcp flags value $q@@$q$n";
+	}
+
+	leaf icmp-type {
+	    type uint8;
+	    description
+		"The ICMP type.";
+		ngcliext:node-fmt "^icmp type @@$n";
+	}
+
+	leaf icmp-code {
+	    type uint8;
+	    description
+		"The ICMP code.";
+		ngcliext:node-fmt "^icmp code @@$n";
+	}
+    }
+
+    grouping vpf-match-config {
+
+	uses vpf-match-base;
+
+	leaf dest-route-table {
+	    type leafref {
+		path "/ngrttab:route-table-config" +
+		     "/ngrttab:static-routes" +
+		     "/ngrttab:route-table/ngrttab:name";
+	    }
+	    description
+		"Name of destination VRF for 'in' filter and NAT rules. " +
+		"Allows input filter rule flow to match return traffic. " +
+		"Allows input NAT rule to direct packets to specific VRF.";
+	    ngcliext:node-fmt "^$% @@$n";
+	}
+    }
+
+    grouping vpf-match-state {
+
+	uses vpf-match-base;
+
+	leaf dest-route-table {
+	    type ngcom:rt-identifier-15;
+	    description
+		"Name of destination VRF for 'in' filter and NAT rules. " +
+		"Allows input filter rule flow to match return traffic. " +
+		"Allows input NAT rule to direct packets to specific VRF.";
+	}
+    }
+
+
+    container "vpf-config" {
+	description
+	    "VPP Packet Filter (VPF) data needed to support VPP.
+	     It consists of a set of named tables containing IP prefixes,
+	     a set of named filtering rules, and a set of named NAT rules.";
+
+	ngcliext:parent-fmt "vpf";
+
+	container prefix-tables {
+	    description
+		"Tables of named IP prefix lists.";
+
+	    ngcliext:parent-fmt "$< table";
+	    ngcliext:post-node-fmt "$n";
+
+	    list table {
+		key "name";
+
+		ngcliext:node-fmt "$< @{name}$n";
+		ngcliext:pre-children-op "push";
+
+		leaf name {
+		    type ngcom:identifier-63;
+		    description
+			"The name of an IP prefix table.";
+		}
+
+		leaf description {
+		    type ngcom:description-63;
+		    description
+			"A text description of the VPF prefix table.";
+		    ngcliext:node-fmt "^description @@$n";
+		}
+
+		container prefixes {
+		    description
+			"Each table is a named set of IP prefixes.";
+
+		    leaf-list prefix {
+			type inet:ip-prefix;
+			description
+			    "Either an IPv4 or IPv6 prefix.";
+			ngcliext:node-fmt "^prefix @@$n";
+		    }
+		}
+	    }
+	}
+
+	container filter-rulesets {
+	    description
+		"A list of named VPF filter rulesets.";
+
+	    ngcliext:parent-fmt "$< filter";
+	    ngcliext:post-node-fmt "$n";
+
+	    list ruleset {
+		key name;
+
+		ngcliext:node-fmt "$< $% @{name}$n";
+		ngcliext:pre-children-op "push";
+
+		leaf name {
+		    type ngcom:identifier-63;
+		    description
+			"The name of the filter ruleset.";
+		}
+
+		leaf description {
+		    type ngcom:description-63;
+		    description
+			"A user description of the VPF filter ruleset.";
+		    ngcliext:node-fmt "^$% @@$n";
+		}
+
+		container rules {
+		    description
+			"A list of filter rules within a ruleset
+			 ordered by sequence number.";
+
+		    list rule {
+			key sequence;
+
+			ngcliext:node-fmt "^$% @{sequence}$n";
+			ngcliext:pre-children-op "push";
+
+			leaf sequence {
+			    type uint32;
+			    description
+				"The VPF filter rule sequence number.";
+			}
+
+			leaf description {
+			    type ngcom:description-63;
+			    description
+				"A user description of the VPF filter rule.";
+			    ngcliext:node-fmt "^$% @@$n";
+			}
+
+			container filter {
+			    uses vpf-match-config;
+
+			    must 'not(child::node()/ipv4-prefix and child::node()/ipv6-prefix)' {
+				error-message
+				    "Address family must be identical for " +
+				    "source and destination prefix on " +
+				    "filter rules.";
+			    }
+
+			}
+
+			leaf ip-version {
+			    type ngcom:ip-address-family;
+			    description
+				"Indicates the IP version (ipv4 or ipv6)
+				 applicable to this VPF rule";
+			    ngcliext:node-fmt "^$% @@$n";
+			}
+
+			leaf pass {
+			    type boolean;
+			    description
+				"If true, the packet is passed, else blocked.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|^$%$n";
+			}
+
+			leaf tentative {
+			    type boolean;
+			    description
+				"If this rule is matched, ruleset examination
+				 continues and this rule is applied only if
+				 there is no other rule to apply. If there
+				 is one, then this rule’s match is ignored
+				 and the other rule takes preference.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|^$%$n";
+			}
+
+			leaf stateful {
+			    type boolean;
+			    description
+				"Create a stateful connection entry upon
+				 match.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|^$%$n";
+			}
+
+			leaf return-rst {
+			    type boolean;
+			    description
+				"Return a TCP reset on match.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|^$%$n";
+			}
+
+			leaf return-icmp {
+			    type boolean;
+			    description
+				"Return an ICMP error on match (Destination
+				 Unreachable/Administratively Prohibited).";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|^$%$n";
+			}
+
+			leaf direction {
+			    type vpf-filter-direction;
+			    default both;
+			    description
+				"One of 'in', 'out', or 'both'.";
+			    ngcliext:node-fmt "^$% @@$n";
+			}
+		    }
+		}
+	    }
+	}
+
+	container nat-rulesets {
+	    description
+		"A list of VPF NAT rulesets.";
+
+	    ngcliext:parent-fmt "$< nat";
+	    ngcliext:post-node-fmt "$n";
+
+	    list ruleset {
+		key name;
+
+		ngcliext:node-fmt "$< $% @{name}$n";
+		ngcliext:pre-children-op "push";
+
+		leaf name {
+		    type ngcom:identifier-63;
+		    description
+			"The name of the NAT ruleset.";
+		}
+
+		leaf description {
+		    type ngcom:description-63;
+		    description
+			"A user description of the VPF NAT ruleset.";
+		    ngcliext:node-fmt "^$% @@$n";
+		}
+
+		container rules {
+		    description
+			"A list of NAT rules within a ruleset
+			 ordered by sequence number.";
+
+		    list rule {
+			key sequence;
+
+			ngcliext:node-fmt "^$% @{sequence}$n";
+			ngcliext:pre-children-op "push";
+
+			leaf sequence {
+			    type uint32;
+			    description
+				"The VPF NAT rule sequence number.";
+			}
+
+			leaf description {
+			    type ngcom:description-63;
+			    description
+				"A user description of the VPF NAT rule.";
+			    ngcliext:node-fmt "^$% @@$n";
+			}
+
+			container match {
+			    uses vpf-match-config;
+
+			    must 'not(child::node()/ipv4-prefix and child::node()/ipv6-prefix)' {
+				error-message
+				    "Address family must be identical for " +
+				    "source and destination prefix on NAT " +
+				    "rules.";
+			    }
+			}
+
+			leaf dynamic {
+			    type boolean;
+			    description
+				"Dynamic mapping.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|^$%$n";
+			}
+
+			leaf no-port-translation {
+			    type boolean;
+			    description
+				"No port translation.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|^$%$n";
+			}
+
+			leaf algorithm {
+			    type vpf-nat-algorithm;
+			    default ip-hash;
+			    description
+				"One of one-to-one, netmap, ip hash, round robin,
+				 or npt66.";
+			    ngcliext:node-fmt "^$% @@$n";
+			}
+
+			leaf direction {
+			    type vpf-nat-direction;
+			    description
+				"One of 'in' or 'out'.";
+			    ngcliext:node-fmt "^$% @@$n";
+			}
+
+			container translation {
+			    description
+				"NAT translation information.";
+
+			    leaf port {
+				type uint16;
+				description
+				    "Port to use for translation.
+				     0 means no port.";
+				ngcliext:node-fmt "^nat-port @@$n";
+			    }
+
+			    choice translation-type {
+				case interface {
+				    leaf if-name {
+					type ngcom:if-identifier-63;
+					description
+					    "Use IF addresses for
+					     translation.";
+					ngcliext:node-fmt "^nat-interface @@$n";
+				    }
+				}
+
+				case prefix {
+				    leaf prefix {
+					 type inet:ip-prefix;
+					 description
+					     "Translation prefix.";
+					ngcliext:node-fmt "^nat-prefix @@$n";
+				    }
+				}
+
+				case table-name {
+				    leaf table-name {
+					type leafref {
+					    path "/ngvpf:vpf-config/ngvpf:prefix-tables/ngvpf:table/ngvpf:name";
+					}
+					description
+					    "Translation table name.";
+					ngcliext:node-fmt "^nat-table @@$n";
+				    }
+				}
+			    }
+			}
+
+			leaf dest-route-table {
+			    type leafref {
+				path "/ngrttab:route-table-config" +
+				     "/ngrttab:static-routes" +
+				     "/ngrttab:route-table/ngrttab:name";
+			    }
+			    description
+				"Name of destination VRF for 'in' NAT rule.";
+			    ngcliext:node-fmt "^$% @@$n";
+			}
+		    }
+		}
+	    }
+	}
+
+	container options {
+	    description
+		"VPF interface configuration and enablement options.";
+
+	    ngcliext:node-fmt "$< $%$n";
+	    ngcliext:pre-children-op "push";
+	    ngcliext:post-node-fmt "$n";
+
+	    container startup {
+		description
+		    "Startup options.";
+
+		container max-connections-per-thread {
+		    description
+			"Maximum connections per thread.";
+
+		    ngcliext:parent-fmt "^$^ $%";
+
+		    leaf ip4 {
+			type uint32;
+			default 131072;
+			description
+			    "Maximum IPv4 connections per thread.";
+			ngcliext:node-fmt "$< $% @@$n";
+		    }
+
+		    leaf ip6 {
+			type uint32;
+			default 32768;
+			description
+			    "Maximum IPv6 connections per thread.";
+			ngcliext:node-fmt "$< $% @@$n";
+		    }
+		}
+
+		container port-mapping {
+		    description
+			"Port mapping.";
+
+		    ngcliext:parent-fmt "^$^ $%";
+
+		    leaf min-port {
+			type uint16 {
+			    range "1024..65535";
+			}
+			default 1024;
+			description
+			    "Lowest port used for port mapping.";
+			ngcliext:node-fmt "$< $% @@$n";
+		    }
+
+		    leaf max-port {
+			type uint16 {
+			    range "1024..65535";
+			}
+			must ". >= ../min-port" {
+			    description
+				"This value MUST be greater or equal to
+				 min-port.";
+			}
+			default 49151;
+			description
+			    "Highest port used for port mapping.";
+			ngcliext:node-fmt "$< $% @@$n";
+		    }
+		}
+	    }
+
+	    container runtime {
+		description
+		    "Runtime options.";
+
+		container drop-options {
+		    description
+			"Drop packets having IP options.";
+
+		    ngcliext:parent-fmt "^$^ $%";
+
+		    leaf ip4 {
+			type boolean;
+			default false;
+			description
+			    "Drop IPv4 packets having IP options.";
+			ngcliext:node-fmt "$< $% @@$n";
+		    }
+
+		    leaf ip6 {
+			type boolean;
+			default false;
+			description
+			    "Drop IPv6 packets having IP options.";
+			ngcliext:node-fmt "$< $% @@$n";
+		    }
+		}
+
+		container timeouts {
+		    description
+			"Timeouts.";
+
+		    ngcliext:parent-fmt "^$^ $%";
+
+		    container generic {
+			description
+			    "Generic timeouts.";
+
+			ngcliext:parent-fmt "$< $%";
+
+			leaf closed {
+			    type uint32;
+			    units "seconds";
+			    default 0;
+			    description
+				"Closed state.";
+			    ngcliext:node-fmt "$< $% @@$n";
+			}
+
+			leaf new {
+			    type uint32;
+			    units "seconds";
+			    default 30;
+			    description
+				"New state.";
+			    ngcliext:node-fmt "$< $% @@$n";
+			}
+
+			leaf established {
+			    type uint32;
+			    units "seconds";
+			    default 60;
+			    description
+				"Established state.";
+			    ngcliext:node-fmt "$< $% @@$n";
+			}
+		    }
+
+		    container tcp {
+			description
+			    "TCP timeouts.";
+
+			ngcliext:parent-fmt "$< $%";
+
+			leaf closed {
+			    type uint32;
+			    units "seconds";
+			    default 10;
+			    description
+				"Closed state.";
+			    ngcliext:node-fmt "$< $% @@$n";
+			}
+
+			leaf new {
+			    type uint32;
+			    units "seconds";
+			    default 30;
+			    description
+				"New state.";
+			    ngcliext:node-fmt "$< $% @@$n";
+			}
+
+			leaf established {
+			    type uint32;
+			    units "seconds";
+			    default 86400;
+			    description
+				"Established state.";
+			    ngcliext:node-fmt "$< $% @@$n";
+			}
+
+			leaf half-closed {
+			    type uint32;
+			    units "seconds";
+			    default 21600;
+			    description
+				"Half-closed state.";
+			    ngcliext:node-fmt "$< $% @@$n";
+			}
+
+			leaf time-wait {
+			    type uint32;
+			    units "seconds";
+			    default 240;
+			    description
+				"Time-wait state.";
+			    ngcliext:node-fmt "$< $% @@$n";
+			}
+		    }
+		}
+
+		container tcp {
+		    description
+			"TCP.";
+
+		    ngcliext:parent-fmt "^$^ $%";
+
+		    leaf strict-rst-order {
+			type boolean;
+			default true;
+			description
+			    "Enforce strict TCP RST order.";
+			ngcliext:node-fmt "$< $% @@$n";
+		    }
+
+		    leaf max-ack-win {
+			type uint32;
+			default 66000;
+			description
+			    "Maximum TCP ACK window.";
+			ngcliext:node-fmt "$< $% @@$n";
+		    }
+		}
+	    }
+
+	    container interfaces {
+		description
+		    "The names of filtering and NAT rulesets applied
+		     to interfaces.";
+
+		list interface {
+		    key "if-name";
+
+		    ngcliext:parent-fmt "^$% @{if-name}";
+
+		    leaf if-name {
+			type ngcom:if-identifier-63;
+			description
+			    "The name of an interface.";
+		    }
+
+		    leaf filter-ruleset {
+			type leafref {
+			    path "/ngvpf:vpf-config"
+				+ "/ngvpf:filter-rulesets"
+				+ "/ngvpf:ruleset"
+				+ "/ngvpf:name";
+			}
+			description
+			    "The name of the filter ruleset on this
+			     interface.";
+			ngcliext:node-fmt "$< $% @@$n";
+		    }
+
+		    leaf nat-ruleset {
+			type leafref {
+			    path "/ngvpf:vpf-config"
+				+ "/ngvpf:nat-rulesets"
+				+ "/ngvpf:ruleset"
+				+ "/ngvpf:name";
+			}
+			description
+			    "The name of the NAT ruleset on this interface.";
+			ngcliext:node-fmt "$< $% @@$n";
+		    }
+		}
+	    }
+	}
+
+	container ipfix {
+	    description
+		"IPFIX exporting options.";
+
+	    ngcliext:node-fmt "$< $%$n";
+	    ngcliext:pre-children-op "push";
+
+	    leaf enable {
+		type empty;
+		description
+		    "If present, IPFIX exporting is enabled.";
+		ngcliext:node-fmt "^$%$n";
+	    }
+
+	    leaf domain {
+		type uint32;
+		default 1;
+		description
+		    "Domain ID.";
+		ngcliext:node-fmt "^$% @@$n";
+	    }
+
+	    leaf src-port {
+		type uint16;
+		default 4739;
+		description
+		    "Source port number.";
+		ngcliext:node-fmt "^$% @@$n";
+	    }
+	}
+
+	leaf enable {
+	    type empty;
+	    description
+		"If present, the feature is enabled.";
+	    ngcliext:node-fmt "$< $%$n";
+	}
+    }
+
+
+    container "vpf-state" {
+	config "false";
+
+	description
+	    "Netbsd Packet Filter (VPF) state data. It consists of a set of
+	     named tables containing IP prefixes, a set of named filtering
+	     rules, a set of named NAT rules, and params.";
+
+	container prefix-tables {
+	    description
+		"Tables of named IP prefix lists.";
+
+	    list table {
+		key "name";
+
+		leaf name {
+		    type ngcom:identifier-63;
+		    description
+			"The name of an IP prefix table.";
+		}
+
+		leaf description {
+		    type ngcom:description-63;
+		    description
+			"A text description of the VPF prefix table.";
+		}
+
+		container hash-buckets {
+		    description
+			"Hash buckets.";
+
+		    leaf ip4 {
+			type uint32;
+			description
+			    "IPv4 hash buckets.";
+		    }
+
+		    leaf ip6 {
+			type uint32;
+			description
+			    "IPv6 hash buckets.";
+		    }
+		}
+
+		container prefixes {
+		    description
+			"Each table is a named set of IP prefixes.";
+
+		    leaf-list prefix {
+			type inet:ip-prefix;
+			description
+			    "Either an IPv4 or IPv6 prefix.";
+		    }
+		}
+	    }
+	}
+
+	container filter-rulesets {
+	    description
+		"A list of named VPF filter rulesets.";
+
+	    list ruleset {
+		key name;
+
+		leaf name {
+		    type ngcom:identifier-63;
+		    description
+			"The name of the filter ruleset.";
+		}
+
+		leaf description {
+		    type ngcom:description-63;
+		    description
+			"A user description of the VPF filter ruleset.";
+		}
+
+		container rules {
+		    description
+			"A list of filter rules within a ruleset
+			 ordered by sequence number.";
+
+		    list rule {
+			key sequence;
+
+			leaf sequence {
+			    type uint32;
+			    description
+				"The VPF filter rule sequence number.";
+			}
+
+			leaf description {
+			    type ngcom:description-63;
+			    description
+				"A user description of the VPF filter rule.";
+			}
+
+			container filter {
+			    uses vpf-match-state;
+			}
+
+			leaf ip-version {
+			    type ngcom:ip-address-family;
+			    description
+				"Indicates the IP version (ipv4 or ipv6)
+				 applicable to this VPF rule";
+			}
+
+			leaf pass {
+			    type boolean;
+			    description
+				"If true, the packet is passed, else blocked.";
+			}
+
+			leaf tentative {
+			    type boolean;
+			    description
+				"If this rule is matched, ruleset examination
+				 continues and this rule is applied only if
+				 there is no other rule to apply. If there
+				 is one, then this rule’s match is ignored
+				 and the other rule takes preference.";
+			}
+
+			leaf stateful {
+			    type boolean;
+			    description
+				"Create a stateful connection entry upon
+				 match.";
+			}
+
+			leaf return-rst {
+			    type boolean;
+			    description
+				"Return a TCP reset on match.";
+			}
+
+			leaf return-icmp {
+			    type boolean;
+			    description
+				"Return an ICMP error on match (Destination
+				 Unreachable/Administratively Prohibited).";
+			}
+
+			leaf direction {
+			    type vpf-filter-direction;
+			    description
+				"One of 'in', 'out', or 'both'.";
+			}
+
+			leaf dest-route-table {
+			    type ngcom:rt-identifier-15;
+			    description
+				"Name of destination VRF for 'in' filter " +
+				"rule.";
+			}
+		    }
+		}
+	    }
+	}
+
+	container nat-rulesets {
+	    description
+		"A list of VPF NAT rulesets.";
+
+	    list ruleset {
+		key name;
+
+		leaf name {
+		    type ngcom:identifier-63;
+		    description
+			"The name of the NAT ruleset.";
+		}
+
+		leaf description {
+		    type ngcom:description-63;
+		    description
+			"A user description of the VPF NAT ruleset.";
+		}
+
+		container rules {
+		    description
+			"A list of NAT rules within a ruleset
+			 ordered by sequence number.";
+
+		    list rule {
+			key sequence;
+
+			leaf sequence {
+			    type uint32;
+			    description
+				"The VPF NAT rule sequence number.";
+			}
+
+			leaf description {
+			    type ngcom:description-63;
+			    description
+				"A user description of the VPF NAT rule.";
+			}
+
+			container match {
+			    uses vpf-match-state;
+			}
+
+			leaf dynamic {
+			    type boolean;
+			    description
+				"Dynamic mapping.";
+			}
+
+			leaf no-port-translation {
+			    type boolean;
+			    description
+				"No port translation.";
+			}
+
+			leaf algorithm {
+			    type vpf-nat-algorithm;
+			    description
+				"One of one-to-one, netmap, ip hash, round robin,
+				 or npt66.";
+			}
+
+			leaf direction {
+			    type vpf-nat-direction;
+			    description
+				"One of 'in' or 'out'.";
+			}
+
+			container translation {
+			    description
+				"NAT translation information.";
+
+			    leaf port {
+				type uint16;
+				description
+				    "Port to use for translation.
+				     0 means no port.";
+			    }
+
+			    choice translation-type {
+				case interface {
+				    leaf if-name {
+					type ngcom:if-identifier-63;
+					description
+					    "Use IF addresses for
+					     translation.";
+				    }
+				}
+
+				case table-name {
+				    leaf table-name {
+					type ngcom:if-identifier-63;
+					description
+					    "Use Table name for
+					     translation.";
+				    }
+				}
+
+				case prefix {
+				    leaf prefix {
+					 type inet:ip-prefix;
+					 description
+					     "Translation prefix.";
+				    }
+				}
+			    }
+			}
+
+			leaf dest-route-table {
+			    type ngcom:rt-identifier-15;
+			    description
+				"Name of destination VRF for 'in' NAT rule.";
+			}
+		    }
+		}
+	    }
+	}
+
+	container options {
+	    description
+		"VPF interface state and enablement options.";
+
+	    container startup {
+		description
+		    "Startup options.";
+
+		container max-connections-per-thread {
+		    description
+			"Maximum connections per thread.";
+
+		    leaf ip4 {
+			type uint32;
+			description
+			    "Maximum IPv4 connections per thread.";
+		    }
+
+		    leaf ip6 {
+			type uint32;
+			description
+			    "Maximum IPv6 connections per thread.";
+		    }
+		}
+
+		container port-mapping {
+		    description
+			"Port mapping.";
+
+		    leaf min-port {
+			type uint16;
+			description
+			    "Lowest port used for port mapping.";
+		    }
+
+		    leaf max-port {
+			type uint16;
+			description
+			    "Highest port used for port mapping.";
+		    }
+		}
+	    }
+
+	    container runtime {
+		description
+		    "Runtime options.";
+
+		container drop-options {
+		    description
+			"Drop packets having IP options.";
+
+		    leaf ip4 {
+			type boolean;
+			description
+			    "Drop IPv4 packets having IP options.";
+		    }
+
+		    leaf ip6 {
+			type boolean;
+			description
+			    "Drop IPv6 packets having IP options.";
+		    }
+		}
+
+		container timeouts {
+		    description
+			"Timeouts.";
+
+		    container generic {
+			description
+			    "Generic timeouts.";
+
+			leaf closed {
+			    type uint32;
+			    units "seconds";
+			    description
+				"Closed state.";
+			}
+
+			leaf new {
+			    type uint32;
+			    units "seconds";
+			    description
+				"New state.";
+			}
+
+			leaf established {
+			    type uint32;
+			    units "seconds";
+			    description
+				"Established state.";
+			}
+		    }
+
+		    container tcp {
+			description
+			    "TCP timeouts.";
+
+			leaf closed {
+			    type uint32;
+			    units "seconds";
+			    description
+				"Closed state.";
+			}
+
+			leaf new {
+			    type uint32;
+			    units "seconds";
+			    description
+				"New state.";
+			}
+
+			leaf established {
+			    type uint32;
+			    units "seconds";
+			    description
+				"Established state.";
+			}
+
+			leaf half-closed {
+			    type uint32;
+			    units "seconds";
+			    description
+				"Half-closed state.";
+			}
+
+			leaf time-wait {
+			    type uint32;
+			    units "seconds";
+			    description
+				"Time-wait state.";
+			}
+		    }
+		}
+
+		container tcp {
+		    description
+			"TCP.";
+
+		    leaf strict-rst-order {
+			type boolean;
+			description
+			    "Enforce strict TCP RST order.";
+		    }
+
+		    leaf max-ack-win {
+			type uint32;
+			description
+			    "Maximum TCP ACK window.";
+		    }
+		}
+	    }
+
+	    container interfaces {
+		description
+		    "The names of filtering and NAT rulesets applied
+		     to interfaces.";
+
+		list interface {
+		    key "if-name";
+
+		    leaf if-name {
+			type ngcom:if-identifier-63;
+			description
+			    "The name of an interface.";
+		    }
+
+		    leaf filter-ruleset {
+			type ngcom:identifier-63;
+			description
+			    "The name of the filter ruleset on this
+			     interface.";
+		    }
+
+		    leaf nat-ruleset {
+			type ngcom:identifier-63;
+			description
+			    "The name of the NAT ruleset on this interface.";
+		    }
+		}
+	    }
+	}
+
+	container ipfix {
+	    description
+		"IPFIX exporting options.";
+
+	    leaf enable {
+		type boolean;
+		description
+		    "Indicates whether IPFIX exporting is enabled.";
+	    }
+
+	    leaf domain {
+		type uint32;
+		description
+		    "Domain ID.";
+	    }
+
+	    leaf src-port {
+		type uint16;
+		description
+		    "Source port number.";
+	    }
+	}
+
+	leaf enable {
+	    type boolean;
+	    description
+		"Indicates whether the feature is enabled.";
+	}
+    }
+}

@@ -41,8 +41,13 @@ module netgate-bgp {
 	"This YANG module provides a Netgate-defined data-model
 	 for BGP data.
 
-	 Copyright 2019-2023 Rubicon Communications, LLC.
+	 Copyright 2019-2024 Rubicon Communications, LLC.
 	 ";
+
+    revision 2024-10-02 {
+	description
+	    "TNSR Release 24.10.";
+    }
 
     revision 2024-06-01 {
 	description
@@ -710,6 +715,10 @@ module netgate-bgp {
 	    }
 
 	    container maximum-prefix {
+		presence
+		    "Indicates that a limited number of prefixes can be
+		     accepted from this peer.";
+
 		description
 		    "The maximum number of prefixes to accept from
 		     this peer, options to control a warning
@@ -720,6 +729,7 @@ module netgate-bgp {
 
 		leaf limit {
 		    type uint32;
+		    mandatory true;
 		    description
 			"Maximum number of prefixes to accept from
 			 this peer.";
@@ -734,21 +744,26 @@ module netgate-bgp {
 		    ngcliext:node-fmt "$< threshold @@$n";
 		}
 
-		leaf warning-only {
-		    type boolean;
+		choice action-control {
 		    description
-			"Only issue warning messages when the limit is
-			 exceeded.";
-		    ngcliext:node-op "bool";
-		    ngcliext:node-fmt "|$< $%$n";
-		}
+			"An action to take after the limit is exceeded.";
 
-		leaf restart-interval {
-		    type uint16;
-		    description
-			"After limit is exceeded, restart BGP
-			 connection.  Restart interval in minutes.";
-		    ngcliext:node-fmt "$< restart @@$n";
+		    leaf warning-only {
+			type boolean;
+			description
+			    "Only issue warning messages when the limit is
+			     exceeded.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
+		    }
+
+		    leaf restart-interval {
+			type uint16;
+			description
+			    "After limit is exceeded, restart BGP
+			     connection.  Restart interval in minutes.";
+			ngcliext:node-fmt "$< restart @@$n";
+		    }
 		}
 	    }
 
@@ -1624,8 +1639,9 @@ module netgate-bgp {
 				type boolean;
 				description
 				    "Enforce the first AS for eBGP routes.";
+				default true;
 				ngcliext:node-op "bool";
-				ngcliext:node-fmt "|^$%$n";
+				ngcliext:node-fmt "^no $%$n|";
 			    }
 
 			    /* bgp neighbor peer local-as-number, -prepend, and -replace-as should be containerized */

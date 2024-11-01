@@ -31,6 +31,11 @@ module netgate-wireguard {
 
 	 Copyright 2022 Rubicon Communications, LLC.";
 
+    revision 2024-10-01 {
+	description
+	    "TNSR Release 24.10.";
+    }
+
     revision 2022-06-15 {
 	description
 	    "TNSR Release 22.06.";
@@ -54,9 +59,6 @@ module netgate-wireguard {
 
 		ngcliext:node-fmt "$< @{instance}$n";
 		ngcliext:pre-children-op "push";
-
-		unique "peers/peer/peer-id";
-		unique "peers/peer/public-key";
 
 		leaf instance {
 		    type uint32 {
@@ -178,6 +180,9 @@ module netgate-wireguard {
 			leaf public-key {
 			    type ngcom:base64-encoding;
 			    mandatory true;
+				must "count(../../../../ngwg:interface/ngwg:peers/ngwg:peer[ngwg:public-key=current()]) = 1" {
+					error-message "Wireguard peer public keys must be unique across all peers on all interfaces";
+				}
 			    description
 				"Base64 encoded 32-byte public key.";
 			    ngcliext:node-fmt "^$% base64 @@$n";
@@ -273,6 +278,19 @@ module netgate-wireguard {
 			    description
 				"A user-assigned ID for this peer.
 				 It must be unique among all peers.";
+			}
+
+			container allowed-prefixes {
+			    description
+				"The set of allowed incoming
+				 tunnel IP prefixes.";
+
+			    leaf-list prefix {
+				type inet:ip-prefix;
+				min-elements 1;
+				description
+				    "An incoming tunnel IP prefix.";
+			    }
 			}
 
 			leaf description {

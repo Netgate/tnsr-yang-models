@@ -1,0 +1,212 @@
+module netgate-dhcp-relay {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-dhcp-relay";
+    prefix "ngdr";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    import netgate-route-table {
+	prefix ngrttab;
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data-model
+	 for DHCP data.
+
+	 Copyright 2024 Rubicon Communications, LLC.
+	 ";
+
+    revision 2024-10-01 {
+	description
+	    "Initial revision.";
+    }
+
+    container "dhcp-relay-config" {
+	description
+	    "Configuration data of DHCP relay.";
+
+	list relay-list {
+	    key "source-vrf";
+	    description
+		"List of configuration";
+
+	    ngcliext:node-fmt "dhcp-relay @{source-vrf}$n";
+	    ngcliext:pre-children-op "push";
+
+	    leaf source-vrf {
+		type ngrttab:route-table-id;
+		description
+		    "Source VRF serviced by DHCP Relay";
+		must "current() = 'default' or /ngrttab:route-table-config/ngrttab:static-routes/ngrttab:route-table[ngrttab:name=current()]" {
+		    error-message "DHCP relay configuration must refer to a valid VRF name";
+		}
+	    }
+
+	    leaf description {
+		type ngcom:description-63;
+		description
+		    "Brief description of the DHCP Relay.";
+		ngcliext:node-fmt "^$% @@$n";
+	    }
+
+	    leaf source-ipv4-address {
+		type inet:ipv4-address-no-zone;
+		description
+		    "The IPv4 source address used when forwarding DHCP packets.";
+		ngcliext:node-fmt "^$% @@$n";
+	    }
+
+	    leaf source-ipv6-address {
+		type inet:ipv6-address-no-zone;
+		description
+		    "The IPv6 source address used when forwarding DHCPv6 packets.";
+		ngcliext:node-fmt "^$% @@$n";
+	    }
+
+	    container servers {
+		description
+			"IPv4 and IPv6 DHCP servers for the source VRF.";
+
+		list server-ipv4 {
+		    description
+			"DHCP relay server VRF table id and address";
+		    key "vrf ip";
+		    ngcliext:node-fmt "^$% @{vrf} @{ip}$n";
+		    must "../../source-ipv4-address" {
+			error-message "A source address for IPv4 must be specified to relay DHCP requests to an IPv4 server";
+		    }
+
+		    leaf vrf {
+			type ngrttab:route-table-id;
+			default "default";
+			description
+			    "The VRF which the DHCP server can be reached on.";
+			must "current() = 'default' or /ngrttab:route-table-config/ngrttab:static-routes/ngrttab:route-table[ngrttab:name=current()]" {
+			    error-message "DHCP relay configuration must refer to a valid VRF name";
+			}
+		    }
+
+		    leaf ip {
+			type inet:ipv4-address-no-zone;
+			mandatory true;
+			description
+			    "The IPv4 address of the DHCP server.";
+		    }
+		}
+
+		list server-ipv6 {
+		    description
+			"DHCPv6 relay server VRF table id and address";
+		    key "vrf ip";
+		    ngcliext:node-fmt "^$% @{vrf} @{ip}$n";
+		    must "../../source-ipv6-address" {
+			error-message "A source address for IPv6 must be specified to relay DHCPv6 requests to an IPv6 server";
+		    }
+
+		    leaf vrf {
+			type ngrttab:route-table-id;
+			default "default";
+			description
+			    "The VRF which the DHCPv6 server can be reached on.";
+			must "current() = 'default' or /ngrttab:route-table-config/ngrttab:static-routes/ngrttab:route-table[ngrttab:name=current()]" {
+			    error-message "DHCPv6 relay configuration must refer to a valid VRF name";
+			}
+		    }
+
+		    leaf ip {
+			type inet:ipv6-address-no-zone;
+			mandatory true;
+			description
+			    "The IPv6 address of the DHCPv6 server.";
+		    }
+		}
+	    }
+	}
+    }
+
+    container "dhcp-relay-state" {
+	description
+	    "DHCP relay state information";
+
+	list relay-list {
+	    key "source-vrf";
+	    description
+		"List of configuration";
+
+	    leaf source-vrf {
+		type ngcom:rt-identifier-15;
+		description
+		    "Source VRF serviced by DHCP Relay";
+	    }
+
+	    leaf source-ipv4-address {
+		type inet:ipv4-address-no-zone;
+		description
+		    "The IPv4 source address used when forwarding DHCP packets.";
+	    }
+
+	    leaf source-ipv6-address {
+		type inet:ipv6-address-no-zone;
+		description
+		    "The IPv6 source address used when forwarding DHCPv6 packets.";
+	    }
+
+	    container servers {
+		description
+			"IPv4 and IPv6 DHCP servers for the source VRF.";
+
+		list server-ipv4 {
+		    description
+			"DHCP relay server VRF table id and address";
+		    key "vrf ip";
+
+		    leaf vrf {
+			type ngcom:rt-identifier-15;
+			description
+			    "The VRF which the DHCP server can be reached on.";
+		    }
+
+		    leaf ip {
+			type inet:ipv4-address-no-zone;
+			description
+			    "The IPv4 address of the DHCP server.";
+		    }
+		}
+
+		list server-ipv6 {
+		    description
+			"DHCPv6 relay server VRF table id and address";
+		    key "vrf ip";
+
+		    leaf vrf {
+			type ngcom:rt-identifier-15;
+			description
+			    "The VRF which the DHCPv6 server can be reached on.";
+		    }
+
+		    leaf ip {
+			type inet:ipv6-address-no-zone;
+			description
+			    "The IPv6 address of the DHCPv6 server.";
+		    }
+		}
+	    }
+	}
+    }
+}

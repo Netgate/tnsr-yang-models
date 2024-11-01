@@ -759,7 +759,7 @@ module netgate-dataplane {
 
 	    leaf unthrottle-time {
 		type int32 {
-		    range "0..max";
+		    range "-1..max";
 		}
 		description
 		    "Message unthrottling time (in seconds). ";

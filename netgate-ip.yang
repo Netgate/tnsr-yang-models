@@ -139,6 +139,10 @@ module netgate-ip {
     }
 
     container ip-config {
+
+	description
+	    "Internet Protocol (IP) reassembly configuration.";
+
 	ngcliext:parent-fmt "ip";
 
 	container reassembly {

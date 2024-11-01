@@ -111,6 +111,9 @@ module netgate-conf-history {
 
     container conf-history-config {
 
+	description
+	    "Config database archive configurations.";
+
 	container version-history-config {
 	
 	    ngcliext:parent-fmt "configuration history";

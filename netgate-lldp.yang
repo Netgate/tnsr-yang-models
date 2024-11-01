@@ -40,6 +40,9 @@ module netgate-lldp {
 
     container lldp-config {
 
+	description
+	    "Link-layer Discovery Protocol (LLDP) configuration.";
+
 	leaf system-name {
 	    type string;
             description

@@ -39,14 +39,14 @@ module netgate-abf {
 
 	 Copyright 2022 Rubicon Communications, LLC.";
 
-    revision 2022-10-15 {
-	description
-	    "TNSR Release 22.10.";
-    }
-
     revision 2023-02-01 {
 	description
 	    "TNSR Release 23.02.";
+    }
+
+    revision 2022-10-15 {
+	description
+	    "TNSR Release 22.10.";
     }
 
     augment "/ngrt:route-config" {

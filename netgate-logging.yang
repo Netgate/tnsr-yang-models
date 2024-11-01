@@ -32,6 +32,11 @@ module netgate-logging {
 	 Copyright 2024 Rubicon Communications, LLC.
 	";
 
+    revision 2024-10-01 {
+	description
+	    "TNSR Release 24.10.";
+    }
+
     revision 2024-06-01 {
 	description
 	    "TNSR Release 24.06."
@@ -231,6 +236,15 @@ module netgate-logging {
 		    ngcliext:node-fmt "^$% @@$n";
 		}
 
+		leaf namespace {
+		    type ngcom:network-namespace;
+		    description
+			"Network namespace to use to reach server.";
+		    default host;
+
+		    ngcliext:node-fmt "^$% @@$n";
+		}
+
 		list filter {
 		    key facility;
 		    description
@@ -252,18 +266,6 @@ module netgate-logging {
 			ngcliext:sibling-fmt " $% @@";
 		    }
 		}
-	    }
-	}
-    }
-
-    typedef systemd-kernel-t {
-        description
-	    "Kernel loggging";
-
-	type enumeration {
-	    enum kernel {
-		description
-		    "dmesg messages";
 	    }
 	}
     }
@@ -314,6 +316,12 @@ module netgate-logging {
 
     rpc rsyslog-control {
 	input {
+	    leaf namespace {
+		type ngcom:network-namespace;
+		mandatory true;
+		description
+		   "operating namespace";
+	    }
 	    leaf operation {
 		type ngcom:service-operation;
 		mandatory true;
