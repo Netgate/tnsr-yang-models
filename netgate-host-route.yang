@@ -5,12 +5,12 @@ module netgate-host-route {
     namespace "urn:netgate:xml:yang:netgate-host-route";
     prefix "nghroute";
 
-    import ietf-inet-types {
-	prefix "inet";
+    import clixon-lib {
+	prefix "cl";
     }
 
-    import ietf-yang-types {
-	prefix "yang";
+    import ietf-inet-types {
+	prefix "inet";
     }
 
     import netgate-cli-extensions {
@@ -28,8 +28,13 @@ module netgate-host-route {
     description
 	"This YANG module provides a data model for host IP routes.
 
-	 Copyright 2024 Rubicon Communications, LLC.
+	 Copyright 2024, 2025 Rubicon Communications, LLC.
 	";
+
+    revision 2025-02-01 {
+	description
+	    "TNSR Release 25.02.";
+    }
 
     revision 2024-02-01 {
 	description
@@ -121,6 +126,7 @@ module netgate-host-route {
 			"A user description of the route table.";
 
 		    ngcliext:node-fmt "^$% @@$n";
+		    cl:ignore-compare;
 		}
 
 		container static-routes {

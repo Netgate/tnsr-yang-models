@@ -5,6 +5,10 @@ module netgate-packet-trace {
     namespace "urn:netgate:xml:yang:netgate-packet-trace";
     prefix "ngpt";
 
+    import clixon-lib {
+	prefix "cl";
+    }
+
     import netgate-cli-extensions {
 	prefix "ngcliext";
     }
@@ -25,7 +29,12 @@ module netgate-packet-trace {
 	"This YANG module provides a Netgate-defined data-model
 	 for tracing packets using Classifier filters.
 
-	 Copyright 2020 Rubicon Communications, LLC.";
+	 Copyright 2020-2022, 2024, 2025 Rubicon Communications, LLC.";
+
+    revision 2025-02-01 {
+	description
+	    "TNSR Release 25.02.";
+    }
 
     revision 2024-06-01 {
 	description
@@ -74,6 +83,7 @@ module netgate-packet-trace {
 		    description
 			"The brief description of the trace filter.";
 		    ngcliext:node-fmt "^$% @@$n";
+		    cl:ignore-compare;
 		}
 
 		container match {

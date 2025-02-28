@@ -37,8 +37,13 @@ module netgate-ospf {
 	"This YANG module provides a Netgate-defined data-model
 	 for OSPF data.
 
-	 Copyright 2019-2024 Rubicon Communications, LLC.
+	 Copyright 2019-2025 Rubicon Communications, LLC.
 	 ";
+
+    revision 2025-02-01 {
+	description
+	    "TNSR Release 25.02.";
+    }
 
     revision 2024-10-02 {
 	description
@@ -861,7 +866,7 @@ module netgate-ospf {
 					     with fast sub-second hellos.
 					     This is the number of hellos to
 					     send each second.";
-					    ngcliext:child-fmt " hello @@";
+					    ngcliext:child-fmt "minimal hello-multiplier @@";
 					}
 				    }
 				}

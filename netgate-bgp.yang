@@ -5,6 +5,10 @@ module netgate-bgp {
     namespace "urn:netgate:xml:yang:netgate-bgp";
     prefix "ngbgp";
 
+    import clixon-lib {
+	prefix "cl";
+    }
+
     import ietf-inet-types {
 	prefix "inet";
     }
@@ -41,8 +45,13 @@ module netgate-bgp {
 	"This YANG module provides a Netgate-defined data-model
 	 for BGP data.
 
-	 Copyright 2019-2024 Rubicon Communications, LLC.
+	 Copyright 2019-2025 Rubicon Communications, LLC.
 	 ";
+
+    revision 2025-02-01 {
+	description
+	    "TNSR Release 25.02.";
+    }
 
     revision 2024-10-02 {
 	description
@@ -311,6 +320,31 @@ module netgate-bgp {
 	    enum disable {
 		description
 		"graceful-restart disabled";
+	    }
+	}
+    }
+
+    typedef bgp-role {
+	type enumeration {
+	    enum provider {
+		description
+		    "Provider";
+	    }
+	    enum rs-server {
+		description
+		    "Route Server";
+	    }
+	    enum rs-client {
+		description
+		    "Route Server Client";
+	    }
+	    enum customer {
+		description
+		    "Customer";
+	    }
+	    enum peer {
+		description
+		    "Peer";
 	    }
 	}
     }
@@ -1510,6 +1544,8 @@ module netgate-bgp {
 			description
 			    "Table of BGP Neighbors.";
 
+			ngcliext:children-top-sort "peer-group-name-ts";
+
 			list neighbor {
 			    key "peer";
 			    description
@@ -1684,6 +1720,30 @@ module netgate-bgp {
 				     Valid for only eBGP peers.";
 				ngcliext:sibling-op "bool";
 				ngcliext:sibling-fmt "| replace-as";
+			    }
+
+			    container roles {
+				description
+				    "BGP Role for defining peering relationships.";
+				ngcliext:post-child-fmt "$n";
+
+				leaf local-role {
+				    type bgp-role;
+				    description
+					"The local BGP Role for this neighbor.";
+				    ngcliext:node-fmt "^local-role @@";
+				}
+
+				leaf strict-mode {
+				    type empty;
+				    must "../local-role != ''" {
+					error-message
+					    "strict-mode requires local-role to be set.";
+				    }
+				    description
+					"If present, BGP peering is in strict mode.";
+				    ngcliext:node-fmt " strict-mode";
+				}
 			    }
 
 			    leaf override-capability {
@@ -2687,6 +2747,7 @@ module netgate-bgp {
 			description
 			    "A user description of the community list.";
 			ngcliext:node-fmt "^$% @@$n";
+			cl:ignore-compare;
 		    }
 
 		    leaf value-type {

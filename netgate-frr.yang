@@ -5,6 +5,10 @@ module netgate-frr {
     namespace "urn:netgate:xml:yang:netgate-frr";
     prefix "ngfrr";
 
+    import clixon-lib {
+	prefix "cl";
+    }
+
     import ietf-inet-types {
 	prefix "inet";
     }
@@ -33,8 +37,13 @@ module netgate-frr {
 	"This YANG module provides a Netgate-defined data-model
 	 for FRR data.
 
-	 Copyright 2017-2020 Rubicon Communications, LLC.
+	 Copyright 2017-2025 Rubicon Communications, LLC.
 	 ";
+
+    revision 2025-02-01 {
+	description
+	    "TNSR Release 25.02.";
+    }
 
     revision 2024-06-01 {
 	description
@@ -335,6 +344,7 @@ module netgate-frr {
 		    description
 			"A user description of the prefix list.";
 		    ngcliext:node-fmt "^description @@$n";
+		    cl:ignore-compare;
 		}
 
 		container rules {
@@ -420,6 +430,7 @@ module netgate-frr {
 		    description
 			"A user description of the Route Map.";
 		    ngcliext:node-fmt "^$% @@$n";
+		    cl:ignore-compare;
 		}
 
 		container rules {
@@ -456,6 +467,7 @@ module netgate-frr {
 			    description
 				"A user description of the Route Map.";
 			    ngcliext:node-fmt "^$% @@$n";
+			    cl:ignore-compare;
 			}
 
 			container match {

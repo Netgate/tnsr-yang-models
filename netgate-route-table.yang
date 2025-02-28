@@ -5,6 +5,10 @@ module netgate-route-table {
     namespace "urn:netgate:xml:yang:netgate-route-table";
     prefix "ngrttab";
 
+    import clixon-lib {
+	prefix "cl";
+    }
+
     import ietf-inet-types {
 	prefix "inet";
     }
@@ -25,7 +29,12 @@ module netgate-route-table {
 	"This YANG module provides a Netgate-defined data-model
 	 for Route Tables.
 
-	 Copyright 2017-2020 Rubicon Communications, LLC.";
+	 Copyright 2017-2025 Rubicon Communications, LLC.";
+
+    revision 2025-02-01 {
+	description
+	    "TNSR Release 25.02.";
+    }
 
     revision 2024-10-01 {
 	description
@@ -272,6 +281,7 @@ module netgate-route-table {
 			"A description of the route table.";
 		    ngcliext:context "static-routes";
 		    ngcliext:node-fmt "^$% @@$n";
+		    cl:ignore-compare;
 		}
 
 		leaf id {
@@ -308,6 +318,7 @@ module netgate-route-table {
 				"A description of the route.";
 			    ngcliext:context "static-routes";
 			    ngcliext:node-fmt "^$% @@$n";
+			    cl:ignore-compare;
 			}
 
 			leaf priority {
@@ -317,6 +328,14 @@ module netgate-route-table {
 				preference.";
 			    ngcliext:context "static-routes";
 			    ngcliext:node-fmt "^$% @@$n";
+			}
+
+			leaf dataplane-only {
+			    type empty;
+			    description
+				"FIB exclusive entry.";
+			    ngcliext:context "static-routes";
+			    ngcliext:node-fmt "^$%$n";
 			}
 
 			container next-hop {
@@ -480,6 +499,7 @@ module netgate-route-table {
 				"A description of the route.";
 			    ngcliext:context "static-routes";
 			    ngcliext:node-fmt "^$% @@$n";
+			    cl:ignore-compare;
 			}
 
 			leaf priority {
@@ -489,6 +509,14 @@ module netgate-route-table {
 				preference.";
 			    ngcliext:context "static-routes";
 			    ngcliext:node-fmt "^$% @@$n";
+			}
+
+			leaf dataplane-only {
+			    type empty;
+			    description
+				"FIB exclusive entry.";
+			    ngcliext:context "static-routes";
+			    ngcliext:node-fmt "^$%$n";
 			}
 
 			container next-hop {

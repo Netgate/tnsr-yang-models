@@ -20,7 +20,12 @@ module netgate-ssh-server {
     description
 	"This YANG module provides a data model for the SSH server.
 
-	 Copyright 2020 Rubicon Communications, LLC.";
+	 Copyright 2020, 2021, 2025 Rubicon Communications, LLC.";
+
+    revision 2025-02-01 {
+	description
+	    "TNSR Release 25.02.";
+    }
 
     revision 2021-02-15 {
 	description
@@ -85,6 +90,66 @@ module netgate-ssh-server {
 		    interfaces.";
 		ngcliext:node-op "bool";
 		ngcliext:node-fmt "|$< enable$n";
+	    }
+
+	    container netconf-subsystem {
+		description
+		    "Dataplane netconf subsystem settings.";
+
+		ngcliext:parent-fmt "$< $%";
+
+		leaf enable {
+		    type boolean;
+		    description
+			"If true, netconf subsystem is enabled for " +
+			"dataplane SSH server.";
+		    must "current() = 'false' or ../../enable = 'true'" {
+			error-message "Dataplane SSH server must be enabled " +
+				      "in order to enable dataplane SSH "+
+				      "netconf-subsystem.";
+		    }
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|$< enable %{port}$n";
+		}
+
+		leaf port {
+		    type uint16;
+		    description
+			"TCP port for dataplane SSH server netconf subsystem.";
+		    default 830;
+		    ngcliext:sibling-fmt "port @@";
+		}
+	    }
+	}
+
+	container host {
+	    description
+		"Host-specific parameters of SSH server.";
+
+	    ngcliext:parent-fmt "$< $%";
+
+	    container netconf-subsystem {
+		description
+		    "Host netconf subsystem settings.";
+
+		ngcliext:parent-fmt "$< $%";
+
+		leaf enable {
+		    type boolean;
+		    description
+			"If true, netconf subsystem is enabled for " +
+			"host SSH server.";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|$< enable %{port}$n";
+		}
+
+		leaf port {
+		    type uint16;
+		    description
+			"TCP port for host SSH server netconf subsystem.";
+		    default 830;
+		    ngcliext:sibling-fmt "port @@";
+		}
 	    }
 	}
     }

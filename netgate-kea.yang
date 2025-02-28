@@ -5,6 +5,10 @@ module netgate-kea {
     namespace "urn:netgate:xml:yang:netgate-kea";
     prefix "ngkea";
 
+    import clixon-lib {
+	prefix "cl";
+    }
+
     import ietf-inet-types {
 	prefix "inet";
     }
@@ -28,7 +32,12 @@ module netgate-kea {
     description
 	"This YANG module provides a data model for the Kea DHCP server.
 
-	 Copyright 2019-2023 Rubicon Communications, LLC.";
+	 Copyright 2019-2025 Rubicon Communications, LLC.";
+
+    revision 2025-02-01 {
+	description
+	    "TNSR Release 25.02.";
+    }
 
     revision 2024-10-01 {
 	description
@@ -182,7 +191,7 @@ module netgate-kea {
 			 8-bit field carrying PSID length (in this
 			 case equal to 4) and the 16-bits-long PSID
 			 value field (in this case equal to
-			 “0011000000000000b” using binary notation).
+			 '0011000000000000b' using binary notation).
 			 Allowed values for a PSID length are 0 to
 			 16. See RFC 7597 for details about the PSID
 			 wire representation.";
@@ -191,7 +200,7 @@ module netgate-kea {
 	    enum record {
 		description
 		    "Structured data that may be comprised of any
-		     types (except “record” and “empty”). The array
+		     types (except 'record' and 'empty'). The array
 		     flag applies to the last field only.";
 	    }
 
@@ -243,6 +252,7 @@ module netgate-kea {
 
     typedef kea-dhcp4-option-standard {
 	type enumeration {
+
 	    enum time-offset {
 		description
 		    "time-offset";
@@ -593,9 +603,9 @@ module netgate-kea {
 		    "slp-service-scope";
 	    }
 
-	    enum nds-server {
+	    enum nds-servers {
 		description
-		    "nds-server";
+		    "nds-servers";
 	    }
 
 	    enum nds-tree-name {
@@ -653,6 +663,11 @@ module netgate-kea {
 		    "tcode";
 	    }
 
+	    enum v6-only-preferred {
+		description
+		    "v6-only-preferred";
+	    }
+
 	    enum netinfo-server-address {
 		description
 		    "netinfo-server-address";
@@ -663,9 +678,9 @@ module netgate-kea {
 		    "netinfo-server-tag";
 	    }
 
-	    enum default-url {
+	    enum v4-captive-portal {
 		description
-		    "default-url";
+		    "v4-captive-portal replaces default-url";
 	    }
 
 	    enum auto-config {
@@ -678,14 +693,14 @@ module netgate-kea {
 		    "name-service-search";
 	    }
 
-	    enum subnet-selection {
-		description
-		    "subnet-selection";
-	    }
-
 	    enum domain-search {
 		description
 		    "domain-search";
+	    }
+
+	    enum classless-static-route {
+		description
+		    "classless-static-route";
 	    }
 
 	    enum vivco-suboptions {
@@ -718,6 +733,11 @@ module netgate-kea {
 		    "sip-ua-cs-domains";
 	    }
 
+	    enum v4-sztp-redirect {
+		description
+		    "v4-sztp-redirect";
+	    }
+
 	    enum rdnss-selection {
 		description
 		    "rdnss-selection";
@@ -728,9 +748,9 @@ module netgate-kea {
 		    "v4-portparams";
 	    }
 
-	    enum v4-captive-portal {
+	    enum v4-dnr {
 		description
-		    "v4-captive-portal";
+		    "v4-dnr";
 	    }
 
 	    enum option-6rd {
@@ -1336,6 +1356,7 @@ module netgate-kea {
 		    description
 			"A user-supplied description of the server.";
 		    ngcliext:node-fmt "^$% @@$n";
+		    cl:ignore-compare;
 		}
 
 		leaf echo-client-id {

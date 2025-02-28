@@ -5,6 +5,10 @@ module netgate-unbound {
     namespace "urn:netgate:xml:yang:netgate-unbound";
     prefix "ngunb";
 
+    import clixon-lib {
+	prefix "cl";
+    }
+
     import ietf-inet-types {
 	prefix "inet";
     }
@@ -24,8 +28,13 @@ module netgate-unbound {
     description
 	"This YANG module provides a data-model for the Unbound service.
 
-	 Copyright 2018-2020 Rubicon Communications, LLC.
+	 Copyright 2018-2022, 2025 Rubicon Communications, LLC.
 	";
+
+    revision 2025-02-01 {
+	description
+	    "TNSR Release 25.02.";
+    }
 
     revision 2022-06-15 {
 	description
@@ -297,6 +306,7 @@ module netgate-unbound {
 			    description
 				"Arbitrary description for zone.";
 			    ngcliext:node-fmt "^$% @@$n";
+			    cl:ignore-compare;
 			}
 
 			container hosts {
@@ -328,6 +338,7 @@ module netgate-unbound {
 				    description
 					"Arbitrary description for host.";
 				    ngcliext:node-fmt "^$% @@$n";
+				    cl:ignore-compare;
 				}
 			    }
 			}

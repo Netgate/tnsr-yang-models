@@ -5,12 +5,12 @@ module netgate-logging {
     namespace "urn:netgate:xml:yang:netgate-logging";
     prefix "nglog";
 
-    import ietf-inet-types {
-        prefix "inet";
+    import clixon-lib {
+	prefix "cl";
     }
 
-    import ietf-yang-types {
-        prefix "yang";
+    import ietf-inet-types {
+        prefix "inet";
     }
 
     import netgate-cli-extensions {
@@ -29,8 +29,13 @@ module netgate-logging {
 	"This YANG module provides specifications of operations and data
 	 related to logging management on TNSR.
 
-	 Copyright 2024 Rubicon Communications, LLC.
+	 Copyright 2024, 2025 Rubicon Communications, LLC.
 	";
+
+    revision 2025-02-01 {
+	description
+	    "TNSR Release 25.02.";
+    }
 
     revision 2024-10-01 {
 	description
@@ -205,6 +210,7 @@ module netgate-logging {
                     description
                         "A text description for the log server.";
                     ngcliext:node-fmt "^description @@$n";
+		    cl:ignore-compare;
                 }
 
 		leaf address {
@@ -310,6 +316,10 @@ module netgate-logging {
 	    enum backend {
 		description
 		    "clixon-backend.service";
+	    }
+	    enum snort {
+		description
+		    "snort.service";
 	    }
 	}
     }

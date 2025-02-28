@@ -5,6 +5,10 @@ module netgate-vpf {
     namespace "urn:netgate:xml:yang:netgate-vpf";
     prefix "ngvpf";
 
+    import clixon-lib {
+	prefix "cl";
+    }
+
     import ietf-inet-types {
 	prefix "inet";
     }
@@ -29,7 +33,12 @@ module netgate-vpf {
 	"This YANG module provides a Netgate-defined data-model
 	 for Netbsd Packet Filters.
 
-	 Copyright 2024 Rubicon Communications, LLC.";
+	 Copyright 2024, 2025 Rubicon Communications, LLC.";
+
+    revision 2025-02-02 {
+	description
+	    "TNSR Release 25.02.";
+    }
 
     revision 2024-10-04 {
 	description
@@ -295,17 +304,31 @@ module netgate-vpf {
 		    description
 			"A text description of the VPF prefix table.";
 		    ngcliext:node-fmt "^description @@$n";
+		    cl:ignore-compare;
 		}
 
 		container prefixes {
 		    description
-			"Each table is a named set of IP prefixes.";
+			"A named set of IP prefixes.";
 
-		    leaf-list prefix {
-			type inet:ip-prefix;
-			description
-			    "Either an IPv4 or IPv6 prefix.";
-			ngcliext:node-fmt "^prefix @@$n";
+		    list prefix {
+			key "ip-prefix";
+			ngcliext:post-child-fmt "$n";
+
+			leaf ip-prefix {
+			    type inet:ip-prefix;
+			    description
+				"Either an IPv4 or IPv6 prefix.";
+			    ngcliext:node-fmt "^prefix @@";
+			}
+
+			leaf description {
+			    type ngcom:description-63;
+			    description
+				"A user description of the VPF prefix table entry.";
+			    ngcliext:node-fmt " description @@";
+			    cl:ignore-compare;
+			}
 		    }
 		}
 	    }
@@ -335,6 +358,7 @@ module netgate-vpf {
 		    description
 			"A user description of the VPF filter ruleset.";
 		    ngcliext:node-fmt "^$% @@$n";
+		    cl:ignore-compare;
 		}
 
 		container rules {
@@ -359,6 +383,7 @@ module netgate-vpf {
 			    description
 				"A user description of the VPF filter rule.";
 			    ngcliext:node-fmt "^$% @@$n";
+			    cl:ignore-compare;
 			}
 
 			container filter {
@@ -406,6 +431,21 @@ module netgate-vpf {
 			    description
 				"Create a stateful connection entry upon
 				 match.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|^$%$n";
+			}
+
+			leaf vrf-bound {
+			    type boolean;
+			    description
+				"Associate stateful connection entry with " +
+				"VRF of outbound interface instead of " +
+				"interface index.";
+			    must "current() = 'false' or ../stateful = 'true'" {
+				error-message
+				    "Filter Rule must be stateful to use " +
+				    "vrf-bound state";
+			    }
 			    ngcliext:node-op "bool";
 			    ngcliext:node-fmt "|^$%$n";
 			}
@@ -463,6 +503,7 @@ module netgate-vpf {
 		    description
 			"A user description of the VPF NAT ruleset.";
 		    ngcliext:node-fmt "^$% @@$n";
+		    cl:ignore-compare;
 		}
 
 		container rules {
@@ -487,6 +528,7 @@ module netgate-vpf {
 			    description
 				"A user description of the VPF NAT rule.";
 			    ngcliext:node-fmt "^$% @@$n";
+			    cl:ignore-compare;
 			}
 
 			container match {
@@ -586,6 +628,21 @@ module netgate-vpf {
 			    description
 				"Name of destination VRF for 'in' NAT rule.";
 			    ngcliext:node-fmt "^$% @@$n";
+			}
+
+			leaf vrf-bound {
+			    type boolean;
+			    description
+				"Associate stateful connection entry with " +
+				"VRF of outbound interface instead of " +
+				"interface index.";
+			    must "current() = 'false' or ../dynamic = 'true'" {
+				error-message
+				    "NAT Rule must be dynamic to use " +
+				    "vrf-bound state";
+			    }
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|^$%$n";
 			}
 		    }
 		}
@@ -936,10 +993,22 @@ module netgate-vpf {
 		    description
 			"Each table is a named set of IP prefixes.";
 
-		    leaf-list prefix {
-			type inet:ip-prefix;
+		    list prefix {
+			key "ip-prefix";
 			description
-			    "Either an IPv4 or IPv6 prefix.";
+			    "A named set of IPv4 and IPv6 prefixes.";
+
+			leaf ip-prefix {
+				type inet:ip-prefix;
+				description
+				    "Either an IPv4 or IPv6 prefix.";
+			}
+
+			leaf description {
+			    type ngcom:description-63;
+			    description
+				"A user description of the VPF prefix table entry.";
+			}
 		    }
 		}
 	    }
@@ -1016,6 +1085,14 @@ module netgate-vpf {
 			    description
 				"Create a stateful connection entry upon
 				 match.";
+			}
+
+			leaf vrf-bound {
+			    type boolean;
+			    description
+				"Associate stateful connection entry with " +
+				"VRF of outbound interface instead of " +
+				"interface index.";
 			}
 
 			leaf return-rst {
@@ -1160,6 +1237,14 @@ module netgate-vpf {
 			    type ngcom:rt-identifier-15;
 			    description
 				"Name of destination VRF for 'in' NAT rule.";
+			}
+
+			leaf vrf-bound {
+			    type boolean;
+			    description
+				"Associate stateful connection entry with " +
+				"VRF of outbound interface instead of " +
+				"interface index.";
 			}
 		    }
 		}

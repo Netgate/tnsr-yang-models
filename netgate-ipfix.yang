@@ -5,16 +5,20 @@ module netgate-ipfix {
     namespace "urn:netgate:xml:yang:netgate-ipfix";
     prefix "ngipfix";
 
-    import ietf-ipfix-psamp {
-	prefix "ipfix";
-    }
-
     import netgate-cli-extensions {
 	prefix "ngcliext";
     }
 
     import netgate-common {
 	prefix "ngcom";
+    }
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import netgate-route-table {
+	prefix "ngrttab";
     }
 
     organization "Netgate";
@@ -25,7 +29,12 @@ module netgate-ipfix {
 	"This YANG module provides a Netgate-defined data-model
 	 for IP Flow Information Export.
 
-	 Copyright 2019-2020 Rubicon Communications, LLC.";
+	 Copyright 2019-2024 Rubicon Communications, LLC.";
+
+    revision 2025-02-01 {
+	description
+	    "TNSR Release 25.02.";
+    }
 
     revision 2023-11-01 {
 	description
@@ -42,120 +51,303 @@ module netgate-ipfix {
 	    "TNSR Release 20.10.";
     }
 
-    grouping udpExporterParametersExtended {
-	description
-	    "Extended parameters of a UDP export destination.";
-
-	leaf vrf {
-	    type ngcom:rt-identifier-63;
-	    description
-		"VRF to use to resolve collector address.";
-	    ngcliext:node-fmt "^vrf @@$n";
-	}
-
-	leaf checksum {
-	    type boolean;
-	    description
-		"UDP checksum calculation enable flag.";
-	    ngcliext:node-fmt "^checksum @@$n";
+    typedef ipfix-direction {
+	type enumeration {
+	    enum ingress {
+		description
+		    "Monitor incoming packets.";
+	    }
+	    enum egress {
+		description
+		    "Monitor outgoing packets.";
+	    }
+	    enum both {
+		description
+		    "Monitor incoming and outgoing packets.";
+	    }
 	}
     }
 
-    augment "/ipfix:ipfix" {
+    typedef ipfix-filter-eid {
+	type enumeration {
+	    enum 60 {
+		description
+		    "ipVersion.";
+	    }
+	}
+    }
+
+    typedef ipfix-filter-ip-version-num {
+	type enumeration {
+	    enum 4 {
+		description
+		    "IPv4.";
+	    }
+	    enum 6 {
+		description
+		    "IPv6.";
+	    }
+	}
+    }
+
+    container ipfix-config {
+	description
+	    "Configuration for IP Flow Information Export. " +
+	    "Data is structured the same as the ietf-ipfix-psamp model.";
 	ngcliext:parent-fmt "ipfix";
-    }
 
-    augment "/ipfix:ipfix/ipfix:exportingProcess/ipfix:destination/" +
-	"ipfix:DestinationParameters/ipfix:udpExporter" {
-	description
-	    "Add extended parameters to the UDP exporter parameters.";
+	list cache {
+	    key name;
+	    description
+		"Cache of the Monitoring Device.";
+	    max-elements 1;
+	    ngcliext:node-fmt "$< cache @{name}$n";
+	    ngcliext:pre-children-op "push";
 
-	uses udpExporterParametersExtended;
-    }
+	    leaf name {
+		type ngcom:identifier;
+		description
+		    "Name of the cache. " +
+		    "Only one set of timeoutCache parameters is supported. " +
+		    "Cache list is for compatibility with IETF model.";
+	    }
 
-    augment "/ipfix:ipfix/ipfix:exportingProcess" {
-	ngcliext:node-fmt "$< exporter @{name}$n";
-	ngcliext:pre-children-op "push";
-    }
+	    container timeoutCache {
+		description
+		    "Flow expiration after active and idle timeout.";
+		ngcliext:parent-fmt "^timeout-cache";
 
-    augment "/ipfix:ipfix/ipfix:exportingProcess/ipfix:destination" +
-	    "/ipfix:DestinationParameters/ipfix:udpExporter" +
-	    "/ipfix:destinationIPAddress" {
-	ngcliext:node-fmt "^collector @@ port %{destinationPort}$n";
-    }
+		leaf activeTimeout {
+		    description
+			"The time in seconds after which a flow is "+
+			"expired even if packets are still received.";
+		    type uint32 {
+			range "1..max";
+		    }
+		    units seconds;
+		    must "../idleTimeout" {
+			error-message
+			    "Both active and idle timer must be set";
+		    }
+		    ngcliext:node-fmt "$< active-timeout @@$n";
+		}
+		leaf idleTimeout {
+		    description
+			"The time in seconds after which a flow is "+
+			"expired if no more packets mathing the flow "+
+			"are received.";
+		    type uint32;
+		    units seconds;
+		    must "../activeTimeout" {
+			error-message
+			    "Both active and idle timer must be set";
+		    }
+		    must "current() > ../activeTimeout" {
+			error-message
+			    "Idle timer must be greater than active timer";
+		    }
+		    ngcliext:node-fmt "$< idle-timeout @@$n";
+		}
+	    } /* timeoutCache */
+	} /* cache */
 
-    augment "/ipfix:ipfix/ipfix:exportingProcess/ipfix:destination" +
-	    "/ipfix:DestinationParameters/ipfix:udpExporter" +
-	    "/ipfix:destinationPort" {
-	ngcliext:sibling-fmt "@@";
-    }
+	list exportingProcess {
+	    description
+		"Exporting Process of the Monitoring Device.";
+	    key name;
+	    max-elements 1;
+	    ngcliext:node-fmt "$< exporter @{name}$n";
+	    ngcliext:pre-children-op "push";
 
-    augment "/ipfix:ipfix/ipfix:exportingProcess/ipfix:destination" +
-	    "/ipfix:DestinationParameters/ipfix:udpExporter" +
-	    "/ipfix:maxPacketSize" {
-	ngcliext:node-fmt "^pmtu @@$n";
-    }
+	    leaf name {
+		type ngcom:identifier;
+		description
+		    "Name of exporting process.";
+	    }
 
-    augment "/ipfix:ipfix/ipfix:exportingProcess/ipfix:destination" +
-	    "/ipfix:DestinationParameters/ipfix:udpExporter" +
-	    "/ipfix:sourceIPAddress" {
-	ngcliext:node-fmt "^source @@$n";
-    }
+	    list destination {
+		description
+		    "List of export destinations.";
+		key name;
+		max-elements 1;
 
-    augment "/ipfix:ipfix/ipfix:exportingProcess/ipfix:destination" +
-	    "/ipfix:DestinationParameters/ipfix:udpExporter" +
-	    "/ipfix:templateRefreshTimeout" {
-	ngcliext:node-fmt "^template-interval @@$n";
-    }
+		leaf name {
+		    type ngcom:identifier;
+		    description
+			"Name of the destination.";
+		}
 
-    augment "/ipfix:ipfix/ipfix:cache" {
-	ngcliext:node-fmt "$< cache @{name}$n";
-	ngcliext:pre-children-op "push";
-    }
+		container udpExporter {
+		    description
+			"UDP parameters.";
 
-    augment "/ipfix:ipfix/ipfix:cache/ipfix:timeoutCache" {
-	ngcliext:parent-fmt "^timeout-cache";
-    }
+		    leaf destinationPort {
+			type inet:port-number;
+			description
+			    "Port of the Collection Process.";
+			ngcliext:sibling-fmt "@@";
+		    }
 
-    augment "/ipfix:ipfix/ipfix:cache/ipfix:timeoutCache/ipfix:activeTimeout" {
-	ngcliext:node-fmt "$< active-timeout @@$n";
-    }
+		    leaf sourceIPAddress {
+			type inet:ipv4-address-no-zone;
+			description
+			    "Source IP address used by the Exporting Process.";
+			mandatory true;
+			ngcliext:node-fmt "^source @@$n";
+		    }
 
-    augment "/ipfix:ipfix/ipfix:cache/ipfix:timeoutCache/ipfix:idleTimeout" {
-	ngcliext:node-fmt "$< idle-timeout @@$n";
-    }
+		    leaf destinationIPAddress {
+			type inet:ipv4-address-no-zone;
+			description
+			    "IP address of the Collection Process.";
+			mandatory true;
+			ngcliext:node-fmt "^collector @@ port %{destinationPort}$n";
+		    }
 
-    deviation "/ipfix:ipfix/ipfix:cache/ipfix:timeoutCache/ipfix:cacheLayout" {
-	deviate not-supported;
-    }
+		    leaf maxPacketSize {
+			type uint16 {
+			    range "68..1450";
+			}
+			description
+			    "Maximum size of IP packets sent to the Collector.";
+			units octets;
+			ngcliext:node-fmt "^pmtu @@$n";
+		    }
 
-    augment "/ipfix:ipfix/ipfix:observationPoint" {
-	ngcliext:node-fmt "$< observation-point @{name}$n";
-	ngcliext:pre-children-op "push";
-    }
+		    leaf templateRefreshTimeout {
+			type uint32;
+			description
+			    "Sets interval after which templates are resent.";
+			units seconds;
+			default 600;
+			ngcliext:node-fmt "^template-interval @@$n";
+		    }
 
-    augment "/ipfix:ipfix/ipfix:observationPoint/ifName" {
-	ngcliext:node-fmt "^interface @@$n";
-    }
+		    leaf vrf {
+			type ngrttab:route-table-id;
+			description
+			    "VRF to use to resolve collector address.";
+			must "current() = 'default' or /ngrttab:route-table-config/ngrttab:static-routes/ngrttab:route-table[ngrttab:name=current()]" {
+			    error-message "IPFIX collector VRF must refer to a valid VRF name";
+			}
+			ngcliext:node-fmt "^vrf @@$n";
+		    }
 
-    augment "/ipfix:ipfix/ipfix:observationPoint/direction" {
-	ngcliext:node-fmt "^$% @@$n";
-    }
+		    leaf checksum {
+			type boolean;
+			description
+			    "UDP checksum calculation enable flag.";
+			ngcliext:node-fmt "^checksum @@$n";
+		    }
+		} /* udpExporter */
+	    } /* destination */
+	} /* exportingProcess */
 
-    augment "/ipfix:ipfix/ipfix:selectionProcess" {
-	ngcliext:node-fmt "$< selection-process @{name}$n";
-	ngcliext:pre-children-op "push";
-    }
+	list observationPoint {
+	    description
+		"Observation Point of the Monitoring Device.";
+	    key name;
+	    leaf name {
+		type ngcom:identifier;
+		description
+		    "Name of observation point.";
+	    }
+	    max-elements 1;
+	    ngcliext:node-fmt "$< observation-point @{name}$n";
+	    ngcliext:pre-children-op "push";
 
-    augment "/ipfix:ipfix/ipfix:selectionProcess/selector/selectAll" {
-	ngcliext:node-fmt "^selector all$n";
-    }
+	    leaf observationDomainId {
+		type enumeration {
+		    enum 1 {
+			description
+			    "Only the value 1 is supported.";
+		    }
+		}
+		description
+		    "The Observation Domain ID for an Observation Point.";
+		default 1;
+	   }
 
-    augment "/ipfix:ipfix/ipfix:selectionProcess/selector/name" {
-	ngcliext:sibling-fmt "@@";
-    }
+	    leaf-list ifName {
+		type ngcom:if-identifier-63;
+		description
+		    "Interface where packets are observed.";
+		ngcliext:node-fmt "^interface @@$n";
+	    }
 
-    augment "/ipfix:ipfix/ipfix:selectionProcess/selector/filterMatch" {
-	ngcliext:node-fmt "^selector %{name}$n";
-    }
+	    leaf direction {
+		type ipfix-direction;
+		description
+		    "Direction of packets.";
+		default both;
+		ngcliext:node-fmt "^$% @@$n";
+	    }
+	} /* observationPoint */
+
+	list selectionProcess {
+	    key name;
+	    description
+		"Selection Process of the Monitoring Device.";
+	    leaf name {
+		type ngcom:identifier;
+		description
+		    "Name of selection process.";
+	    }
+	    max-elements 1;
+	    ngcliext:node-fmt "$< selection-process @{name}$n";
+	    ngcliext:pre-children-op "push";
+
+	    list selector {
+		key name;
+		description
+		    "Selectors that define action of selection process.";
+		max-elements 1;
+
+		leaf name {
+		    type ngcom:identifier;
+		    description
+			"Name of selector.";
+		    ngcliext:sibling-fmt "@@";
+		}
+
+		choice Method {
+		    description
+			"Packet selection method applied by the Selector.";
+		    mandatory true;
+
+		    case selectAll {
+			leaf selectAll {
+			    type empty;
+			    description
+				"Select all packets.";
+			    ngcliext:node-fmt "^selector all$n";
+			}
+		    }
+		    case filterMatch {
+			container filterMatch {
+			    description
+				"Property match filtering.";
+			    ngcliext:node-fmt "^selector %{name}$n";
+
+			    leaf ieId {
+				type ipfix-filter-eid;
+				description
+				    "Information Element identifier. " +
+				    "Only value currently supported is " +
+				    "ipVersion (60).";
+			    }
+
+			    leaf value {
+				type ipfix-filter-ip-version-num;
+				description
+				    "Information Element value. " +
+				    "Only values currently supported with " +
+				    "ieId 60 are 4 and 6.";
+			    }
+			} /* container filterMatch */
+		    } /* case filterMatch */
+		} /* Method */
+	    } /* selector */
+	} /* selectionProcess */
+    } /* ipfix-config */
 }

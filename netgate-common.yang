@@ -15,6 +15,11 @@ module netgate-common {
 
     Copyright 2017-2020 Rubicon Communications, LLC. All rights reserved.";
 
+    revision 2025-02-01 {
+	description
+	    "TNSR Release 25.02.";
+    }
+
     revision 2023-02-15 {
 	description
 	    "TNSR Release 23.02.";
@@ -173,6 +178,44 @@ module netgate-common {
 	}
 	description
 	    "Enumeration of available page sizes.";
+    }
+
+    typedef traffic-direction-oneway {
+        description
+	    "Traffic direction selector In/Out";
+
+	type enumeration {
+	    enum in {
+	        value 1;
+		description
+		    "ingress";
+	    }
+	    enum out {
+		description
+		    "egress";
+	    }
+	}
+    }
+
+    typedef traffic-direction-t {
+        description
+	    "Traffic direction.";
+
+	type enumeration {
+	    enum in {
+	        value 1;
+		description
+		    "ingress";
+	    }
+	    enum out {
+		description
+		    "egress";
+	    }
+	    enum both {
+		description
+		    "bi-directional";
+	    }
+	}
     }
 
     typedef ip-address-family {
@@ -597,6 +640,33 @@ module netgate-common {
         }
         description
             "Common operations that can be performed on a service";
+    }
+
+    typedef service-operation-extended {
+        type enumeration {
+            enum start {
+                description
+                    "Start if not already running";
+            }
+            enum stop {
+                description
+                    "Stop if running";
+            }
+            enum restart {
+                description
+                    "Stop if running, then start";
+            }
+            enum status {
+                description
+                    "Check status";
+            }
+            enum reload {
+                description
+                    "On-the-fly config reloading";
+            }
+        }
+        description
+            "Common operations plus config reload";
     }
 
     typedef service-op-enable-disable {

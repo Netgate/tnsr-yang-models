@@ -5,6 +5,10 @@ module netgate-ipip {
     namespace "urn:netgate:xml:yang:netgate-ipip";
     prefix "ngipip";
 
+    import clixon-lib {
+	prefix "cl";
+    }
+
     import ietf-inet-types {
 	prefix "inet";
     }
@@ -29,7 +33,12 @@ module netgate-ipip {
 	"This YANG module provides a Netgate-defined data model
 	 for IPIP tunnel management.
 
-	 Copyright 2022 Rubicon Communications, LLC.";
+	 Copyright 2022, 2024 Rubicon Communications, LLC.";
+
+    revision 2025-02-01 {
+	description
+	    "TNSR Release 25.02.";
+    }
 
     revision 2022-10-15 {
 	description
@@ -58,6 +67,14 @@ module netgate-ipip {
 		ngcliext:node-fmt "tunnel ipip @{instance}$n";
 		ngcliext:pre-children-op "push";
 
+		leaf description {
+		    type ngcom:description-63;
+		    description
+			"IPIP tunnel description";
+		    ngcliext:node-fmt "^$% @@$n";
+		    cl:ignore-compare;
+		}
+
 		choice tunnel-address-family {
 		    case ipv4 {
 			leaf ipv4-local-endpoint-address {
@@ -74,7 +91,7 @@ module netgate-ipip {
 			    }
 			}
 			 */
-			choice remote-type {
+			choice ipv4-remote-type {
 			    case address {
 				leaf ipv4-remote-endpoint-address {
 				    type inet:ipv4-address-no-zone;
@@ -95,7 +112,7 @@ module netgate-ipip {
 			    mandatory true;
 			    ngcliext:node-fmt "^source ipv6 address @@$n";
 			}
-			choice remote-type {
+			choice ipv6-remote-type {
 			    case address {
 				leaf ipv6-remote-endpoint-address {
 				    type inet:ipv6-address-no-zone;
@@ -169,6 +186,12 @@ module netgate-ipip {
 		    type uint32;
 		    description
 			"Numeric identifier used in interface name";
+		}
+
+		leaf description {
+		    type ngcom:description-63;
+		    description
+			"IPIP tunnel description";
 		}
 
 		choice tunnel-address-family {

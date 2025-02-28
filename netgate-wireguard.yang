@@ -5,6 +5,10 @@ module netgate-wireguard {
     namespace "urn:netgate:xml:yang:netgate-wireguard";
     prefix "ngwg";
 
+    import clixon-lib {
+	prefix "cl";
+    }
+
     import ietf-inet-types {
 	prefix "inet";
     }
@@ -29,7 +33,12 @@ module netgate-wireguard {
 	"This YANG module provides a Netgate-defined data-model
 	 for Wireguard data.
 
-	 Copyright 2022 Rubicon Communications, LLC.";
+	 Copyright 2022, 2024, 2025 Rubicon Communications, LLC.";
+
+    revision 2025-02-01 {
+	description
+	    "TNSR Release 25.02.";
+    }
 
     revision 2024-10-01 {
 	description
@@ -76,6 +85,7 @@ module netgate-wireguard {
 		    description
 			"A textual description of the interface.";
 		    ngcliext:node-fmt "^$% @@$n";
+		    cl:ignore-compare;
 		}
 
 		leaf source-address {
@@ -152,6 +162,7 @@ module netgate-wireguard {
 			    description
 				"A textual description of the peer.";
 			    ngcliext:node-fmt "^$% @@$n";
+			    cl:ignore-compare;
 			}
 
 			leaf endpoint-address {

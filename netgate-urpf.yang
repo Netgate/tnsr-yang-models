@@ -1,0 +1,146 @@
+module netgate-urpf {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-urpf";
+    prefix "ngurpf";
+
+    import netgate-cli-extensions {
+        prefix ngcliext;
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    import netgate-route-table {
+	prefix ngrttab;
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"YANG module to fully support the controls of
+	 the urpf VPP plugin via TNSR.
+
+	 Copyright 2024 Rubicon Communications, LLC.
+	";
+
+    revision 2025-02-01 {
+	description
+	    "TNSR Release 25.02."
+	    + " Initial revision.";
+    }
+
+    typedef urpf-mode {
+        description
+	    "Loose/Strict selection.";
+
+	type enumeration {
+	    enum loose {
+		value 1;
+		description "loose";
+	    }
+	    enum strict {
+		description "strict";
+	    }
+	}
+    }
+
+    container urpf-config {
+	description
+	    "Urpf plugin configuration";
+
+	list urpf-filter {
+	    key "interface address-family direction";
+	    description
+		"Filter instance";
+
+	    ngcliext:node-fmt "$% ${interface} ${address-family} ${direction}$n";
+	    ngcliext:pre-children-op "push";
+
+	    leaf interface {
+		type string;
+		description
+		    "Interface name";
+
+		ngcliext:child-fmt "$% @@";
+	    }
+
+	    leaf address-family {
+		type ngcom:ip-address-family;
+		description
+		    "af";
+
+		ngcliext:child-fmt "$% @@";
+	    }
+
+	    leaf direction {
+		type ngcom:traffic-direction-oneway;
+		description
+		    "Traffic direction";
+
+		ngcliext:child-fmt "$% @@";
+	    }
+
+	    leaf mode {
+		type urpf-mode;
+		description
+		    "Loose vs Strict selection.";
+
+		mandatory true;
+		ngcliext:node-fmt "^$% @@$n";
+	    }
+
+	    leaf vrf {
+		type ngrttab:route-table-id;
+		description
+		    "VRF name";
+
+		ngcliext:node-fmt "^$% @@$n";
+	    }
+	}
+    }
+
+    container urpf-state {
+	description
+	    "Uprf state.";
+
+	list urpf-filter {
+	    key "interface";
+
+	    leaf interface {
+		type string;
+		description "Interface";
+	    }
+
+	    list filter {
+		key "address-family direction";
+
+		leaf address-family {
+		    type string;
+		    description "AF";
+		}
+
+		leaf direction {
+		    type string;
+		    description "In or Out";
+		}
+
+		leaf mode {
+		    type string;
+		    description
+			"Loose or Strict";
+		}
+
+		leaf vrf {
+		    type string;
+		    description
+			"VRF name";
+		}
+	    }
+	}
+    }
+}

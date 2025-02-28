@@ -36,6 +36,11 @@ module netgate-system {
 	 Copyright 2018-2024 Rubicon Communications, LLC.
 	 ";
 
+    revision 2025-02-02 {
+	description
+	    "TNSR Release 25.02.";
+    }
+
     revision 2024-02-01 {
 	description
 	    "TNSR Release 24.02.";
@@ -585,12 +590,28 @@ module netgate-system {
 		    case manual {
 			leaf manual {
 			    type string {
-				pattern '[a-zA-Z0-9_\-=.,\/ ]+';
+				pattern '[-a-zA-Z0-9_=.,/ ]+';
 			    }
 			    description
 				"String to be added to kernel command line";
 		    	    ngcliext:node-fmt "$< $% @@$n";
 			}
+		    }
+		}
+	    }
+
+	    container modules {
+		ngcliext:parent-fmt "$< $%";
+
+		container vfio {
+		    ngcliext:parent-fmt "$< $%";
+
+		    leaf noiommu {
+			type boolean;
+			description
+			"Enable enable_unsafe_noiommu_mode option for vfio";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$< $%$n";
 		    }
 		}
 	    }

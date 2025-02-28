@@ -5,6 +5,10 @@ module netgate-host-interface {
     namespace "urn:netgate:xml:yang:netgate-hostif";
     prefix "nghif";
 
+    import clixon-lib {
+	prefix "cl";
+    }
+
     import ietf-inet-types {
 	prefix "inet";
     }
@@ -28,8 +32,13 @@ module netgate-host-interface {
     description
 	"This YANG module provides a data model for host interfaces.
 
-	 Copyright 2018-2020 Rubicon Communications, LLC.
+	 Copyright 2018-2025 Rubicon Communications, LLC.
 	";
+
+    revision 2025-02-01 {
+	description
+	    "TNSR Release 25.02.";
+    }
 
     revision 2024-06-01 {
 	description
@@ -100,6 +109,7 @@ module netgate-host-interface {
 		description
 		    "A textual description of the host interface.";
 		ngcliext:node-fmt "^$% @@$n";
+		cl:ignore-compare;
 	    }
 
 	    leaf enabled {

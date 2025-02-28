@@ -13,10 +13,6 @@ module netgate-rpki {
 	prefix "ngcliext";
     }
 
-    import netgate-common {
-	prefix "ngcom";
-    }
-
     import netgate-route {
 	prefix "ngrt";
     }
@@ -37,8 +33,13 @@ module netgate-rpki {
 	"This YANG module provides a Netgate-defined data-model
 	 for RPKI data.
 
-	 Copyright 2022 Rubicon Communications, LLC.
+	 Copyright 2022-2024 Rubicon Communications, LLC.
 	 ";
+
+    revision 2025-02-01 {
+	description
+	    "TNSR Release 25.02.";
+    }
 
     revision 2024-10-01 {
 	description

@@ -5,6 +5,10 @@ module netgate-interface {
     namespace "urn:netgate:xml:yang:netgate-interface";
     prefix "ngif";
 
+    import clixon-lib {
+	prefix "cl";
+    }
+
     import ietf-inet-types {
 	prefix "inet";
     }
@@ -25,6 +29,10 @@ module netgate-interface {
 	prefix "ngnat";
     }
 
+    import netgate-macip {
+	prefix "ngmacip";
+    }
+
     organization "Netgate";
 
     contact "Web: <http://www.netgate.com>";
@@ -32,8 +40,13 @@ module netgate-interface {
     description
 	"This YANG module provides a data model for network interfaces.
 
-	 Copyright 2017-2024 Rubicon Communications, LLC.
+	 Copyright 2017-2025 Rubicon Communications, LLC.
 	";
+
+    revision 2025-02-01 {
+	description
+	    "TNSR Release 25.02.";
+    }
 
     revision 2024-10-01 {
 	description
@@ -486,6 +499,7 @@ module netgate-interface {
 		    "A textual description of the interface.";
 		ngcliext:context "intf-interfaces";
 		ngcliext:node-fmt "^$% @@$n";
+		cl:ignore-compare;
 	    }
 
 	    leaf enabled {
@@ -555,9 +569,6 @@ module netgate-interface {
 		    "Parameters for the IPv4 address family.";
 
 		ngcliext:parent-fmt "^ip";
-
-		presence
-		    "make container work the way code expects";
 		
 		container address {
 		    ngcliext:context "intf-interfaces";
@@ -651,9 +662,6 @@ module netgate-interface {
 		    "Parameters for the IPv6 address family.";
 
 		ngcliext:parent-fmt "^ipv6";
-
-		presence
-		    "make container work the way code expects";
 		
 		container address {
 		    ngcliext:context "intf-interfaces";
@@ -1087,6 +1095,7 @@ module netgate-interface {
 		    description
 			"A textual description of the bridge.";
 		    ngcliext:node-fmt "^$% @@$n";
+		    cl:ignore-compare;
 		}
 
 		leaf flood {
@@ -1209,6 +1218,7 @@ module netgate-interface {
 		    description
 			"A user description of the Loopback.";
 		    ngcliext:node-fmt "^$% @@$n";
+		    cl:ignore-compare;
 		}
 	    }
 	}

@@ -25,7 +25,12 @@ module netgate-tunnel {
 	"This YANG module provides a Netgate-defined data model
 	 for tunnel management.
 
-	 Copyright 2022 Rubicon Communications, LLC.";
+	 Copyright 2022, 2023, 2025 Rubicon Communications, LLC.";
+
+    revision 2025-02-01 {
+	description
+	    "TNSR Release 25.02.";
+    }
 
     revision 2023-02-15 {
 	description

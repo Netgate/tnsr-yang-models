@@ -1,0 +1,384 @@
+module netgate-snort {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-snort";
+    prefix "ngsnort";
+
+    import clixon-lib {
+	prefix "cl";
+    }
+
+    import netgate-cli-extensions {
+        prefix ngcliext;
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"YANG module to fully support the controls of
+	 the Snort VPP plugin via TNSR.
+
+	 Copyright 2025 Rubicon Communications, LLC.
+	";
+
+    revision 2025-02-01 {
+	description
+	    "TNSR Release 25.02."
+	    + " Initial revision.";
+    }
+
+    typedef snort-node-mode-t {
+        description
+	    "Polling/Interrupt selection.";
+
+	type enumeration {
+	    enum polling {
+		value 0;
+		description "polling";
+	    }
+	    enum interrupt {
+		description "interrupt (the default)";
+	    }
+	}
+    }
+
+    typedef snort-action-t {
+        description
+	    "IDS vs IPS selection.";
+
+	type enumeration {
+	    enum detect {
+		value 0;
+		description "detect aka passive mode (the default)";
+	    }
+	    enum prevent {
+		description "prevent aka inline mode";
+	    }
+	}
+    }
+
+    typedef snort-alert-output-t {
+        description
+	    "A method of reporting alerts.";
+
+	type enumeration {
+	    enum fast {
+		description "'-A alert_fast' equivalent";
+	    }
+	    enum full {
+		description "'-A alert_full' equivalent";
+	    }
+	    enum syslog {
+		description "'-A alert_syslog' equivalent";
+	    }
+	    enum json {
+		description "'-A alert_json' equivalent";
+	    }
+	    enum csv {
+		description "'-A alert_csv' equivalent";
+	    }
+	    enum unixsock {
+		description "'-A alert_unixsock' equivalent";
+	    }
+	}
+    }
+
+    typedef snort-on-disconnect-t {
+        description
+	    "Traffic policy when without a client.";
+
+	type enumeration {
+	    enum pass {
+	        value 0;
+		description
+		    "Pass traffic";
+	    }
+	    enum drop {
+		description
+		    "Drop - the default policy";
+	    }
+	}
+    }
+
+    container snort-config {
+	description
+	    "Snort plugin configuration parameters.";
+
+	leaf mode {
+	    type snort-node-mode-t;
+	    description
+		"Snort node type of operation.";
+
+	    ngcliext:node-fmt "snort $% @@$n";
+	}
+
+	container instances {
+	    description
+                "Remote servers.";
+
+            list instance {
+		key "name";
+		description
+		    "Instance name.";
+
+                ngcliext:node-fmt "snort $% @{name}$n";
+		ngcliext:pre-children-op "push";
+
+                leaf name {
+                    type string;
+                    description
+                         "Instance name.";
+                }
+
+                leaf description {
+                    type ngcom:description-63;
+                    description
+                        "A text description for the instance.";
+		    ngcliext:node-fmt "^$% @@$n";
+		    cl:ignore-compare;
+                }
+
+		leaf queue-size {
+		    type uint16 {
+			range "1..65535";
+		    }
+		    description
+			"Queue size (2 power)";
+
+		    ngcliext:node-fmt "^$% @@$n";
+		}
+
+		leaf on-disconnect {
+		    type snort-on-disconnect-t;
+		    description
+			"Traffic policy on disconnect event.";
+
+		    ngcliext:node-fmt "^$% @@$n";
+		}
+
+		container interfaces {
+		    description
+			"Attached interfaces.";
+
+		    list interface {
+			key "name";
+			description
+			    "Interface name.";
+
+			ngcliext:node-fmt "^$% @{name}";
+			ngcliext:post-node-fmt "$n";
+
+			leaf name {
+			    type ngcom:if-identifier-63;
+			    description
+				 "Interface name.";
+			}
+
+			leaf direction {
+			    type ngcom:traffic-direction-t;
+			    default both;
+			    description
+				"Snort traffic direction.";
+			    ngcliext:node-fmt " $% @@";
+			}
+		    }
+		}
+
+		leaf action {
+		    type snort-action-t;
+		    description
+			"IDS vs IPS selection.";
+
+		    ngcliext:node-fmt "^$% @@$n";
+		}
+
+		leaf output {
+		    type snort-alert-output-t;
+		    description
+			"A method of reporting alerts.";
+
+		    ngcliext:node-fmt "^$% @@$n";
+		}
+
+		leaf enable {
+		    type boolean;
+		    description
+			"If true a client for the
+			 instance is started.";
+
+		    ngcliext:node-fmt "^$%$n";
+		}
+	    }
+	}
+    }
+
+    container snort-state {
+	description
+	    "Snort state.";
+
+	leaf mode {
+	    type snort-node-mode-t;
+	    description
+		"Snort node type of operation.";
+	}
+
+	container instances {
+	    description
+                "Packet provider instance.";
+
+            list instance {
+		key "name";
+		description
+		    "Keyed by name.";
+
+                leaf name {
+                    type string;
+                    description
+                         "Instance name.";
+                }
+
+		leaf index {
+		    type uint32;
+		    description
+			"Pool index.";
+		}
+
+		leaf client {
+		    type int32;
+		    description
+			"Client index. (-1 if not connected)";
+		}
+
+		leaf shm-size {
+		    type uint32;
+		    description
+			"Amount of allocated memory";
+		}
+
+		leaf shm-fd {
+		    type int32;
+		    description
+			"Shared memory file descriptor.";
+		}
+
+		leaf on-disconnect {
+		    type snort-on-disconnect-t;
+		    description
+			"Traffic policy on disconnect event.";
+		}
+	    }
+	}
+
+	container interfaces {
+	    description
+                "Attached interfaces.";
+
+            list interface {
+		key "if-index";
+		description
+		    "Keyed by interface index.";
+
+                leaf if-index {
+                    type uint32;
+                    description
+                         "Instance name.";
+                }
+
+		leaf if-name {
+		    type string;
+		    description
+			"Human readable name.";
+		}
+
+		leaf instance-index {
+		    type uint32;
+		    description
+			"Snort instance index.";
+		}
+
+		leaf instance-name {
+		    type string;
+		    description
+			"Snort instance name";
+		}
+	    }
+	}
+
+	container clients {
+	    description
+                "Connected clients.";
+
+            list client {
+		key "client-index";
+		description
+		    "Keyed by client index.";
+
+                leaf client-index {
+                    type uint32;
+                    description
+                         "Client index.";
+                }
+
+		leaf instance-index {
+		    type uint32;
+		    description
+			"Snort instance index.";
+		}
+
+		leaf instance-name {
+		    type string;
+		    description
+			"Snort instance name";
+		}
+	    }
+	}
+    }
+
+    rpc snort-disconnect {
+        description
+            "Disconnect client from instance.";
+
+        input {
+            leaf name {
+		type string;
+                mandatory true;
+                description
+                    "Snort instance to be disconnected.";
+            }
+        }
+    }
+
+    rpc snort-refresh {
+        description
+            "Forcefully reload cache data.";
+    }
+
+    rpc snort-client-control {
+        input {
+            leaf name {
+                type string;
+                mandatory true;
+                description
+		    "Name of the associated instance";
+            }
+            leaf operation {
+                type ngcom:service-operation-extended;
+                mandatory true;
+                description
+                    "The operation to perform";
+            }
+        }
+        output {
+            leaf stdout {
+                type string;
+            }
+        }
+    }
+}

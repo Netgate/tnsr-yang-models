@@ -5,6 +5,10 @@ module netgate-map {
     namespace "urn:netgate:xml:yang:netgate-map";
     prefix "ngmap";
 
+    import clixon-lib {
+	prefix "cl";
+    }
+
     import ietf-inet-types {
 	prefix "inet";
     }
@@ -29,8 +33,13 @@ module netgate-map {
 	"This YANG module provides a Netgate-defined data-model
 	 for Mapping Address and Port (MAP) data.
 
-	 Copyright 2018-2020 Rubicon Communications, LLC.
+	 Copyright 2018-2022, 2025 Rubicon Communications, LLC.
 	 ";
+
+    revision 2025-02-01 {
+	description
+	    "TNSR Release 25.02.";
+    }
 
     revision 2022-02-15 {
 	description
@@ -249,6 +258,7 @@ module netgate-map {
 			description
 			    "An arbitrary description of the MAP domain.";
 			ngcliext:node-fmt "^$% @@$n";
+			cl:ignore-compare;
 		    }
 
 		    leaf ip4-prefix {

@@ -5,6 +5,10 @@ module netgate-dhcp-relay {
     namespace "urn:netgate:xml:yang:netgate-dhcp-relay";
     prefix "ngdr";
 
+    import clixon-lib {
+	prefix "cl";
+    }
+
     import ietf-inet-types {
 	prefix "inet";
     }
@@ -29,8 +33,13 @@ module netgate-dhcp-relay {
 	"This YANG module provides a Netgate-defined data-model
 	 for DHCP data.
 
-	 Copyright 2024 Rubicon Communications, LLC.
+	 Copyright 2024, 2025 Rubicon Communications, LLC.
 	 ";
+
+    revision 2025-02-01 {
+	description
+	    "TNSR Release 25.02.";
+    }
 
     revision 2024-10-01 {
 	description
@@ -63,6 +72,7 @@ module netgate-dhcp-relay {
 		description
 		    "Brief description of the DHCP Relay.";
 		ngcliext:node-fmt "^$% @@$n";
+		cl:ignore-compare;
 	    }
 
 	    leaf source-ipv4-address {
@@ -94,7 +104,6 @@ module netgate-dhcp-relay {
 
 		    leaf vrf {
 			type ngrttab:route-table-id;
-			default "default";
 			description
 			    "The VRF which the DHCP server can be reached on.";
 			must "current() = 'default' or /ngrttab:route-table-config/ngrttab:static-routes/ngrttab:route-table[ngrttab:name=current()]" {
@@ -121,7 +130,6 @@ module netgate-dhcp-relay {
 
 		    leaf vrf {
 			type ngrttab:route-table-id;
-			default "default";
 			description
 			    "The VRF which the DHCPv6 server can be reached on.";
 			must "current() = 'default' or /ngrttab:route-table-config/ngrttab:static-routes/ngrttab:route-table[ngrttab:name=current()]" {

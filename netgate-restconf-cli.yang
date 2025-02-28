@@ -21,7 +21,12 @@ module netgate-restconf-cli {
 	"This YANG module provides TNSR CLI augments for
 	 clixon RESTCONF model.
 
-	 Copyright 2021 Rubicon Communications, LLC.";
+	 Copyright 2021, 2023, 2024 Rubicon Communications, LLC.";
+
+    revision 2025-02-01 {
+	description
+	    "TNSR Release 25.02.";
+    }
 
     revision 2023-02-15 {
 	description
@@ -43,44 +48,44 @@ module netgate-restconf-cli {
 	ngcliext:pre-children-op "push";
     }
 
-    augment "/clrc:restconf/enable" {
+    augment "/clrc:restconf/clrc:enable" {
 	ngcliext:node-fmt "^$% @@$n";
     }
 
-    augment "/clrc:restconf/enable-http-data" {
+    augment "/clrc:restconf/clrc:enable-http-data" {
 	ngcliext:node-op "bool";
 	ngcliext:node-fmt "|^gui enable$n";
     }
 
-    augment "/clrc:restconf/auth-type" {
+    augment "/clrc:restconf/clrc:auth-type" {
 	ngcliext:node-fmt "^global authentication-type @@$n";
     }
 
-    augment "/clrc:restconf/server-ca-cert-path" {
+    augment "/clrc:restconf/clrc:server-ca-cert-path" {
 	ngcliext:node-fmt "^global server-ca-cert-path @@$n";
     }
 
-    augment "/clrc:restconf/server-cert-path" {
+    augment "/clrc:restconf/clrc:server-cert-path" {
 	ngcliext:node-fmt "^global server-certificate @@$n";
     }
 
-    augment "/clrc:restconf/server-key-path" {
+    augment "/clrc:restconf/clrc:server-key-path" {
 	ngcliext:node-fmt "^global server-key @@$n";
     }
 
-    augment "/clrc:restconf/socket/namespace" {
+    augment "/clrc:restconf/clrc:socket/clrc:namespace" {
 	ngcliext:node-fmt "^server @@%{address}%{port}%{ssl}$n";
     }
 
-    augment "/clrc:restconf/socket/address" {
+    augment "/clrc:restconf/clrc:socket/clrc:address" {
 	ngcliext:sibling-fmt " @@";
     }
 
-    augment "/clrc:restconf/socket/port" {
+    augment "/clrc:restconf/clrc:socket/clrc:port" {
 	ngcliext:sibling-fmt " @@";
     }
 
-    augment "/clrc:restconf/socket/ssl" {
+    augment "/clrc:restconf/clrc:socket/clrc:ssl" {
 	ngcliext:sibling-fmt " @@";
     }
 }

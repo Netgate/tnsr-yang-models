@@ -13,10 +13,6 @@ module netgate-ldap {
 	prefix "ngcliext";
     }
 
-    import netgate-common {
-	prefix "ngcom";
-    }
-
     organization "Netgate";
 
     contact "Web: <http://www.netgate.com>";
@@ -26,6 +22,11 @@ module netgate-ldap {
 
 	 Copyright 2023, 2024 Rubicon Communications, LLC.
 	";
+
+    revision 2025-02-01 {
+	description
+	    "TNSR Release 25.02.";
+    }
 
     revision 2024-02-01 {
 	description

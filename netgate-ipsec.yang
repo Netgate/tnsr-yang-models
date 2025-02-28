@@ -5,6 +5,10 @@ module netgate-ipsec {
     namespace "urn:netgate:xml:yang:netgate-ipsec";
     prefix "ngipsec";
 
+    import clixon-lib {
+	prefix "cl";
+    }
+
     import ietf-inet-types {
 	prefix "inet";
     }
@@ -762,6 +766,14 @@ module netgate-ipsec {
 		    "Numeric identifier of tunnel";
 	    }
 
+	    leaf description {
+		type ngcom:description-63;
+		description
+		    "IPsec tunnel description";
+		ngcliext:node-fmt "^$% @@$n";
+		cl:ignore-compare;
+	    }
+
 	    leaf remote-type {
 		type ipsec-peer-type-t;
 		default "gateway";
@@ -1294,6 +1306,12 @@ module netgate-ipsec {
 		type uint32;
 		description
 		    "Tunnel number";
+	    }
+
+	    leaf description {
+		type ngcom:description-63;
+		description
+		    "IPsec tunnel description";
 	    }
 
 	    list "ike-sa" {

@@ -5,6 +5,10 @@ module netgate-host-acl {
     namespace "urn:netgate:xml:yang:netgate-host-acl";
     prefix "nghost";
 
+    import clixon-lib {
+	prefix "cl";
+    }
+
     import ietf-inet-types {
 	prefix "inet";
     }
@@ -28,8 +32,13 @@ module netgate-host-acl {
     description
 	"This YANG module provides a data model for host ACL data.
 
-	 Copyright 2019-2020 Rubicon Communications, LLC.
+	 Copyright 2019-2022, 2025 Rubicon Communications, LLC.
 	";
+
+    revision 2025-02-01 {
+	description
+	    "TNSR Release 25.02.";
+    }
 
     revision 2022-02-15 {
 	description
@@ -320,6 +329,7 @@ module netgate-host-acl {
 			description
 			    "The description of the host ACL.";
 			ngcliext:node-fmt "^$% @@$n";
+			cl:ignore-compare;
 		    }
 
 		    list acl-rule {
@@ -342,6 +352,7 @@ module netgate-host-acl {
 			    description
 				"The description of the rule.";
 			    ngcliext:node-fmt "^$% @@$n";
+			    cl:ignore-compare;
 			}
 
 			container packet-match {
