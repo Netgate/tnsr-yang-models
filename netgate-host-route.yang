@@ -31,6 +31,11 @@ module netgate-host-route {
 	 Copyright 2024, 2025 Rubicon Communications, LLC.
 	";
 
+    revision 2025-06-01 {
+	description
+	    "TNSR Release 25.06.";
+    }
+
     revision 2025-02-01 {
 	description
 	    "TNSR Release 25.02.";
@@ -180,30 +185,6 @@ module netgate-host-route {
 					    "IPv4 destination prefix.";
 				    }
 
-				    leaf advertised-receive-window {
-					type uint32 {
-					    range "1..max";
-					}
-					description
-					    "The receive window to be
-					     advertised for the route.
-					     Represented by the number of
-					     segments. (1..4294967295)";
-					ngcliext:node-fmt "^$% @@$n";
-				    }
-
-				    leaf congestion-window {
-					type uint32 {
-					    range "1..max";
-					}
-					description
-					    "The congestion window to be used
-					     for the route.  Represented by
-					     the number of segments.
-					     (1..4294967295)";
-					ngcliext:node-fmt "^$% @@$n";
-				    }
-
 				    leaf description {
 					type ngcom:description-63;
 					description
@@ -226,16 +207,6 @@ module netgate-host-route {
 					description
 					    "The route's relative priority
 					      metric.  (1..4294967295)";
-					ngcliext:node-fmt "^$% @@$n";
-				    }
-
-				    leaf mtu {
-					type uint32 {
-					    range "1..max";
-					}
-					description
-					    "The MTU to be used for the route,
-					     in bytes.  (1 .. 4294967295).";
 					ngcliext:node-fmt "^$% @@$n";
 				    }
 
@@ -290,6 +261,10 @@ module netgate-host-route {
 
 				    leaf via {
 					type inet:ipv4-address-no-zone;
+					must "not(../type) or ../type = 'unicast'" {
+						error-message "Gateway setting is only "+
+							"valid for unicast routes";
+					}
 					description
 					    "IPv4 address to the gateway to
 					     use for this route.";
@@ -325,30 +300,6 @@ module netgate-host-route {
 					    "IPv6 destination prefix.";
 				    }
 
-				    leaf advertised-receive-window {
-					type uint32 {
-					    range "1..max";
-					}
-					description
-					    "The receive window to be
-					     advertised for the route.
-					     Represented by the number of
-					     segments. (1..4294967295)";
-					ngcliext:node-fmt "^$% @@$n";
-				    }
-
-				    leaf congestion-window {
-					type uint32 {
-					    range "1..max";
-					}
-					description
-					    "The congestion window to be used
-					     for the route.  Represented by
-					     the number of segments.
-					     (1..4294967295)";
-					ngcliext:node-fmt "^$% @@$n";
-				    }
-
 				    leaf description {
 					type ngcom:description-63;
 					description
@@ -371,16 +322,6 @@ module netgate-host-route {
 					description
 					    "The route's relative priority
 					      metric.  (1..4294967295)";
-					ngcliext:node-fmt "^$% @@$n";
-				    }
-
-				    leaf mtu {
-					type uint32 {
-					    range "1..max";
-					}
-					description
-					    "The MTU to be used for the route,
-					     in bytes.  (1 .. 4294967295).";
 					ngcliext:node-fmt "^$% @@$n";
 				    }
 
@@ -434,6 +375,10 @@ module netgate-host-route {
 
 				    leaf via {
 					type inet:ipv6-address-no-zone;
+					must "not(../type) or ../type = 'unicast'" {
+						error-message "Gateway setting is only "+
+							"valid for unicast routes";
+					}
 					description
 					    "IPv6 address to the gateway to
 					     use for this route.";

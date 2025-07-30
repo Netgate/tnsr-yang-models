@@ -31,6 +31,11 @@ module netgate-ipfix {
 
 	 Copyright 2019-2024 Rubicon Communications, LLC.";
 
+    revision 2025-06-01 {
+	description
+	    "TNSR Release 25.06.";
+    }
+
     revision 2025-02-01 {
 	description
 	    "TNSR Release 25.02.";
@@ -282,6 +287,23 @@ module netgate-ipfix {
 		default both;
 		ngcliext:node-fmt "^$% @@$n";
 	    }
+
+	    leaf sample-rate {
+		type uint32;
+		description
+		    "Number of packets to skip between sampling intervals.";
+		default 0;
+		ngcliext:node-fmt "^$% @@$n";
+	    }
+
+	    leaf sample-run-length {
+		type uint32;
+		description
+		    "Number of packets to report in each interval.";
+		default 1;
+		ngcliext:node-fmt "^$% @@$n";
+	    }
+
 	} /* observationPoint */
 
 	list selectionProcess {
@@ -350,4 +372,53 @@ module netgate-ipfix {
 	    } /* selector */
 	} /* selectionProcess */
     } /* ipfix-config */
+
+
+    container ipfix-state {
+        description
+            "State information for IPFIX";
+        config false;
+
+        list observationPoint {
+            key "name";
+            description
+              "Information about observation points";
+
+            leaf name {
+                type string;
+                description
+                  "Name of the observation point";
+            }
+
+            leaf observationDomainId {
+                type uint32;
+                description
+                  "Observation domain ID";
+            }
+
+            leaf direction {
+                type string;
+                description
+                  "Traffic flow direction (ingress, egress, or both)";
+            }
+
+            leaf sample-rate {
+                type uint32;
+                description
+                  "Sampling rate configuration";
+            }
+
+            leaf sample-run-length {
+                type uint32;
+                description
+                  "Sampling run length";
+            }
+
+            leaf-list ifName {
+                type string;
+                description
+                  "Interface name";
+            }
+        }
+    }
 }

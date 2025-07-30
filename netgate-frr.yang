@@ -40,6 +40,11 @@ module netgate-frr {
 	 Copyright 2017-2025 Rubicon Communications, LLC.
 	 ";
 
+    revision 2025-06-01 {
+	description
+	    "TNSR Release 25.06.";
+    }
+
     revision 2025-02-01 {
 	description
 	    "TNSR Release 25.02.";
@@ -253,6 +258,15 @@ module netgate-frr {
     }
 
     augment "/ngrt:route-config/ngrt:dynamic" {
+
+	leaf unmanaged {
+	    type empty;
+	    description
+		"Indicates that dynamic routing configuration will be " +
+		"manually maintained by the user. Mutually exclusive " +
+		"with any other managed dynamic route configuration.";
+	    ngcliext:node-fmt "route dynamic $%$n";
+	}
 
 	container access-lists {
 	    description

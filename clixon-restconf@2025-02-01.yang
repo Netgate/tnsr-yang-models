@@ -25,8 +25,13 @@ module clixon-restconf {
          3. Related to (2), options that should not be settable in a datastore should be
             in clixon-config
 
-       Some of this spec if in-lined from ietf-restconf-server@2022-05-24.yang
-       ";
+         Some of this spec if in-lined from ietf-restconf-server@2022-05-24.yang
+         ";
+    revision 2025-02-01 {
+        description
+            "Added timeout parameter
+             Released in Clixon 7.4";
+    }
     revision 2022-08-01 {
         description
             "Added socket/call-home container
@@ -155,15 +160,16 @@ module clixon-restconf {
         leaf debug {
             description
                 "Set debug level of restconf daemon.
-                 0 is no debug, 1 is debugging, more is detailed debug.
-                 Debug logs will be directed to log-destination with LOG_DEBUG level (for syslog)";
+                 Debug logs will be directed to log-destination with LOG_DEBUG level (for syslog)
+                 Note: must be decimal";
             type uint32;
             default 0;
         }
         leaf log-destination {
             description
                 "Log destination.
-                 If debug is not set, only notice, error and warning will be logged";
+                 If debug is not set, only notice, error and warning will be logged
+                 If log-destination is file, the actual file is /var/log/clixon_restconf.log";
             type log-destination;
             default syslog;
         }
@@ -220,6 +226,14 @@ module clixon-restconf {
                 "Path to server CA cert file
                  Note only applies if socket has ssl enabled";
         }
+        leaf timeout {
+            description
+                "Timeout of individual sessions.
+                 Useful when debugging long-poll server-sent event streams";
+            type uint32;
+            default 0;
+            units "seconds";
+        }
         list socket {
             description
                 "List of server sockets that the restconf daemon listens to.
@@ -232,9 +246,6 @@ module clixon-restconf {
                      On platforms where namespaces are not suppported, 'default'
                      Default value can be changed by RESTCONF_NETNS_DEFAULT";
             }
-            leaf description{
-                type string;
-            }
             leaf address {
                 type inet:ip-address;
                 description "IP address to bind to";
@@ -242,6 +253,9 @@ module clixon-restconf {
             leaf port {
                 type inet:port-number;
                 description "TCP port to bind to";
+            }
+            leaf description{
+                type string;
             }
             leaf ssl {
                 type boolean;
@@ -315,7 +329,8 @@ module clixon-restconf {
     }
     container restconf {
         description
-            "This presence is strictly not necessary since the enable flag
+            "If imported, this container appears in top-level configuration.
+             The presence statement is strictly not necessary since the enable flag
              in clixon-restconf is the flag bearing the actual semantics.
              However, removing the presence leads to default config in all
              clixon installations, even those which do not use backend-started restconf.

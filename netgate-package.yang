@@ -5,6 +5,10 @@ module netgate-package {
     namespace "urn:netgate:xml:yang:netgate-package";
     prefix "ngpkg";
 
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
     organization "Netgate";
 
     contact "Web: <http://www.netgate.com>";
@@ -28,6 +32,27 @@ module netgate-package {
     revision 2019-02-15 {
 	description
 	    "TNSR Release 19.02.";
+    }
+
+    revision 2025-06-02 {
+	description
+	    "TNSR Release 25.06.";
+    }
+
+    container package-config {
+	description
+	    "Package configuration.";
+
+	ngcliext:parent-fmt "package";
+
+	leaf auto-update-lists {
+	    type boolean;
+	    default false;
+	    description
+		"Automatically update package lists.";
+	    ngcliext:node-op "bool";
+	    ngcliext:node-fmt "|$< $%$n";
+	}
     }
 
     // get information about packages

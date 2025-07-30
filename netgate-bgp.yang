@@ -48,6 +48,11 @@ module netgate-bgp {
 	 Copyright 2019-2025 Rubicon Communications, LLC.
 	 ";
 
+    revision 2025-06-01 {
+	description
+	    "TNSR Release 25.06.";
+    }
+
     revision 2025-02-01 {
 	description
 	    "TNSR Release 25.02.";
@@ -167,6 +172,10 @@ module netgate-bgp {
 	    enum ospf {
 		description
 		"OSPF";
+	    }
+	    enum isis {
+		description
+		"IS-IS";
 	    }
 	}
     }
@@ -1149,7 +1158,7 @@ module netgate-bgp {
 		    type bgp-source;
 		    description
 			"The route source.  One of 'kernel',
-			 'connected', 'ospf'.";
+			 'connected', 'ospf', 'isis'.";
 		}
 
 		container route-data {
@@ -1497,6 +1506,11 @@ module netgate-bgp {
 			"If true, the BGP Daemon is enabled.";
 		    ngcliext:node-op "bool";
 		    ngcliext:node-fmt "^disable$n|^enable$n";
+		    must "current() = 'false' or not(../../../ngfrr:unmanaged)" {
+			error-message
+			    "BGP configuration is not compatible " +
+			    "with unmanaged dynamic routing configuration.";
+		    }
 		}
 
 		leaf route-map-delay-timer {
@@ -1533,7 +1547,9 @@ module netgate-bgp {
 		    }
 
 		    leaf asn {
-			type uint32;
+			type uint32 {
+			    range "1..4294967295";
+			}
 			mandatory true;
 			description
 			    "The BGP Router AS number.";
@@ -1729,6 +1745,9 @@ module netgate-bgp {
 
 				leaf local-role {
 				    type bgp-role;
+				    must "../../remote-asn != ../../../../asn" {
+				   	 error-message "BGP role may only be set for external ASNs";
+				    }
 				    description
 					"The local BGP Role for this neighbor.";
 				    ngcliext:node-fmt "^local-role @@";
@@ -1789,7 +1808,9 @@ module netgate-bgp {
 			    }
 
 			    leaf remote-asn {
-				type uint32;
+				type uint32 {
+				    range "1..4294967295";
+				}
 				description
 				    "The AS-number of the neighbor.";
 				ngcliext:node-fmt "^remote-as @@$n";
@@ -2011,7 +2032,9 @@ module netgate-bgp {
 			    ngcliext:parent-fmt "$<";
 
 			    leaf-list peer {
-				type uint32;
+				type uint32 {
+				    range "1..4294967295";
+				}
 				description
 				    "A list of AS numbers for each peer.";
 				ngcliext:node-fmt "$< $% @@$n";
@@ -3339,7 +3362,9 @@ module netgate-bgp {
 		    }
 
 		    leaf asn {
-			type uint32;
+			type uint32 {
+			    range "1..4294967295";
+			}
 			mandatory true;
 			description
 			    "The BGP Router AS-Number.";
@@ -3444,7 +3469,9 @@ module netgate-bgp {
 
 			container peers {
 			    leaf-list peer {
-				type uint32;
+				type uint32 {
+				    range "1..4294967295";
+				}
 				description
 				    "A list of AS numbers for each peer.";
 			    }
@@ -4025,7 +4052,9 @@ module netgate-bgp {
 			    }
 
 			    leaf remote-asn {
-				type uint32;
+				type uint32 {
+				    range "1..4294967295";
+				}
 				description
 				    "The AS-number of the neighbor.";
 			    }

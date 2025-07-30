@@ -31,6 +31,11 @@ module netgate-dataplane {
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	";
 
+    revision 2025-06-01 {
+	description
+	    "TNSR Release 25.06.";
+    }
+
     revision 2025-02-01 {
 	description
 	    "TNSR Release 25.02.";
@@ -348,6 +353,16 @@ module netgate-dataplane {
 			 list of cores.";
 		    ngcliext:node-fmt "$< @@$n";
 		}
+	    }
+	}
+
+	container unix {
+	    leaf poll-sleep-usec {
+		type uint32;
+		units "microseconds";
+		description
+		    "Sleep time for main loop poll.";
+		ngcliext:node-fmt "$< $% @@$n";
 	    }
 	}
 

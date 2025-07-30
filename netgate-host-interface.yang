@@ -35,6 +35,11 @@ module netgate-host-interface {
 	 Copyright 2018-2025 Rubicon Communications, LLC.
 	";
 
+    revision 2025-06-01 {
+	description
+	    "TNSR Release 25.06.";
+    }
+
     revision 2025-02-01 {
 	description
 	    "TNSR Release 25.02.";
@@ -133,8 +138,6 @@ module netgate-host-interface {
 	    }
 
 	    container ipv4 {
-		presence
-		    "Enables IPv4'";
 		description
 		    "Parameters for the IPv4 address family.";
 
@@ -304,6 +307,37 @@ module netgate-host-interface {
 			    "An IPv6 prefix on the host interface.";
 		    }
 		}
+	    }
+	}
+    }
+
+    rpc hostif-dhclient-control {
+        description
+	    "Systemd service controls";
+
+	input {
+	    leaf name {
+		type ngcom:host-if-name;
+		mandatory true;
+		description
+		    "Name of an interface";
+	    }
+	    leaf ipversion {
+		type ngcom:ip-address-family;
+		mandatory true;
+		description
+		    "IP version";
+	    }
+	    leaf operation {
+		type ngcom:service-operation;
+		mandatory true;
+		description
+		    "The operation to perform";
+	    }
+	}
+	output {
+	    leaf stdout {
+		type string;
 	    }
 	}
     }

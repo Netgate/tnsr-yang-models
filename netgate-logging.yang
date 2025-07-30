@@ -311,7 +311,7 @@ module netgate-logging {
 	    }
 	    enum ssh {
 		description
-		    "sshd and ssh-dataplane";
+		    "ssh and ssh-dataplane";
 	    }
 	    enum backend {
 		description

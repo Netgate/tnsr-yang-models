@@ -33,8 +33,13 @@ module netgate-rip {
 	"This YANG module provides a Netgate-defined data-model
 	 for RIP data.
 
-	 Copyright 2019-2020 Rubicon Communications, LLC.
+	 Copyright 2019-2025 Rubicon Communications, LLC.
 	 ";
+
+    revision 2025-06-01 {
+	description
+	    "TNSR Release 25.06.";
+    }
 
     revision 2023-11-01 {
 	description
@@ -170,6 +175,10 @@ module netgate-rip {
 	    enum ospf {
 		description
 		    "OSPF";
+	    }
+	    enum isis {
+		description
+		    "IS-IS";
 	    }
 	}
     }
@@ -319,6 +328,11 @@ module netgate-rip {
 			"If true, the RIP Daemon is enabled.";
 		    ngcliext:node-op "bool";
 		    ngcliext:node-fmt "|^$%$n";
+		    must "current() = 'false' or not(../../../ngfrr:unmanaged)" {
+			error-message
+			    "RIP configuration is not compatible " +
+			    "with unmanaged dynamic routing configuration.";
+		    }
 		}
 	    }
 

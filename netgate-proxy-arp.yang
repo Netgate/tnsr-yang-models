@@ -1,0 +1,121 @@
+module netgate-proxy-arp {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-proxy-arp";
+    prefix "ngproxyarp";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    import netgate-interface {
+	prefix "ngif";
+    }
+
+    import netgate-route-table {
+	prefix "ngrttab";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data-model for
+	 VPP ARP proxy
+
+	 Copyright 2025 Rubicon Communications, LLC.";
+
+    container proxy-arp-config {
+	description "ARP proxy configuration";
+
+	ngcliext:parent-fmt "proxy-arp";
+
+	container ranges {
+
+	    ngcliext:parent-fmt "$<";
+
+	    list range {
+		ngcliext:node-fmt "$< $% vrf @{vrf-name} @{low-address} - @{high-address} $n";
+
+		key "vrf-name low-address high-address";
+
+		leaf vrf-name {
+		    description "VRF name";
+		    type ngrttab:route-table-id;
+		    must "current() = 'default' or /ngrttab:route-table-config/ngrttab:static-routes/ngrttab:route-table[ngrttab:name=current()]" {
+			error-message "ARP proxy configuration must refer to a valid VRF name";
+		    }
+		}
+
+		leaf low-address {
+		    description "Low address";
+		    type inet:ipv4-address-no-zone;
+		}
+
+		leaf high-address {
+		    description "High address";
+		    type inet:ipv4-address-no-zone;
+		}
+	    }
+	}
+
+	container interfaces {
+	    description "ARP proxy enabled interfaces";
+
+	    ngcliext:parent-fmt "$<";
+
+	    leaf-list interface {
+
+		description "Interface";
+		ngcliext:node-fmt "$< interface @@$n";
+		type ngcom:if-identifier-63;
+	    }
+	}
+    }
+
+    container proxy-arp-state {
+	config "false";
+
+	description "ARP proxy state";
+
+	container ranges {
+	    list range {
+		key "vrf-name low-address high-address";
+
+		leaf vrf-name {
+		    description "VRF name";
+		    type ngrttab:route-table-id;
+		}
+
+		leaf low-address {
+		    description "Low address";
+		    type inet:ipv4-address-no-zone;
+		}
+
+		leaf high-address {
+		    description "High address";
+		    type inet:ipv4-address-no-zone;
+		}
+	    }
+	}
+
+	container interfaces {
+	    description "ARP proxy enabled interfaces";
+
+	    leaf-list interface {
+		description "Interface";
+		type ngcom:if-identifier-63;
+	    }
+	}
+    }
+}

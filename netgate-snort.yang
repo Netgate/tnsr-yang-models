@@ -10,7 +10,7 @@ module netgate-snort {
     }
 
     import netgate-cli-extensions {
-        prefix ngcliext;
+	prefix ngcliext;
     }
 
     import netgate-common {
@@ -27,6 +27,11 @@ module netgate-snort {
 
 	 Copyright 2025 Rubicon Communications, LLC.
 	";
+
+    revision 2025-06-01 {
+	description
+	    "TNSR Release 25.06.";
+    }
 
     revision 2025-02-01 {
 	description
@@ -128,14 +133,16 @@ module netgate-snort {
 		description
 		    "Instance name.";
 
-                ngcliext:node-fmt "snort $% @{name}$n";
+		ngcliext:node-fmt "snort $% @{name}$n";
 		ngcliext:pre-children-op "push";
 
-                leaf name {
-                    type string;
-                    description
-                         "Instance name.";
-                }
+		leaf name {
+		    type string {
+			pattern "[0-9A-Za-z_]+";
+		    }
+		    description
+			 "Instance name.";
+		}
 
                 leaf description {
                     type ngcom:description-63;
@@ -153,6 +160,23 @@ module netgate-snort {
 			"Queue size (2 power)";
 
 		    ngcliext:node-fmt "^$% @@$n";
+		}
+
+		leaf max-threads {
+		    type uint32;
+		    description
+			"Max number of client's packet threads";
+
+		    ngcliext:node-fmt "^$% @@$n";
+		}
+
+		leaf daq-debug {
+		    type boolean;
+		    description
+			"enable daq debug messages";
+
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|^$%$n";
 		}
 
 		leaf on-disconnect {
@@ -207,13 +231,22 @@ module netgate-snort {
 		    ngcliext:node-fmt "^$% @@$n";
 		}
 
+		leaf snort-cores {
+		    type string;
+		    description
+			"List of cores";
+
+		    ngcliext:node-fmt "^$% @@$n";
+		}
+
 		leaf enable {
 		    type boolean;
 		    description
 			"If true a client for the
 			 instance is started.";
 
-		    ngcliext:node-fmt "^$%$n";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|^$%$n";
 		}
 	    }
 	}

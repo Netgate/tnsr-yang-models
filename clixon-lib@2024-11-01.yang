@@ -68,6 +68,12 @@ module clixon-lib {
        - objectexisted
        - link # For split multiple XML files
       ";
+
+    revision 2024-11-01 {
+        description
+            "Added: system-only-config extension
+             Released in Clixon 7.3";
+    }
     revision 2024-04-01 {
         description
             "Added: debug bits type
@@ -332,6 +338,20 @@ module clixon-lib {
              For example, a split could be made at mountpoints.
              See also the 'link 'attribute.
              ";
+    }
+    extension system-only-config {
+        description
+            "This extension marks which fields in the configuration tree should not be
+             saved to datastore and be removed from memory after commit.
+             Instead, the application must provide a mechanism to save the system-only-config
+             in the system:
+               1. Mark system-only config data in YANG with this extension
+               2. Write a commit callback for data write
+               2. Write a system-only-config callback for data read
+             Note that the XML with these values will be remove from the datastore. The remaining XML
+             still needs to be valid XML wrt YANG.
+             An example of an invalid marking would be a list key. Because if the list keys are
+             removed, the remaining XML would no longer be valid wrt the YANG list";
     }
     md:annotation creator {
         type string;

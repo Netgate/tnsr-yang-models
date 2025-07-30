@@ -449,6 +449,11 @@ module netgate-vrrp {
 	    description
 		"Configures VRRP version 3 for IPv4.";
 
+	    must "not(../ngif:unnumbered)" {
+		error-message
+		    "VRRP interface cannot be an unnumbered interface";
+	    }
+
 	    ngcliext:context "intf-vrrp";
 	    ngcliext:parent-fmt "$<";
 

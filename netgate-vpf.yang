@@ -35,6 +35,11 @@ module netgate-vpf {
 
 	 Copyright 2024, 2025 Rubicon Communications, LLC.";
 
+    revision 2025-06-03 {
+	description
+	    "TNSR Release 25.06.";
+    }
+
     revision 2025-02-02 {
 	description
 	    "TNSR Release 25.02.";
@@ -113,6 +118,552 @@ module netgate-vpf {
 	    enum "npt66" {
 		description
 		    "IPv6-to-IPv6 network prefix translation (NPTv6).";
+	    }
+	}
+    }
+
+    grouping vpf-connection-filter {
+	description "VPF connection filter";
+
+	leaf invert {
+	    type boolean;
+	    description "Invert match.";
+	}
+
+	leaf filter-only {
+	    type boolean;
+	    description "Match only filter connections.";
+	}
+
+	leaf nat-only {
+	    type boolean;
+	    description "Match only NAT connections.";
+	}
+
+	choice source-prefix-or-address {
+	    case prefix {
+		leaf source-prefix {
+		    type inet:ip-prefix;
+		    description "Source address prefix.";
+		}
+	    }
+
+	    case address {
+		leaf source-address {
+		    type inet:ip-address;
+		    description "Source address prefix.";
+		}
+	    }
+	}
+
+	choice destination-prefix-or-address {
+	    case prefix {
+		leaf destination-prefix {
+		    type inet:ip-prefix;
+		    description "Destination address prefix.";
+		}
+	    }
+
+	    case address {
+		leaf destination-address {
+		    type inet:ip-address;
+		    description "Destination address prefix.";
+		}
+	    }
+	}
+
+	choice translation-prefix-or-address {
+	    case prefix {
+		leaf translation-prefix {
+		    type inet:ip-prefix;
+		    description "Translation address prefix.";
+		}
+	    }
+
+	    case address {
+		leaf translation-address {
+		    type inet:ip-address;
+		    description "Translation address prefix.";
+		}
+	    }
+	}
+
+	leaf source-id {
+	    type uint32;
+	    description "Source identifier.";
+	}
+
+	leaf destination-id {
+	    type uint32;
+	    description "Destination identifier.";
+	}
+
+	leaf translation-id {
+	    type uint32;
+	    description "Translation identifier.";
+	}
+
+	leaf protocol {
+	    type ngcom:ip-protocol-name-or-number;
+	    description "IP protocol.";
+	}
+
+	leaf source-route-table {
+	    type ngcom:rt-identifier-15;
+	    description "Source VRF name.";
+	}
+
+	leaf destination-route-table {
+	    type ngcom:rt-identifier-15;
+	    description "Destination VRF name.";
+	}
+
+	choice owner {
+	    description "Owner interface or VRF.";
+
+	    case interface {
+		leaf owner-interface {
+		    type ngcom:if-identifier-63;
+		    description "Owner interface.";
+		}
+	    }
+
+	    case route-table {
+		leaf owner-route-table {
+		    type ngcom:rt-identifier-15;
+		    description "Owner route table.";
+		}
+	    }
+	}
+    }
+
+    typedef vpf-connection-state-generic {
+	type enumeration {
+	    enum new {
+		value 1;
+		description "New.";
+	    }
+
+	    enum established {
+		value 2;
+		description "Established.";
+	    }
+
+	    enum closed {
+		value 3;
+		description "Closed.";
+	    }
+	}
+    }
+
+    typedef vpf-connection-state-tcp {
+	type enumeration {
+	    enum closed {
+		value 0;
+		description "CLOSED.";
+	    }
+
+	    enum syn-sent {
+		value 1;
+		description "SYN-SENT.";
+	    }
+
+	    enum sim-syn-sent {
+		value 2;
+		description "SIM-SYN-SENT.";
+	    }
+
+	    enum syn-received {
+		value 3;
+		description "SYN-RCVD.";
+	    }
+
+	    enum established {
+		value 4;
+		description "ESTAB.";
+	    }
+
+	    enum fin-sent {
+		value 5;
+		description "FIN-SENT.";
+	    }
+
+	    enum fin-received {
+		value 6;
+		description "FIN-RCVD.";
+	    }
+
+	    enum close-wait {
+		value 7;
+		description "CLOSE-WAIT.";
+	    }
+
+	    enum fin-wait {
+		value 8;
+		description "FIN-WAIT.";
+	    }
+
+	    enum closing {
+		value 9;
+		description "CLOSING.";
+	    }
+
+	    enum last-ack {
+		value 10;
+		description "LAST-ACK.";
+	    }
+
+	    enum time-wait {
+		value 11;
+		description "TIME-WAIT.";
+	    }
+
+	    enum syn-sent-rem-syn-acked {
+		value 12;
+		description "SYN-SENT-REM-SYN-ACK.";
+	    }
+
+	}
+    }
+
+    typedef vpf-connection-direction {
+	type enumeration {
+	    enum in {
+		value 1;
+		description "In.";
+	    }
+
+	    enum out {
+		value 2;
+		description "Out.";
+	    }
+	}
+    }
+
+    grouping vpf-tcp-context {
+	description "VPF TCP tracking context.";
+
+	leaf end {
+	    type uint32;
+	}
+
+	leaf maxend {
+	    type uint32;
+	}
+
+	leaf maxwin {
+	    type uint32;
+	}
+
+	leaf wscale {
+	    type int32;
+	}
+    }
+
+    grouping vpf-connection-key {
+	description "VPF connection key.";
+	leaf rx-route-table {
+	    type leafref {
+		path "/ngrttab:route-table-config" +
+		    "/ngrttab:static-routes" +
+		    "/ngrttab:route-table/ngrttab:name";
+	    }
+	    description "RX route-table name.";
+	}
+
+	leaf direction {
+	    type vpf-connection-direction;
+	    description "Direction.";
+	}
+
+	leaf source-address {
+	    type inet:ip-address;
+	    description "Source address.";
+	}
+
+	leaf destination-address {
+	    type inet:ip-address;
+	    description "Destination address.";
+	}
+
+	leaf source-id {
+	    type uint32;
+	    description "Source identifier.";
+	}
+
+	leaf destination-id {
+	    type uint32;
+	    description "Destination identifier.";
+	}
+    }
+
+    grouping vpf-connection-details {
+	description "VPF connection details.";
+
+	leaf thread-index {
+	    type uint32;
+	    description "Thread index this connection belongs to.";
+	}
+
+	leaf is-pass {
+	    type boolean;
+	    description "Indicates whether this is a 'pass' connection.";
+	}
+
+	leaf protocol {
+	    type ngcom:ip-protocol-name-or-number;
+	    description "IP protocol.";
+	}
+
+	choice connection-state {
+	    description "Connection state.";
+
+	    case generic {
+		leaf generic-state {
+		    type vpf-connection-state-generic;
+		    description "Generic connection state.";
+		}
+	    }
+
+	    case tcp {
+		leaf tcp-state {
+		    type vpf-connection-state-tcp;
+		    description "TCP connection state.";
+		}
+	    }
+	}
+
+	choice protocol-tracking-context {
+	    description "Protocol specific tracking context.";
+
+	    case tcp-tracking-context {
+
+		container tcp-forward-tracking-context {
+		    description "Forward TCP tracking context.";
+		    uses vpf-tcp-context;
+		}
+
+		container tcp-backward-tracking-context {
+		    description "Backward TCP tracking context.";
+		    uses vpf-tcp-context;
+		}
+	    }
+	}
+
+	leaf last-heard {
+	    description "Time since last packet seen.";
+
+	    type decimal64 {
+		fraction-digits 2;
+	    }
+	}
+
+	choice expiry-time {
+
+	    case active {
+		leaf expires-in {
+		    description "Time to connection expiry.";
+
+		    type decimal64 {
+			fraction-digits 2;
+		    }
+		}
+	    }
+
+	    case expired {
+		leaf expired-ago {
+		    description "Time since connection expiry.";
+
+		    type decimal64 {
+			fraction-digits 2;
+		    }
+		}
+	    }
+	}
+
+	leaf last-lru-update {
+	    description "Time since last LRU update.";
+
+	    type decimal64 {
+		fraction-digits 2;
+	    }
+	}
+
+	choice owner {
+	    description "Owner interface or VRF.";
+
+	    case interface {
+		leaf owner-interface {
+		    type ngcom:if-identifier-63;
+		    description "Owner interface.";
+		}
+	    }
+
+	    case table {
+		leaf owner-route-table {
+		    type leafref {
+			path "/ngrttab:route-table-config" +
+			    "/ngrttab:static-routes" +
+			    "/ngrttab:route-table/ngrttab:name";
+		    }
+		    description "Owner VRF name.";
+		}
+	    }
+	}
+
+
+	leaf translation-address {
+	    type inet:ip-address;
+	    description "Translation address.";
+	}
+
+	leaf translation-id {
+	    type uint32;
+	    description "Translation identifier.";
+	}
+
+	container forward-key {
+	    uses vpf-connection-key;
+	    description "Forward key.";
+	}
+
+	container backward-key {
+	    uses vpf-connection-key;
+	    description "Backward key.";
+	}
+    }
+
+    rpc vpf-connections-get {
+	description "Get VPF connections.";
+
+	input {
+	    leaf thread-index {
+		type uint32;
+		description "Thread index";
+		default 4294967295;
+	    }
+
+	    leaf limit {
+		description "Maximum number of connections returned";
+		type uint32;
+		default 100;
+	    }
+
+	    uses vpf-connection-filter;
+	}
+
+	output {
+	    list connection {
+		uses vpf-connection-details;
+	    }
+	}
+    }
+
+    rpc vpf-ha-export-trigger {
+	description "Trigger VPF HA export.";
+
+	output {
+	    leaf success {
+		description "Success of the operation";
+		type boolean;
+	    }
+	}
+    }
+
+    rpc vpf-connections-clear {
+	description "Clear VPF connections.";
+
+	input {
+	    leaf thread-index {
+		type uint32;
+		description "Thread index";
+		default 4294967295;
+	    }
+
+	    uses vpf-connection-filter;
+	}
+
+	output {
+	    leaf ip4-connections-cleared {
+		type uint32;
+	    }
+
+	    leaf ip6-connections-cleared {
+		type uint32;
+	    }
+	}
+    }
+
+    rpc vpf-connection-statistics-get {
+	output {
+	    list per-thread {
+		leaf thread-index {
+		    type uint32;
+		}
+
+		leaf ip4-icmp-active {
+		    type uint32;
+		}
+
+		leaf ip4-icmp-expired {
+		    type uint32;
+		}
+
+		leaf ip4-udp-active {
+		    type uint32;
+		}
+
+		leaf ip4-udp-expired {
+		    type uint32;
+		}
+
+		leaf ip4-tcp-active {
+		    type uint32;
+		}
+
+		leaf ip4-tcp-expired {
+		    type uint32;
+		}
+
+		leaf ip4-other-active {
+		    type uint32;
+		}
+
+		leaf ip4-other-expired {
+		    type uint32;
+		}
+
+		leaf ip6-icmp-active {
+		    type uint32;
+		}
+
+		leaf ip6-icmp-expired {
+		    type uint32;
+		}
+
+		leaf ip6-udp-active {
+		    type uint32;
+		}
+
+		leaf ip6-udp-expired {
+		    type uint32;
+		}
+
+		leaf ip6-tcp-active {
+		    type uint32;
+		}
+
+		leaf ip6-tcp-expired {
+		    type uint32;
+		}
+
+		leaf ip6-other-active {
+		    type uint32;
+		}
+
+		leaf ip6-other-expired {
+		    type uint32;
+		}
 	    }
 	}
     }
@@ -234,6 +785,10 @@ module netgate-vpf {
 
 	leaf icmp-code {
 	    type uint8;
+	    must "../icmp-type" {
+		error-message
+		    "ICMP code requires ICMP type";
+	    }
 	    description
 		"The ICMP code.";
 		ngcliext:node-fmt "^icmp code @@$n";
@@ -271,6 +826,21 @@ module netgate-vpf {
 	}
     }
 
+    grouping vpf-match-statistics {
+	container match-statistics {
+		leaf packets {
+		    type uint64;
+		    description
+			"Amount of packets.";
+		}
+
+		leaf bytes {
+		    type uint64;
+		    description
+			"Amount of bytes.";
+		}
+	}
+    }
 
     container "vpf-config" {
 	description
@@ -859,7 +1429,26 @@ module netgate-vpf {
 			ngcliext:node-fmt "$< $% @@$n";
 		    }
 		}
-	    }
+
+                container expired-connection-cleanup {
+                    description
+                        "Limit on number of expired connections freed before VPF processes a frame of packets.";
+
+                    leaf generic-limit {
+                        type uint32;
+                        default 256;
+                        description
+                            "Maximum of number of generic connections freed before VPF processes a frame of packets.";
+                    }
+
+                    leaf tcp-limit {
+                        type uint32;
+                        default 256;
+                        description
+                            "Maximum of number of TCP connections freed before VPF processes a frame of packets.";
+                    }
+                }
+            }
 
 	    container interfaces {
 		description
@@ -935,6 +1524,93 @@ module netgate-vpf {
 		ngcliext:node-fmt "^$% @@$n";
 	    }
 	}
+
+        container ha {
+            description
+                "High-availability options.";
+
+	    ngcliext:node-fmt "$< $%$n";
+	    ngcliext:pre-children-op "push";
+
+            list importer {
+                key "local-address local-port remote-address remote-port";
+
+	        ngcliext:node-fmt "^$%";
+
+                leaf local-address {
+                    type inet:ip-address;
+                    description
+                        "Local IP address.";
+	            ngcliext:node-fmt " $% @@";
+                }
+
+                leaf local-port {
+                    type uint16;
+                    description
+                        "Local port number.";
+	            ngcliext:node-fmt " $% @@";
+                }
+
+                leaf remote-address {
+                    type inet:ip-address;
+                    description
+                        "Remote IP address.";
+	            ngcliext:node-fmt " $% @@";
+                }
+
+                leaf remote-port {
+                    type uint16;
+                    description
+                        "Remote port number.";
+	            ngcliext:node-fmt " $% @@$n";
+                }
+            }
+
+            list exporter {
+                key "local-address local-port remote-address remote-port";
+
+	        ngcliext:node-fmt "^$%";
+
+                leaf local-address {
+                    type inet:ip-address;
+                    description
+                        "Local IP address.";
+	            ngcliext:node-fmt " $% @@";
+                }
+
+                leaf local-port {
+                    type uint16;
+                    description
+                        "Local port number.";
+	            ngcliext:node-fmt " $% @@";
+                }
+
+                leaf remote-address {
+                    type inet:ip-address;
+                    description
+                        "Remote IP address.";
+	            ngcliext:node-fmt " $% @@";
+                }
+
+                leaf remote-port {
+                    type uint16;
+                    description
+                        "Remote port number.";
+	            ngcliext:node-fmt " $% @@";
+                }
+
+                leaf mtu {
+                    type uint16 {
+                        range "1280..2048";
+                    }
+
+                    mandatory true;
+                    description
+                        "MTU.";
+	            ngcliext:node-fmt " $% @@$n";
+                }
+            }
+        }
 
 	leaf enable {
 	    type empty;
@@ -1120,6 +1796,8 @@ module netgate-vpf {
 				"Name of destination VRF for 'in' filter " +
 				"rule.";
 			}
+
+			uses vpf-match-statistics;
 		    }
 		}
 	    }
@@ -1246,6 +1924,8 @@ module netgate-vpf {
 				"VRF of outbound interface instead of " +
 				"interface index.";
 			}
+
+			uses vpf-match-statistics;
 		    }
 		}
 	    }
@@ -1402,6 +2082,23 @@ module netgate-vpf {
 			    "Maximum TCP ACK window.";
 		    }
 		}
+
+                container expired-connection-cleanup {
+                    description
+                        "Limit on number of expired connections freed before processing a frame of packets by VPF.";
+
+                    leaf generic-limit {
+                        type uint32;
+                        description
+                            "Maximum of number of generic connections freed before processing a frame of packets by VPF.";
+                    }
+
+                    leaf tcp-limit {
+                        type uint32;
+                        description
+                            "Maximum of number of TCP connections freed before processing a frame of packets by VPF.";
+                    }
+                }
 	    }
 
 	    container interfaces {
@@ -1456,6 +2153,73 @@ module netgate-vpf {
 		    "Source port number.";
 	    }
 	}
+
+        container ha {
+            description
+                "High-availability options.";
+
+            list importer {
+                key "local-address local-port remote-address remote-port";
+
+                leaf local-address {
+                    type inet:ip-address;
+                    description
+                        "Local IP address.";
+                }
+
+                leaf local-port {
+                    type uint16;
+                    description
+                        "Local port number.";
+                }
+
+                leaf remote-address {
+                    type inet:ip-address;
+                    description
+                        "Remote IP address.";
+                }
+
+                leaf remote-port {
+                    type uint16;
+                    description
+                        "Remote port number.";
+                }
+            }
+
+            list exporter {
+                key "local-address local-port remote-address remote-port";
+
+                leaf local-address {
+                    type inet:ip-address;
+                    description
+                        "Local IP address.";
+                }
+
+                leaf local-port {
+                    type uint16;
+                    description
+                        "Local port number.";
+                }
+
+                leaf remote-address {
+                    type inet:ip-address;
+                    description
+                        "Remote IP address.";
+                }
+
+                leaf remote-port {
+                    type uint16;
+                    description
+                        "Remote port number.";
+                }
+
+                leaf mtu {
+                    type uint16;
+                    description
+                        "MTU.";
+                }
+            }
+        }
 
 	leaf enable {
 	    type boolean;

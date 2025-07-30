@@ -43,6 +43,11 @@ module netgate-interface {
 	 Copyright 2017-2025 Rubicon Communications, LLC.
 	";
 
+    revision 2025-06-02 {
+	description
+	    "TNSR Release 25.06.";
+    }
+
     revision 2025-02-01 {
 	description
 	    "TNSR Release 25.02.";
@@ -453,6 +458,19 @@ module netgate-interface {
 	}
     }
 
+    typedef memif-mode {
+	type enumeration {
+	    enum ethernet {
+		description
+		    "Ethernet mode";
+	    }
+	    enum ip {
+		description
+		    "IP mode";
+	    }
+	}
+    }
+
     rpc clear-interface-counters {
 	input {
 	    leaf interface {
@@ -475,6 +493,8 @@ module netgate-interface {
     container interfaces-config {
 	description
 	    "Interface configuration parameters.";
+
+	ngcliext:children-top-sort "interface-ts"; 
 
 	list interface {
 	    key "name";
@@ -550,6 +570,14 @@ module netgate-interface {
 
 	    leaf rx-mode {
 		type ngif:intf-rx-mode;
+		must 'not(starts-with(../name, "BondEthernet"))' {
+		    error-message
+			"Cannot set rx-mode for a bond interface.";
+		}
+		must 'not(starts-with(../name, "loop"))' {
+		    error-message
+			"Cannot set rx-mode for a loopback interface.";
+		}
 		description
 		    "Rx mode";
 		ngcliext:context "intf-interfaces";
@@ -565,6 +593,8 @@ module netgate-interface {
 	    }
 
 	    container ipv4 {
+		presence
+		    "Enables IPv4";
 		description
 		    "Parameters for the IPv4 address family.";
 
@@ -655,9 +685,29 @@ module netgate-interface {
 			}
 		    }
 		}
+
+		leaf unnumbered {
+		    type ngcom:if-identifier-63 {
+			path "/ngif:interfaces-config"
+			    + "/ngif:interface"
+			    + "/ngif:name";
+		    }
+		    must 'not(../address)' {
+			error-message "Unnumbered interfaces cannot have an address.";
+		    }
+		    must 'current() != ../../name' {
+			error-message "Unnumbered interfaces cannot refer to itself.";
+		    }
+		    description
+			    "This interface this interfaces is associated with.";
+		    ngcliext:context "intf-interfaces";
+		    ngcliext:node-fmt "$< $% @@$n";
+		}
 	    }
 
 	    container ipv6 {
+		presence
+		    "Enables IPv6";
 		description
 		    "Parameters for the IPv6 address family.";
 
@@ -794,6 +844,11 @@ module netgate-interface {
 		ngcliext:context "intf-interfaces";
 		ngcliext:node-fmt "^dhcp client ipv4";
 		ngcliext:post-node-fmt "$n";
+
+		must "not(../ipv4/ngif:unnumbered)" {
+		    error-message
+		        "DHCP client cannot be on an unnumbered interface";
+		}
 
 		leaf enable {
 		    type boolean;
@@ -964,6 +1019,16 @@ module netgate-interface {
 		     contains the corresponding bond ID and slave options.";
 
 		ngcliext:context "intf-interfaces";
+
+		must "not(../ipv4)" {
+		    error-message "IPv4 config not allowed on bond slave interfaces.";
+		}
+		must "not(../ipv6)" {
+		    error-message "IPv6 config not allowed on bond slave interfaces.";
+		}
+		must "not(../nat-interface or ../mac-address or ../vrf or ../bridge or ../dhcp-client or ../access-list or ../lldp or ../map or ../vlan-tag-rewrite)" {
+		    error-message "Invalid configuration on bond slave interface.";
+		}
 
 		leaf instance {
 		    type uint32;
@@ -1302,7 +1367,8 @@ module netgate-interface {
 		}
 
 		leaf mode {
-		    type string;
+		    type memif-mode;
+		    mandatory true;
 		    description
 			"Should be 'ethernet', 'IP' or 'punt/inject'.";
 		    ngcliext:node-fmt "^$% @@$n";
@@ -1731,6 +1797,12 @@ module netgate-interface {
 				"The directions to which the MSS applies.";
 			}
 		    }
+		}
+
+		leaf unnumbered {
+		    type string;
+		    description
+			"This interface this interfaces is associated with.";
 		}
 	    }
 

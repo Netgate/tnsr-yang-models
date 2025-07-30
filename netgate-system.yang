@@ -36,6 +36,11 @@ module netgate-system {
 	 Copyright 2018-2024 Rubicon Communications, LLC.
 	 ";
 
+    revision 2025-06-02 {
+	description
+	    "TNSR Release 25.06.";
+    }
+
     revision 2025-02-02 {
 	description
 	    "TNSR Release 25.02.";
@@ -183,10 +188,50 @@ module netgate-system {
 	    "AAA server types.";
     }
 
+    typedef system-kernel-args-intel-iommu-type {
+	type enumeration {
+	    enum on {
+		description
+		    "Enabling Intel IOMMU";
+	    }
+	    enum off {
+		description
+		    "Disabling Intel IOMMU";
+	    }
+        }
+
+	description
+	    "Enabling and Disabling Intel IOMMU";
+    }
+
+    typedef system-kernel-args-iommu-type {
+	type enumeration {
+	    enum on {
+		description
+		    "Enabling IOMMU / VT-d";
+	    }
+	    enum off {
+		description
+		    "Disabling IOMMU / VT-d";
+	    }
+	    enum pt {
+		description
+		    "IOMMU turn on pass through (no DMA translation)";
+	    }
+	    enum nopt {
+		description
+		    "IOMMU turn off pass through (using DMA translation)";
+	    }
+	}
+
+	description
+	    "Enabling and Disabling IOMMU / VT-d";
+    }
+
 
     rpc system-devices-list {
         description
-            "List of the usefull PCI devices in the system.";
+            "List of the useful PCI devices in the system.";
 
 	output {
             list devices {
@@ -554,6 +599,7 @@ module netgate-system {
 	leaf login-banner {
 	    type string {
 		    length 1..4096;
+		    pattern '[\u0020-\u007E\t\n]+';
 	    }
 	    description
 		"A banner message to be displayed at user login, as part
@@ -583,6 +629,20 @@ module netgate-system {
 				    "Enable or disable isolcpus";
 				    ngcliext:node-op "bool";
 				    ngcliext:node-fmt "|$< $%$n";
+			    }
+
+			    leaf iommu {
+				type system-kernel-args-iommu-type;
+				description
+				    "Configuring IOMMU / VT-d in Linux Kernel";
+				    ngcliext:node-fmt "$< $% @@$n";
+			    }
+
+			    leaf intel_iommu {
+				type system-kernel-args-intel-iommu-type;
+				description
+				    "Configuring intel IOMMU driver in Linux Kernel";
+				    ngcliext:node-fmt "$< $% @@$n";
 			    }
 			}
 		    }

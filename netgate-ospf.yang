@@ -40,6 +40,11 @@ module netgate-ospf {
 	 Copyright 2019-2025 Rubicon Communications, LLC.
 	 ";
 
+    revision 2025-06-02 {
+	description
+	    "TNSR Release 25.06.";
+    }
+
     revision 2025-02-01 {
 	description
 	    "TNSR Release 25.02.";
@@ -109,10 +114,7 @@ module netgate-ospf {
     }
 
     typedef ospf-area-id {
-	type union {
-	    type uint32;
-	    type yang:dotted-quad;
-	}
+	type yang:dotted-quad;
     }
 
     typedef ospf-ip4-or-any {
@@ -189,6 +191,10 @@ module netgate-ospf {
 	    enum kernel {
 		description
 		    "Kernel";
+	    }
+	    enum isis {
+		description
+		    "IS-IS";
 	    }
 	}
     }
@@ -692,6 +698,11 @@ module netgate-ospf {
 			"If true, the OSPF Daemon is enabled.";
 		    ngcliext:node-op "bool";
 		    ngcliext:node-fmt "|^$%$n";
+		    must "current() = 'false' or not(../../../ngfrr:unmanaged)" {
+			error-message
+			    "OSPF configuration is not compatible " +
+			    "with unmanaged dynamic routing configuration.";
+		    }
 		}
 	    }
 
@@ -1061,6 +1072,32 @@ module netgate-ospf {
 				    description
 					"The LSA age increment.  Default is 1,
 					 in seconds.";
+				}
+			    }
+			}
+
+			container passive {
+			    description
+				"Passive interfaces will be adertised as
+				 stub links in this router's Router LSA.
+				 Addresses on passive interfaces may be
+				 advertised without having to originate
+				 AS-External Type-5 LSAs.  This is the
+				 only way to advertise non-OSPF links into
+				 stub areas.";
+
+			    ngcliext:parent-fmt "$<";
+
+			    list address {
+				key ip4-address;
+
+				ngcliext:node-fmt "$< $% @{ip4-address} passive$n";
+
+				leaf ip4-address {
+				    type ospf-ip4-or-any;
+				    description
+					"If present, an IPv4 address
+					 on this interface.";
 				}
 			    }
 			}
@@ -1444,44 +1481,14 @@ module netgate-ospf {
 			}
 		    }
 
-		    container passive-interfaces {
+		    leaf passive-interface-default {
+			type boolean;
 			description
-			    "Passive interfaces will be adertised as
-			     stub links in this router's Router LSA.
-			     Addresses on passive interfaces may be
-			     advertised without having to originate
-			     AS-External Type-5 LSAs.  This is the
-			     only way to advertise non-OSPF links into
-			     stub areas.";
+			    "Make all interfaces that belong to
+			     this router passive by default.";
 
-			ngcliext:parent-fmt "^passive-interface";
-
-			list passive-if {
-			    key if-name;
-
-			    ngcliext:node-fmt "$< @{if-name}";
-	    		    ngcliext:post-node-fmt "$n";
-
-			    leaf if-name {
-				type ospf-passive-if-name;
-				description
-				    "The name of an interface or 'default'.";
-			    }
-
-			    container passive-data {
-				presence
-				    "If present, the interface will be
-				     passive.";
-
-				leaf ip4-address {
-				    type inet:ipv4-address-no-zone;
-				    description
-					"If present, a specific IPv4
-					 address on this interface.";
-				    ngcliext:node-fmt " @@";
-				}
-			    }
-			}
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
 		    }
 
 		    container pce {
@@ -1761,11 +1768,7 @@ module netgate-ospf {
 				type ospf-area-id;
 				description
 				    "Each area must have a unique ID
-				     that takes the form of either a
-				     dotted-quad or an unsigned 32-bit
-				     number, interchangeably.  That
-				     is, dotted-quad 0.0.0.1 is the
-				     same as the unsigned number 1.";
+				     that takes the form of a dotted-quad.";
 			    }
 
 			    container authentication {
@@ -1940,6 +1943,9 @@ module netgate-ospf {
 
 			    leaf shortcut {
 				type ospf-shortcut-mode;
+				must "../area-id != '0.0.0.0'" {
+					error-message "OSPF backbone area cannot be configured for shortcuts";
+				}
 				description
 				    "When the router is an ABR, its shortcut
 				     mode may be set to one of 'default',
@@ -3143,11 +3149,7 @@ module netgate-ospf {
 				type ospf-area-id;
 				description
 				    "Each area must have a unique ID
-				     that takes the form of either a
-				     dotted-quad or an unsigned 32-bit
-				     number, interchangeably.  That
-				     is, dotted-quad 0.0.0.1 is the
-				     same as the unsigned number 1.";
+				     that takes the form of a dotted-quad.";
 			    }
 
 			    container authentication {

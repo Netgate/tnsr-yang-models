@@ -1,0 +1,1505 @@
+module netgate-isis {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-isis";
+    prefix "ngisis";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
+    import netgate-interface {
+	prefix "ngif";
+    }
+
+    import netgate-route {
+	prefix "ngrt";
+    }
+
+    import netgate-frr {
+	prefix "ngfrr";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data-model
+	 for IS-IS data.
+
+	 Copyright 2025 Rubicon Communications, LLC.
+	 ";
+
+    revision 2025-06-01 {
+	description
+	    "TNSR Release 25.06.";
+    }
+
+    typedef isis-level-single {
+	type enumeration {
+	    enum "level-1" {
+		description
+		    "Level 1 only.";
+	    }
+
+	    enum "level-2" {
+		description
+		    "Level 2 only.";
+	    }
+	}
+    }
+
+    typedef isis-level {
+	type enumeration {
+	    enum "level-1" {
+		description
+		    "Level 1 only.";
+	    }
+
+	    enum "level-2" {
+		description
+		    "Level 2 only.";
+	    }
+
+	    enum "level-1-2" {
+		description
+		    "Levels 1 and 2.";
+	    }
+	}
+    }
+
+    /* NSAP address format: <area ID>.<system ID>.<NSEL> */
+    typedef isis-nsap-address {
+	type string {
+	    pattern
+		'[0-9A-Fa-f]{2}\.([0-9A-Fa-f]{4}\.){0,6}' +
+		'([0-9A-Fa-f]{4}\.){3}00';
+	}
+	description
+	    "NSAP address for IS-IS area. " +
+	    "2 hex digits for AFI, " +
+	    "0-3 groups of 4 hex digits for area ID, " +
+	    "3 groups of 4 hex digits for system ID, " +
+	    "00 for NSEL.";
+    }
+
+    typedef isis-debug-category {
+	type enumeration {
+	    enum "adj-packets" {
+		description
+		    "IS-IS adjacency packets.";
+	    }
+
+	    enum "events" {
+		description
+		    "IS-IS Events.";
+	    }
+
+	    enum "flooding" {
+		description
+		    "IS-IS flooding.";
+	    }
+
+	    enum "lfa" {
+		description
+		    "IS-IS LFA events.";
+	    }
+
+	    enum "lsp-gen" {
+		description
+		    "IS-IS LSP generation.";
+	    }
+
+	    enum "lsp-sched" {
+		description
+		    "IS-IS scheduling of LSP generation.";
+	    }
+
+	    enum "packet-dump" {
+		description
+		    "IS-IS packet dump.";
+	    }
+
+	    enum "route-events" {
+		description
+		    "IS-IS route events.";
+	    }
+
+	    enum "snp-packets" {
+		description
+		    "IS-IS CSNP/PSNP packets.";
+	    }
+
+	    enum "spf-events" {
+		description
+		    "IS-IS SPF events.";
+	    }
+
+	    enum "tx-queue" {
+		description
+		    "IS-IS TX queue.";
+	    }
+
+	    enum "update-packets" {
+		description
+		    "IS-IS update packets.";
+	    }
+
+	} /* enumeration */
+    } /* isis-debug-category */
+
+    typedef isis-metric-style {
+	type enumeration {
+	    enum "narrow" {
+		description
+		    "Narrow IS-IS metric style.";
+	    }
+	    enum "wide" {
+		description
+		    "Wide IS-IS metric style.";
+	    }
+	    enum "transition" {
+		description
+		    "Both wide and narrow IS-IS metric styles.";
+	    }
+	} /* enumeration */
+    } /* isis-metric-style */
+
+    typedef isis-snp-auth-dir {
+	type enumeration {
+	    enum "send-only" {
+		description
+		    "Send authenticated PDUs, do not check inbound.";
+	    }
+	    enum "validate" {
+		description
+		    "Send authenticated PDUs, check inbound.";
+	    }
+	}
+    } /* isis-snp-auth */
+
+    typedef isis-prefix-priority {
+	type enumeration {
+	    enum "critical" {
+		description
+		    "Critical priority prefixes.";
+	    }
+	    enum "high" {
+		description
+		    "High priority prefixes.";
+	    }
+	    enum "medium" {
+		description
+		    "Medium priority prefixes.";
+	    }
+	}
+    } /* isis-prefix-priority */
+
+    typedef isis-fast-reroute-tiebreaker {
+	type enumeration {
+	    enum downstream {
+		description
+		    "Downstream node as the backup path.";
+	    }
+
+	    enum lowest-backup-metric {
+		description
+		    "Node with the lowest total metric as the backup path.";
+	    }
+
+	    enum node-protecting {
+		description
+		    "Node protecting the backup path.";
+	    }
+	}
+    } /* isis-fast-reroute-tiebreaker */
+
+    typedef isis-hello-padding {
+	type enumeration {
+	    enum always {
+		description
+		    "All hello packets are padded.";
+	    }
+
+	    enum disabled {
+		description
+		    "No hello packets are padded.";
+	    }
+
+	    enum during-adjacency-formation {
+		description
+		    "Hello packets are padded during adjacency formation only.";
+	    }
+	}
+    } /* isis-hello-padding */
+
+    typedef isis-show-request {
+	type enumeration {
+	    enum config {
+		description
+		    "Output from 'show running-config isisd'.";
+	    }
+
+	    enum database {
+		description
+		    "IS-IS link state database.";
+	    }
+
+	    enum fast-reroute {
+		description
+		    "IS-IS fast-reroute information.";
+	    }
+
+	    enum hostname {
+		description
+		    "IS-IS dynamic hostname mapping.";
+	    }
+
+	    enum interface {
+		description
+		    "IS-IS interface information.";
+	    }
+
+	    enum neighbor {
+		description
+		    "IS-IS neighbor adjacencies.";
+	    }
+
+	    enum route {
+		description
+		    "IS-IS routing table.";
+	    }
+
+	    enum spf-backoff-delay {
+		description
+		    "IS-IS SPF backoff delay (RFC 8405) information.";
+	    }
+
+	    enum summary {
+		description
+		    "IS-IS status overview.";
+	    }
+
+	    enum topology {
+		description
+		    "IS-IS paths to Intermediate Systems.";
+	    }
+	}
+    } /* isis-show-request */
+
+    typedef isis-redistribution-source {
+	type enumeration {
+	    enum kernel {
+		description
+		    "Kernel";
+	    }
+	    enum connected {
+		description
+		    "Connected";
+	    }
+	    enum bgp {
+		description
+		    "BGP";
+	    }
+	    enum ospf {
+		description
+		    "OSPF";
+	    }
+	}
+    }
+
+    grouping isis-redistribution-attrs {
+	leaf metric {
+	    type uint32 {
+		range "0..16777215";
+	    }
+	    default "0";
+	    description
+		"Metric for the redistributed route. Use default metric if 0.";
+	    ngcliext:node-fmt "$< $% @@$n";
+	}
+
+	leaf route-map {
+	    type leafref {
+		path "/ngrt:route-config/ngrt:dynamic" +
+		     "/ngfrr:route-maps/ngfrr:map/ngfrr:name";
+	    }
+	    description
+		"Route map to apply.";
+	    ngcliext:node-fmt "$< $% @@$n";
+	}
+    } /* isis-redistribution-attrs */
+
+    grouping isis-af-default-distribute {
+	description
+	    "Per-address-family default route distribution directives.";
+
+	list distribution {
+	    key level;
+
+	    description
+		"Enable distribution of default route for this AF to " +
+		"IS-IS level.";
+	    ngcliext:parent-fmt "$< @{level}";
+
+	    leaf level {
+		type isis-level-single;
+		description
+		    "IS-IS level to redistribute routes into.";
+		must ". = ../../../../is-type or ../../../../is-type = 'level-1-2'" {
+		    error-message
+			"Inappropriate redistribute level for this router.";
+		}
+	    }
+
+	    uses isis-redistribution-attrs;
+
+	    leaf always {
+		type boolean;
+		default false;
+		description
+		    "Always advertise default route, even if none in FIB.";
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "|$< $%$n";
+	    }
+	}
+    } /* isis-af-default-distribute */
+
+    grouping isis-af-redistributions {
+	description
+	    "Per-address-family route redistribution directives.";
+
+	list redistribution {
+	    key "source level";
+
+	    description
+		"Enable redistribution of a source for this AF into IS-IS.";
+	    ngcliext:parent-fmt "$< @{source} @{level}";
+
+	    leaf source {
+		type isis-redistribution-source;
+		description
+		    "Other route source/protocol to redistribute to IS-IS " +
+		    "peers from.";
+	    }
+
+	    leaf level {
+		type isis-level-single;
+		description
+		    "IS-IS level to redistribute routes into.";
+		must ". = ../../../../is-type or ../../../../is-type = 'level-1-2'" {
+		    error-message
+			"Inappropriate redistribute level for this router.";
+		}
+	    }
+
+	    uses isis-redistribution-attrs;
+	}
+    } /* isis-af-redistributions */
+
+    grouping isis-fast-reroute-level {
+	container lfa {
+	    description
+		"LFA configuration.";
+	    ngcliext:parent-fmt "$< $%";
+
+	    leaf priority-limit {
+		type isis-prefix-priority;
+		description
+		    "Limit LFA backup computation to the specified priority.";
+		ngcliext:node-fmt "$< $% @@$n";
+	    }
+
+	    list tiebreaker {
+		key "tiebreaker-type";
+		unique "index";
+		description
+		    "Configure a tie-breaker for multiple LFA backups. " +
+		    "Lower numeric priority value is processed first.";
+		ngcliext:node-fmt "$< $% @{tiebreaker-type} index @{index}$n";
+
+		leaf tiebreaker-type {
+		    type isis-fast-reroute-tiebreaker;
+		    description
+			"Tiebreaker type";
+		}
+
+		leaf index {
+		    type uint8 {
+			range "1..255";
+		    }
+		    mandatory true;
+		    description
+			"Numeric priority. Lower values have higher priority.";
+		}
+	    }
+	    leaf disable-load-sharing {
+		type boolean;
+		default "false";
+		description
+		    "Disable load-share across multiple backups.";
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "|$< $%$n";
+	    }
+	} /* container lfa */
+    } /* grouping isis-fast-reroute-level */
+
+    grouping isis-lsp-level-timers {
+	leaf gen-interval {
+	    type uint16 {
+		range "1..120";
+	    }
+	    description
+		"Interval between generation of LSPs.";
+	    default "30";
+	    units "seconds";
+	    must ". < ../refresh-interval" {
+		error-message
+		    "LSP gen-interval must be less than refresh-interval";
+	    }
+	    ngcliext:node-fmt "$< $% @@$n";
+	}
+
+	leaf refresh-interval {
+	    type uint16;
+	    description
+		"Interval between refresh of LSPs.";
+	    default "900";
+	    units "seconds";
+	    ngcliext:node-fmt "$< $% @@$n";
+	}
+
+	leaf max-lifetime {
+	    type uint16 {
+		range "350..65535";
+	    }
+	    description
+		"Maximum LSP lifetime in seconds.";
+	    default "1200";
+	    units "seconds";
+	    must ". >= ../refresh-interval + 300" {
+		error-message
+		    "LSP max-lifetime must be greater than or equal to " +
+		    "refresh-interval + 300";
+	    }
+	    ngcliext:node-fmt "$< $% @@$n";
+	}
+    } /* grouping isis-lsp-level-timers */
+
+    grouping isis-password {
+	choice password-type {
+	    case cleartext {
+		leaf clear {
+		    type string {
+			length "1..254";
+		    }
+
+		    ngcliext:node-fmt "$< $% @@$n";
+		}
+	    }
+	    case md5 {
+		leaf md5 {
+		    type string {
+			pattern '[0-9a-fA-F]{32}';
+		    }
+
+		    ngcliext:node-fmt "$< $% @@$n";
+		}
+	    }
+	}
+    } /* grouping isis-password */
+
+    grouping isis-interface-hello-level {
+	leaf interval {
+	    type uint16 {
+		range "1..600";
+	    }
+	    default "3";
+	    description
+		"Hello message holding time.";
+
+	    ngcliext:node-fmt "$< $% @@$n";
+	}
+
+	leaf multiplier {
+	    type uint8 {
+		range "2..100";
+	    }
+	    default "10";
+	    description
+		"Multiplier for the hello message holding time.";
+
+	    ngcliext:node-fmt "$< $% @@$n";
+	}
+    } /* grouping isis-interface-hello-level */
+
+    grouping isis-interface-level {
+	leaf csnp-interval {
+	    type uint16 {
+		range "1..600";
+	    }
+	    default "10";
+	    units "seconds";
+	    description
+		"Complete Sequence Number PDU generation interval.";
+	    ngcliext:node-fmt "$< $% @@$n";
+	}
+
+	leaf metric {
+	    type uint32 {
+		range "0..16777215";
+	    }
+	    default "10";
+	    description
+		"Default metric for the interface.";
+	    must ". < 64 or /ngrt:route-config/ngrt:dynamic/ngisis:isis/ngisis:routers/ngisis:router[ngisis:area-tag = current()/../../area-tag]/ngisis:metric-style != 'narrow'" {
+		error-message
+		    "IS-IS metric must be < 64 for metric-type narrow";
+	    }
+	    ngcliext:node-fmt "$< $% @@$n";
+	}
+
+	leaf priority {
+	    type uint8 {
+		range "0..127";
+	    }
+	    default "64";
+	    description
+		"Priority for Designated Router election.";
+	    ngcliext:node-fmt "$< $% @@$n";
+	}
+
+	leaf psnp-interval {
+	    type uint8 {
+		range "1..120";
+	    }
+	    default "2";
+	    units "seconds";
+	    description
+		"Partial Sequence Number PDU generation interval.";
+	    ngcliext:node-fmt "$< $% @@$n";
+	}
+
+	container fast-reroute {
+	    description
+		"Interface Fast Reroute configuration.";
+
+	    ngcliext:parent-fmt "$< $%";
+
+	    container lfa {
+		description
+		    "LFA configuration.";
+
+		ngcliext:parent-fmt "$< $%";
+
+		leaf enable {
+		    type boolean;
+		    default "false";
+		    description
+			"Enable LFA computation for the interface.";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|$< $%$n";
+		}
+
+		leaf-list exclude-interface {
+		    type leafref {
+			path "/ngif:interfaces-config/ngif:interface/ngif:name";
+		    }
+		    ngcliext:node-fmt "$< $% @@$n";
+		}
+	    }
+	}
+    } /* grouping isis-interface-level */
+
+    rpc isis-show {
+	input {
+	    leaf vrf-id {
+		type ngcom:host-if-name;
+		description
+		    "Limit information to a single VRF.";
+	    }
+
+	    leaf request {
+		type isis-show-request;
+		mandatory true;
+		description
+		    "IS-IS show request type.";
+	    }
+
+	    container param {
+		description
+		    "Additional request parameters specific to request type.";
+
+		container database {
+		    description
+			"Parameters for show isis database.";
+		    must "../../request = 'database'";
+
+		    leaf lsp-id {
+			type string {
+			    pattern "[a-zA-Z0-9_/.-]{1,64}";
+			}
+			description
+			    "Limit information to a specific LSP ID.";
+		    }
+
+		    leaf detail {
+			type boolean;
+			description
+			    "Produce detailed output.";
+		    }
+		}
+
+		container fast-reroute {
+		    description
+			"Paramaeters for show isis fast-reroute summary.";
+		    must "../../request = 'fast-reroute'";
+
+		    leaf level {
+			type isis-level-single;
+			description
+			    "Limit output to level-1 or level-2.";
+		    }
+		} /* fast-reroute */
+
+		container interface {
+		    description
+			"Parameters for show isis interface.";
+		    must "../../request = 'interface'";
+
+		    choice if-param-type {
+			description
+			    "The detail keyword cannot be used while " +
+			    "displaying a single interface.";
+
+			case if-param-name {
+			    leaf if-name {
+				type ngcom:if-identifier-63;
+				description
+				    "Name of an IS-IS-enabled interface.";
+			    }
+			}
+
+			case if-param-detail {
+			    leaf detail {
+				type boolean;
+				description
+				    "Produce detailed output.";
+			    }
+			}
+		    } /* param-type */
+		} /* interface */
+
+		container neighbor {
+		    description
+			"Parameters for show isis interface.";
+		    must "../../request = 'neighbor'";
+
+		    choice nbr-param-type {
+			description
+			    "The detail keyword cannot be used while " +
+			    "displaying a single neighbor.";
+
+			case nbr-param-name {
+			    leaf neighbor-name {
+				type string;
+				description
+				    "Name of an IS-IS neighbor.";
+			    }
+			}
+
+			case nbr-param-detail {
+			    leaf detail {
+				type boolean;
+				description
+				    "Produce detailed output.";
+			    }
+			}
+		    } /* nbr-param-type */
+		} /* neighbor */
+
+		container route {
+		    description
+			"Parameters for show isis route.";
+		    must "../../request = 'route'";
+
+		    leaf level {
+			type isis-level-single;
+			description
+			    "Limit output to level-1 or level-2.";
+		    }
+
+		    leaf backup {
+			type boolean;
+			description
+			    "Show backup routes.";
+		    }
+
+		    leaf prefix-sid {
+			type boolean;
+			description
+			    "Show prefix-SID information.";
+		    }
+		} /* route */
+	    } /* param */
+	}
+	output {
+	    leaf stdout {
+		type string;
+	    }
+	}
+    }
+
+    augment "/ngrt:route-config/ngrt:dynamic" {
+
+	container isis {
+
+	    ngcliext:node-fmt "route dynamic isis$n";
+	    ngcliext:pre-children-op "push";
+	    ngcliext:children-order "global-options routers interfaces";
+
+	    container global-options {
+		description
+		    "These are options that apply to the IS-IS Server or
+		     to all IS-IS Router configurations.";
+
+		container debug {
+		    description
+			"IS-IS debug options.";
+
+		    ngcliext:parent-fmt "^$%";
+
+		    leaf adj-packets {
+			type boolean;
+			description
+			    "Debug IS-IS adjacency packets.";
+
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
+		    }
+
+		    leaf events {
+			type boolean;
+			description
+			    "Debug IS-IS Events.";
+
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
+		    }
+
+		    leaf flooding {
+			type boolean;
+			description
+			    "Debug IS-IS flooding.";
+
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
+		    }
+
+		    leaf lfa {
+			type boolean;
+			description
+			    "IS-IS LFA events.";
+
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
+		    }
+
+		    leaf lsp-gen {
+			type boolean;
+			description
+			    "IS-IS LSP generation.";
+
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
+		    }
+
+		    leaf lsp-sched {
+			type boolean;
+			description
+			    "IS-IS scheduling of LSP generation.";
+
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
+		    }
+
+		    leaf packet-dump {
+			type boolean;
+			description
+			    "Debug IS-IS packet dump.";
+
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
+		    }
+
+		    leaf route-events {
+			type boolean;
+			description
+			    "IS-IS route events.";
+
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
+		    }
+
+		    leaf snp-packets {
+			type boolean;
+			description
+			    "IS-IS CSNP/PSNP packets.";
+
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
+		    }
+
+		    leaf spf-events {
+			type boolean;
+			description
+			    "Debug IS-IS SPF events.";
+
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
+		    }
+
+		    leaf tx-queue {
+			type boolean;
+			description
+			    "Debug IS-IS TX queues.";
+
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
+		    }
+
+		    leaf update-packets {
+			type boolean;
+			description
+			    "IS-IS update packets.";
+
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
+		    }
+
+		}
+
+		leaf enable {
+		    type boolean;
+		    default "false";
+		    description
+			"If true, IS-IS is enabled.";
+
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|^$%$n";
+		    must "current() = 'false' or not(../../../ngfrr:unmanaged)" {
+			error-message
+			    "IS-IS configuration is not compatible " +
+			    "with unmanaged dynamic routing configuration.";
+		    }
+		}
+	    }
+
+	    container interfaces {
+		description
+		    "IS-IS configuration for interfaces.";
+
+		list if {
+		    key if-name;
+
+		    ngcliext:node-fmt "^interface @{if-name}$n";
+		    ngcliext:pre-children-op "push";
+
+		    must "ipv4 = 'true' or ipv6 = 'true'" {
+			error-message
+			    "IS-IS interface configuration must enable at " +
+			    "least one of ipv4 or ipv6.";
+		    }
+
+		    leaf if-name {
+			type ngcom:if-identifier-63;
+			description
+			    "The interface IS-IS is being configured for.";
+		    }
+
+		    leaf area-tag {
+			type leafref {
+			    path "../../../routers/router/area-tag";
+			}
+			mandatory true;
+			description
+			    "Area tag for a configured IS-IS instance.";
+			ngcliext:node-fmt "^$% @@$n";
+		    }
+
+		    leaf ipv4 {
+			type boolean;
+			description
+			    "Enable IPv4 routing on this interface.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
+		    }
+
+		    leaf ipv6 {
+			type boolean;
+			description
+			    "Enable IPv6 routing on this interface.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
+		    }
+
+		    leaf circuit-type {
+			type isis-level;
+			description
+			    "IS type of this interface.";
+			ngcliext:node-fmt "^$% @@$n";
+			must ". = 'level-1-2' or ../../../routers/router[area-tag=current()/../area-tag]/is-type = 'level-1-2' or . = ../../../routers/router[area-tag=current()/../area-tag]/is-type" {
+			    error-message
+				"Mismatch between IS-IS interface " +
+				"circuit-type and the is-type of the IS-IS " +
+				"router associated with the interface.";
+			    }
+		    }
+
+		    leaf point-to-point {
+			type boolean;
+			default "false";
+			description
+			    "Attached network is point-to-point.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
+		    }
+
+		    leaf passive {
+			type boolean;
+			default "false";
+			description
+			    "Interface uses passive mode.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
+		    }
+
+		    container password {
+			description
+			    "Authentication password for the interface.";
+			ngcliext:parent-fmt "^$%";
+			uses isis-password;
+		    }
+
+		    leaf disable-three-way-handshake {
+			type boolean;
+			default "false";
+			description
+			    "Disable three-way handshake during adjacency creation.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
+		    }
+
+		    container hello {
+			description
+			    "Configurations for IS-IS hello PDUs.";
+			ngcliext:parent-fmt "^$%";
+
+			leaf padding {
+			    type isis-hello-padding;
+			    default "always";
+			    description
+				"Configuration of padding on IS-IS hello PDUs.";
+			    ngcliext:node-fmt "$< $% @@$n";
+			}
+
+			container level-1 {
+			    description
+				"Hello settings for level-1.";
+			    uses isis-interface-hello-level;
+			    ngcliext:parent-fmt "$< $%";
+			}
+
+			container level-2 {
+			    description
+				"Hello settings for level-2.";
+			    uses isis-interface-hello-level;
+			    ngcliext:parent-fmt "$< $%";
+			}
+		    } /* container hello */
+
+		    container level-1 {
+			description
+			    "Level 1 interface configurations.";
+
+			uses isis-interface-level;
+			ngcliext:parent-fmt "^$%";
+		    }
+
+		    container level-2 {
+			description
+			    "Level 2 interface configurations.";
+
+			uses isis-interface-level;
+			ngcliext:parent-fmt "^$%";
+		    }
+
+		} /* list if */
+	    } /* container interfaces */
+
+	    container routers {
+		list router {
+		    key "vrf-id";
+		    unique "area-tag";
+
+		    ngcliext:node-fmt "^server vrf @{vrf-id}$n";
+		    ngcliext:pre-children-op "push";
+
+		    leaf vrf-id {
+			type ngcom:host-if-name;
+			description
+			    "The attached VRF for an IS-IS instance.";
+		    }
+
+		    leaf area-tag {
+			type ngcom:identifier-31;
+			mandatory true;
+			description
+			    "Area tag for an IS-IS instance.";
+			ngcliext:node-fmt "^$% @@$n";
+		    }
+
+		    leaf is-type {
+			type isis-level;
+			default "level-1-2";
+			description
+			    "Level of the IS-IS instance.";
+			ngcliext:node-fmt "^$% @@$n";
+		    }
+
+		    leaf net {
+			type isis-nsap-address;
+			mandatory true;
+			description
+			    "OSI NSAP address for the IS-IS instance.";
+			ngcliext:node-fmt "^$% @@$n";
+		    }
+
+		    leaf disable-dynamic-hostname {
+			type boolean;
+			default "false";
+			description
+			    "Override default behavior and disable " +
+			    "dynamic hostname exchange.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
+		    }
+
+		    leaf disable-attached-bit-send {
+			type boolean;
+			default "false";
+			description
+			    "Override default behavior and do not set " +
+			    " attached bit in LSPs.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
+		    }
+
+		    leaf attached-bit-receive-ignore {
+			type boolean;
+			default "false";
+			description
+			    "Do not add default route when attached bit " +
+			    "is set in received LSP.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
+		    }
+
+		    leaf log-adjacency-changes {
+			type boolean;
+			default "false";
+			description
+			    "Log changes to adjacencies for this IS-IS instance.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
+		    }
+
+		    leaf log-pdu-drops {
+			type boolean;
+			default "false";
+			description
+			    "Log dropped PDUs for this IS-IS instance.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
+		    }
+
+		    leaf advertise-high-metrics {
+			type boolean;
+			default "false";
+			description
+			    "Advertise high metric on all interfaces.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
+		    }
+
+		    leaf purge-originator {
+			type boolean;
+			default "false";
+			description
+			    "Enable purge originator identification.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
+		    }
+
+		    leaf advertise-passive-only {
+			type boolean;
+			default "false";
+			description
+			    "Advertise prefixes of passive interfaces only.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
+		    }
+
+		    leaf admin-group-send-zero {
+			type boolean;
+			default "false";
+			description
+			    "Allow sending default admin group 0.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
+		    }
+
+		    leaf set-overload-bit {
+			type boolean;
+			default "false";
+			description
+			    "Set overload bit in LSP.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
+		    }
+
+		    leaf set-overload-bit-on-startup {
+			type uint32 {
+			     range "1..86400";
+			}
+			units "seconds";
+			description
+			    "Length of time after startup to set overload bit.";
+			ngcliext:node-fmt "^$% @@$n";
+		    }
+
+		    leaf asla-legacy-flag {
+			type boolean;
+			default "false";
+			description
+			    "Set legacy flag in LSP ASLA Sub-TLV.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
+		    }
+
+		    leaf metric-style {
+			type isis-metric-style;
+			default "wide";
+			description
+			    "The style of TLVs/metric supported.";
+			ngcliext:node-fmt "^$% @@$n";
+		    }
+
+		    container lsp {
+			description
+			    "Configuration for LSPs.";
+
+			ngcliext:parent-fmt "^$%";
+
+			leaf mtu {
+			    type uint16 {
+				range "128..4352";
+			    }
+			    default "1497";
+			    description
+				"Maximum LSP size in bytes.";
+			    ngcliext:node-fmt "$< $% @@$n";
+			}
+
+			container timers {
+			    description
+				"LSP timer configurations.";
+
+			    ngcliext:parent-fmt "$< $%";
+
+			    container level-1 {
+				description
+				    "Level-1 timers.";
+
+				ngcliext:parent-fmt "$< $%";
+
+				uses isis-lsp-level-timers;
+			    }
+
+			    container level-2 {
+				description
+				    "Level-2 timers.";
+
+				ngcliext:parent-fmt "$< $%";
+
+				uses isis-lsp-level-timers;
+			    }
+			} /* container timers */
+		    } /* container lsp */
+
+		    container area-password {
+			description
+			    "Authentication for IS-IS level-1.";
+			ngcliext:parent-fmt "^$%";
+
+			uses isis-password;
+
+			leaf authenticate-snp {
+			    type isis-snp-auth-dir;
+			    description
+				"Control whether received & transmitted " +
+				"SNP packets are authenticated";
+			    ngcliext:node-fmt "$< $% @@$n";
+			}
+		    }
+
+		    container domain-password {
+			description
+			    "Authentication for IS-IS level-2.";
+			ngcliext:parent-fmt "^$%";
+
+			uses isis-password;
+
+			leaf authenticate-snp {
+			    type isis-snp-auth-dir;
+			    description
+				"Control whether received & transmitted " +
+				"SNP packets are authenticated";
+			    ngcliext:node-fmt "$< $% @@$n";
+			}
+		    }
+
+		    container default-information-originate {
+			description
+			    "Distribution of default route.";
+			ngcliext:parent-fmt "^default-information originate";
+
+			container ipv4 {
+			    description
+				"Distribution of IPv4 default route.";
+			    ngcliext:parent-fmt "$< $%";
+
+			    uses isis-af-default-distribute;
+			}
+
+			container ipv6 {
+			    description
+				"Distribution of IPv6 default route.";
+			    ngcliext:parent-fmt "$< $%";
+
+			    uses isis-af-default-distribute;
+			}
+		    }
+
+		    container redistributions {
+			description
+			    "Redistribution of other route protocols into IS-IS.";
+			ngcliext:parent-fmt "^redistribute";
+
+			container ipv4 {
+			    description
+				"Redistribution of IPv4 routes.";
+			    ngcliext:parent-fmt "$< $%";
+
+			    uses isis-af-redistributions;
+			}
+
+			container ipv6 {
+			    description
+				"Redistribution of IPv6 routes.";
+			    ngcliext:parent-fmt "$< $%";
+
+			    uses isis-af-redistributions;
+			}
+		    }
+
+		    container spf {
+			description
+			    "Shortest Path First algorithm configuration.";
+
+			ngcliext:parent-fmt "^$%";
+
+			container interval {
+
+			    description
+				"Interval between executions of SPF algorithm.";
+			    ngcliext:parent-fmt "$< $%";
+
+			    leaf level-1 {
+				type uint16 {
+				    range "1..120";
+				}
+				default 1;
+				units "seconds";
+				description
+				    "Interval for level-1.";
+				ngcliext:node-fmt "$< $% @@$n";
+			    }
+
+			    leaf level-2 {
+				type uint16 {
+				    range "1..120";
+				}
+				default 1;
+				units "seconds";
+				description
+				    "Interval for level-2.";
+				ngcliext:node-fmt "$< $% @@$n";
+			    }
+			}
+
+			container backoff-delay {
+
+			    description
+				"SPF backoff delay (RFC 8405) configuration.";
+			    ngcliext:parent-fmt "$< $%";
+
+			    leaf enable {
+				type boolean;
+				description
+				    "Enable SPF backoff delay algorithm.";
+				ngcliext:node-op "bool";
+				ngcliext:node-fmt "|$< $%$n";
+			    }
+
+			    leaf init-delay {
+				type uint16 {
+				    range "0..60000";
+				}
+				default "50";
+				units "msec";
+				description
+				    "Delay used while in QUIET state";
+				ngcliext:node-fmt "$< $% @@$n";
+			    }
+
+			    leaf short-delay {
+				type uint16 {
+				    range "0..60000";
+				}
+				default "200";
+				units "msec";
+				description
+				    "Delay used while in SHORT_WAIT state";
+				must ". >= ../init-delay" {
+				    error-message "short-delay must be at least as long as init-delay";
+				}
+				ngcliext:node-fmt "$< $% @@$n";
+			    }
+
+			    leaf long-delay {
+				type uint16 {
+				    range "0..60000";
+				}
+				default "5000";
+				units "msec";
+				description
+				    "Delay used while in LONG_WAIT state";
+				must ". >= ../short-delay" {
+				    error-message "long-delay must be at least as long as short-delay";
+				}
+				ngcliext:node-fmt "$< $% @@$n";
+			    }
+
+			    leaf holddown {
+				type uint16 {
+				    range "0..60000";
+				}
+				default "10000";
+				units "msec";
+				description
+				    "Time with no received IGP events " +
+				    "before considering IGP stable";
+				must ". > ../time-to-learn" {
+				    error-message "holddown delay must be longer than time-to-learn delay";
+				}
+				ngcliext:node-fmt "$< $% @@$n";
+			    }
+
+			    leaf time-to-learn {
+				type uint16 {
+				    range "0..60000";
+				}
+				default "500";
+				units "msec";
+				description
+				    "Maximum duration needed to learn all " +
+				    "the events related to a single failure";
+				ngcliext:node-fmt "$< $% @@$n";
+			    }
+			} /* container backoff-delay */
+
+			container prefix-priority {
+			    description
+				"SPF prefix priority configuration.";
+			    ngcliext:parent-fmt "$< $%";
+
+			    leaf critical {
+				type leafref {
+				    path "/ngrt:route-config/ngrt:dynamic" +
+					 "/ngfrr:access-lists/ngfrr:list" +
+					 "/ngfrr:name";
+				}
+				description
+				    "Access list matching prefixes for critical priority";
+				ngcliext:node-fmt "$< $% @@$n";
+			    }
+
+			    leaf high {
+				type leafref {
+				    path "/ngrt:route-config/ngrt:dynamic" +
+					 "/ngfrr:access-lists/ngfrr:list" +
+					 "/ngfrr:name";
+				}
+				description
+				    "Access list matching prefixes for high priority";
+				ngcliext:node-fmt "$< $% @@$n";
+			    }
+
+			    leaf medium {
+				type leafref {
+				    path "/ngrt:route-config/ngrt:dynamic" +
+					 "/ngfrr:access-lists/ngfrr:list" +
+					 "/ngfrr:name";
+				}
+				description
+				    "Access list matching prefixes for medium priority";
+				ngcliext:node-fmt "$< $% @@$n";
+			    }
+			} /* container prefix-priority */
+		    } /* container spf */
+
+		    container fast-reroute {
+			description
+			    "IP fast-reroute configuration.";
+			ngcliext:parent-fmt "^$%";
+
+			container level-1 {
+			    uses isis-fast-reroute-level;
+			    description
+				"IP fast-reroute configurations for level-1.";
+			    ngcliext:parent-fmt "$< $%";
+			}
+			container level-2 {
+			    uses isis-fast-reroute-level;
+			    description
+				"IP fast-reroute configurations for level-2.";
+			    ngcliext:parent-fmt "$< $%";
+			}
+		    } /* container fast-reroute */
+		} /* list router */
+	    } /* container routers */
+
+	} /* container isis */
+    } /* augment */
+}
