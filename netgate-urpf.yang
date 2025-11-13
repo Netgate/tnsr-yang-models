@@ -105,6 +105,8 @@ module netgate-urpf {
     }
 
     container urpf-state {
+	config "false";
+
 	description
 	    "Uprf state.";
 

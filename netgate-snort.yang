@@ -253,6 +253,8 @@ module netgate-snort {
     }
 
     container snort-state {
+	config "false";
+
 	description
 	    "Snort state.";
 

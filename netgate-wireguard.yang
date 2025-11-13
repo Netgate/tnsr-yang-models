@@ -35,6 +35,11 @@ module netgate-wireguard {
 
 	 Copyright 2022, 2024, 2025 Rubicon Communications, LLC.";
 
+    revision 2025-10-02 {
+	description
+	    "TNSR Release 25.10.";
+    }
+
     revision 2025-02-01 {
 	description
 	    "TNSR Release 25.02.";
@@ -98,6 +103,7 @@ module netgate-wireguard {
 
 		leaf port {
 		    type uint16;
+		    mandatory true;
 		    description
 			"Port number.";
 		    ngcliext:node-fmt "^$% @@$n";
@@ -166,10 +172,20 @@ module netgate-wireguard {
 			}
 
 			leaf endpoint-address {
-			    type inet:ip-address-no-zone;
+			    type inet:host;
 			    description
-				"Endpoint destination IP address";
+				"Endpoint destination hostname or IP address";
 			    ngcliext:node-fmt "^$% @@$n";
+			    must "contains(../../../ngwg:source-address, ':') or
+ 				  not(contains(., ':'))" {
+				error-message
+				    "With an IPv4 source-address, endpoint-address must be IPv4 or a hostname.";
+			    }
+			    must "not(contains(../../../ngwg:source-address, ':')) or
+				  not(re-match(., '^[0-9]+(\\.[0-9]+){3}$'))" {
+				error-message
+				    "With an IPv6 source-address, endpoint-address must be IPv6 or a hostname.";
+			    }
 			}
 
 			leaf keep-alive {
@@ -183,6 +199,7 @@ module netgate-wireguard {
 
 			leaf port {
 			    type uint16;
+			    mandatory true;
 			    description
 				"Port.";
 			    ngcliext:node-fmt "^$% @@$n";
@@ -311,9 +328,9 @@ module netgate-wireguard {
 			}
 
 			leaf endpoint-address {
-			    type inet:ip-address-no-zone;
+			    type inet:host;
 			    description
-				"Endpoint destination IP address";
+				"Endpoint destination hostname or IP address";
 			}
 
 			leaf flags {

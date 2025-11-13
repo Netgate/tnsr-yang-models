@@ -2,7 +2,7 @@ module netgate-host-interface {
 
     yang-version 1.1;
 
-    namespace "urn:netgate:xml:yang:netgate-hostif";
+    namespace "urn:netgate:xml:yang:netgate-host-interface";
     prefix "nghif";
 
     import clixon-lib {
@@ -35,9 +35,9 @@ module netgate-host-interface {
 	 Copyright 2018-2025 Rubicon Communications, LLC.
 	";
 
-    revision 2025-06-01 {
+    revision 2025-10-01 {
 	description
-	    "TNSR Release 25.06.";
+	    "TNSR Release 25.10.";
     }
 
     revision 2025-02-01 {

@@ -23,6 +23,11 @@ module netgate-vhost-user {
 
 	 Copyright 2023 Rubicon Communications, LLC.";
 
+    revision 2025-10-01 {
+	description
+	    "TNSR Release 25.10.";
+    }
+
     revision 2023-06-01 {
 	description
 	    "TNSR Release 23.06.";
@@ -38,6 +43,39 @@ module netgate-vhost-user {
 
 	    ngcliext:context "intf-vhost-user";
 	    ngcliext:parent-fmt "interface vhost-user";
+
+	    container global-options {
+		description
+		    "vhost-user global configuration parameters.";
+
+		ngcliext:parent-fmt "$< $%";
+
+		leaf coalesce-frames {
+		    type uint32;
+		    description
+			"Minimum number of packet frames before transmission.
+			 Default is 32 frames.";
+		    ngcliext:node-fmt "$< $% @@$n";
+		}
+
+		leaf coalesce-time {
+		    type uint32;
+		    units "microseconds";
+		    description
+			"Maximum time in microseconds to hold packet frames
+			 before transmission. Default is 1000 microseconds.";
+		    ngcliext:node-fmt "$< $% @@$n";
+		}
+
+		leaf dont-dump-memory {
+		    type boolean;
+		    description
+			"If true, vhost-user shared memory segments will not be
+			 added to corefiles. Default is false.";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|$< $%$n";
+		}
+	    }
 
 	    list vhost-user-interface {
 		key "instance";
@@ -136,6 +174,32 @@ module netgate-vhost-user {
 	container vhost-user-interfaces {
 	    description
 		"State of the vhost-user interfaces.";
+
+	    container global-options {
+		description
+		    "vhost-user parameters.";
+
+		leaf coalesce-frames {
+		    type uint32;
+		    description
+			"Minimum number of packet frames before transmission.";
+		}
+
+		leaf coalesce-time {
+		    type uint32;
+		    units "microseconds";
+		    description
+			"Maximum time in microseconds to hold packet frames
+			 before transmission.";
+		}
+
+		leaf dont-dump-memory {
+		    type boolean;
+		    description
+			"If vhost-user shared memory segments will be
+			 added to corefiles or not.";
+		}
+	    }
 
 	    list vhost-user-interface {
 		key "instance";

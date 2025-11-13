@@ -149,6 +149,8 @@ module netgate-dhcp-relay {
     }
 
     container "dhcp-relay-state" {
+	config "false";
+
 	description
 	    "DHCP relay state information";
 

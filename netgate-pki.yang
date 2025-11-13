@@ -117,6 +117,52 @@ module netgate-pki {
 	}
     }
 
+    rpc pki-license-key-delete {
+	description
+	    "Delete the license key.";
+    }
+
+    rpc pki-license-key-generate {
+	description
+	    "Generate the license key.";
+
+	output {
+	    leaf stdout {
+		type string;
+		description
+		    "PEM-encoded text of new icense key.";
+	    }
+	}
+    }
+
+    rpc pki-license-key-get {
+	description
+	    "Fetch the contents of the license key.";
+
+	output {
+	    leaf stdout {
+		type string;
+		description
+		    "Text of the requested private key.";
+	    }
+	}
+    }
+
+    rpc pki-license-key-import {
+	description
+	    "Import a license key.";
+
+	input {
+	    leaf contents {
+		type string;
+		mandatory true;
+		description
+		    "Text of a PEM-encoded private key, including the
+		     'BEGIN PRIVATE KEY' and 'END PRIVATE KEY' blocks.";
+	    }
+	}
+    }
+
     rpc pki-private-key-delete {
 	description
 	    "Delete an existing private key.";

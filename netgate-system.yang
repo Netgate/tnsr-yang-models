@@ -33,7 +33,7 @@ module netgate-system {
 	"This YANG module provides a Netgate-defined data-model
 	 for SYSTEM data.
 
-	 Copyright 2018-2024 Rubicon Communications, LLC.
+	 Copyright 2018-2025 Rubicon Communications, LLC.
 	 ";
 
     revision 2025-06-02 {
@@ -450,7 +450,9 @@ module netgate-system {
 		 include the full name and version identification of the
 		 system's hardware type, software operating-system, and
 		 networking software. It is mandatory that this only contain
-		 printable ASCII characters.";
+		 printable ASCII characters, but cannot include less-than,
+		 greater-than, ampersand, backslash, single quote, or
+		 double quote.";
 	    ngcliext:node-fmt "$< $% @@$n";
 	}
 
@@ -605,6 +607,15 @@ module netgate-system {
 		"A banner message to be displayed at user login, as part
 		 of update-motd.";
 	    ngcliext:node-fmt "$< banner .$n@@.$n";
+	}
+
+	leaf timezone {
+	    type string {
+		    length 1..80;
+	    }
+	    description
+		"The system timezone.";
+	    ngcliext:node-fmt "$< timezone @@.$n";
 	}
 
 	container kernel {

@@ -1,0 +1,245 @@
+module netgate-license {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-license";
+    prefix "nglic";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a Netgate-defined data-model
+	 for License data.
+
+	 Copyright 2025 Rubicon Communications, LLC.
+	 ";
+
+    revision 2025-06-01 {
+	description
+	    "TNSR Release 25.06.";
+    }
+
+
+    typedef encoding-choice {
+        description
+	    "Data encoding choices.";
+
+	type enumeration {
+	    enum none {
+		description
+		    "No encoding applied.";
+	    }
+	    enum base64 {
+		description
+		    "Base64 encoded";
+	    }
+	}
+    }
+
+    typedef format-choice {
+        description
+	    "Data format choices";
+
+	type enumeration {
+	    enum text {
+		description
+		    "ASCII text";
+	    }
+	    enum json {
+		description
+		    "JSON";
+	    }
+	}
+    }
+
+
+    rpc license-get-sign-request {
+        description
+            "Generate a License Sign Request containing user,
+	     platform, and hardware information.";
+
+	input {
+	    leaf name {
+		type string {
+		    length 1..127;
+		}
+		description
+		    "The name of a primary user.";
+	    }
+
+	    leaf email {
+		type inet:email-address;
+		description
+		    "Email contact address.";
+	    }
+	    leaf token {
+		type string {
+		    length 1..64;
+		}
+		description
+		    "Token granting License or License features.";
+	    }
+	}
+
+	output {
+	    leaf encoding {
+		type encoding-choice;
+	    }
+	    leaf format {
+		type format-choice;
+	    }
+	    leaf data {
+		type string;
+		description
+		    "The License Request data.";
+	    }
+	}
+    }
+
+    rpc license-sign-request {
+        description
+	    "Create a License by generating a License Sign Request
+	     and sending it to the Netgate License server for signing.";
+
+	input {
+	    leaf name {
+		type string {
+		    length 1..127;
+		}
+		description
+		    "The name of a primary user.";
+	    }
+
+	    leaf email {
+		type inet:email-address;
+		description
+		    "Email contact address.";
+	    }
+	    leaf token {
+		type string {
+		    length 1..64;
+		}
+		description
+		    "Token granting License or License features.";
+	    }
+	}
+
+	output {
+	    leaf license-phrase {
+		type string;
+	    }
+	    leaf text {
+		type string;
+		description
+		    "The License text.";
+	    }
+	}
+    }
+
+    rpc license-get {
+	description
+	    "License information.";
+
+	output {
+	    leaf license-phrase {
+		type string;
+		description
+		    "The license phrase for the License.";
+	    }
+
+	    leaf name {
+		type string;
+		description
+		    "The name of a contact for the License holder.";
+	    }
+
+	    leaf email {
+		type string;
+		description
+		    "The email of a contact for the License holder.";
+	    }
+
+	    leaf text {
+		type string;
+		description
+		    "The text of the License as a PEM certificate.";
+	    }
+
+	    container extensions {
+		description
+		    "License extensions specifying enabled features
+		     and abilities along with their valide dates.";
+
+		list extension {
+		    key oid;
+
+		    leaf oid {
+			type string;
+			description
+			    "Extension OID.";
+		    }
+
+		    leaf name {
+			type string;
+			description
+			    "Extension name.";
+		    }
+
+		    leaf value {
+			type string;
+			description
+			    "Extension value.";
+		    }
+		}
+	    }
+	}
+    }
+
+
+    container license {
+	description
+	    "License configuration.";
+
+	ngcliext:node-fmt "$% request ${name} ${email}$n";
+
+	leaf name {
+	    type string;
+	    description
+		"The name of a contact for the License holder.";
+	    ngcliext:child-fmt "$% $q@@$q";
+	}
+
+	leaf email {
+	    type string;
+	    description
+		"The email of a contact for the License holder.";
+	    ngcliext:child-fmt "$% $q@@$q";
+	}
+
+	leaf license-phrase {
+	    type string;
+	    description
+		"The license phrase for the License.";
+	}
+
+	leaf text {
+	    type string;
+	    description
+		"The text of the License.";
+	}
+    }
+}

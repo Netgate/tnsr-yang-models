@@ -35,6 +35,16 @@ module netgate-proxy-arp {
 
 	 Copyright 2025 Rubicon Communications, LLC.";
 
+    revision 2025-10-01 {
+	description
+	    "TNSR Release 25.10.";
+    }
+
+    revision 2025-06-01 {
+	description
+	    "TNSR Release 25.06.";
+    }
+
     container proxy-arp-config {
 	description "ARP proxy configuration";
 

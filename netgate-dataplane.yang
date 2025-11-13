@@ -31,6 +31,11 @@ module netgate-dataplane {
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	";
 
+    revision 2025-10-01 {
+	description
+	    "TNSR Release 25.10.";
+    }
+
     revision 2025-06-01 {
 	description
 	    "TNSR Release 25.06.";
@@ -831,39 +836,6 @@ module netgate-dataplane {
 		    "Delay in ms between processing batches of netlink
 		     messages.";
 		ngcliext:node-fmt "$< $% @@$n";
-	    }
-	}
-
-	container vhost-user {
-	    description
-		"vhost-user startup configuration parameters.";
-
-	    ngcliext:parent-fmt "$< $%";
-
-	    leaf coalesce-frames {
-		type uint32;
-		description
-		    "Minimum number of packet frames before transmission.
-		     Default is 32 frames.";
-		ngcliext:node-fmt "$< $% @@$n";
-	    }
-
-	    leaf coalesce-time {
-		type uint32;
-		units "microseconds";
-		description
-		    "Maximum time in microseconds to hold packet frames
-		     before transmission. Default is 1000 microseconds.";
-		ngcliext:node-fmt "$< $% @@$n";
-	    }
-
-	    leaf dont-dump-memory {
-		type boolean;
-		description
-		    "If true, vhost-user shared memory segments will not be
-		     added to corefiles. Default is false.";
-		ngcliext:node-op "bool";
-		ngcliext:node-fmt "|$< $%$n";
 	    }
 	}
     }

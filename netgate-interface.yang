@@ -25,12 +25,12 @@ module netgate-interface {
 	prefix "ngcom";
     }
 
-    import netgate-nat {
-	prefix "ngnat";
-    }
-
     import netgate-macip {
 	prefix "ngmacip";
+    }
+
+    import netgate-dataplane {
+	prefix "ngdataplane";
     }
 
     organization "Netgate";
@@ -42,6 +42,11 @@ module netgate-interface {
 
 	 Copyright 2017-2025 Rubicon Communications, LLC.
 	";
+
+    revision 2025-10-02 {
+	description
+	    "TNSR Release 25.10.";
+    }
 
     revision 2025-06-02 {
 	description
@@ -544,14 +549,6 @@ module netgate-interface {
 		ngcliext:node-fmt "^$% @@$n";
 	    }
 
-	    leaf nat-interface {
-		type ngnat:nat-side;
-		description
-		    "NAT role.";
-		ngcliext:context "intf-interfaces";
-		ngcliext:node-fmt "^ip nat @@$n";
-	    }
-
 	    leaf mac-address {
 		type yang:mac-address;
 		description
@@ -710,7 +707,10 @@ module netgate-interface {
 		    "Enables IPv6";
 		description
 		    "Parameters for the IPv6 address family.";
-
+		must './ngif:mtu or ../ngif:mtu >= 1280 or /ngdataplane:dataplane-config/ngdataplane:ethernet/ngdataplane:default-mtu >= 1280' {
+		    error-message
+			"IPv6 mandates an MTU 1280 or greater";
+		}
 		ngcliext:parent-fmt "^ipv6";
 		
 		container address {
@@ -1026,7 +1026,7 @@ module netgate-interface {
 		must "not(../ipv6)" {
 		    error-message "IPv6 config not allowed on bond slave interfaces.";
 		}
-		must "not(../nat-interface or ../mac-address or ../vrf or ../bridge or ../dhcp-client or ../access-list or ../lldp or ../map or ../vlan-tag-rewrite)" {
+		must "not(../mac-address or ../vrf or ../bridge or ../dhcp-client or ../access-list or ../lldp or ../map or ../vlan-tag-rewrite)" {
 		    error-message "Invalid configuration on bond slave interface.";
 		}
 
@@ -1393,28 +1393,47 @@ module netgate-interface {
 		    description
 			"The secret is used to match and authenticate
 			 the other end of the connection.";
-		    ngcliext:node-fmt "^$% @@$n";
+		    ngcliext:node-fmt "^$% $q@@$q$n";
 		}
 
-		container client {
-		    presence
-			"If present, the role of this memif is 'client'.
-			 If not present, the role is 'server'.";
+		choice role {
+		    mandatory true;
+		    description
+			"Interface role (client or server).";
+		    case client {
+			container client {
+			    presence
+				"If present, the role of this memif is 'client'.";
 
-		    ngcliext:node-fmt "^role client%{rx-queues}%{tx-queues}$n";
+			    ngcliext:node-fmt "^role client$n";
+			    ngcliext:parent-fmt "^role client";
 
-		    leaf rx-queues {
-			type uint8;
-			description
-			    "The number of slave rx queues.";
-			ngcliext:sibling-fmt " $% @@";
+			    leaf rx-queues {
+				type uint8 {
+				    range "1..255";
+				}
+				description
+				    "The number of slave rx queues.";
+				ngcliext:node-fmt "$< $% @@$n";
+			    }
+
+			    leaf tx-queues {
+				type uint8 {
+				    range "1..255";
+				}
+				description
+				    "The number of slave tx queues.";
+				ngcliext:node-fmt "$< $% @@$n";
+			    }
+			}
 		    }
+		    case server {
+			container server {
+			    presence
+				"If present, the role of this memif is 'server'.";
 
-		    leaf tx-queues {
-			type uint8;
-			description
-			    "The number of slave tx queues.";
-			ngcliext:sibling-fmt " $% @@";
+			    ngcliext:node-fmt "^role server$n";
+			}
 		    }
 		}
 	    }
@@ -1735,13 +1754,6 @@ module netgate-interface {
 		description
 		    "The Media Access Control (MAC) address of the
 		    interface.";
-	    }
-
-	    leaf nat-side {
-		type string;
-		description
-		    "If used as a NAT interface, either 'inside'
-		     'outside', or 'both'.";
 	    }
 
 	    leaf vrf {

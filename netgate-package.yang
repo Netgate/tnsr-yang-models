@@ -16,8 +16,13 @@ module netgate-package {
     description
 	"This YANG module provides a data model for network interfaces.
 
-	 Copyright 2018-2020 Rubicon Communications, LLC.
+	 Copyright 2018-2020,2023,2025 Rubicon Communications, LLC.
 	";
+
+    revision 2025-10-01 {
+	description
+	    "TNSR Release 25.10.";
+    }
 
     revision 2020-06-15 {
 	description
@@ -214,5 +219,12 @@ module netgate-package {
 		    "results of package operation";
 	    }
         }
+    }
+
+    notification netgate-upgrade-event {
+	description "Package upgrade notification event.";
+	leaf message {
+		type string;
+	}
     }
 }

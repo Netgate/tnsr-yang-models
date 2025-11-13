@@ -291,7 +291,7 @@ module netgate-logging {
 	    }
 	    enum ntp {
 		description
-		    "ntp.service or ntpd-dataplane.service";
+		    "chrony.service or chrony-dataplane.service";
 	    }
 	    enum dhcp {
 		description

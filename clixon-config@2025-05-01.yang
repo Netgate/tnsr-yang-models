@@ -52,6 +52,11 @@ module clixon-config {
     revision 2025-05-01 {
         description
             "Added options:
+                CLICON_EVENT_SELECT
+             Deprecated
+                CLICON_CLI_EXPAND_LEAFREF {
+             Obsoleted:
+                CLICON_STREAM_URL
              Release in Clixon 7.5";
     }
     revision 2024-11-01 {
@@ -432,7 +437,9 @@ module clixon-config {
             enum except {
                 description
                   "Exact match between NACM user and unix socket peer user, except
-                   for root and www user (restconf).";
+                   for root, CLICON_RESTCONF_USER and conroller:CONTROLLER_PYAPI_USER.
+                   Misleading term, 'proxy' would have been better.
+                   ";
             }
         }
     }
@@ -700,8 +707,7 @@ module clixon-config {
             description
                 "Backend privileges mode.
                  If CLICON_BACKEND_USER user is set, mode can be set to drop_perm or
-                 drop_temp.
-                 Drop privs may not be used together with CLICON_XMLDB_MULTI";
+                 drop_temp.";
         }
         leaf CLICON_BACKEND_PIDFILE {
             type string;
@@ -855,11 +861,10 @@ module clixon-config {
         leaf CLICON_RESTCONF_USER {
             type string;
             description
-                "Run clixon_daemon as this user
-                 When drop privileges is used, the daemon will drop privileges to this user.
-                 In pre-5.2 code this was configured as compile-time constant WWWUSER with
-                 default value www-data
-                 See also CLICON_PRIVILEGES setting";
+                "Run restconf daemon as this user
+                 When drop privileges is used, the daemon will drop privileges to this user
+                 Also: if CLICON_NACM_CREDENTIALS=except, the backend accepts this restconf
+                 user acting as a proxy for other users";
             default www-data;
         }
         leaf CLICON_RESTCONF_PRIVILEGES {
@@ -924,7 +929,7 @@ module clixon-config {
                  Both feature clixon-restconf:http-data and restconf/enable-http-data
                  must be enabled for this match to occur.";
         }
-        /* Clixon CLI */
+        /* Clixon CLI, see also clixon-autocli.yang */
         leaf CLICON_CLI_DIR {
             type string;
             description
@@ -1006,7 +1011,8 @@ module clixon-config {
             default "~/.clixon_cli_history";
             description
                 "Name of CLI history file. If not given, history is not saved.
-                 The number of lines is saved is given by CLICON_CLI_HIST_SIZE.";
+                 The number of lines is saved is given by CLICON_CLI_HIST_SIZE.
+                 The filename is expanded, ie, can be relative and include tilde";
         }
         leaf CLICON_CLI_HIST_SIZE {
             type int32;
@@ -1053,7 +1059,7 @@ module clixon-config {
         }
         leaf CLICON_CLI_EXPAND_LEAFREF {
             type boolean;
-            default false;
+            default true;
             description
                 "If true, then CLI expansion of leafrefs (in expand_dbvar) are done using the
                  source values, not the references.
@@ -1063,8 +1069,13 @@ module clixon-config {
                    <ifref>b</ifref>
                  If true, expansion will suggest a, b, c (source if values)
                  If false, expansion will suggest b (destination ifref values)
-                 While setting this value makes sense for adding new values, it makes less sense for
-                 deleting.";
+                 While setting this value makes sense for adding new values, it makes less sense
+                 for deleting.
+                 Deprecated in 7.5,
+                 Instead of 'false', use:
+                 label 'leafref-no-refer' or @add:leafref-no-refer in @tree syntax";
+            status deprecated;
+
         }
         leaf CLICON_CLI_OUTPUT_FORMAT {
             type cl:datastore_format;
@@ -1334,7 +1345,11 @@ module clixon-config {
             description
                 "Verify nacm user credentials with unix socket peer cred.
                  This means nacm user must match unix user accessing the backend
-                 socket.";
+                 socket according to the nacm_cred_mode enum:
+                 none: sont check users
+                 exact: Only exact match between peer user and nacm user
+                 except: Exact match except some users that can act as proxy for other users
+                 ";
         }
         leaf CLICON_NACM_RECOVERY_USER {
             type string;
@@ -1383,10 +1398,11 @@ module clixon-config {
             type boolean;
             default false;
             description
-                "Enable monitoring information for the RESTCONF protocol from RFC 8040 as specified
-                 in module ietf-restconf-monitoring.yang
-                 Note that the name of this option is misleading, the monitoring module defines state
-                 for both capabilities and streams, not only streams which the name indicates.
+                "Enable monitoring information for the RESTCONF protocol from RFC 8040
+                 as specified in module ietf-restconf-monitoring.yang
+                 Note that the name of this option is misleading, the monitoring
+                 module defines state for both capabilities and streams, not only
+                 streams which the name indicates.
                  Also, consider changing default to true.";
         }
         leaf CLICON_STREAM_URL {
@@ -1395,22 +1411,24 @@ module clixon-config {
             description
                 "Stream URL
                  See RFC 8040 Sec 9.3 location leaf:
-                  'Contains a URL that represents the entry point for
-                 establishing notification delivery via server-sent events.'
-                 Prepend this constant to name of stream.
+                    Contains a URL that represents the entry point for
+                    establishing notification delivery via server-sent events.
                  Example: https://localhost/streams/NETCONF. Note this is the
                  external URL, not local behind a reverse-proxy.
                  Note that -s <stream> command-line option to clixon_restconf
                  should correspond to last path of url (eg 'streams')";
+            status obsolete;
         }
         leaf CLICON_STREAM_PATH {
             type string;
             default "streams";
             description
-                "Stream path appended to CLICON_STREAM_URL to form
+                "Stream path appended to URI to form
                  stream subscription URL.
-                 See CLICON_RESTCONF_API_ROOT and CLICON_HTTP_DATA_ROOT
-                 Should be changed to include '/' ";
+                 Construct an URL for stream 'mystream' as follows:
+                    CLICON_STREAM_PATH/mystream
+                 See also CLICON_RESTCONF_API_ROOT and CLICON_HTTP_DATA_ROOT
+                 as alternative base URL:s";
         }
         leaf CLICON_STREAM_RETENTION {
             type uint32;

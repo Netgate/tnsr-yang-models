@@ -24,8 +24,13 @@ module netgate-ntp {
     description
 	"This YANG module provides a data-model for the NTP service.
 
-	 Copyright 2018-2020 Rubicon Communications, LLC.
+	 Copyright 2018-2025 Rubicon Communications, LLC.
 	";
+
+    revision 2025-06-01 {
+	description
+	    "TNSR Release 25.06.";
+    }
 
     revision 2021-11-15 {
 	description
@@ -62,55 +67,6 @@ module netgate-ntp {
 	    "Initial Revision.";
     }
 
-    typedef ntp-restriction-special {
-	type enumeration {
-	    enum default {
-		description
-		    "Default restrictions";
-	    }
-	    enum source {
-		description
-		    "Source restrictions";
-	    }
-	}
-	description
-	    "Enumeration of special NTP restriction values other than
-	     network specifications.";
-    }
-
-    typedef ntp-restriction-address {
-	type union {
-	    type inet:ip-prefix;
-	    type inet:domain-name;
-	    type ntp-restriction-special;
-	}
-	description
-	    "NTP restriction address type which can be a special name
-	     or an IP prefix.";
-
-    }
-
-    typedef ntp-interface-action {
-	type enumeration {
-	    enum listen {
-		description
-		    "Listen for matching packets.";
-	    }
-	    enum ignore {
-		description
-		    "Prevent opening matching packets.";
-	    }
-	    enum drop {
-		description
-		    "Drop causes ntpd to open the address and drop all
-		     the received packets without examination.";
-	    }
-	}
-	description
-	    "List of special interface address class names.";
-
-    }
-
     typedef ntp-server-mode {
 	type enumeration {
 	    enum server {
@@ -124,81 +80,33 @@ module netgate-ntp {
 	}
 	description
 	    "Enumeration of server types.";
-
     }
 
-    typedef ntp-log-action {
+    typedef ntp-access-action {
 	type enumeration {
-	    enum set {
+	    enum allow {
 		description
-		    "Set";
+		    "Allow access.";
 	    }
-	    enum add {
+	    enum deny {
 		description
-		    "Add";
-	    }
-	    enum delete {
-		description
-		    "Delete";
+		    "Deny access.";
 	    }
 	}
-    }
-
-    typedef ntp-log-class {
-	type enumeration {
-	    enum all {
-		description
-		    "All";
-	    }
-	    enum clock {
-		description
-		    "Clock";
-	    }
-	    enum peer {
-		description
-		    "Peer";
-	    }
-	    enum sys {
-		description
-		    "Sys";
-	    }
-	    enum sync {
-		description
-		    "Sync";
-	    }
-	}
-    }
-
-    typedef ntp-log-type {
-	type enumeration {
-	    enum all {
-		description
-		    "All";
-	    }
-	    enum info {
-		description
-		    "Info";
-	    }
-	    enum events {
-		description
-		    "events";
-	    }
-	    enum statistics {
-		description
-		    "Statistics";
-	    }
-	    enum status {
-		description
-		    "Status";
-	    }
-	}
+	description
+	    "List of access rule actions.";
     }
 
     typedef ntp-selection {
 	type enumeration {
-	    enum "rejected" {
+	    enum "selected" {
 		description
-		    "rejected";
+		    "selected";
+	    }
+
+	    enum "nonselectable" {
+		description
+		    "cannot be selected";
 	    }
 
 	    enum "falsetick" {
@@ -206,120 +114,14 @@ module netgate-ntp {
 		    "discarded by intersection algorithm";
 	    }
 
-	    enum "excess" {
+	    enum "jittery" {
 		description
-		    "discarded by table overflow";
+		    "jittery";
 	    }
 
-	    enum "outlier" {
+	    enum "unselected" {
 		description
-		    "discarded by cluster algorithm";
-	    }
-
-	    enum "candidate" {
-		description
-		    "included by the combine algorithm";
-	    }
-
-	    enum "backup" {
-		description
-		    "backup source";
-	    }
-
-	    enum "sys.peer" {
-		description
-		    "synchronization source";
-	    }
-
-	    enum "pps.peer" {
-		description
-		    "Pulse per second peer";
-	    }
-	}
-    }
-
-
-    typedef ntp-event {
-	type enumeration {
-	    enum "unspecified" {
-		description
-		    "unspecified";
-	    }
-
-	    enum "mobilize" {
-		description
-		    "association mobilized";
-	    }
-
-	    enum "demobilized" {
-		description
-		    "association demobilized";
-	    }
-
-	    enum "unreachable" {
-		description
-		    "peer unreachable (peer.reach was nonzero now zero)";
-	    }
-
-	    enum "rechable" {
-		description
-		    "peer reachable (peer.reach was zero now nonzero)";
-	    }
-
-	    enum "restart" {
-		description
-		    "association restarted or timed out";
-	    }
-
-	    enum "no_reply" {
-		description
-		    "no reply (only used with one-shot ntpd -q)";
-	    }
-
-	    enum "rate_exceeded" {
-		description
-		    "peer rate limit exceeded (kiss code RATE received)";
-	    }
-
-	    enum "access_denied" {
-		description
-		    "access denied (kiss code DENY received)";
-	    }
-
-	    enum "leap_armed" {
-		description
-		    "leap second insertion/deletion at month's end
-		     armed by peer vote";
-	    }
-
-	    enum "sys_peer" {
-		description
-		    "became system peer (sys.peer)";
-	    }
-
-	    enum "clock_event" {
-		description
-		    "reference clock event (see clock status word)";
-	    }
-
-	    enum "bad_auth" {
-		description
-		    "authentication failed";
-	    }
-
-	    enum "popcorn" {
-		description
-		    "popcorn spike suppressed by peer clock filter register";
-	    }
-
-	    enum "interleave_mode" {
-		description
-		    "entering interleaved mode";
-	    }
-
-	    enum "interleave_error" {
-		description
-		    "recovered from interleave error";
+		    "unselected";
 	    }
 	}
     }
@@ -367,15 +169,16 @@ module netgate-ntp {
 		    type string;
 		    description
 			"Full path name of the drift file.  If not specified,
-			 /var/lib/ntp/drift.";
+			 /var/lib/chrony/drift.";
 		    ngcliext:node-fmt "^$% @@$n";
 		}
 
-		leaf statsdir {
-		    type string;
+		leaf maxupdateskew {
+		    type decimal64 {
+			fraction-digits 3;
+		    }
 		    description
-			"Full path name of the statistics directory.  If not
-			 specified, /var/log/ntpstats";
+			"Maximum skew update threshold.";
 		    ngcliext:node-fmt "^$% @@$n";
 		}
 
@@ -389,6 +192,23 @@ module netgate-ntp {
 			type boolean;
 			description
 			    "If true, disable monitor.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
+		    }
+
+		    leaf rtcsync {
+			type boolean;
+			description
+			    "If true, disable RTC sync.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
+		    }
+
+		    leaf leapsectz {
+			type boolean;
+			description
+			    "If true, disable getting leap second
+			     info from the timezone database.";
 			ngcliext:node-op "bool";
 			ngcliext:node-fmt "|$< $%$n";
 		    }
@@ -407,6 +227,23 @@ module netgate-ntp {
 			ngcliext:node-op "bool";
 			ngcliext:node-fmt "|$< $%$n";
 		    }
+
+		    leaf rtcsync {
+			type boolean;
+			description
+			    "If true, enable RTC sync.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
+		    }
+
+		    leaf leapsectz {
+			type boolean;
+			description
+			    "If true, enable getting leap second
+			     info from the timezone database.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|$< $%$n";
+		    }
 		}
 	    }
 
@@ -414,169 +251,166 @@ module netgate-ntp {
 		description
 		    "Interface binding specifications.";
 
+		ngcliext:parent-fmt "interface";
 
-		list interface {
+		choice bind-designator {
+		    description "Binding spec.";
+
+		    case bindaddress {
+			leaf bind {
+			    type inet:ipv4-address-no-zone;
+			    description "IPv4 address to bind to.";
+			    ngcliext:node-fmt "^$< $% @@$n";
+			}
+
+			leaf bind6 {
+			    type inet:ipv6-address-no-zone;
+			    description "IPv6 address to bind to.";
+			    ngcliext:node-fmt "^$< $% @@$n";
+			}
+		    }
+
+		    case binddevice {
+			leaf binddevice {
+			    type ngcom:if-identifier;
+			    description "Interface to bind to.";
+			    ngcliext:node-fmt "^$< $% @@$n";
+			}
+		    }
+		}
+	    }
+
+	    container log {
+		description
+		    "Logging options";
+		    ngcliext:node-fmt "^$%$n";
+		    ngcliext:pre-children-op "push";
+
+		must "*" {
+		    error-message "At least one log specifer expected";
+		}
+
+		leaf rawmeasurements {
+		    type boolean;
+		    description
+			"Log raw NTP measurements";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|^$%$n";
+		}
+
+		leaf measurements {
+		    type boolean;
+		    description
+			"Log measurements";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|^$%$n";
+		}
+
+		leaf statistics {
+		    type boolean;
+		    description
+			"Log statistics";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|^$%$n";
+		}
+
+		leaf selection {
+		    type boolean;
+		    description
+			"Log source selection";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|^$%$n";
+		}
+
+		leaf tracking {
+		    type boolean;
+		    description
+			"Log changes to the estimate of system's
+			 gain or loss rate.";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|^$%$n";
+		}
+
+		leaf rtc {
+		    type boolean;
+		    description
+			"Log RTC information";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|^$%$n";
+		}
+
+		leaf refclocks {
+		    type boolean;
+		    description
+			"Log reference clock measurements";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|^$%$n";
+		}
+
+		leaf tempcomp {
+		    type boolean;
+		    description
+			"Log temperature compensation";
+		    ngcliext:node-op "bool";
+		    ngcliext:node-fmt "|^$%$n";
+		}
+	    }
+
+	    leaf logdir {
+		type string;
+		description
+		    "Full path name of the log directory.";
+		ngcliext:node-fmt "^$% @@$n";
+	    }
+
+	    container access-rules {
+		description
+		    "Access rules";
+
+		list access {
+		    description
+			"Allow and deny rules for NTP requests.";
+
 		    key "sequence";
-
-		    ngcliext:node-fmt "^interface";
-		    ngcliext:children-order "sequence action match-all match-interface match-ip-prefix";
+		    ngcliext:node-fmt "^access";
+		    ngcliext:children-order "sequence action all prefix";
 
 		    leaf sequence {
 			type uint32;
 			description
 			    "The sequence numbers provide an ordering for the
-			     list of interface commands.";
-			ngcliext:node-fmt " sequence @@";
+			     list of access commands.";
+			ngcliext:node-fmt " $% @@";
 		    }
 
 		    leaf action {
-			type ntp-interface-action;
-			description
-			    "One of the action keywords listen, ignore
-			     or drop to perform on a single matching
-			     keyword, interface, or IP prefix.";
+			type ntp-access-action;
+			mandatory true;
+
+			description "One of the action keywords: allow or deny";
 			ngcliext:node-fmt " @@";
 		    }
 
-		    leaf match-all {
-			type boolean;
+		    choice subject {
 			description
-			    "Match all interfaces.";
-			ngcliext:node-op "bool";
-			ngcliext:node-fmt "| all$n";
-		    }
-
-		    leaf match-interface {
-			type string;
-			description
-			    "Match an interface name.";
-			ngcliext:node-fmt " interface @@$n";
-		    }
-
-		    leaf match-ip-prefix {
-			type inet:ip-prefix;
-			description
-			    "Match an IP prefix.";
-			ngcliext:node-fmt " prefix @@$n";
-		    }
-		}
-	    }
-
-	    container logconfigs {
-		description
-		    "An ordered sequence of NTPD logconfig settings.";
-
-		ngcliext:parent-fmt "^logconfig";
-
-		list logconfig {
-		    key "sequence";
-
-		    ngcliext:node-fmt "$< sequence @{sequence} @{action} @{class} @{type}$n";
-
-		    leaf sequence {
-			type uint32;
-			description
-			    "Logconfig options must be ordered.";
-		    }
-
-		    leaf action {
-			type ntp-log-action;
-			description
-			    "One of the actions 'set', 'add', or 'delete'.";
-		    }
-
-		    leaf class {
-			type ntp-log-class;
-			description
-			    "One of the logging classes 'clock', 'peer',
-			     'sys', 'sync', or 'all'.";
-		    }
-
-		    leaf type {
-			type ntp-log-type;
-			description
-			    "One of the logging types 'info', 'events',
-			     'statistics', 'status', or 'all'.";
-		    }
-		}
-	    }
-
-	    container restrictions {
-		list restriction {
-		    key "address";
-
-		    ngcliext:node-fmt "^restrict @{address}$n";
-		    ngcliext:pre-children-op "push";
-
-		    leaf address {
-			type ntp-restriction-address;
+			    "Allow/deny for all or for a prefix.";
 			mandatory true;
-			description
-			    "Network to restrict.";
-		    }
 
-		    leaf address-family {
-			type ngcom:ip-address-family;
-			description
-			    "IP address family of this restriction.";
-		    }
+			leaf all {
+			    type boolean;
+			    description
+				"If true, allow access from all addresses.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "| $%$n";
+			}
 
-		    leaf kod {
-			type boolean;
-			description
-			    "If true, enable Kiss o' Death packets.";
-			ngcliext:node-op "bool";
-			ngcliext:node-fmt "|^$%$n";
-		    }
+			leaf prefix {
+			    type inet:ip-prefix;
+			    description
+				"If specified, allow access from this subnet.";
 
-		    leaf limited {
-			type boolean;
-			description
-			    "If true, enable Kiss o' Death packets.";
-			ngcliext:node-op "bool";
-			ngcliext:node-fmt "|^$%$n";
-		    }
-
-		    leaf nomodify {
-			type boolean;
-			description
-			    "If true, deny run-time config by ntpq and ntpdc.";
-			ngcliext:node-op "bool";
-			ngcliext:node-fmt "|^$%$n";
-		    }
-
-		    leaf noquery {
-			type boolean;
-			description
-			    "If true, disable ntpq/ntpdc queries.";
-			ngcliext:node-op "bool";
-			ngcliext:node-fmt "|^$%$n";
-		    }
-
-		    leaf noserve {
-			type boolean;
-			description
-			    "If true, disable service/everything except
-			     ntpq and ntpdc queries.";
-			ngcliext:node-op "bool";
-			ngcliext:node-fmt "|^$%$n";
-		    }
-
-		    leaf nopeer {
-			type boolean;
-			description
-			    "If true, deny peer association packets.";
-			ngcliext:node-op "bool";
-			ngcliext:node-fmt "|^$%$n";
-		    }
-
-		    leaf notrap {
-			type boolean;
-			description
-			    "If true, deny mode 6 control message trap
-			     service.";
-			ngcliext:node-op "bool";
-			ngcliext:node-fmt "|^$%$n";
+			    ngcliext:node-fmt " @@$n";
+			}
 		    }
 		}
 	    }
@@ -605,11 +439,21 @@ module netgate-ntp {
 			ngcliext:node-fmt "|^$%$n";
 		    }
 
+		    leaf burst {
+			type boolean;
+			description
+			    "If true, send a burst of attempts to an
+			     server that did not provide good measurements
+			     to speed up acquisition of time synchronization.";
+			ngcliext:node-op "bool";
+			ngcliext:node-fmt "|^$%$n";
+		    }
+
 		    leaf maxpoll {
 			type uint8 {
 			    range "7..17";
 			}
-			description    
+			description
 			    "Maximum poll interval expressed as a power of
 			     2 in seconds.";
 			ngcliext:node-fmt "^$% @@$n";
@@ -639,27 +483,100 @@ module netgate-ntp {
 			ngcliext:node-op "bool";
 			ngcliext:node-fmt "|^$%$n";
 		    }
+
+		    leaf maxsources {
+			type int32;
+			description
+			    "Desired number of sources to be used from
+			     the pool";
+			ngcliext:node-fmt "^$% @@$n";
+			must "../operational-mode = 'pool'" {
+			    error-message "maxsources can only be used for pools";
+			}
+		    }
 		}
 	    }
 
-	    container tinker {
+	    container maxchange {
 		description
-		    "Tinker options.";
+		    "Maxchange options.";
 
-		ngcliext:parent-fmt "^tinker";
+		ngcliext:node-fmt "^maxchange";
 
-		leaf panic {
-		    type uint32;
+		// FIXME: `mandatory true` on leafs makes the
+		// container mandatory too, somehow
+		must "offset and start and ignore" {
+		    error-message "offset, start and ignore must be present";
+		}
+
+		leaf offset {
+		    type decimal64 {
+			fraction-digits 3;
+		    }
 		    description
-			"Panic threshold in seconds.  0 disables.
-			 Default 1000.";
-		    ngcliext:node-fmt "$< $% @@$n";
+			"Maximum clock update offset in seconds.
+			 If the offset is greater
+			 than this value, the NTP daemon will exit
+			 unless start and ignore values prevent it.";
+		    ngcliext:node-fmt " offset @@";
+		}
+
+		leaf start {
+		    type int32;
+		    description
+			"Number of clock updates after which to
+			 begin checking the offset.";
+		    ngcliext:node-fmt " start @@";
+		}
+
+		leaf ignore {
+		    type int32;
+		    description
+			"Number of times to ignore clock updates
+			greater than the offset.";
+		    ngcliext:node-fmt " ignore @@$n";
+		}
+	    }
+
+	    container makestep {
+		description
+		    "Allow stepping system clock.";
+
+		ngcliext:node-fmt "^makestep";
+
+		// FIXME: `mandatory true` on leafs makes the
+		// container mandatory too, somehow
+		must "threshold and limit" {
+		    error-message "offset, start and ignore must be present";
+		}
+
+		leaf threshold {
+		    type decimal64 {
+			fraction-digits 3;
+		    }
+		    description
+			"Step threshold. The system clock will be stepped
+                         if the adjustment is larger than the specified
+                         value.";
+		    ngcliext:node-fmt " threshold @@";
+		}
+
+		leaf limit {
+		    type int32;
+		    description
+			"Number of initial clock updates during which
+                         stepping is allowed.";
+		    ngcliext:node-fmt " limit @@$n";
 		}
 	    }
 
 	    container tos {
 		description
 		    "TOS options.";
+
+		must "orphan" {
+		    error-message "'orphan' is expected";
+		}
 
 		ngcliext:parent-fmt "^tos";
 
@@ -705,13 +622,6 @@ module netgate-ntp {
 			    "The association's rw hex status value.";
 		    }
 
-		    leaf persistent {
-			type boolean;
-			description
-			    "If true, the association condition is
-			     persistent.";
-		    }
-
 		    leaf auth-enable {
 			type boolean;
 			description
@@ -732,37 +642,12 @@ module netgate-ntp {
 			    "If true, the association is reachable.";
 		    }
 
-		    leaf broadcast {
-			type boolean;
-			description
-			    "If true, this is a broadcast association.";
-		    }
-
 		    leaf selection {
 			type ntp-selection;
 			description
-			    "One of the NTP peer selections rejected,
-			     falsetick, excess, outlier, candidate,
-			     backup, sys.peer, or pps.peer.";
-		    }
-
-		    leaf last-event {
-			type ntp-event;
-			description
-			    "The most recent event received from this
-			     peer.";
-		    }
-
-		    leaf event-count {
-			type uint8 {
-			    range "0..15";
-			}
-			description
-			    "This is the number of peer exception
-			     events that occurred since the last time
-			     the peer event code changed.  Upon
-			     reaching 15, subsequent events with the
-			     same code are not counted.";
+			    "One of the NTP peer selections selected,
+			     nonselectable, falsetick, jittery, unselected,
+			     or selectable.";
 		    }
 		}
 
@@ -792,7 +677,7 @@ module netgate-ntp {
 				"If needed, the raw value might be decoded
 				 into something more legible.";
 			}
-		    }	
+		    }
 		}
 	    }
 	}

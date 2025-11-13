@@ -1407,6 +1407,75 @@ module netgate-kea {
 		    ngcliext:node-fmt "^$% @@$n";
 		}
 
+		container expired-leases-processing {
+			leaf reclaim-timer-wait-time {
+				type uint16;
+				default 10;
+				description
+				"This parameter governs intervals between the
+				completion of the previous reclamation cycle
+				and the start of the next one.
+				Expressed in seconds.";
+				ngcliext:node-fmt "^$^ $% @@$n";
+			}
+
+			leaf flush-reclaimed-timer-wait-time {
+				type uint16;
+				default 25;
+				description
+				"This parameter controls how often the server
+				initiates the lease reclamation procedure.
+				Expressed in seconds.";
+				ngcliext:node-fmt "^$^ $% @@$n";
+			}
+
+			leaf hold-reclaimed-time {
+				type uint32;
+				default 3600;
+				description
+				"This parameter governs how long the lease
+				should be kept after it is reclaimed.
+				This enables lease affinity when set to
+				a non-zero value.
+				Expressed in seconds.";
+				ngcliext:node-fmt "^$^ $% @@$n";
+			}
+
+			leaf max-reclaim-leases {
+				type uint32;
+				default 100;
+				description
+				"This parameter specifies the maximum number
+				of reclaimed leases that can be processed at
+				one time. Zero means unlimited.";
+				ngcliext:node-fmt "^$^ $% @@$n";
+			}
+
+			leaf max-reclaim-time {
+				type uint16 {
+				range "0..10000";
+				}
+				default 250;
+				description
+				"This parameter specifies an upper limit to
+				the length of time a lease reclamation
+				procedure can take. Zero means no time limit.
+				Expressed in milliseconds.";
+				ngcliext:node-fmt "^$^ $% @@$n";
+			}
+
+			leaf unwarned-reclaim-cycles {
+				type uint16;
+				default 5;
+				description
+				"This parameter specifies how many consecutive
+				clean-up cycles must end with remaining leases
+				to be processed before a warning is printed.
+				The default is 5 cycles.";
+				ngcliext:node-fmt "^$^ $% @@$n";
+			}
+		}
+
 		container lease-database {
 
 		    ngcliext:parent-fmt "^lease";

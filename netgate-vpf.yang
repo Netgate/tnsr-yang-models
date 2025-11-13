@@ -35,7 +35,7 @@ module netgate-vpf {
 
 	 Copyright 2024, 2025 Rubicon Communications, LLC.";
 
-    revision 2025-06-03 {
+    revision 2025-06-05 {
 	description
 	    "TNSR Release 25.06.";
     }
@@ -76,11 +76,6 @@ module netgate-vpf {
 		value 2;
 		description "Outbound filter on packet transmit.";
 	    }
-
-	    enum both {
-		value 3;
-		description "Filter applied to packets in both directions.";
-	    }
 	}
     }
 
@@ -99,13 +94,23 @@ module netgate-vpf {
 			 addr = net-addr | (orig-addr & ~mask).";
 	    }
 
+	    enum "src-ip-hash" {
+		description
+		    "The translation address for a new connection is
+		     selected based on a hash of the original source
+		     address.  This algorithm attempts to keep all
+		     connections of particular client associated with
+		     the same translation address.";
+	    }
+
 	    enum "ip-hash" {
 		description
 		    "The translation address for a new connection is
 		     selected based on a hash of the original source
-		     and destination addresses.  This algorithms
+		     and destination addresses.  This algorithm
 		     attempts to keep all connections of particular
-		     client associated with the same translation address.
+		     client to particular server associated with
+		     the same translation address.
 		     This is the default algorithm.";
 	    }
 
@@ -131,7 +136,7 @@ module netgate-vpf {
 	}
 
 	leaf filter-only {
-	    type boolean;
+	    type boolean ;
 	    description "Match only filter connections.";
 	}
 
@@ -240,17 +245,17 @@ module netgate-vpf {
     typedef vpf-connection-state-generic {
 	type enumeration {
 	    enum new {
-		value 1;
+		value 0;
 		description "New.";
 	    }
 
 	    enum established {
-		value 2;
+		value 1;
 		description "Established.";
 	    }
 
 	    enum closed {
-		value 3;
+		value 2;
 		description "Closed.";
 	    }
 	}
@@ -698,15 +703,15 @@ module netgate-vpf {
 		}
 	    }
 
-	    case table-name {
-		leaf table-name {
+	    case prefix-table-name {
+		leaf prefix-table-name {
 		    type leafref {
 			path "/ngvpf:vpf-config"
 			    + "/ngvpf:prefix-tables"
 			    + "/ngvpf:table"
 			    + "/ngvpf:name";
 		    }
-		    ngcliext:node-fmt "$< table @@$n";
+		    ngcliext:node-fmt "$< prefix-table @@$n";
 		}
 	    }
 
@@ -718,18 +723,36 @@ module netgate-vpf {
 	    }
 	}
 
-	leaf port-min {
-	    type uint16;
-	    description
-		"The first source port in a range.";
-		ngcliext:node-fmt "$< port @@%{port-max}$n";
-	}
+	choice port-type {
+	    description "VPF source or destination ports";
 
-	leaf port-max {
-	    type uint16;
-	    description
-		"The last source port in a range.";
-	    ngcliext:sibling-fmt " @@";
+	    case port-range {
+		leaf port-min {
+		    type uint16;
+		    description
+			"The first source port in a range.";
+			ngcliext:node-fmt "$< port @@%{port-max}$n";
+		}
+
+		leaf port-max {
+		    type uint16;
+		    description
+			"The last source port in a range.";
+		    ngcliext:sibling-fmt " @@";
+		}
+	    }
+
+	    case port-table {
+		leaf port-table-name {
+		    type leafref {
+			path "/ngvpf:vpf-config"
+			    + "/ngvpf:port-tables"
+			    + "/ngvpf:table"
+			    + "/ngvpf:name";
+		    }
+		    ngcliext:node-fmt "$< port-table @@$n";
+		}
+	    }
 	}
     }
 
@@ -846,7 +869,8 @@ module netgate-vpf {
 	description
 	    "VPP Packet Filter (VPF) data needed to support VPP.
 	     It consists of a set of named tables containing IP prefixes,
-	     a set of named filtering rules, and a set of named NAT rules.";
+	     named tables containing ports, a set of named filtering rules,
+	     and a set of named NAT rules.";
 
 	ngcliext:parent-fmt "vpf";
 
@@ -854,7 +878,7 @@ module netgate-vpf {
 	    description
 		"Tables of named IP prefix lists.";
 
-	    ngcliext:parent-fmt "$< table";
+	    ngcliext:parent-fmt "$< prefix-table";
 	    ngcliext:post-node-fmt "$n";
 
 	    list table {
@@ -899,6 +923,60 @@ module netgate-vpf {
 			    ngcliext:node-fmt " description @@";
 			    cl:ignore-compare;
 			}
+		    }
+		}
+	    }
+	}
+
+	container port-tables {
+	    description
+		"Tables of named port lists.";
+
+	    ngcliext:parent-fmt "$< port-table";
+	    ngcliext:post-node-fmt "$n";
+
+	    list table {
+		key "name";
+
+		ngcliext:node-fmt "$< @{name}$n";
+		ngcliext:pre-children-op "push";
+
+		leaf name {
+		    type ngcom:identifier-63;
+		    description
+			"The name of a port table.";
+		}
+
+		leaf description {
+		    type ngcom:description-63;
+		    description
+			"A text description of the VPF port table.";
+		    ngcliext:node-fmt "^description @@$n";
+		    cl:ignore-compare;
+		}
+		
+		container ports {
+		    description
+			"A named set of ports.";
+
+		    list port {
+		        description "List of ports";
+
+		        key "port-value";
+		        ngcliext:post-child-fmt "$n";
+
+		        leaf port-value {
+		            type uint16;
+		            description "Port.";
+		            ngcliext:node-fmt "^port @@";
+		        }
+
+		        leaf description {
+		            type ngcom:description-63;
+		            description "A user description of the VPF port table entry.";
+		            ngcliext:node-fmt " description @@";
+		            cl:ignore-compare;
+		        }
 		    }
 		}
 	    }
@@ -1039,9 +1117,9 @@ module netgate-vpf {
 
 			leaf direction {
 			    type vpf-filter-direction;
-			    default both;
+			    default out;
 			    description
-				"One of 'in', 'out', or 'both'.";
+				"One of 'in', 'out'.";
 			    ngcliext:node-fmt "^$% @@$n";
 			}
 		    }
@@ -1148,12 +1226,50 @@ module netgate-vpf {
 			    description
 				"NAT translation information.";
 
-			    leaf port {
-				type uint16;
-				description
-				    "Port to use for translation.
-				     0 means no port.";
-				ngcliext:node-fmt "^nat-port @@$n";
+			    choice translation-port-or-range {
+				case translation-port {
+				    leaf port {
+			    	        type uint16;
+			    	        description
+			    	            "Port to use for translation.
+			    	             0 means no port.";
+			    	        ngcliext:node-fmt "^nat-port @@$n";
+			    	    }
+				}
+
+				case translation-range {
+				    leaf port-min {
+			    	        type uint16;
+			    	        description
+			    	            "Minimum port to use for translation.
+			    	             0 means no port.";
+			    	        ngcliext:node-fmt "^nat-port-range @@";
+					must "current() = '0' or ../../dynamic = 'true'" {
+					    error-message
+					        "NAT Rule must be dynamic to use " +
+						"translation port range";
+					}
+			    	    }
+
+				    leaf port-max {
+			    	        type uint16;
+			    	        description
+			    	            "Maximum port to use for translation.
+			    	             0 means no port.";
+			    	        ngcliext:node-fmt " @@$n";
+					must "current() = '0' or ../../dynamic = 'true'" {
+					    error-message
+					        "NAT Rule must be dynamic to use " +
+						"translation port range";
+					}
+					must ". > ../port-min" {
+					    error-message
+						"port-max must be greater than port-min.";
+					}
+					mandatory true;
+					when "../port-min";
+			    	    }
+				}
 			    }
 
 			    choice translation-type {
@@ -1176,14 +1292,14 @@ module netgate-vpf {
 				    }
 				}
 
-				case table-name {
-				    leaf table-name {
+				case prefix-table-name {
+				    leaf prefix-table-name {
 					type leafref {
 					    path "/ngvpf:vpf-config/ngvpf:prefix-tables/ngvpf:table/ngvpf:name";
 					}
 					description
 					    "Translation table name.";
-					ngcliext:node-fmt "^nat-table @@$n";
+					ngcliext:node-fmt "^nat-prefix-table @@$n";
 				    }
 				}
 			    }
@@ -1214,6 +1330,21 @@ module netgate-vpf {
 			    ngcliext:node-op "bool";
 			    ngcliext:node-fmt "|^$%$n";
 			}
+
+			leaf endpoint-independent {
+			    type boolean;
+			    description
+				"Create endpoint-independent state.";
+			    must "current() = 'false' or
+				(../dynamic = 'true' and ../direction = 'out')" {
+				error-message
+				    "NAT Rule must be dynamic with direction out to use " +
+				    "endpoint-independent state";
+			    }
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|^$%$n";
+			}
+
 		    }
 		}
 	    }
@@ -1275,9 +1406,9 @@ module netgate-vpf {
 			    range "1024..65535";
 			}
 			must ". >= ../min-port" {
-			    description
-				"This value MUST be greater or equal to
-				 min-port.";
+			    error-message
+				"max-port value MUST be greater or equal to" +
+				 " min-port.";
 			}
 			default 49151;
 			description
@@ -1690,6 +1821,48 @@ module netgate-vpf {
 	    }
 	}
 
+	container port-tables {
+	    description
+		"Tables of named port lists.";
+
+	    list table {
+		key "name";
+
+		leaf name {
+		    type ngcom:identifier-63;
+		    description
+			"The name of a port table.";
+		}
+
+		leaf description {
+		    type ngcom:description-63;
+		    description
+			"A text description of the VPF port table.";
+		}
+		
+		container ports {
+		    description
+			"A named set of ports.";
+
+		    list port {
+		        description "List of ports";
+
+		        key "port-value";
+
+		        leaf port-value {
+		            type uint16;
+		            description "Port.";
+		        }
+
+		        leaf description {
+		            type ngcom:description-63;
+		            description "A user description of the VPF port table entry.";
+		        }
+		    }
+		}
+	    }
+	}
+
 	container filter-rulesets {
 	    description
 		"A list of named VPF filter rulesets.";
@@ -1787,7 +1960,7 @@ module netgate-vpf {
 			leaf direction {
 			    type vpf-filter-direction;
 			    description
-				"One of 'in', 'out', or 'both'.";
+				"One of 'in', 'out'.";
 			}
 
 			leaf dest-route-table {
@@ -1875,11 +2048,31 @@ module netgate-vpf {
 			    description
 				"NAT translation information.";
 
-			    leaf port {
-				type uint16;
-				description
-				    "Port to use for translation.
-				     0 means no port.";
+			    choice translation-port-or-range {
+				case translation-port {
+				    leaf port {
+			    	        type uint16;
+			    	        description
+			    	            "Port to use for translation.
+			    	             0 means no port.";
+			    	    }
+				}
+
+				case translation-range {
+				    leaf port-min {
+			    	        type uint16;
+			    	        description
+			    	            "Minimum port to use for translation.
+			    	             0 means no port.";
+			    	    }
+
+				    leaf port-max {
+			    	        type uint16;
+			    	        description
+			    	            "Maximum port to use for translation.
+			    	             0 means no port.";
+			    	    }
+				}
 			    }
 
 			    choice translation-type {
@@ -1892,8 +2085,8 @@ module netgate-vpf {
 				    }
 				}
 
-				case table-name {
-				    leaf table-name {
+				case prefix-table-name {
+				    leaf prefix-table-name {
 					type ngcom:if-identifier-63;
 					description
 					    "Use Table name for
@@ -1923,6 +2116,12 @@ module netgate-vpf {
 				"Associate stateful connection entry with " +
 				"VRF of outbound interface instead of " +
 				"interface index.";
+			}
+
+			leaf endpoint-independent {
+			    type boolean;
+			    description
+				"Create endpoint-independent state.";
 			}
 
 			uses vpf-match-statistics;

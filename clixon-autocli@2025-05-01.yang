@@ -264,7 +264,11 @@ module clixon-autocli{
 
         leaf clispec-cache{
             description
-                "Autocli cache mode, none, read, write or both";
+                "Autocli cache to save generated autocli specs between runs.
+
+                 If enabled, before generating clispecs from YANG, check if
+                 a cached clispec already exists.
+                 One of disabled, read, write or readwrite";
             type cache-type;
             default disabled;
         }
