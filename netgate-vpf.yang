@@ -35,6 +35,11 @@ module netgate-vpf {
 
 	 Copyright 2024, 2025 Rubicon Communications, LLC.";
 
+    revision 2025-10-02 {
+	description
+	    "TNSR Release 25.10.";
+    }
+
     revision 2025-06-05 {
 	description
 	    "TNSR Release 25.06.";
@@ -455,7 +460,7 @@ module netgate-vpf {
 	    }
 	}
 
-	leaf last-heard {
+	leaf last-heard-ago {
 	    description "Time since last packet seen.";
 
 	    type decimal64 {
@@ -599,6 +604,58 @@ module netgate-vpf {
 	}
     }
 
+    grouping vpf-connection-statistics-by-protocol {
+	description "VPF connection statistics by IP protocol";
+
+	leaf tcp {
+	    type uint32;
+	    description "TCP connections.";
+	}
+
+	leaf udp {
+	    type uint32;
+	    description "UDP connections.";
+	}
+
+	leaf icmp {
+	    type uint32;
+	    description "ICMP connections.";
+	}
+
+	leaf other {
+	    type uint32;
+	    description "other connections.";
+	}
+    }
+
+    grouping vpf-connection-statistics-by-type {
+	description "VPF connection statistics by type";
+
+	container filter {
+	    uses vpf-connection-statistics-by-protocol;
+	}
+
+	container nat-endpoint-dependent {
+	    uses vpf-connection-statistics-by-protocol;
+	}
+
+	container nat-endpoint-independent {
+	    uses vpf-connection-statistics-by-protocol;
+	}
+    }
+
+    grouping vpf-connection-statistics-by-timer-status {
+	description "VPF connection statistics by timer status";
+
+	container active {
+	    uses vpf-connection-statistics-by-type;
+	}
+
+	container expired {
+	    uses vpf-connection-statistics-by-type;
+	}
+    }
+
     rpc vpf-connection-statistics-get {
 	output {
 	    list per-thread {
@@ -606,68 +663,12 @@ module netgate-vpf {
 		    type uint32;
 		}
 
-		leaf ip4-icmp-active {
-		    type uint32;
+		container ip4 {
+		    uses vpf-connection-statistics-by-timer-status;
 		}
 
-		leaf ip4-icmp-expired {
-		    type uint32;
-		}
-
-		leaf ip4-udp-active {
-		    type uint32;
-		}
-
-		leaf ip4-udp-expired {
-		    type uint32;
-		}
-
-		leaf ip4-tcp-active {
-		    type uint32;
-		}
-
-		leaf ip4-tcp-expired {
-		    type uint32;
-		}
-
-		leaf ip4-other-active {
-		    type uint32;
-		}
-
-		leaf ip4-other-expired {
-		    type uint32;
-		}
-
-		leaf ip6-icmp-active {
-		    type uint32;
-		}
-
-		leaf ip6-icmp-expired {
-		    type uint32;
-		}
-
-		leaf ip6-udp-active {
-		    type uint32;
-		}
-
-		leaf ip6-udp-expired {
-		    type uint32;
-		}
-
-		leaf ip6-tcp-active {
-		    type uint32;
-		}
-
-		leaf ip6-tcp-expired {
-		    type uint32;
-		}
-
-		leaf ip6-other-active {
-		    type uint32;
-		}
-
-		leaf ip6-other-expired {
-		    type uint32;
+		container ip6 {
+		    uses vpf-connection-statistics-by-timer-status;
 		}
 	    }
 	}
@@ -789,14 +790,14 @@ module netgate-vpf {
 	    type ngcom:tcp-flags;
 	    description
 		"The TCP flags mask as a set of names.";
-	    ngcliext:node-fmt "^tcp flags mask $q@@$q$n";
+	    ngcliext:node-fmt "^tcp flags mask @@$n";
 	}
 
 	leaf tcp-flags-value {
 	    type ngcom:tcp-flags;
 	    description
 		"The TCP flags value as a set of flags names.";
-	    ngcliext:node-fmt "^tcp flags value $q@@$q$n";
+	    ngcliext:node-fmt "^tcp flags value @@$n";
 	}
 
 	leaf icmp-type {
@@ -1561,25 +1562,29 @@ module netgate-vpf {
 		    }
 		}
 
-                container expired-connection-cleanup {
-                    description
-                        "Limit on number of expired connections freed before VPF processes a frame of packets.";
+		container expired-connection-cleanup {
+		    ngcliext:parent-fmt "^$^ $%";
 
-                    leaf generic-limit {
-                        type uint32;
-                        default 256;
-                        description
-                            "Maximum of number of generic connections freed before VPF processes a frame of packets.";
-                    }
+		    description
+			"Limit on number of expired connections freed before VPF processes a frame of packets.";
 
-                    leaf tcp-limit {
-                        type uint32;
-                        default 256;
-                        description
-                            "Maximum of number of TCP connections freed before VPF processes a frame of packets.";
-                    }
-                }
-            }
+		    leaf generic-limit {
+			type uint32;
+			default 256;
+			description
+			    "Maximum of number of generic connections freed before VPF processes a frame of packets.";
+			ngcliext:node-fmt "$< $% @@$n";
+		    }
+
+		    leaf tcp-limit {
+			type uint32;
+			default 256;
+			description
+			    "Maximum of number of TCP connections freed before VPF processes a frame of packets.";
+			ngcliext:node-fmt "$< $% @@$n";
+		    }
+		}
+	    }
 
 	    container interfaces {
 		description
@@ -2383,6 +2388,24 @@ module netgate-vpf {
                     description
                         "Remote port number.";
                 }
+
+		leaf last-sent-ago {
+		    type decimal64 {
+			fraction-digits 2;
+		    }
+
+		    description
+			"Time since last packet sent to peer.";
+		}
+
+		leaf last-heard-ago {
+		    type decimal64 {
+			fraction-digits 2;
+		    }
+
+		    description
+			"Time since last packet received from peer.";
+		}
             }
 
             list exporter {
@@ -2417,6 +2440,30 @@ module netgate-vpf {
                     description
                         "MTU.";
                 }
+
+		leaf last-sent-ago {
+		    type decimal64 {
+			fraction-digits 2;
+		    }
+
+		    description
+			"Time since last packet sent to peer.";
+		}
+
+		leaf last-heard-ago {
+		    type decimal64 {
+			fraction-digits 2;
+		    }
+
+		    description
+			"Time since last packet received from peer.";
+		}
+
+		leaf last-heartbeat-uptime {
+		    type uint32;
+		    description
+			"Last uptime value received in heartbeat packet.";
+		}
             }
         }
 

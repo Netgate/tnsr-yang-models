@@ -1858,7 +1858,7 @@ module netgate-ospf {
 
 				ngcliext:parent-fmt "^$%";
 				ngcliext:node-op "test-set:@{no-summary}@{translate}";
-				ngcliext:node-fmt "$<$n";
+				ngcliext:node-fmt "^$%$n|";
 
 				leaf no-summary {
 				    type boolean;

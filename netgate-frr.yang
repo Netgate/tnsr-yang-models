@@ -37,8 +37,13 @@ module netgate-frr {
 	"This YANG module provides a Netgate-defined data-model
 	 for FRR data.
 
-	 Copyright 2017-2025 Rubicon Communications, LLC.
+	 Copyright 2017-2026 Rubicon Communications, LLC.
 	 ";
+
+    revision 2026-02-01 {
+	description
+	    "TNSR Release 26.02.";
+    }
 
     revision 2025-06-01 {
 	description
@@ -309,7 +314,9 @@ module netgate-frr {
 			ngcliext:node-fmt "^sequence @{sequence} @{action} @{ip-prefix}$n";
 
 			leaf sequence {
-			    type uint32;
+			    type uint32 {
+				range "1..4294967295";
+			    }
 			    description
 				"Rules are executed in increasing sequence
 				 number.";
@@ -376,7 +383,9 @@ module netgate-frr {
 			unique "prefix le-len ge-len";
 
 			leaf sequence {
-			    type uint32;
+			    type uint32 {
+				range "1..4294967295";
+			    }
 			    description
 				"Rules are executed in increasing sequence
 				 number.";
@@ -1040,7 +1049,7 @@ module netgate-frr {
 			    "If present, enable debugging between zebra
 			     and the kernel.";
 
-			ngcliext:parent-fmt "$< $%";
+			ngcliext:node-fmt "$< $%";
 			ngcliext:post-node-fmt "$n";
 
 			container msgdump {

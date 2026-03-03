@@ -362,6 +362,11 @@ module netgate-dataplane {
 	}
 
 	container unix {
+	    description
+		"VPP unix section";
+
+	    ngcliext:parent-fmt "$< $%";
+
 	    leaf poll-sleep-usec {
 		type uint32;
 		units "microseconds";

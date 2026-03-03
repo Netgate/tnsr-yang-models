@@ -36,6 +36,11 @@ module netgate-rip {
 	 Copyright 2019-2025 Rubicon Communications, LLC.
 	 ";
 
+    revision 2026-02-01 {
+	description
+	    "TNSR Release 26.02.";
+    }
+
     revision 2025-06-01 {
 	description
 	    "TNSR Release 25.06.";
@@ -578,7 +583,7 @@ module netgate-rip {
 				    mandatory true;
 				    description
 					"RIP administrative distance.";
-				    ngcliext:child-fmt " distance @@";
+				    ngcliext:child-fmt " @@";
 				}
 
 				leaf filter {

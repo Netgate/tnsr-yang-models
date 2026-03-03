@@ -199,7 +199,6 @@ module netgate-wireguard {
 
 			leaf port {
 			    type uint16;
-			    mandatory true;
 			    description
 				"Port.";
 			    ngcliext:node-fmt "^$% @@$n";

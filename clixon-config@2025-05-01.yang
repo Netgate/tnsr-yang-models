@@ -57,7 +57,7 @@ module clixon-config {
                 CLICON_CLI_EXPAND_LEAFREF {
              Obsoleted:
                 CLICON_STREAM_URL
-             Release in Clixon 7.5";
+             Released in Clixon 7.5";
     }
     revision 2024-11-01 {
         description
