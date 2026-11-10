@@ -1,0 +1,666 @@
+module netgate-netgard {
+
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-netgard";
+    prefix "ngng";
+
+    import clixon-lib {
+	prefix "cl";
+    }
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
+    import netgate-common {
+	prefix "ngcom";
+    }
+
+    import netgate-interface {
+	prefix "ngif";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module for Netgard VPN protocol.
+
+	 Copyright 2026 Rubicon Communications, LLC.";
+
+    revision 2026-10-01 {
+	description
+	    "TNSR Release 26.10.";
+    }
+
+    typedef netgard-ciphers {
+	type enumeration {
+	    enum aes-128-gcm {
+	    	value 9;
+		description "aes-128-gcm";
+	    }
+	    enum aes-256-gcm {
+	    	value 11;
+		description "aes-256-gcm";
+	    }
+	    enum chacha20-poly1305 {
+	    	value 15;
+		description "chacha20-poly1305";
+	    }
+	}
+    }
+
+    typedef base64-32byte-key {
+	type ngcom:base64-encoding {
+	    length 44;
+	}
+    }
+
+    augment "/ngif:interfaces-config" {
+
+	container netgard-interfaces {
+	    description
+		"Netgard interface.";
+
+	    ngcliext:context "intf-netgard";
+	    ngcliext:parent-fmt "interface netgard";
+
+	    list tunnel {
+		key "instance";
+
+		description
+		    "Netgard interface configuration.";
+
+		ngcliext:node-fmt "$< @{instance}$n";
+		ngcliext:pre-children-op "push";
+
+		leaf instance {
+		    type uint32 {
+			 range "0..16383";
+		    }
+		    description
+			"Tunnel interface named 'ng<instance>'";
+		}
+
+		leaf description {
+		    type ngcom:description-63;
+		    description
+			"A textual description of the interface.";
+		    ngcliext:node-fmt "^$% @@$n";
+		    cl:ignore-compare;
+		}
+
+		leaf source-address {
+		    type inet:ip-address-no-zone;
+		    mandatory true;
+		    description
+			"The tunnel source IP address, modifiable
+			within the same address family. AF is fixed.
+			Could be 0.0.0.0 or ::.";
+		    ngcliext:node-fmt "^$% @@$n";
+		}
+
+		leaf port {
+		    type uint16;
+		    mandatory true;
+		    must ". != 0";
+		    description
+			"Non-zero local UDP port.";
+		    ngcliext:node-fmt "^$% @@$n";
+		}
+
+		leaf vpn-prefix4 {
+		    type inet:ipv4-prefix;
+		    description
+			"Tunnel's IPv4 vpn address.";
+		    ngcliext:node-fmt "^vpn-addr-prefix @@$n";
+		}
+
+		leaf vpn-prefix6 {
+		    type inet:ipv6-prefix;
+		    description
+			"Tunnel's IPv6 vpn address.";
+		    ngcliext:node-fmt "^vpn-addr-prefix @@$n";
+		}
+
+		leaf private-key {
+		    description
+			"Private key is 32-byte private ED25519
+			 as a base64 encoded string of 44 bytes.";
+
+		    type base64-32byte-key;
+		    ngcliext:node-fmt "^$% @@$n";
+		}
+
+		leaf network-key {
+		    type base64-32byte-key;
+		    description
+			"Network key is a shared 32-byte data block
+			 given as a base64 encoded string of 44 bytes.";
+		    ngcliext:node-fmt "^$% @@$n";
+		}
+
+		leaf ping-interval {
+		    type uint32;
+		    description
+		    	"Interval for keep-alives, default is 15 secs.";
+		    units "seconds";
+		    ngcliext:node-fmt "^$% @@$n";
+		}
+
+		leaf rekey-interval {
+		    type uint32;
+		    description
+			"Interval for rekeying, default is 180 secs.";
+		    units "seconds";
+		    ngcliext:node-fmt "^$% @@$n";
+		}
+
+		leaf cipher {
+		    type netgard-ciphers;
+		    description
+		    	"Cipher suite used for encoding data packets";
+		    ngcliext:node-fmt "^$% @@$n";
+		}
+
+		leaf no-long-sequence {
+		    type empty;
+		    description "Disable 64-bit sequence numbers";
+		    ngcliext:node-fmt "^$%$n";
+		}
+
+		leaf extended-handshake {
+		    type empty;
+		    description "5-packet handshake exchange";
+		    ngcliext:node-fmt "^$%$n";
+		}
+
+		leaf pong {
+		    type empty;
+		    description "Pong to pings";
+		    ngcliext:node-fmt "^$%$n";
+		}
+
+		container peers {
+		    description
+			"Netgard peers.";
+
+		    list peer {
+			key "peer-id";
+			unique "pubkey";
+			unique "vpn-addr4";
+			unique "vpn-addr6";
+
+			description
+			    "Peers of the parent netgard interface.";
+
+			ngcliext:node-fmt "^peer @{peer-id}$n";
+			ngcliext:pre-children-op "push";
+
+			leaf peer-id {
+			    type uint32 {
+				range "0..16777216";
+			    }
+			    description
+				"A user-assigned ID for this peer.
+				 It must be unique among all peers
+				 and no more than 24-bit long";
+			}
+
+			leaf description {
+			    type ngcom:description-63;
+			    description
+				"A textual description of the peer.";
+			    ngcliext:node-fmt "^$% @@$n";
+			    cl:ignore-compare;
+			}
+
+			leaf local-id {
+			    type uint32 {
+				range "0..16777216";
+			    }
+			    description
+				"Remotedly assigned 'local' peer id used 
+				 to stamp outgoing packets.";
+			}
+
+			leaf remote-address {
+		    	    type inet:ip-address-no-zone;
+
+			    description
+				"Endpoint destination IP address";
+			    ngcliext:node-fmt "^$% @@$n";
+			}
+
+			leaf remote-port {
+			    type uint16;
+			    must ". != 0";
+			    description
+				"Remote UDP port.";
+			    ngcliext:node-fmt "^$% @@$n";
+			}
+
+			leaf pubkey {
+			    type base64-32byte-key;
+			    mandatory true;
+
+			    description
+				"Remote public ED25519 key
+				 as a base64 encoded string of 44 bytes.";
+			    ngcliext:node-fmt "^$% @@$n";
+			}
+
+			leaf enable {
+			    type boolean;
+
+			    description "Try to connect to";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "^disable$n|^$%$n";
+			}
+
+			leaf vpn-addr4 {
+			    type inet:ipv4-address-no-zone;
+			    description
+				"Peer's IPv4 vpn address.";
+			    ngcliext:node-fmt "^vpn-addr @@$n";
+			}
+
+			leaf vpn-addr6 {
+			    type inet:ipv6-address-no-zone;
+			    description
+				"Peer's IPv6 vpn address.";
+			    ngcliext:node-fmt "^vpn-addr @@$n";
+			}
+
+			leaf cipher {
+			    type netgard-ciphers;
+			    description
+				"Cipher suite used for encoding data packets";
+			    ngcliext:node-fmt "^$% @@$n";
+			}
+
+			leaf outer-route-table {
+			    type ngcom:rt-identifier-63;
+			    description
+				"Endpoint route table name.";
+			    ngcliext:node-fmt "^$% @@$n";
+			}
+
+			container routed-prefixes {
+			    description
+				"Prefixes accessible via peer.";
+
+			    leaf-list routed-prefix {
+				type inet:ip-prefix;
+				description
+				    "Prefix with the next-hop via this peer."; 
+				ngcliext:node-fmt "^$% @@$n";
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+
+    augment "/ngif:interfaces-state" {
+
+	description
+	    "State of the Netgard tunnels.";
+
+	container netgard-interfaces {
+	    description
+		"Netgard interface.";
+
+	    list tunnel {
+		key "instance";
+
+		description
+		    "Netgard interface configuration.";
+
+		leaf instance {
+		    type uint32 {
+			 range "0..16383";
+		    }
+		    description
+			"Netgard tunnel interface named 'ng<instance>'";
+		}
+
+		leaf if-name {
+		    type string;
+		    description
+			"The interface name.";
+		}
+
+		leaf description {
+		    type string;
+		    description
+			"A textual description of the interface.";
+		}
+
+		leaf source-address {
+		    type inet:ip-address-no-zone;
+		    description
+			"The tunnel source IP address.";
+		}
+
+		leaf port {
+		    type uint16;
+		    description
+			"Port number.";
+		}
+
+		leaf private-key {
+		    type string;
+		    description
+			"The private key.";
+		}
+
+		leaf public-key {
+		    type string;
+		    description
+			"The public key.";
+		}
+
+		leaf network-key {
+		    type string;
+		    description
+			"The network key (shared data secret).";
+		}
+
+		leaf cipher {
+		    type string;
+		    description
+			"Symmetric cipher used.";
+		}
+
+		leaf vpn-ip4 {
+		    type inet:ipv4-prefix;
+		    description
+			"Local IP4 vpn address.";
+		}
+
+		leaf vpn-ip6 {
+		    type inet:ipv6-prefix;
+		    description
+			"Local IP6 vpn address.";
+		}
+
+		leaf ping-interval {
+		    type uint32;
+		    description
+			"Interval for pinging.";
+		}
+
+		leaf rekey-interval {
+		    type uint32;
+		    description
+			"Interval for rekeying.";
+		}
+
+		leaf flags {
+		    type uint64;
+		    description
+			"Various config/state flags.";
+		}
+
+		leaf no-long-sequence {
+		    type empty;
+		    description "Disable 64-bit sequence numbers";
+		}
+
+		leaf extended-handshake {
+		    type empty;
+		    description "5-packet handshake exchange";
+		}
+
+		leaf pong {
+		    type empty;
+		    description "Pong to pings";
+		}
+
+		leaf multi {
+		    type empty;
+		    description "Multi-homed peer";
+		}
+
+		container ip4-address-pool {
+		    description
+			"Pool of IP4 addresses.";
+
+		    leaf start-addr {
+		    	type inet:ipv4-address-no-zone;
+			description
+			    "Start address of the pool.";
+		    }
+
+		    leaf end-addr {
+		    	type inet:ipv4-address-no-zone;
+			description
+			    "End address of the pool.";
+		    }
+
+		    leaf len {
+			type uint32;
+			description
+			    "Length, i.e. pool size
+			     in number of addresses.";
+		    }
+
+		    leaf reserved-addresses {
+			type uint32;
+			description
+			    "Number of assigned addresses.";
+		    }
+		}
+
+		container ip6-address-pool {
+		    description
+			"Pool of IP6 addresses.";
+
+		    leaf start-addr {
+		    	type inet:ipv6-address-no-zone;
+			description
+			    "Start address of the pool.";
+		    }
+
+		    leaf addr-len {
+			type uint32;
+			description
+			    "Pool address mask.";
+		    }
+
+		    leaf len {
+			type uint64;
+			description
+			    "Length, i.e. pool size
+			     in number of addresses.";
+		    }
+
+		    leaf reserved-addresses {
+			type uint32;
+			description
+			    "Number of assigned addresses.";
+		    }
+		}
+
+		container peers {
+		    description
+			"Netgard peers.";
+
+		    list peer {
+			key "peer-id";
+
+			description
+			    "Peers of the parent netgard interface.";
+
+			leaf peer-id {
+			    type uint32 {
+				range "0..16777216";
+			    }
+			    description
+				"A user-assigned ID for this peer.
+				 It must be unique among all peers.";
+			}
+
+			leaf local-id {
+			    type uint32 {
+				range "0..16777216";
+			    }
+			    description
+				"A peer ID assigned to us.";
+			}
+
+			leaf remote-address {
+			    type inet:host;
+			    description
+				"Remote destination IP address";
+			}
+
+			leaf port {
+			    type uint16;
+			    description
+				"Remote destination UDP port.";
+			}
+
+			leaf local-address {
+			    type inet:host;
+			    description
+				"Local source IP address";
+			}
+
+			leaf description {
+			    type string;
+			    description
+				"A textual description of the peer.";
+			}
+
+			leaf pubkey {
+			    type string;
+			    description
+				"The public key.";
+			}
+
+			leaf cipher {
+			    type string;
+			    description
+				"Data encription symmetric cipher.";
+			}
+
+			leaf vpn-addr4 {
+			    type inet:ipv4-address-no-zone;
+			    description
+				"Peer's IPv4 vpn address.";
+			}
+
+			leaf vpn-addr6 {
+			    type inet:ipv6-address-no-zone;
+			    description
+				"Peer's IPv6 vpn address.";
+			}
+
+			leaf local-vpn-addr4 {
+			    type inet:ipv4-prefix;
+			    description
+				"Local side vpn IPv4 address.";
+			}
+
+			leaf local-vpn-addr6 {
+			    type inet:ipv6-prefix;
+			    description
+				"Local side vpn IPv6 address.";
+			}
+
+			leaf thread-index {
+			    type uint32;
+			    description
+				"Worker to process data packets.";
+			}
+
+			leaf flags {
+			    type uint32;
+			    description
+				"Flags";
+			}
+
+			leaf last-seen {
+			    type int32;
+			    description
+				"The time of the last authenticated packet";
+			}
+
+			leaf last-init {
+			    type int32;
+			    description
+				"The time since the last connection init";
+			}
+
+// some of the flags' bits translated:
+			leaf connected {
+			    type empty;
+			    description "State - connected";
+			}
+
+			leaf connecting {
+			    type empty;
+			    description "State - connecting";
+			}
+
+			leaf stopped {
+			    type empty;
+			    description "State - peer is disabled";
+			}
+
+			leaf status {
+			    type empty;
+			    description "Peer's status is periodically checked";
+			}
+
+			leaf local-initiator {
+			    type empty;
+			    description "Local peer's role is client";
+			}
+
+			leaf unknown {
+			    type empty;
+			    description "Peer hasn't authenticated yet";
+			}
+
+			leaf pinging {
+			    type empty;
+			    description "Local side sends keep-alives";
+			}
+		    }
+		}
+	    }
+	}
+    }
+    
+    rpc netgard-peer-connect {
+        input {
+            leaf instance {
+                type uint32;
+                mandatory true;
+                description "Netgard tunnel instance";
+            }
+
+            leaf peer-id {
+                type uint32;
+                mandatory true;
+                description "Peer id";
+            }
+
+            leaf enable {
+                type boolean;
+                mandatory true;
+                description "Connect/Disconnect selector";
+            }
+        }
+    }
+}

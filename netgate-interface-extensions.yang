@@ -13,6 +13,10 @@ module netgate-interface-extensions {
 	prefix "ngif";
     }
 
+    import netgate-dataplane {
+	prefix "ngdataplane";
+    }
+
     organization "Netgate";
 
     contact "Web: <http://www.netgate.com>";
@@ -47,7 +51,7 @@ module netgate-interface-extensions {
 	description
 	    "The interface extensions configuration data contains interface
 	     information that is not covered by standard data models.";
-	
+
 	list rx-queue {
 	    key rx-queue-id;
 
@@ -63,6 +67,11 @@ module netgate-interface-extensions {
 		type uint16;
 		description
 		    "CPU ID";
+		must "/ngdataplane:dataplane-config/ngdataplane:cpu/ngdataplane:main-core = current() or
+		      /ngdataplane:dataplane-config/ngdataplane:cpu/ngdataplane:corelist-workers/ngdataplane:corelist-worker[. = current()]" {
+		    error-message "The pinned-cpu-id should be same as " +
+				  "corelist-worker or main-core lcore id. ";
+		}
 		ngcliext:node-fmt "$< cpu @@$n";
 	    }
 	}
@@ -98,6 +107,15 @@ module netgate-interface-extensions {
 
     augment "/ngif:interfaces-config/ngif:interface" {
 	container rx-queues {
+
+	must "not(/ngdataplane:dataplane-config/ngdataplane:cpu/ngdataplane:skip-cores)" {
+	    error-message "Cannot configure rx-queue while using skip-cores.";
+	}
+
+	must "not(/ngdataplane:dataplane-config/ngdataplane:cpu/ngdataplane:workers)" {
+	    error-message "Cannot configure rx-queue while using workers.";
+	}
+
 	    uses interface-config-extensions;
 	}
     }

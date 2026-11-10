@@ -69,6 +69,13 @@ module clixon-lib {
        - link # For split multiple XML files
       ";
 
+    revision 2025-12-01 {
+        description
+            "Added:
+                extension: error-message
+                rpcs: clixon-cache, config-path-info, translate-format
+             Released in Clixon 7.7";
+    }
     revision 2025-08-01 {
         description
             "Added: netconf-framing-type
@@ -319,6 +326,29 @@ module clixon-lib {
             }
         }
     }
+    typedef cache-operation {
+        type enumeration {
+            enum read {
+                description "Request cache data from server";
+            }
+            enum clear {
+                description "Clear cache";
+            }
+        }
+    }
+    typedef cache-type {
+        type enumeration {
+            enum autocli {
+                description "Autocli clispec cache";
+            }
+            enum yang-domain {
+                description "Yang domain specs as defined by CLICON_YANG_DOMAIN_DIR";
+            }
+            enum datastore {
+                description "XML datastores (xmldb)";
+            }
+        }
+    }
     identity snmp {
         description
             "SNMP";
@@ -372,6 +402,14 @@ module clixon-lib {
              An example of an invalid marking would be a list key. Because if the list keys are
              removed, the remaining XML would no longer be valid wrt the YANG list";
     }
+    extension error-message {
+        description
+            "In RFC 7950 error-message as described in Section 7.5.4.1 is defined for YANG must, and
+             type fields range, length and pattern.
+             This extension adds an error-message to other places in YANG than defined in RFC 7950.
+             Note: Only applicable to leafref and in effect only when instance-required = true";
+        argument message;
+    }
     md:annotation creator {
         type string;
         description
@@ -381,6 +419,27 @@ module clixon-lib {
              track of which service created what.
              Limitations: only objects that are actually added or deleted.
              A sub-object will not be noted";
+    }
+    grouping namespace-context {
+        description
+            "List of prefix/namespace pairs";
+        container namespace-context {
+            description
+                "List of prefix/namespace pairs";
+            list namespace {
+                description
+                    "prefix / namespace pair for XPath.";
+                key prefix;
+                leaf prefix{
+                    description "Local prefix";
+                    type string;
+                }
+                leaf ns{
+                    description "Namespace";
+                    type string;
+                }
+            }
+        }
     }
     rpc debug {
         description
@@ -556,6 +615,205 @@ module clixon-lib {
                         type empty;
                     }
                 }
+            }
+        }
+    }
+    rpc clixon-cache {
+        description
+            "Perform operations on cache data.
+             This includes clearing data, as well as read and write data between client and backend server.
+             If read operation returns data-missing the entry does not exist";
+        input {
+            leaf operation {
+                type cache-operation;
+                mandatory true;
+            }
+            leaf type {
+                type cache-type;
+                mandatory true;
+            }
+            leaf domain {
+                description
+                    "YANG or XMLDB domain, in the latter case prefix of xmldb name";
+                type string;
+            }
+            leaf spec {
+                description
+                    "YANG spec";
+                type string;
+            }
+            leaf module {
+                description
+                    "YANG module";
+                type string;
+            }
+            leaf revision {
+                description
+                    "YANG module revision";
+                type string;
+            }
+            leaf keyword {
+                description
+                    "YANG symbol keyword, eg grouping";
+                type string;
+            }
+            leaf argument {
+                description
+                    "YANG argument name";
+                type string;
+            }
+        }
+        output {
+            anydata data {
+                description "Get cache data";
+            }
+        }
+    }
+    rpc config-path-info {
+        description
+            "Get detailed information of configuration path: XPath or RFC 8040 api-path";
+        input{
+            choice path {
+                case api-path {
+                    leaf api-path {
+                        type string;
+                        description
+                            "RFC 8040 api-path";
+                    }
+                    leaf strict{
+                        type boolean;
+                        default false;
+                        description
+                            "If false, accept incomplete api-paths, such as incomplete lists,
+                             this is necessary when completing keys for example";
+                    }
+                }
+                case xpath {
+                    leaf xpath {
+                        type string;
+                        description
+                            "XPath 1.0 according to https://www.w3.org/TR/xpath-10
+                             If namespace binding is lacking, then they should be
+                             YANG module canonical namespace bindings.
+                             This binding is returned by the RPC.
+                             In this way this RPC can be used to query namespace bindings.";
+                    }
+                    uses namespace-context{
+                        description
+                            "If given, use these prefix/namespace bindings for xpath.";
+                    }
+                }
+                mandatory true;
+            }
+            leaf leafref-refer {
+                description
+                    "If true, and the innermost xml is a leafref,
+                     the XPath is extended by appending the path of the leafref to the original XPath.
+                     If false, the XPath is not extended";
+                type boolean;
+                default false;
+            }
+            leaf body {
+                description
+                    "If innermost XML is leaf, add body to xml output";
+                type string;
+            }
+        }
+        output{
+            anydata xml{
+                description
+                    "Minimal XML corresponding to given path and YANG in server";
+            }
+            leaf api-path{
+                type string;
+                description
+                    "XPath corresponding to given api-path and YANG.
+                     Also, if last xml element is a leafref and if leafref-refer is true: append path to xpath.
+                     Note that some XPaths may not correspond to a (single) api-path, the api-path is then not
+                     given.";
+            }
+            leaf xpath{
+                type string;
+                description
+                    "XPath corresponding to given api-path and YANG.
+                     Includes XML namespace bindings in xmlns: form, also present in namespace-context.
+                     Also, if last xml element is a leafref and if leafref-refer is true: append path to xpath.";
+            }
+            uses namespace-context{
+                description
+                    "Prefix/namespace binding for xpath using canonical namespaces";
+            }
+            leaf symbol {
+                description "Yang statement of innermost XML symbol";
+                type string;
+            }
+            leaf prefix{
+                description "Local prefix of symbol";
+                type string;
+            }
+            leaf ns{
+                description "Namespace of symbol";
+                type string;
+            }
+            leaf module {
+                description "Yang module of symbol";
+                type string;
+            }
+            leaf filename {
+                description "File path of module";
+                type string;
+            }
+        }
+    }
+    rpc translate-format {
+        description
+            "Translate data from XML to other datastore formats";
+        input{
+            leaf format{
+                description
+                    "Translate input xml format to this output format";
+                type cl:datastore_format;
+                mandatory true;
+            }
+            leaf xpath{
+                description
+                    "If given, the XPath points to a point in the data tree where the XML is rooted,
+                     this could cross mount-points";
+                type string;
+            }
+            uses namespace-context;
+            anydata xml{
+                description
+                    "Input XML data, top-level, optionally sub-tree specified by XPath";
+            }
+            leaf pretty{
+                description
+                    "Set if output is pretty-printed";
+                type boolean;
+            }
+            leaf skiptop{
+                description
+                    "If set, Skip top-object, only children";
+                type boolean;
+            }
+            leaf cli-aware {
+                type boolean;
+                default false;
+                description
+                    "Autocli extensions awareness: false: ignore true: follow.
+                     This applies when displaying config, eg there is a hide-show extension that
+                     hides sub-parts of the tree if this flag is true";
+            }
+            leaf prepend{
+                description
+                    "CLI prefix to prepend cli syntax, eg 'set '";
+                type string;
+            }
+        }
+        output{
+            anyxml data {
+                description
+                    "Contains the output format according to format setting.";
             }
         }
     }

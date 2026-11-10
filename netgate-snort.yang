@@ -25,8 +25,13 @@ module netgate-snort {
 	"YANG module to fully support the controls of
 	 the Snort VPP plugin via TNSR.
 
-	 Copyright 2025 Rubicon Communications, LLC.
+	 Copyright 2026 Rubicon Communications, LLC.
 	";
+
+    revision 2026-10-01 {
+	description
+	    "TNSR Release 26.10.";
+    }
 
     revision 2025-06-01 {
 	description
@@ -65,6 +70,27 @@ module netgate-snort {
 	    }
 	    enum prevent {
 		description "prevent aka inline mode";
+	    }
+	}
+    }
+
+    typedef snort-client-mode-t {
+        description
+	    "Extension list of snort actions.";
+
+	type enumeration {
+	    enum none {
+		value 0;
+		description "not set";
+	    }
+	    enum passive {
+		description "passive mode";
+	    }
+	    enum inline {
+		description "inline mode";
+	    }
+	    enum read-file {
+		description "read-file";
 	    }
 	}
     }
@@ -139,6 +165,7 @@ module netgate-snort {
 		leaf name {
 		    type string {
 			pattern "[0-9A-Za-z_]+";
+			length "1..31";
 		    }
 		    description
 			 "Instance name.";
@@ -208,6 +235,7 @@ module netgate-snort {
 			leaf direction {
 			    type ngcom:traffic-direction-t;
 			    default both;
+			    mandatory true;
 			    description
 				"Snort traffic direction.";
 			    ngcliext:node-fmt " $% @@";
@@ -231,10 +259,13 @@ module netgate-snort {
 		    ngcliext:node-fmt "^$% @@$n";
 		}
 
-		leaf snort-cores {
-		    type string;
+		leaf timeout {
+		    type uint32 {
+			range "0..2147483647";
+		    }
+		    units "milliseconds";
 		    description
-			"List of cores";
+			"epoll-timeout in client threads";
 
 		    ngcliext:node-fmt "^$% @@$n";
 		}
@@ -303,6 +334,18 @@ module netgate-snort {
 			"Shared memory file descriptor.";
 		}
 
+		leaf qpairs-per-thread {
+		    type int32;
+		    description
+			"Number of DAQ queues per worker.";
+		}
+
+		leaf drop-bitmap {
+		    type uint8;
+		    description
+			"Packet-drop verdict bitmap.";
+		}
+
 		leaf on-disconnect {
 		    type snort-on-disconnect-t;
 		    description
@@ -323,7 +366,7 @@ module netgate-snort {
                 leaf if-index {
                     type uint32;
                     description
-                         "Instance name.";
+                         "Interface index.";
                 }
 
 		leaf if-name {
@@ -332,13 +375,25 @@ module netgate-snort {
 			"Human readable name.";
 		}
 
-		leaf instance-index {
+		leaf in-instance-index {
 		    type uint32;
 		    description
 			"Snort instance index.";
 		}
 
-		leaf instance-name {
+		leaf in-instance-name {
+		    type string;
+		    description
+			"Snort instance name";
+		}
+
+		leaf out-instance-index {
+		    type uint32;
+		    description
+			"Snort instance index.";
+		}
+
+		leaf out-instance-name {
 		    type string;
 		    description
 			"Snort instance name";
@@ -361,16 +416,16 @@ module netgate-snort {
                          "Client index.";
                 }
 
-		leaf instance-index {
-		    type uint32;
+		leaf nthreads {
+		    type uint16;
 		    description
-			"Snort instance index.";
+			"Number of DAQ threads in the process";
 		}
 
-		leaf instance-name {
-		    type string;
+		leaf mode {
+		    type snort-client-mode-t;
 		    description
-			"Snort instance name";
+			"Snort client mode of operation";
 		}
 	    }
 	}

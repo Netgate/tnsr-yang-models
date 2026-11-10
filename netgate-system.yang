@@ -36,6 +36,11 @@ module netgate-system {
 	 Copyright 2018-2025 Rubicon Communications, LLC.
 	 ";
 
+    revision 2026-10-01 {
+	description
+	    "TNSR Release 26.10.";
+    }
+
     revision 2025-06-02 {
 	description
 	    "TNSR Release 25.06.";
@@ -615,7 +620,7 @@ module netgate-system {
 	    }
 	    description
 		"The system timezone.";
-	    ngcliext:node-fmt "$< timezone @@.$n";
+	    ngcliext:node-fmt "$< timezone @@$n";
 	}
 
 	container kernel {
@@ -681,6 +686,18 @@ module netgate-system {
 			type boolean;
 			description
 			"Enable enable_unsafe_noiommu_mode option for vfio";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$< $%$n";
+		    }
+		}
+
+		container igb_uio {
+		    ngcliext:parent-fmt "$< $%";
+
+		    leaf write-combining {
+			type boolean;
+			description
+			"Enable write-combining option for igb_uio";
 			    ngcliext:node-op "bool";
 			    ngcliext:node-fmt "|$< $%$n";
 		    }

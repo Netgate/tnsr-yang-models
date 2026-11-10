@@ -32,8 +32,13 @@ module netgate-host-interface {
     description
 	"This YANG module provides a data model for host interfaces.
 
-	 Copyright 2018-2025 Rubicon Communications, LLC.
+	 Copyright 2018-2026 Rubicon Communications, LLC.
 	";
+
+    revision 2026-06-01 {
+	description
+	    "TNSR Release 26.06.";
+    }
 
     revision 2025-10-01 {
 	description
@@ -184,8 +189,6 @@ module netgate-host-interface {
 	    }
 
 	    container ipv6 {
-		presence
-		    "Enables IPv6";
 		description
 		    "Parameters for the IPv6 address family.";
 
@@ -280,8 +283,6 @@ module netgate-host-interface {
 	    }
 
 	    container ipv4 {
-		presence
-		    "Enables IPv4'";
 		description
 		    "Parameters for the IPv4 address family.";
 
@@ -295,8 +296,6 @@ module netgate-host-interface {
 	    }
 
 	    container ipv6 {
-		presence
-		    "Enables IPv6";
 		description
 		    "Parameters for the IPv6 address family.";
 

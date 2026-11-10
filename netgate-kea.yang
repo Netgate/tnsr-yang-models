@@ -34,6 +34,11 @@ module netgate-kea {
 
 	 Copyright 2019-2025 Rubicon Communications, LLC.";
 
+    revision 2026-10-01 {
+	description
+	    "TNSR Release 26.10.";
+    }
+
     revision 2025-02-01 {
 	description
 	    "TNSR Release 25.02.";
@@ -1291,12 +1296,6 @@ module netgate-kea {
 	    description
 		"This section contains parameters for the keactrl
 		 configuration file.";
-
-	    leaf verbose {
-		type boolean;
-		description
-		    "If true, the Kea Control daemon will be verbose.";
-	    }
 
 	    container dhcp4 {
 		description

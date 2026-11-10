@@ -40,6 +40,16 @@ module netgate-frr {
 	 Copyright 2017-2026 Rubicon Communications, LLC.
 	 ";
 
+    revision 2026-10-02 {
+	description
+	    "TNSR Release 26.10.";
+    }
+
+    revision 2026-10-01 {
+	description
+	    "TNSR Release 26.10.";
+    }
+
     revision 2026-02-01 {
 	description
 	    "TNSR Release 26.02.";
@@ -131,6 +141,15 @@ module netgate-frr {
     }
 
 
+    typedef frr-show-request {
+	type enumeration {
+	    enum config-file {
+		description
+		    "FRR Configuration File";
+	    }
+	}
+    }
+
     typedef ospf6-metric-type {
 	type enumeration {
 	    enum type-1 {
@@ -193,15 +212,15 @@ module netgate-frr {
 	    description
 		"Debug packets sent or received.
 		Missing is both.";
-	    ngcliext:node-fmt " @@%{detail}";
+	    ngcliext:node-fmt " @@";
 	}
 
 	leaf detail {
 	    type boolean;
 	    description
 		"Debug packets in detail.";
-	    ngcliext:sibling-op "bool";
-	    ngcliext:sibling-fmt "| detail";
+	    ngcliext:node-op "bool";
+	    ngcliext:node-fmt "| $%";
 	}
     }
 
@@ -247,12 +266,42 @@ module netgate-frr {
 	}
     }
 
+    rpc frr-show {
+	input {
+	    leaf request {
+		type frr-show-request;
+		description
+		    "An FRR show request type.";
+	    }
+	}
+	output {
+	    leaf stdout {
+		type string;
+	    }
+	}
+    }
+
     rpc zebra-show {
 	input {
 	    leaf request {
 		type zebra-show-request;
 		description
 		    "A Zebra show request type.  Now only 'config' string.";
+	    }
+	}
+	output {
+	    leaf stdout {
+		type string;
+	    }
+	}
+    }
+
+    rpc mgmtd-show {
+	input {
+	    leaf request {
+		type zebra-show-request;
+		description
+		    "A mgmtd show request type.  Now only 'config' string.";
 	    }
 	}
 	output {
@@ -271,6 +320,20 @@ module netgate-frr {
 		"manually maintained by the user. Mutually exclusive " +
 		"with any other managed dynamic route configuration.";
 	    ngcliext:node-fmt "route dynamic $%$n";
+	}
+
+	container snmp {
+	    description
+		"SNMP configuration options for all FRR protocols.";
+
+	    leaf enable {
+		type boolean;
+		default false;
+		description
+		    "If true, SNMP is enabled for all FRR dynamic protocols.";
+		ngcliext:node-op "bool";
+		ngcliext:node-fmt "|route dynamic snmp $%$n";
+	    }
 	}
 
 	container access-lists {
@@ -1023,15 +1086,6 @@ module netgate-frr {
 			type boolean;
 			description
 			    "If true, debug Zebra events.";
-			ngcliext:node-op "bool";
-			ngcliext:node-fmt "|$< $%$n";
-		    }
-
-		    leaf fpm {
-			type boolean;
-			description
-			    "If true, debug Zebra Forwarding Plane Manager
-			     events.";
 			ngcliext:node-op "bool";
 			ngcliext:node-fmt "|$< $%$n";
 		    }

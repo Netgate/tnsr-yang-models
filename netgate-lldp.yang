@@ -9,6 +9,18 @@ module netgate-lldp {
 	prefix "ngcliext";
     }
 
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import netgate-interface {
+	prefix "ngif";
+    }
+
+    import netgate-interface-extensions {
+	prefix "ngifext";
+    }
+
     organization "Netgate";
 
     contact "Web: <http://www.netgate.com>";
@@ -16,7 +28,12 @@ module netgate-lldp {
     description
         "This YANG module provides a data model for the VPP LLDP Service.
 
-	 Copyright 2019-2020 Rubicon Communications, LLC.";
+	 Copyright 2019-2026 Rubicon Communications, LLC.";
+
+    revision 2026-10-01 {
+	description
+	    "TNSR Release 26.10.";
+    }
 
     revision 2021-02-15 {
 	description
@@ -36,6 +53,97 @@ module netgate-lldp {
     revision 2019-02-15 {
 	description
 	    "TNSR Release 19.02.";
+    }
+
+    typedef lldp-port-id-subtype {
+	type enumeration {
+	    enum reserved {
+		description
+		    "RESERVED";
+	    }
+	    enum intf-alias {
+		description
+		    "INTF-ALIAS";
+	    }
+	    enum port-comp {
+		description
+		    "PORT-COMP";
+	    }
+	    enum mac-addr {
+		description
+		    "MAC-ADDR";
+	    }
+	    enum net-addr {
+		description
+		    "NET-ADDR";
+	    }
+	    enum intf-name {
+		description
+		    "INTF-NAME";
+	    }
+	    enum agent-circuit-id {
+		description
+		    "AGENT-CIRCUIT-ID";
+	    }
+	    enum local {
+		description
+		    "LOCAL";
+	    }
+	}
+    }
+
+    typedef chassis-id-subtype {
+	type enumeration {
+	    enum reserved {
+		description
+		    "RESERVED";
+	    }
+	    enum chassis-comp {
+		description
+		    "CHASSIS-COMP";
+	    }
+	    enum intf-alias {
+		description
+		    "INTF-ALIAS";
+	    }
+	    enum port-comp {
+		description
+		    "PORT-COMP";
+	    }
+	    enum mac-addr {
+		description
+		    "MAC-ADDR";
+	    }
+	    enum net-addr {
+		description
+		    "NET-ADDR";
+	    }
+	    enum intf-name {
+		description
+		    "INTF-NAME";
+	    }
+	    enum local {
+		description
+		    "LOCAL";
+	    }
+	}
+    }
+
+    typedef connection-status {
+	type enumeration {
+	    enum reserved {
+		description
+		    "RESERVED";
+	    }
+	    enum active {
+		description
+		    "ACTIVE";
+	    }
+	    enum inactive {
+		description
+		    "INACTIVE";
+	    }
+	}
     }
 
     container lldp-config {
@@ -67,5 +175,127 @@ module netgate-lldp {
 	        "transmit interval range [1..3600]";
 	    ngcliext:node-fmt "lldp $% @@$n";
         }
+    }
+
+    container lldp-state {
+	description
+	    "Link-layer Discovery Protocol (LLDP) state details.";
+
+	list interface {
+	    description
+		"Interface-specific state details.";
+
+	    key "if-index";
+
+	    leaf local-interface {
+		type string;
+		description
+		    "The interface name corresponding to the if-index.";
+	    }
+
+	    leaf if-index {
+		type int32;
+		description
+		    "The ifIndex value for the ifEntry represented
+		    by this interface.";
+		reference
+		    "RFC 2863: The Interfaces Group MIB - ifIndex";
+	    }
+
+	    leaf last-heard-age {
+		type decimal64 {
+		    fraction-digits 2;
+		}
+		description
+		    "Time in seconds since last received packet.";
+	    }
+
+	    leaf last-sent-age {
+		type decimal64 {
+		    fraction-digits 2;
+		}
+		description
+		    "Time in seconds since last sent packet.";
+	    }
+
+	    leaf status {
+		type connection-status;
+		description
+		    "Connection status (based on age.)";
+	    }
+
+	    leaf chassis-id {
+		type string { length "1..64"; }
+		description
+		    "Chassis id -- should be 64 bytes long.";
+	    }
+
+	    leaf chassis-id-subtype {
+		type chassis-id-subtype;
+		description
+		    "Type of chassis id.";
+	    }
+
+	    leaf port-id {
+		type string { length "1..64"; }
+		description
+		    "Port id -- should be 64 bytes long.";
+	    }
+
+	    leaf port-id-subtype {
+		type lldp-port-id-subtype;
+		description
+		    "Type of port id.";
+	    }
+
+	    leaf ttl {
+		type uint16;
+		description
+		    "Time-To-Live.";
+	    }
+
+	    leaf system-name {
+		type string;
+		description
+		    "Name of system.";
+	    }
+
+	    leaf tx-hold {
+		type uint32;
+		description
+		    "Multiplier for tx-interval when setting
+		     time-to-live (TTL).";
+	    }
+
+	    leaf tx-interval {
+		type uint32;
+		description
+		    "Time interval, in seconds, between each LLDP frames.";
+	    }
+
+	    leaf mgmt-ip4 {
+		type inet:ipv4-address;
+		description
+		    "Management IPv4 address of interface.";
+	    }
+
+	    leaf mgmt-ip6 {
+		type inet:ipv6-address;
+		description
+		    "Management IPv6 address of interface.";
+	    }
+    
+	    leaf mgmt-oid {
+		type string;
+		description
+		    "Management OID of the interface.";
+	    }
+
+	    leaf port-desc {
+		type string;
+		description
+		    "Description of port.";
+	    }
+	}
     }
 }

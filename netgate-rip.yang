@@ -33,8 +33,13 @@ module netgate-rip {
 	"This YANG module provides a Netgate-defined data-model
 	 for RIP data.
 
-	 Copyright 2019-2025 Rubicon Communications, LLC.
+	 Copyright 2019-2026 Rubicon Communications, LLC.
 	 ";
+
+    revision 2026-10-01 {
+	description
+	    "TNSR Release 26.10.";
+    }
 
     revision 2026-02-01 {
 	description
@@ -204,6 +209,10 @@ module netgate-rip {
 
     typedef rip-show-request {
 	type enumeration {
+	    enum config {
+		description
+		    "Show RIP configuration information.";
+	    }
 	    enum default {
 		description
 		    "Show default RIP information.";
@@ -474,17 +483,30 @@ module netgate-rip {
 		    }
 
 		    container split-horizon {
-			presence
-			    "If present, perform split-horizon.";
 
-			ngcliext:node-fmt "^$%${poisoned-reverse}$n";
+			ngcliext:parent-fmt "$%";
+
+			leaf enabled {
+			    type boolean;
+			    default true;
+			    description
+				"If false, disables split horizon functionality
+				 in RIP.";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "^no $<$n|";
+			}
 
 			leaf poisoned-reverse {
 			    type boolean;
+			    must "current() != 'true' or ../enabled != 'false'" {
+				error-message
+				    "'split-horizon' must not be disabled " +
+				    "when 'poisoned-reverse' is enabled";
+				}
 			    description
 				"If true, use poisoned-reverse.";
-			    ngcliext:child-op "bool";
-			    ngcliext:child-fmt "| $%";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|^$< $%$n";
 			}
 		    }
 
@@ -895,13 +917,12 @@ module netgate-rip {
 			list interface {
 			    key if-name; 
 
-			    ngcliext:node-fmt "^route-map-filter ${if-name}";
+			    ngcliext:parent-fmt "^route-map-filter interface @{if-name}";
 
 			    leaf if-name {
 				type string;
 				description
 				    "The name of an interface.";
-				ngcliext:node-fmt "interface @@";
 			    }
 
 			    container in {

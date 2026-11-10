@@ -542,6 +542,24 @@ module netgate-interface {
 		    range "0 | 68..max";
 		}
 		units octets;
+		/*
+		 * With no-multi-seg, a received frame must fit into a single
+		 * buffer: the MTU plus 22 (the Ethernet header and two VLAN
+		 * tags) must not exceed the buffer data size, which is 2048
+		 * when not configured. VPP refuses larger MTUs. The ethernet
+		 * default-mtu is checked in netgate-dataplane.
+		 */
+		must "not(/ngdataplane:dataplane-config/ngdataplane:dpdk/"
+		   + "ngdataplane:no-multi-seg = 'true') or "
+		   + "(not(/ngdataplane:dataplane-config/ngdataplane:buffers/"
+		   + "ngdataplane:default-data-size) and current() <= 2026) or "
+		   + "current() <= /ngdataplane:dataplane-config/"
+		   + "ngdataplane:buffers/ngdataplane:default-data-size - 22" {
+		    error-message
+			"With dataplane dpdk no-multi-seg, the MTU must not "
+		      + "exceed the dataplane buffers default-data-size minus "
+		      + "22 (2026 when default-data-size is not configured)";
+		}
 		description
 		    "The size, in octets, of the largest packet that the
 		     interface will send and receive.";
@@ -978,6 +996,8 @@ module netgate-interface {
 		    "Indicates this interface has LLDP configured";
 
 		ngcliext:context "intf-interfaces";
+		ngcliext:node-op "test-set:@{port-name}@{management}";
+		ngcliext:node-fmt "^lldp$n|";
 
 		leaf port-name {
 		    type string;
@@ -1460,7 +1480,9 @@ module netgate-interface {
 		}
 
 		leaf subid {
-		    type uint32;
+		    type uint32 {
+			range "0..4294967294";
+		    }
 		    description
 			"The subinterface id.  It is often also the (outer)
 			 VLAN tag value, though they can be different.";
@@ -1872,7 +1894,9 @@ module netgate-interface {
 		     definition for VLAN handling.";
 
 		leaf subid {
-		    type uint32;
+		    type uint32 {
+			range "0..4294967294";
+		    }
 		    description
 			"The subinterface id.  It is often also the (outer)
 			 VLAN tag value, though they can be different.";

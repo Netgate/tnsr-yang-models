@@ -40,6 +40,11 @@ module netgate-ospf {
 	 Copyright 2019-2025 Rubicon Communications, LLC.
 	 ";
 
+    revision 2026-10-01 {
+	description
+	    "TNSR Release 26.10.";
+    }
+
     revision 2025-06-02 {
 	description
 	    "TNSR Release 25.06.";
@@ -650,22 +655,6 @@ module netgate-ospf {
 			    ngcliext:node-fmt "$< $%$n|";
 
 			    uses ospf-packet-send-recv;
-			}
-		    }
-
-		    container te {
-			description
-			    "Debug OSPF traffic engineering";
-
-			ngcliext:parent-fmt "$< $%";
-
-			leaf enable {
-			    type boolean;
-			    description
-				"If true, OSPF traffic-engineering debug
-				 is enabled.";
-			    ngcliext:node-op "bool";
-			    ngcliext:node-fmt "|$<$n";
 			}
 		    }
 
@@ -2234,18 +2223,6 @@ module netgate-ospf {
 				"If present, debug ls-update packets.";
 
 			    uses ospf-packet-send-recv;
-			}
-		    }
-
-		    container te {
-			description
-			    "Debug OSPF traffic engineering";
-
-			leaf enable {
-			    type boolean;
-			    description
-				"If true, OSPF traffic-engineering debug
-				 is enabled.";
 			}
 		    }
 

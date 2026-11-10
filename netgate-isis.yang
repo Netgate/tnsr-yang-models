@@ -40,6 +40,11 @@ module netgate-isis {
 	 Copyright 2025 Rubicon Communications, LLC.
 	 ";
 
+    revision 2026-10-01 {
+	description
+	    "TNSR Release 26.10.";
+    }
+
     revision 2025-06-01 {
 	description
 	    "TNSR Release 25.06.";
@@ -1160,15 +1165,6 @@ module netgate-isis {
 			ngcliext:node-fmt "|^$%$n";
 		    }
 
-		    leaf admin-group-send-zero {
-			type boolean;
-			default "false";
-			description
-			    "Allow sending default admin group 0.";
-			ngcliext:node-op "bool";
-			ngcliext:node-fmt "|^$%$n";
-		    }
-
 		    leaf set-overload-bit {
 			type boolean;
 			default "false";
@@ -1186,15 +1182,6 @@ module netgate-isis {
 			description
 			    "Length of time after startup to set overload bit.";
 			ngcliext:node-fmt "^$% @@$n";
-		    }
-
-		    leaf asla-legacy-flag {
-			type boolean;
-			default "false";
-			description
-			    "Set legacy flag in LSP ASLA Sub-TLV.";
-			ngcliext:node-op "bool";
-			ngcliext:node-fmt "|^$%$n";
 		    }
 
 		    leaf metric-style {

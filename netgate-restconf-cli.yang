@@ -44,8 +44,13 @@ module netgate-restconf-cli {
     }
 
     augment "/clrc:restconf" {
-	ngcliext:node-fmt "restconf$n";
+	ngcliext:node-fmt "${enable-core-dump}restconf$n";
 	ngcliext:pre-children-op "push";
+    }
+
+    augment "/clrc:restconf/clrc:enable-core-dump" {
+	ngcliext:child-op "bool";
+	ngcliext:child-fmt "|service restconf coredump enable$n";
     }
 
     augment "/clrc:restconf/clrc:enable" {

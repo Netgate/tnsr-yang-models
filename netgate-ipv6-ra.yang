@@ -26,7 +26,12 @@ module netgate-ipv6-ra {
 	 The model is duplicated directly, to the extent possible, from the
 	 IETF IPv6 Router Advertisements data model introduced by RFC 8349.
 
-	 Copyright 2022 Rubicon Communications, LLC.";
+	 Copyright 2022,2026 Rubicon Communications, LLC.";
+
+    revision 2026-06-01 {
+	description
+	    "TNSR Release 26.06.";
+    }
 
     revision 2023-02-01 {
 	description
@@ -277,6 +282,8 @@ module netgate-ipv6-ra {
 				    description
 					"This value MUST NOT be greater than
 					 valid-lifetime.";
+				    error-message
+					"The preferred lifetime for an advertised IPv6 prefix cannot be greater than the valid lifetime.";
 				}
 				default "604800";
 				description

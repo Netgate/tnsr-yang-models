@@ -1148,14 +1148,14 @@ module netgate-ospf6 {
 
 		    container stub-router {
 
-			ngcliext:node-fmt "^$%${administrative}$n";
+			ngcliext:parent-fmt "^$%";
 
 			leaf administrative {
 			    type boolean;
 			    description
 				"If true, this router will be a stub.";
-			    ngcliext:child-op "bool";
-			    ngcliext:child-fmt "| $%";
+			    ngcliext:node-op "bool";
+			    ngcliext:node-fmt "|$< $%$n";
 			}
 		    }
 

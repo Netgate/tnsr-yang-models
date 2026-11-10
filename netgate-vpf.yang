@@ -35,6 +35,25 @@ module netgate-vpf {
 
 	 Copyright 2024, 2025 Rubicon Communications, LLC.";
 
+    revision 2026-10-03 {
+	description
+	    "Restrict NPT66 NAT rule translation prefix to /112 or
+	     shorter. A longer prefix leaves no 16-bit word of the
+	     translated address to absorb the RFC 6296 checksum
+	     adjustment.";
+    }
+
+    revision 2026-10-02 {
+	description
+	    "Restrict filter rule return-rst and return-icmp to 'in'
+	     block rules.";
+    }
+
+    revision 2026-10-01 {
+	description
+	    "TNSR Release 26.10.";
+    }
+
     revision 2025-10-02 {
 	description
 	    "TNSR Release 25.10.";
@@ -150,6 +169,26 @@ module netgate-vpf {
 	    description "Match only NAT connections.";
 	}
 
+	leaf interface-bound-only {
+	    type boolean ;
+	    description "Match only connections bound to interface.";
+	}
+
+	leaf route-table-bound-only {
+	    type boolean;
+	    description "Match only connections bound to route table.";
+	}
+
+	leaf post-nat-only {
+	    type boolean;
+	    description "Match only post-NAT connections.";
+	}
+
+	leaf block-only {
+	    type boolean;
+	    description "Match only block connections.";
+	}
+
 	choice source-prefix-or-address {
 	    case prefix {
 		leaf source-prefix {
@@ -162,6 +201,22 @@ module netgate-vpf {
 		leaf source-address {
 		    type inet:ip-address;
 		    description "Source address prefix.";
+		}
+	    }
+	}
+
+	choice not-source-prefix-or-address {
+	    case not-prefix {
+		leaf not-source-prefix {
+		    type inet:ip-prefix;
+		    description "Source address prefix (exclusion).";
+		}
+	    }
+
+	    case not-address {
+		leaf not-source-address {
+		    type inet:ip-address;
+		    description "Source address prefix (exclusion).";
 		}
 	    }
 	}
@@ -182,6 +237,22 @@ module netgate-vpf {
 	    }
 	}
 
+	choice not-destination-prefix-or-address {
+	    case not-prefix {
+		leaf not-destination-prefix {
+		    type inet:ip-prefix;
+		    description "Destination address prefix (exclusion).";
+		}
+	    }
+
+	    case not-address {
+		leaf not-destination-address {
+		    type inet:ip-address;
+		    description "Destination address prefix (exclusion).";
+		}
+	    }
+	}
+
 	choice translation-prefix-or-address {
 	    case prefix {
 		leaf translation-prefix {
@@ -198,9 +269,30 @@ module netgate-vpf {
 	    }
 	}
 
+	choice not-translation-prefix-or-address {
+	    case not-prefix {
+		leaf not-translation-prefix {
+		    type inet:ip-prefix;
+		    description "Translation address prefix (exclusion).";
+		}
+	    }
+
+	    case not-address {
+		leaf not-translation-address {
+		    type inet:ip-address;
+		    description "Translation address prefix (exclusion).";
+		}
+	    }
+	}
+
 	leaf source-id {
 	    type uint32;
 	    description "Source identifier.";
+	}
+
+	leaf not-source-id {
+	    type uint32;
+	    description "Source identifier (exclusion).";
 	}
 
 	leaf destination-id {
@@ -208,9 +300,19 @@ module netgate-vpf {
 	    description "Destination identifier.";
 	}
 
+	leaf not-destination-id {
+	    type uint32;
+	    description "Destination identifier (exclusion).";
+	}
+
 	leaf translation-id {
 	    type uint32;
 	    description "Translation identifier.";
+	}
+
+	leaf not-translation-id {
+	    type uint32;
+	    description "Translation identifier (exclusion).";
 	}
 
 	leaf protocol {
@@ -218,9 +320,19 @@ module netgate-vpf {
 	    description "IP protocol.";
 	}
 
+	leaf not-protocol {
+	    type ngcom:ip-protocol-name-or-number;
+	    description "IP protocol (exclusion).";
+	}
+
 	leaf source-route-table {
 	    type ngcom:rt-identifier-15;
 	    description "Source VRF name.";
+	}
+
+	leaf not-source-route-table {
+	    type ngcom:rt-identifier-15;
+	    description "Source VRF name (exclusion).";
 	}
 
 	leaf destination-route-table {
@@ -228,20 +340,43 @@ module netgate-vpf {
 	    description "Destination VRF name.";
 	}
 
-	choice owner {
-	    description "Owner interface or VRF.";
+	leaf not-destination-route-table {
+	    type ngcom:rt-identifier-15;
+	    description "Destination VRF name (exclusion).";
+	}
+
+	choice bound-to {
+	    description "Binding interface or VRF.";
 
 	    case interface {
-		leaf owner-interface {
+		leaf bound-to-interface {
 		    type ngcom:if-identifier-63;
-		    description "Owner interface.";
+		    description "Binding interface.";
 		}
 	    }
 
 	    case route-table {
-		leaf owner-route-table {
+		leaf bound-to-route-table {
 		    type ngcom:rt-identifier-15;
-		    description "Owner route table.";
+		    description "Binding route table.";
+		}
+	    }
+	}
+
+	choice not-bound-to {
+	    description "Binding interface or VRF (exclusion).";
+
+	    case not-interface {
+		leaf not-bound-to-interface {
+		    type ngcom:if-identifier-63;
+		    description "Binding interface (exclusion).";
+		}
+	    }
+
+	    case not-route-table {
+		leaf not-bound-to-route-table {
+		    type ngcom:rt-identifier-15;
+		    description "Binding route table (exclusion).";
 		}
 	    }
 	}
@@ -259,10 +394,6 @@ module netgate-vpf {
 		description "Established.";
 	    }
 
-	    enum closed {
-		value 2;
-		description "Closed.";
-	    }
 	}
     }
 
@@ -420,6 +551,26 @@ module netgate-vpf {
 	    description "Indicates whether this is a 'pass' connection.";
 	}
 
+	leaf is-block {
+	    type boolean;
+	    description "Indicates whether this is a 'block' connection.";
+	}
+
+	leaf is-post-nat {
+	    type boolean;
+	    description "Indicates whether this is a post-NAT filter connection.";
+	}
+
+	leaf is-block-return-rst {
+	    type boolean;
+	    description "Indicates whether this block connection returns TCP RST on block.";
+	}
+
+	leaf is-block-return-icmp {
+	    type boolean;
+	    description "Indicates whether this block connection returns ICMP error on block.";
+	}
+
 	leaf protocol {
 	    type ngcom:ip-protocol-name-or-number;
 	    description "IP protocol.";
@@ -499,24 +650,24 @@ module netgate-vpf {
 	    }
 	}
 
-	choice owner {
-	    description "Owner interface or VRF.";
+	choice bound-to {
+	    description "Binding interface or VRF.";
 
 	    case interface {
-		leaf owner-interface {
+		leaf bound-to-interface {
 		    type ngcom:if-identifier-63;
-		    description "Owner interface.";
+		    description "Binding interface.";
 		}
 	    }
 
 	    case table {
-		leaf owner-route-table {
+		leaf bound-to-route-table {
 		    type leafref {
 			path "/ngrttab:route-table-config" +
 			    "/ngrttab:static-routes" +
 			    "/ngrttab:route-table/ngrttab:name";
 		    }
-		    description "Owner VRF name.";
+		    description "Binding VRF name.";
 		}
 	    }
 	}
@@ -541,6 +692,159 @@ module netgate-vpf {
 	    uses vpf-connection-key;
 	    description "Backward key.";
 	}
+
+	leaf packets-fw {
+	    type uint64;
+	    description
+		"Number of forward packets matched by this connection.";
+	}
+
+	leaf bytes-fw {
+	    type uint64;
+	    description
+		"Number of forward bytes matched by this connection.";
+	}
+
+	leaf packets-bk {
+	    type uint64;
+	    description
+		"Number of backward packets matched by this connection.";
+	}
+
+	leaf bytes-bk {
+	    type uint64;
+	    description
+		"Number of backward bytes matched by this connection.";
+	}
+    }
+
+    typedef vpf-select-mmdb-field {
+	type enumeration {
+	    enum asn {
+		value 1;
+		description "Match on the asn field.";
+	    }
+	    enum alpha2code {
+		value 2;
+		description "Match on the alpha2code field.";
+	    }
+	    enum region {
+		value 3;
+		description "Match on the region field.";
+	    }
+	    enum city {
+		value 4;
+		description "Match on the city field.";
+	    }
+	}
+    }
+
+    typedef vpf-select-csv-field {
+	type enumeration {
+	    enum u0 {
+		value 0;
+		description "Match as a uint32 on field 0.";
+	    }
+	    enum u1 {
+		value 1;
+		description "Match as a uint32 on field 1.";
+	    }
+	    enum u2 {
+		value 2;
+		description "Match as a uint32 on field 2.";
+	    }
+	    enum u3 {
+		value 3;
+		description "Match as a uint32 on field 3.";
+	    }
+	    enum u4 {
+		value 4;
+		description "Match as a uint32 on field 4.";
+	    }
+	    enum u5 {
+		value 5;
+		description "Match as a uint32 on field 5.";
+	    }
+	    enum u6 {
+		value 6;
+		description "Match as a uint32 on field 6.";
+	    }
+	    enum u7 {
+		value 7;
+		description "Match as a uint32 on field 7.";
+	    }
+	    enum u8 {
+		value 8;
+		description "Match as a uint32 on field 8.";
+	    }
+	    enum u9 {
+		value 9;
+		description "Match as a uint32 on field 9.";
+	    }
+	    enum s0 {
+		value 10;
+		description "Match as a string on field 0.";
+	    }
+	    enum s1 {
+		value 11;
+		description "Match as a string on field 1.";
+	    }
+	    enum s2 {
+		value 12;
+		description "Match as a string on field 2.";
+	    }
+	    enum s3 {
+		value 13;
+		description "Match as a string on field 3.";
+	    }
+	    enum s4 {
+		value 14;
+		description "Match as a string on field 4.";
+	    }
+	    enum s5 {
+		value 15;
+		description "Match as a string on field 5.";
+	    }
+	    enum s6 {
+		value 16;
+		description "Match as a string on field 6.";
+	    }
+	    enum s7 {
+		value 17;
+		description "Match as a string on field 7.";
+	    }
+	    enum s8 {
+		value 18;
+		description "Match as a string on field 8.";
+	    }
+	    enum s9 {
+		value 19;
+		description "Match as a string on field 9.";
+	    }
+	}    	
+    }
+
+    typedef vpf-select-comparison {
+	type enumeration {
+	    enum eq {
+		description "equals match.";
+	    }
+	    enum ne {
+		description "Not-equals match.";
+	    }
+	    enum lt {
+		description "Less-than match.";
+	    }
+	    enum le {
+		description "Less-than-or-equal match.";
+	    }
+	    enum gt {
+		description "Greater-than match.";
+	    }
+	    enum ge {
+		description "Greater-than-or-equal match.";
+	    }
+	}
     }
 
     rpc vpf-connections-get {
@@ -550,12 +854,18 @@ module netgate-vpf {
 	    leaf thread-index {
 		type uint32;
 		description "Thread index";
-		default 4294967295;
+	    }
+
+	    leaf not-thread-index {
+		type uint32;
+		description "Thread index (exclusion)";
 	    }
 
 	    leaf limit {
 		description "Maximum number of connections returned";
-		type uint32;
+		type uint32 {
+		    range "1..max";
+		}
 		default 100;
 	    }
 
@@ -588,6 +898,11 @@ module netgate-vpf {
 		type uint32;
 		description "Thread index";
 		default 4294967295;
+	    }
+
+	    leaf not-thread-index {
+		type uint32;
+		description "Thread index (exclusion)";
 	    }
 
 	    uses vpf-connection-filter;
@@ -902,27 +1217,133 @@ module netgate-vpf {
 		    cl:ignore-compare;
 		}
 
-		container prefixes {
-		    description
-			"A named set of IP prefixes.";
-
-		    list prefix {
-			key "ip-prefix";
-			ngcliext:post-child-fmt "$n";
-
-			leaf ip-prefix {
-			    type inet:ip-prefix;
+		choice table-type {
+		    case inline {
+			container prefixes {
 			    description
-				"Either an IPv4 or IPv6 prefix.";
-			    ngcliext:node-fmt "^prefix @@";
+				"A named set of IP prefixes.";
+
+			    list prefix {
+				key "ip-prefix";
+				ngcliext:post-child-fmt "$n";
+
+				leaf ip-prefix {
+				    type inet:ip-prefix;
+				    description
+					"Either an IPv4 or IPv6 prefix.";
+				    ngcliext:node-fmt "^prefix @@";
+				}
+
+				leaf description {
+				    type ngcom:description-63;
+				    description
+					"A user description of the VPF
+					 prefix table entry.";
+				    ngcliext:node-fmt " description @@";
+				    cl:ignore-compare;
+				}
+			    }
 			}
+		    }
 
-			leaf description {
-			    type ngcom:description-63;
-			    description
-				"A user description of the VPF prefix table entry.";
-			    ngcliext:node-fmt " description @@";
-			    cl:ignore-compare;
+		    case mmdb-file {
+			container mmdb-file {
+			    ngcliext:post-node-fmt "$n";
+			    leaf file {
+				type string;
+				description
+				    "Path to the MMDB file.";
+				mandatory true;
+				ngcliext:node-fmt "^mmdb $% @@";
+			    }
+
+			    leaf field {
+				type vpf-select-mmdb-field;
+				description
+				    "One of 'asn', 'alpha2code', 'region',
+				     or 'city'.";
+				ngcliext:node-fmt " select @@";
+			    }
+
+			    leaf comparison {
+				type vpf-select-comparison;
+				description
+				    "Match comparison operation.
+				     eq, ne, lt, le, gt, or ge";
+				ngcliext:node-fmt " @@";
+			    }
+
+			    choice match-value {
+				case match-uint32 {
+				    leaf match-uint32 {
+					type uint32;
+					description
+					    "A uint32 that must match.";
+					ngcliext:node-fmt " @@";
+				    }
+				}
+
+				case match-string {
+				    leaf match-string {
+					type string {
+					    length "1..63";
+					}
+					description
+					    "A string that must match.";
+					ngcliext:node-fmt " $q@@$q";
+				    }
+				}
+			    }
+			}
+		    }
+
+		    case csv-file {
+			container csv-file {
+			    ngcliext:post-node-fmt "$n";
+			    leaf file {
+				type string;
+				description
+				    "Path to the CSV file.";
+				mandatory true;
+				ngcliext:node-fmt "^csv $% @@";
+			    }
+
+			    leaf field {
+				type vpf-select-csv-field;
+				description
+				    "One of 'u0' .. 'u9', or 's0' .. 's9'.";
+				ngcliext:node-fmt " select @@";
+			    }
+
+			    leaf comparison {
+				type vpf-select-comparison;
+				description
+				    "Match comparison operation.
+				     eq, ne, lt, le, gt, or ge";
+				ngcliext:node-fmt " @@";
+			    }
+
+			    choice match-value {
+				case match-uint32 {
+				    leaf match-uint32 {
+					type uint32;
+					description
+					    "A uint32 that must match.";
+					ngcliext:node-fmt " @@";
+				    }
+				}
+
+				case match-string {
+				    leaf match-string {
+					type string {
+					    length "1..63";
+					}
+					description
+					    "A string that must match.";
+					ngcliext:node-fmt " @@";
+				    }
+				}
+			    }
 			}
 		    }
 		}
@@ -1079,7 +1500,11 @@ module netgate-vpf {
 			    type boolean;
 			    description
 				"Create a stateful connection entry upon
-				 match.";
+				 match. On a block rule, creates a stateful
+				 block connection that unconditionally drops
+				 matching packets while it exists. Block
+				 connections support return-rst and return-icmp
+				 for subsequent packets.";
 			    ngcliext:node-op "bool";
 			    ngcliext:node-fmt "|^$%$n";
 			}
@@ -1103,6 +1528,14 @@ module netgate-vpf {
 			    type boolean;
 			    description
 				"Return a TCP reset on match.";
+			    must "current() = 'false' or not(../pass = 'true')" {
+				error-message
+				    "Return flags are only supported on block rules";
+			    }
+			    must "current() = 'false' or ../direction = 'in'" {
+				error-message
+				    "Return flags are only supported on 'in' rules";
+			    }
 			    ngcliext:node-op "bool";
 			    ngcliext:node-fmt "|^$%$n";
 			}
@@ -1112,6 +1545,14 @@ module netgate-vpf {
 			    description
 				"Return an ICMP error on match (Destination
 				 Unreachable/Administratively Prohibited).";
+			    must "current() = 'false' or not(../pass = 'true')" {
+				error-message
+				    "Return flags are only supported on block rules";
+			    }
+			    must "current() = 'false' or ../direction = 'in'" {
+				error-message
+				    "Return flags are only supported on 'in' rules";
+			    }
 			    ngcliext:node-op "bool";
 			    ngcliext:node-fmt "|^$%$n";
 			}
@@ -1209,10 +1650,8 @@ module netgate-vpf {
 
 			leaf algorithm {
 			    type vpf-nat-algorithm;
-			    default ip-hash;
 			    description
-				"One of one-to-one, netmap, ip hash, round robin,
-				 or npt66.";
+				"One of one-to-one (default if static), netmap, src ip hash (default if dynamic), ip hash, round robin, or npt66.";
 			    ngcliext:node-fmt "^$% @@$n";
 			}
 
@@ -1238,37 +1677,64 @@ module netgate-vpf {
 			    	    }
 				}
 
-				case translation-range {
-				    leaf port-min {
-			    	        type uint16;
-			    	        description
-			    	            "Minimum port to use for translation.
-			    	             0 means no port.";
-			    	        ngcliext:node-fmt "^nat-port-range @@";
-					must "current() = '0' or ../../dynamic = 'true'" {
-					    error-message
-					        "NAT Rule must be dynamic to use " +
-						"translation port range";
+				case translation-port-range {
+				    /*
+				     * Wrap min and max in a container so that
+				     * these can be atomically removed.
+				     * RESTCONF would otherwise struggle,
+				     * forcing the user to replace whole
+				     * container "translation" instead.
+				     */
+				    container translation-range {
+					leaf port-min {
+					    type uint16;
+					    description
+						"Minimum port to use for translation.
+						 0 means no port.";
+					    ngcliext:node-fmt "^nat-port-range @@";
+					    must "current() = '0' or ../../../dynamic = 'true'" {
+						error-message
+						    "NAT Rule must be dynamic to use " +
+						     "translation port range";
+					    }
 					}
-			    	    }
 
-				    leaf port-max {
+					leaf port-max {
+					    type uint16;
+					    description
+						"Maximum port to use for translation.
+						 0 means no port.";
+					    ngcliext:node-fmt " @@$n";
+					    must "current() = '0' or ../../../dynamic = 'true'" {
+						error-message
+						    "NAT Rule must be dynamic to use " +
+						    "translation port range";
+					    }
+					    must ". > ../port-min" {
+						error-message
+						    "port-max must be greater than port-min";
+					    }
+					    mandatory true;
+					    when "../port-min";
+					}
+				    }
+				}
+
+				case port-mapping {
+				    leaf port-range-start {
 			    	        type uint16;
 			    	        description
-			    	            "Maximum port to use for translation.
+			    	            "Minimum port for port-mapping.
 			    	             0 means no port.";
-			    	        ngcliext:node-fmt " @@$n";
-					must "current() = '0' or ../../dynamic = 'true'" {
+			    	        ngcliext:node-fmt "^nat-port-mapping @@$n";
+					must "current() = '0' or (../../direction = 'out' and ../../match/from/port-min and ../../match/from/port-max) or (../../direction = 'in' and ../../match/to/port-min and ../../match/to/port-max)" {
 					    error-message
-					        "NAT Rule must be dynamic to use " +
-						"translation port range";
+						"NAT rule must match the port range it rewrites (match/from for direction out, match/to for direction in) to use port-mapping.";
 					}
-					must ". > ../port-min" {
+					must "current() = '0' or (../../direction = 'out' and ../../match/from/port-min and ../../match/from/port-max and ((current() + (../../match/from/port-max - ../../match/from/port-min)) <= 65535)) or (../../direction = 'in' and ../../match/to/port-min and ../../match/to/port-max and ((current() + (../../match/to/port-max - ../../match/to/port-min)) <= 65535))" {
 					    error-message
-						"port-max must be greater than port-min.";
+						"port-mapping translation range must not exceed port 65535.";
 					}
-					mandatory true;
-					when "../port-min";
 			    	    }
 				}
 			    }
@@ -1290,6 +1756,12 @@ module netgate-vpf {
 					 description
 					     "Translation prefix.";
 					ngcliext:node-fmt "^nat-prefix @@$n";
+					must "not(../../algorithm='npt66') or "
+					     + "number(substring-after(current(), '/'))"
+					     + " <= 112" {
+					    error-message
+						"NAT rule with npt66 algorithm requires a translation prefix of /112 or shorter.";
+					}
 				    }
 				}
 
@@ -1386,6 +1858,29 @@ module netgate-vpf {
 		    }
 		}
 
+		container max-block-connections-per-thread {
+		    description
+			"Maximum stateful block connections per thread.";
+
+		    ngcliext:parent-fmt "^$^ $%";
+
+		    leaf ip4 {
+			type uint32;
+			default 0;
+			description
+			    "Maximum IPv4 stateful block connections per thread. A value of 0 means no block-specific limit.";
+			ngcliext:node-fmt "$< $% @@$n";
+		    }
+
+		    leaf ip6 {
+			type uint32;
+			default 0;
+			description
+			    "Maximum IPv6 stateful block connections per thread. A value of 0 means no block-specific limit.";
+			ngcliext:node-fmt "$< $% @@$n";
+		    }
+		}
+
 		container port-mapping {
 		    description
 			"Port mapping.";
@@ -1458,17 +1953,10 @@ module netgate-vpf {
 
 			ngcliext:parent-fmt "$< $%";
 
-			leaf closed {
-			    type uint32;
-			    units "seconds";
-			    default 0;
-			    description
-				"Closed state.";
-			    ngcliext:node-fmt "$< $% @@$n";
-			}
-
-			leaf new {
-			    type uint32;
+						leaf new {
+			    type uint32 {
+			    	range "1..max";
+			    }
 			    units "seconds";
 			    default 30;
 			    description
@@ -1477,7 +1965,9 @@ module netgate-vpf {
 			}
 
 			leaf established {
-			    type uint32;
+			    type uint32 {
+			    	range "1..max";
+			    }
 			    units "seconds";
 			    default 60;
 			    description
@@ -1493,7 +1983,9 @@ module netgate-vpf {
 			ngcliext:parent-fmt "$< $%";
 
 			leaf closed {
-			    type uint32;
+			    type uint32 {
+			    	range "1..max";
+			    }
 			    units "seconds";
 			    default 10;
 			    description
@@ -1502,7 +1994,9 @@ module netgate-vpf {
 			}
 
 			leaf new {
-			    type uint32;
+			    type uint32 {
+			    	range "1..max";
+			    }
 			    units "seconds";
 			    default 30;
 			    description
@@ -1511,7 +2005,9 @@ module netgate-vpf {
 			}
 
 			leaf established {
-			    type uint32;
+			    type uint32 {
+			    	range "1..max";
+			    }
 			    units "seconds";
 			    default 86400;
 			    description
@@ -1520,7 +2016,9 @@ module netgate-vpf {
 			}
 
 			leaf half-closed {
-			    type uint32;
+			    type uint32 {
+			    	range "1..max";
+			    }
 			    units "seconds";
 			    default 21600;
 			    description
@@ -1528,12 +2026,43 @@ module netgate-vpf {
 			    ngcliext:node-fmt "$< $% @@$n";
 			}
 
+			leaf closing {
+			    type uint32 {
+			    	range "1..max";
+			    }
+			    units "seconds";
+			    default 900;
+			    description
+				"Closing and Last-Ack states.";
+			    ngcliext:node-fmt "$< $% @@$n";
+			}
+
 			leaf time-wait {
-			    type uint32;
+			    type uint32 {
+			    	range "1..max";
+			    }
 			    units "seconds";
 			    default 240;
 			    description
 				"Time-wait state.";
+			    ngcliext:node-fmt "$< $% @@$n";
+			}
+		    }
+
+		    container block {
+			description
+			    "Stateful block connection timeout.";
+
+			ngcliext:parent-fmt "$< $%";
+
+			leaf timeout {
+			    type uint32 {
+			    	range "1..max";
+			    }
+			    units "seconds";
+			    default 60;
+			    description
+				"Stateful block connection timeout.";
 			    ngcliext:node-fmt "$< $% @@$n";
 			}
 		    }
@@ -1572,7 +2101,7 @@ module netgate-vpf {
 			type uint32;
 			default 256;
 			description
-			    "Maximum of number of generic connections freed before VPF processes a frame of packets.";
+			    "Maximum number of generic connections freed before VPF processes a frame of packets.";
 			ngcliext:node-fmt "$< $% @@$n";
 		    }
 
@@ -1580,7 +2109,15 @@ module netgate-vpf {
 			type uint32;
 			default 256;
 			description
-			    "Maximum of number of TCP connections freed before VPF processes a frame of packets.";
+			    "Maximum number of TCP connections freed before VPF processes a frame of packets.";
+			ngcliext:node-fmt "$< $% @@$n";
+		    }
+
+		    leaf block-limit {
+			type uint32;
+			default 256;
+			description
+			    "Maximum number of block connections freed before VPF processes a frame of packets.";
 			ngcliext:node-fmt "$< $% @@$n";
 		    }
 		}
@@ -1611,6 +2148,19 @@ module netgate-vpf {
 			}
 			description
 			    "The name of the filter ruleset on this
+			     interface.";
+			ngcliext:node-fmt "$< $% @@$n";
+		    }
+
+		    leaf filter-ruleset-post-nat {
+			type leafref {
+			    path "/ngvpf:vpf-config"
+				+ "/ngvpf:filter-rulesets"
+				+ "/ngvpf:ruleset"
+				+ "/ngvpf:name";
+			}
+			description
+			    "The name of the post-NAT filter ruleset on this
 			     interface.";
 			ngcliext:node-fmt "$< $% @@$n";
 		    }
@@ -2039,8 +2589,7 @@ module netgate-vpf {
 			leaf algorithm {
 			    type vpf-nat-algorithm;
 			    description
-				"One of one-to-one, netmap, ip hash, round robin,
-				 or npt66.";
+				"One of one-to-one, netmap, src ip hash, ip hash, round robin, or npt66.";
 			}
 
 			leaf direction {
@@ -2063,18 +2612,29 @@ module netgate-vpf {
 			    	    }
 				}
 
-				case translation-range {
-				    leaf port-min {
-			    	        type uint16;
-			    	        description
-			    	            "Minimum port to use for translation.
-			    	             0 means no port.";
-			    	    }
+				case translation-port-range {
+				    container translation-range {
+					leaf port-min {
+					    type uint16;
+					    description
+						"Minimum port to use for translation.
+						 0 means no port.";
+					}
 
-				    leaf port-max {
+					leaf port-max {
+					    type uint16;
+					    description
+						"Maximum port to use for translation.
+						 0 means no port.";
+					}
+				    }
+				}
+
+				case port-mapping {
+				    leaf port-range-start {
 			    	        type uint16;
 			    	        description
-			    	            "Maximum port to use for translation.
+			    	            "Minimum port for port-mapping.
 			    	             0 means no port.";
 			    	    }
 				}
@@ -2160,6 +2720,23 @@ module netgate-vpf {
 		    }
 		}
 
+		container max-block-connections-per-thread {
+		    description
+			"Maximum stateful block connections per thread.";
+
+		    leaf ip4 {
+			type uint32;
+			description
+			    "Maximum IPv4 stateful block connections per thread.";
+		    }
+
+		    leaf ip6 {
+			type uint32;
+			description
+			    "Maximum IPv6 stateful block connections per thread.";
+		    }
+		}
+
 		container port-mapping {
 		    description
 			"Port mapping.";
@@ -2206,13 +2783,6 @@ module netgate-vpf {
 		    container generic {
 			description
 			    "Generic timeouts.";
-
-			leaf closed {
-			    type uint32;
-			    units "seconds";
-			    description
-				"Closed state.";
-			}
 
 			leaf new {
 			    type uint32;
@@ -2261,11 +2831,30 @@ module netgate-vpf {
 				"Half-closed state.";
 			}
 
+			leaf closing {
+			    type uint32;
+			    units "seconds";
+			    description
+				"Closing and Last-Ack states.";
+			}
+
 			leaf time-wait {
 			    type uint32;
 			    units "seconds";
 			    description
 				"Time-wait state.";
+			}
+		    }
+
+		    container block {
+			description
+			    "Stateful block connection timeout.";
+
+			leaf timeout {
+			    type uint32;
+			    units "seconds";
+			    description
+				"Stateful block connection timeout.";
 			}
 		    }
 		}
@@ -2294,13 +2883,19 @@ module netgate-vpf {
                     leaf generic-limit {
                         type uint32;
                         description
-                            "Maximum of number of generic connections freed before processing a frame of packets by VPF.";
+                            "Maximum number of generic connections freed before processing a frame of packets by VPF.";
                     }
 
                     leaf tcp-limit {
                         type uint32;
                         description
-                            "Maximum of number of TCP connections freed before processing a frame of packets by VPF.";
+                            "Maximum number of TCP connections freed before processing a frame of packets by VPF.";
+                    }
+
+                    leaf block-limit {
+                        type uint32;
+                        description
+                            "Maximum number of block connections freed before processing a frame of packets by VPF.";
                     }
                 }
 	    }
@@ -2323,6 +2918,13 @@ module netgate-vpf {
 			type ngcom:identifier-63;
 			description
 			    "The name of the filter ruleset on this
+			     interface.";
+		    }
+
+		    leaf filter-ruleset-post-nat {
+			type ngcom:identifier-63;
+			description
+			    "The name of the post-NAT filter ruleset on this
 			     interface.";
 		    }
 

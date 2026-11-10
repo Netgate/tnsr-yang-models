@@ -1,0 +1,80 @@
+module netgate-http-static {
+    yang-version 1.1;
+
+    namespace "urn:netgate:xml:yang:netgate-http-static";
+    prefix "netgate-http-static";
+
+    import ietf-inet-types {
+	prefix "inet";
+    }
+
+    import netgate-cli-extensions {
+	prefix "ngcliext";
+    }
+
+    organization "Netgate";
+
+    contact "Web: <http://www.netgate.com>";
+
+    description
+	"This YANG module provides a static HTTP server.
+
+	 Copyright 2026 Rubicon Communications, LLC.
+	";
+
+    revision 2026-06-28 {
+	description
+	    "Initial definition.";
+    }
+
+    container http-static-config {
+	    ngcliext:node-fmt "http_static$n";
+	    ngcliext:pre-children-op "push";
+
+		leaf root {
+			type string;
+			mandatory true;
+			ngcliext:node-fmt "^$% @@$n";
+			description
+			"The web root to serve.";
+		}
+		leaf port {
+			type uint16;
+			mandatory true;
+			ngcliext:node-fmt "^$% @@$n";
+			description
+			"The port number to listen on";
+		}
+		leaf address {
+			type inet:ip-address-no-zone;
+			mandatory true;
+			ngcliext:node-fmt "^$% @@$n";
+			description
+			"The IP address to listen on";
+		}
+	}
+    container http-static-state {
+		config false;
+
+		leaf enabled {
+			type boolean;
+			description
+			"If the http server is enabled or not.";
+		}
+		leaf root {
+			type string;
+			description
+			"The web root to serve.";
+		}
+		leaf port {
+			type uint16;
+			description
+			"The port number to listen on";
+		}
+		leaf address {
+			type inet:ip-address-no-zone;
+			description
+			"The IP address to listen on";
+		}
+	}
+}

@@ -31,6 +31,17 @@ module netgate-dataplane {
 	 Copyright 2018-2020 Rubicon Communications, LLC.
 	";
 
+    revision 2026-10-02 {
+	description
+	    "Reject dpdk no-multi-seg with LRO or with MTUs that don't
+	     fit into a single buffer.";
+    }
+
+    revision 2026-10-01 {
+	description
+	    "TNSR Release 26.10.";
+    }
+
     revision 2025-10-01 {
 	description
 	    "TNSR Release 25.10.";
@@ -317,6 +328,7 @@ module netgate-dataplane {
 	    "dataplane startup configurations";
 
 	ngcliext:parent-fmt "dataplane";
+	ngcliext:children-order "cpu unix ethernet buffers dpdk memory api-segment ip6 plugins statseg logging linux-cp";
 
 	container cpu {
 	    description
@@ -324,40 +336,58 @@ module netgate-dataplane {
 
 	    ngcliext:parent-fmt "$< $%";
 
+	    must './main-core' {
+		error-message "Main core must be specified when using worker " +
+			      "threads";
+	    }
+
 	    leaf main-core {
-		type uint32;
+		type uint16;
 		description
 		    "Assign main thread to a specific core.";
+		must "not(../corelist-workers/corelist-worker[. = current()])" {
+		     error-message "Cannot configure main-core same as " +
+				   "corelist-worker.";
+		}
 		ngcliext:node-fmt "$< $% @@$n";
 	    }
 
-	    leaf workers {
-		type uint16;
+	    choice workers-type {
 		description
-		    "Number of worker threads";
-		ngcliext:node-fmt "$< $% @@$n";
+		    "Number of workers or explicit list of worker thread core
+		     bindings.";
+
+		case workers {
+		    leaf workers {
+			type uint16;
+			description
+			    "Number of worker threads";
+			ngcliext:node-fmt "$< $% @@$n";
+		    }
+		}
+		case corelist-workers {
+		    container corelist-workers {
+
+			ngcliext:parent-fmt "$< $%";
+
+			leaf-list corelist-worker {
+			type uint16;
+			description
+			    "Place worker threads according to the
+			    list of cores.";
+			ngcliext:node-fmt "$< @@$n";
+			}
+		    }
+		}
 	    }
 
 	    leaf skip-cores {
-		type uint32 {
+		type uint16 {
 		    range "1..max";
 		}
 		description
 		    "Sets number of CPU core(s) to be skipped.";
 		ngcliext:node-fmt "$< $% @@$n";
-	    }
-
-	    container corelist-workers {
-
-		ngcliext:parent-fmt "$< $%";
-
-		leaf-list corelist-worker {
-		    type uint32;
-		    description
-			"Place worker threads according to the
-			 list of cores.";
-		    ngcliext:node-fmt "$< @@$n";
-		}
 	    }
 	}
 
@@ -531,6 +561,36 @@ module netgate-dataplane {
 
 	    leaf no-multi-seg {
 		type boolean;
+		/*
+		 * Interfaces without an MTU of their own use the ethernet
+		 * default-mtu (1500 when not configured). It must leave room
+		 * for the Ethernet header and two VLAN tags (22 bytes) in a
+		 * buffer, as the interface MTU must in netgate-interface.
+		 * The buffer data size is 2048 when not configured.
+		 */
+		must "current() = 'false' or "
+		   + "(not(../../buffers/default-data-size) and "
+		   + "(not(../../ethernet/default-mtu) or "
+		   + "../../ethernet/default-mtu <= 2026)) or "
+		   + "(not(../../ethernet/default-mtu) and "
+		   + "../../buffers/default-data-size >= 1522) or "
+		   + "../../ethernet/default-mtu <= "
+		   + "../../buffers/default-data-size - 22" {
+		    error-message
+			"With dataplane dpdk no-multi-seg, the dataplane "
+		      + "ethernet default-mtu must not exceed the dataplane "
+		      + "buffers default-data-size minus 22 (2026 when "
+		      + "default-data-size is not configured)";
+		}
+		/*
+		 * LRO merges TCP segments into frames of up to 64 KB, which
+		 * NIC drivers deliver as chains of buffers.
+		 */
+		must "current() = 'false' or not(../lro = 'true')" {
+		    error-message
+			"dataplane dpdk lro needs multi-segment buffers and "
+		      + "can't be combined with dataplane dpdk no-multi-seg";
+		}
 		description
 		    "Disable mutli-segment buffers.";
 		ngcliext:node-op "bool";
@@ -842,6 +902,27 @@ module netgate-dataplane {
 		     messages.";
 		ngcliext:node-fmt "$< $% @@$n";
 	    }
+
+	    leaf num-rx-queues {
+		type uint16 {
+		    range "1..256";
+		}
+		default "1";
+		description
+		    "Number of receive queues created on linux-cp tap and
+		     tun interfaces.";
+		ngcliext:node-fmt "$< $% @@$n";
+	    }
+
+	    leaf num-tx-queues {
+		type uint16 {
+		    range "1..256";
+		}
+		description
+		    "Number of transmit queues created on linux-cp tap and
+		     tun interfaces.";
+		ngcliext:node-fmt "$< $% @@$n";
+	    }
 	}
     }
 
@@ -850,6 +931,15 @@ module netgate-dataplane {
 
 	description
 	    "dataplane state";
+
+	leaf config-synced {
+	    type boolean;
+	    description
+		"True when the running configuration has been fully
+		 applied to the running VPP instance.  False or absent
+		 while VPP is down or starting, or while a configuration
+		 replay is pending after a VPP start or restart.";
+	}
 
 	container cpu {
 	    description
